@@ -18,6 +18,8 @@ The `main` branch is kept as the protected/default branch. The `hbin` branch is 
 
 See:
 
+- `docs/process/COMPETITION_DIRECTION.md`
+- `docs/process/NEXT_DEVELOPMENT_QUEUE.md`
 - `docs/process/GITHUB_WORKFLOW.md`
 - `docs/process/DEVELOPMENT_LOG.md`
 
@@ -33,12 +35,14 @@ Read order:
 
 ```text
 1. docs/Requirements.md
-2. docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md
-3. docs/agents/AGENT_RUNTIME.md
-4. docs/agents/AURA_ATTACK_AGENT.md
-5. docs/agents/TSRA_R_DEFENSE_AGENT.md
-6. docs/Implementation_Report.md
-7. docs/Report_Ready_Summary.md
+2. docs/process/COMPETITION_DIRECTION.md
+3. docs/process/NEXT_DEVELOPMENT_QUEUE.md
+4. docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md
+5. docs/agents/AGENT_RUNTIME.md
+6. docs/agents/AURA_ATTACK_AGENT.md
+7. docs/agents/TSRA_R_DEFENSE_AGENT.md
+8. docs/Implementation_Report.md
+9. docs/Report_Ready_Summary.md
 ```
 
 ## Components
