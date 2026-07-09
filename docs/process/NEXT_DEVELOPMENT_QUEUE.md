@@ -2415,3 +2415,59 @@ experiments: E5_rule_aura_tsra_r=5, E7_ml_aura_ml_tsra_r=5
 - 개발 판단 근거가 Markdown에 남는다.
 - `hbin` 브랜치에만 커밋/푸시된다.
 - `main`은 보호 브랜치로 유지된다.
+
+## P48. ML Defense Decision Path Audit
+
+상태: 완료
+
+문제:
+
+- ML contribution audit는 모델 성능과 tool invocation을 보여주지만, E7 TSRA-R-ML의 probability threshold가 실제 방어 window와 action으로 이어지는 과정을 한 표에서 보기 어렵다.
+- reactive defense tradeoff audit는 E6/E7 차이를 설명하지만, threshold 아래 no-op, threshold 위 alert cooldown, memory window 유지가 어떻게 연결되는지 세부 decision path는 따로 분해하지 않는다.
+
+구현:
+
+```text
+src/experiments/ml_defense_decision_path_audit.py
+outputs/report_tables/ml_defense_decision_path_audit.csv
+outputs/report_tables/ml_defense_decision_path_audit.md
+```
+
+검증 기준:
+
+- E7 TSRA-R-ML DecisionTrace 61개를 읽는다.
+- threshold 이전 trace 16개가 no-op이고 defense event가 0개여야 한다.
+- 첫 threshold crossing은 첫 ML attack 이후 20초 안에 defense window와 `ml_attack_alert`를 만들어야 한다.
+- threshold 이상 decision 중 event trace와 no-event refresh trace가 모두 있어야 한다.
+- alert gap은 cooldown 25초 이상이어야 한다.
+- active defense window memory와 feedback이 일치하고 above-threshold window가 non-decreasing이어야 한다.
+- E7 coordination latency audit와 연결되어 ML reactive row가 pass여야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+ml_defense_decision_path_audit rows: 6
+status: pass=6
+pre_threshold_noop_count: 16
+pre_threshold_defense_events: 0
+first_response_latency_sec: 20
+above_threshold_event_traces: 23
+above_threshold_no_event_refresh_traces: 22
+ml_attack_alerts: 9
+min_alert_gap_sec: 25
+memory_mismatches: 0
+threshold_window_nondecreasing: true
+```
+
+해석:
+
+- TSRA-R-ML은 probability threshold를 기준으로 no-op, window open, cooldown-bounded refresh, core defense fanout을 구분한다.
+- ML 방어자는 단순 분류기가 아니라 AgentMemory와 ToolCall, DecisionTrace를 통해 상태를 유지하며 행동한다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

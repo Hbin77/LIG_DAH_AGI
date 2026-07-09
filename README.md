@@ -434,6 +434,19 @@ This writes:
 
 The audit verifies that ML is used inside bounded agent decisions: AURA-ML model quality, TSRA-R-ML detector quality, ML tool invocations in DecisionTrace, E6/E7 closed-loop separation, E7 ML action evidence, and the Mac MPS scale experiment framing.
 
+## Audit ML Defense Decision Path
+
+```bash
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/ml_defense_decision_path_audit.csv`
+- `outputs/report_tables/ml_defense_decision_path_audit.md`
+
+The audit follows the E7 TSRA-R-ML path from anomaly probability to threshold crossing, defense-window opening, alert cooldown, core TSRA-R fanout, memory continuity, and closed-loop coordination effect.
+
 ## Audit Reactive Defense Tradeoff
 
 ```bash
@@ -776,6 +789,7 @@ python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.ml_contribution_audit --fail-on-error
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
 python3 -m src.experiments.run_ml_threshold_sweep
 python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error

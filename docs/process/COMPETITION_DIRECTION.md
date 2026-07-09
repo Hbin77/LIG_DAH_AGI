@@ -1069,6 +1069,21 @@ first_operator_alert_latency_sec <= 40
 impact_reduction_from_peak > 0
 ```
 
+### P38. ML Defense Decision Path Audit
+
+E7 TSRA-R-ML은 모델 성능 숫자만으로 설명하면 약하다. 대회 목표상 중요한 것은 ML이 실제 에이전트 판단을 바꾸고, 그 판단이 방어 행동과 mission metric에 연결되는지다.
+
+이번 보강은 `ml_defense_decision_path_audit`로 다음 흐름을 검증한다.
+
+- threshold 이전에는 no-op으로 방어 event를 내지 않는다.
+- threshold crossing 시점에는 ML alert와 defense window가 열린다.
+- alert cooldown 동안에는 무의미한 반복 alert를 만들지 않고 window refresh로 남긴다.
+- 열린 window 안에서 `priority_reroute`, `stale_badge`, `video_throttle`, `pace_switch` 같은 core TSRA-R action이 실행된다.
+- active defense window는 AgentMemory와 DecisionTrace feedback에서 일치한다.
+- ML reactive episode는 coordination latency audit에서 response window 안의 완화 효과로 이어진다.
+
+이 방향은 "ML을 넣었다"가 아니라 "ML이 에이전트 decision path를 바꿨다"는 증거를 남기는 쪽이다. 실제 RF, exploit, live network 동작은 계속 배제한다.
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

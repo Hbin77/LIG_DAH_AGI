@@ -2468,3 +2468,27 @@ impact_reduction_from_peak > 0 for all rows
 - metric peak 이후 impact reduction이 있었는지 확인한다.
 - E7 첫 공격은 ML reactive window로 분류되어 ML 방어자의 시간상 역할을 따로 보여준다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation coordination-latency audit만 생성한다.
+
+### 61. ML Defense Decision Path Audit를 추가한 이유
+
+이전 상태에서는 ML contribution audit와 reactive defense tradeoff audit가 있었지만, E7 TSRA-R-ML의 내부 판단 흐름을 한눈에 따라가기에는 간격이 있었다. 즉, `predict_attack_probability`가 호출되고 E7 결과가 E6와 다르다는 증거는 있었지만, 확률이 threshold를 넘는 순간이 어떤 defense window, alert, no-op cooldown, core defense action으로 이어지는지 별도 산출물로 분해되어 있지 않았다.
+
+그래서 `src/experiments/ml_defense_decision_path_audit.py`를 추가했다. 이 감사는 기존 실험을 바꾸지 않고 `outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_decision_traces.jsonl`, `defense_events.jsonl`, `attack_events.jsonl`, `agent_coordination_latency_audit.csv`만 읽어서 ML 방어 decision path를 검증한다.
+
+검증 결과는 다음과 같다.
+
+```text
+ml_defense_decision_path_audit rows: 6
+status: pass=6
+pre_threshold_noop_count: 16
+pre_threshold_defense_events: 0
+first_response_latency_sec: 20
+above_threshold_event_traces: 23
+above_threshold_no_event_refresh_traces: 22
+ml_attack_alerts: 9
+min_alert_gap_sec: 25
+memory_mismatches: 0
+threshold_window_nondecreasing: true
+```
+
+이 보강의 의미는 E7 ML 방어자가 단순한 모델 성능 숫자나 장식적 이벤트가 아니라, threshold 판단을 통해 active defense window를 열고, alert cooldown으로 과잉 알림을 막고, 그 window 안에서 core TSRA-R action을 실행하며, memory로 window 상태를 유지한다는 점을 검증 가능한 형태로 만든 것이다.

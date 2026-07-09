@@ -63,6 +63,7 @@ REQUIRED_FILES = [
     "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
     "src/experiments/ml_contribution_audit.py",
+    "src/experiments/ml_defense_decision_path_audit.py",
     "src/experiments/reactive_defense_tradeoff_audit.py",
     "src/experiments/tsra_detector_calibration_audit.py",
     "src/experiments/safety_boundary_audit.py",
@@ -135,6 +136,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/report_tables/ml_contribution_audit.csv",
     "outputs/report_tables/ml_contribution_audit.md",
+    "outputs/report_tables/ml_defense_decision_path_audit.csv",
+    "outputs/report_tables/ml_defense_decision_path_audit.md",
     "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
     "outputs/report_tables/reactive_defense_tradeoff_audit.md",
     "outputs/report_tables/ml_threshold_sweep.csv",
@@ -984,6 +987,72 @@ def check_csv_outputs() -> list[str]:
         "ML contribution audit missing MPS sample-pass and top-1 comparison evidence",
     )
     checks.append("ml_contribution_audit rows=7 pass")
+
+    ml_path_rows = read_csv("outputs/report_tables/ml_defense_decision_path_audit.csv")
+    require(
+        len(ml_path_rows) == 6,
+        f"expected 6 ML defense decision path rows, got {len(ml_path_rows)}",
+    )
+    failed_ml_path_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in ml_path_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_ml_path_rows, f"failed ML defense path rows: {failed_ml_path_rows[:8]}")
+    required_ml_path_areas = {
+        "Pre-threshold no-op gate",
+        "Threshold-to-window transition",
+        "Alert cooldown and window refresh",
+        "Core defense fanout",
+        "Memory continuity",
+        "Closed-loop coordination effect",
+    }
+    observed_ml_path_areas = {row["area"] for row in ml_path_rows}
+    require(
+        required_ml_path_areas == observed_ml_path_areas,
+        f"ML defense path audit has unexpected areas: {sorted(observed_ml_path_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in ml_path_rows),
+        "ML defense path audit missing safety boundary",
+    )
+    require(
+        any(
+            "pre_threshold_noop_count=16" in row["observed"]
+            and "pre_threshold_defense_events=0" in row["observed"]
+            for row in ml_path_rows
+            if row["check_id"] == "MDP01"
+        ),
+        "ML defense path audit missing pre-threshold no-op evidence",
+    )
+    require(
+        any(
+            "first_response_latency_sec=20" in row["observed"]
+            and "same_time_actions=ml_attack_alert" in row["observed"]
+            for row in ml_path_rows
+            if row["check_id"] == "MDP02"
+        ),
+        "ML defense path audit missing threshold-to-window evidence",
+    )
+    require(
+        any(
+            "above_threshold_no_event_refresh_traces=22" in row["observed"]
+            and "min_alert_gap_sec=25" in row["observed"]
+            for row in ml_path_rows
+            if row["check_id"] == "MDP03"
+        ),
+        "ML defense path audit missing cooldown refresh evidence",
+    )
+    require(
+        any(
+            "memory_mismatches=0" in row["observed"]
+            and "threshold_window_nondecreasing=true" in row["observed"]
+            for row in ml_path_rows
+            if row["check_id"] == "MDP05"
+        ),
+        "ML defense path audit missing memory continuity evidence",
+    )
+    checks.append("ml_defense_decision_path_audit rows=6 pass")
 
     tradeoff_rows = read_csv("outputs/report_tables/reactive_defense_tradeoff_audit.csv")
     require(
@@ -1854,6 +1923,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/ml_contribution_audit.md" in manifest_text,
         "manifest missing ML contribution audit",
+    )
+    require(
+        "outputs/report_tables/ml_defense_decision_path_audit.md" in manifest_text,
+        "manifest missing ML defense decision path audit",
     )
     require(
         "outputs/report_tables/reactive_defense_tradeoff_audit.md" in manifest_text,

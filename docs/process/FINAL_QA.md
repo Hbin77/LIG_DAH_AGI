@@ -36,6 +36,7 @@ python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.ml_contribution_audit --fail-on-error
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
 python3 -m src.experiments.run_ml_threshold_sweep
 python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
@@ -72,6 +73,7 @@ tsra_action_ablation_summary rows: 5
 adaptive_memory_summary conditions: full_tsra_r, adaptive_tsra_r
 metric_gate_summary rows: 11 pass
 ml_contribution_audit rows: 7 pass
+ml_defense_decision_path_audit rows: 6 pass
 reactive_defense_tradeoff_audit rows: 7 pass
 ml_threshold_sweep_summary rows: 5
 tsra_detector_calibration_audit rows: 6 pass

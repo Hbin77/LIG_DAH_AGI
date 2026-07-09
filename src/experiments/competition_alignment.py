@@ -277,6 +277,8 @@ ALIGNMENT_SPECS = [
             "AURA uses impact prediction for candidate ranking; ML TSRA-R opens reactive defense windows "
             "from anomaly probability; ML contribution audit ties model quality, tool invocation, E6/E7 "
             "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together; "
+            "ML defense decision-path audit follows E7 from probability threshold to defense window, "
+            "alert cooldown, core action fanout, memory continuity, and coordination effect; "
             "reactive defense tradeoff audit explains E7's pre-attack suppression, alert overlap, "
             "first-response cost, and bounded mission-impact tradeoff versus E6; threshold sweep "
             "makes the anomaly threshold a measured tuning parameter instead of a hidden constant; "
@@ -289,6 +291,7 @@ ALIGNMENT_SPECS = [
             "src/ml/train_aura_mps_mlp.py",
             "src/experiments/run_ml_threshold_sweep.py",
             "src/experiments/ml_contribution_audit.py",
+            "src/experiments/ml_defense_decision_path_audit.py",
             "src/experiments/reactive_defense_tradeoff_audit.py",
             "src/experiments/tsra_detector_calibration_audit.py",
             "outputs/models/aura_impact_model_metrics.json",
@@ -296,6 +299,8 @@ ALIGNMENT_SPECS = [
             "outputs/models/aura_mps_mlp_metrics.json",
             "outputs/report_tables/ml_contribution_audit.csv",
             "outputs/report_tables/ml_contribution_audit.md",
+            "outputs/report_tables/ml_defense_decision_path_audit.csv",
+            "outputs/report_tables/ml_defense_decision_path_audit.md",
             "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
             "outputs/report_tables/reactive_defense_tradeoff_audit.md",
             "outputs/batch/ml_threshold_sweep_summary.csv",
@@ -312,6 +317,9 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "sample_passes=20000000"),
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_candidate_impact_invocations"),
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_attack_probability_invocations"),
+            ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "first_response_latency_sec=20"),
+            ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "above_threshold_no_event_refresh_traces=22"),
+            ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "threshold_window_nondecreasing=true"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_pre_first_defense_events=0"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "active_attack_overlap=9"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_minus_e6=0.0167761"),
@@ -323,6 +331,7 @@ ALIGNMENT_SPECS = [
         ],
         row_checks=[
             RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7),
+            RowCountCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", 6),
             RowCountCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", 7),
             RowCountCheck("outputs/batch/ml_threshold_sweep_summary.csv", 5),
             RowCountCheck("outputs/report_tables/tsra_detector_calibration_audit.csv", 6),
