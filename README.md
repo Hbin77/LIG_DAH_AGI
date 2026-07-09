@@ -101,6 +101,19 @@ This writes:
 
 The summary combines AURA and TSRA-R `DecisionTrace` logs into one time-ordered table with selected action, top candidate, score/probability, tool calls, and reason.
 
+## Generate AURA COA Cards
+
+```bash
+python3 -m src.experiments.aura_coa_cards
+```
+
+This writes:
+
+- `outputs/report_tables/aura_coa_cards.csv`
+- `outputs/report_tables/aura_coa_cards.md`
+
+Each COA card describes one AURA-selected simulated attack effect with target link, traffic class, expected mission impact, detectability, runner-up candidate, selection reason, and explicit safety boundary.
+
 ## Run 30-Seed Repeated Experiments
 
 ```bash
@@ -191,5 +204,6 @@ python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
+python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_batch
 ```

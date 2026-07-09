@@ -126,10 +126,9 @@ Metrics
 
 현재 가장 중요한 개발 방향:
 
-1. AURA의 공격 후보 설명력을 높인다.
-2. TSRA-R의 방어 action별 효과를 분리해서 검증한다.
-3. 공방 timeline에서 `왜 이 행동이 나왔는지`를 바로 확인 가능하게 한다.
-4. AgentMemory를 다음 판단에 더 적극적으로 반영한다.
+1. TSRA-R의 방어 action별 효과를 분리해서 검증한다.
+2. 공방 timeline에서 `왜 이 행동이 나왔는지`를 바로 확인 가능하게 한다.
+3. AgentMemory를 다음 판단에 더 적극적으로 반영한다.
 
 ## 다음 작업 우선순위
 
@@ -152,7 +151,7 @@ outputs/report_tables/agent_decision_trace_summary.csv
 
 ### P1. AURA COA Card
 
-상태: 다음 작업
+상태: 완료
 
 목적:
 
@@ -166,6 +165,8 @@ outputs/report_tables/aura_coa_cards.md
 ```
 
 ### P2. TSRA-R Action Ablation
+
+상태: 다음 작업
 
 목적:
 

@@ -244,6 +244,68 @@ agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 
 이 변경으로 AURA가 왜 특정 공격 효과를 골랐는지, TSRA-R이 왜 특정 방어 액션 또는 no-op을 선택했는지 같은 시간축에서 확인할 수 있다.
 
+### 12. AURA COA Card를 추가한 이유
+
+DecisionTrace 요약기는 시간축 판단을 보여준다. 하지만 AURA가 실제로 선택한 각 공격 효과를 한 장 단위로 설명하기에는 부족했다. 그래서 P1 작업으로 AURA COA Card 생성기를 추가했다.
+
+구현:
+
+```text
+src/experiments/aura_coa_cards.py
+```
+
+입력:
+
+```text
+outputs/experiments/*/attack_events.jsonl
+outputs/experiments/*/aura_decision_traces.jsonl
+```
+
+출력:
+
+```text
+outputs/report_tables/aura_coa_cards.csv
+outputs/report_tables/aura_coa_cards.md
+```
+
+각 COA card에 포함한 항목:
+
+- experiment
+- event_id
+- selected_at
+- mission_phase
+- attack_type
+- target_link
+- target_traffic_classes
+- simulated_effects
+- expected mission impact
+- detectability score
+- attack score
+- candidate rank
+- runner-up candidate
+- selection reason
+- safety boundary
+
+검증:
+
+```text
+python3 -m compileall src
+python3 -m src.experiments.run_all
+python3 -m src.experiments.aura_coa_cards
+```
+
+결과:
+
+```text
+aura_coa_cards.csv: 15 cards
+experiments: E3_rule_aura, E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+agents: AURA, AURA-ML
+missing_safety: 0
+unknown_rank: 0
+```
+
+모든 카드에는 실제 공격 명령이 아니라 폐쇄형 시뮬레이션 효과임을 명시했다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

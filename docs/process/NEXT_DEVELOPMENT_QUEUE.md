@@ -58,7 +58,7 @@ experiments: E3_rule_aura, E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 
 ## P1. AURA COA Card
 
-상태: 대기
+상태: 완료
 
 문제:
 
@@ -79,9 +79,9 @@ outputs/report_tables/aura_coa_cards.csv
 
 완료 기준:
 
-- 각 `AttackEvent`마다 COA card가 생성된다.
-- card에는 attack_type, target_link, duration, expected_impact, score, reason이 들어간다.
-- 실제 공격 명령처럼 보이지 않고 시뮬레이션 효과임이 명확해야 한다.
+- 완료. 각 `AttackEvent`마다 COA card가 생성된다.
+- 완료. card에는 attack_type, target_link, duration, expected_impact, score, reason이 들어간다.
+- 완료. 실제 공격 명령처럼 보이지 않도록 safety boundary를 각 카드에 명시한다.
 
 검증:
 
@@ -90,9 +90,19 @@ python3 -m src.experiments.run_all
 python3 -m src.experiments.aura_coa_cards
 ```
 
+검증 결과:
+
+```text
+aura_coa_cards.csv: 15 cards
+experiments: E3_rule_aura, E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+agents: AURA, AURA-ML
+missing_safety: 0
+unknown_rank: 0
+```
+
 ## P2. TSRA-R Action Ablation
 
-상태: 대기
+상태: 다음 작업
 
 문제:
 
