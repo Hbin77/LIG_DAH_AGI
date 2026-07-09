@@ -330,6 +330,20 @@ This writes:
 
 The decomposition breaks repeated-run Mission Impact into critical latency, trusted stale exposure, priority inversion, kill-chain delay, and recovery instability. It uses `trusted_stale_exposure` for the stale component because TSRA-R may reduce operator trust risk without removing every stale COP object.
 
+## Generate Agent Collaboration Graph
+
+```bash
+python3 -m src.experiments.agent_collaboration_graph
+```
+
+This writes:
+
+- `outputs/report_tables/agent_collaboration_graph.csv`
+- `outputs/report_tables/agent_collaboration_graph.md`
+- `outputs/report_tables/agent_collaboration_graph.mmd`
+
+The graph summarizes how AgentRuntime, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Mission Metrics, and the verifier/package cooperate inside the closed simulation. Run it after trace summary, COA cards, coverage, response audit, operator alerts, metric gates, and mission decomposition have been generated.
+
 ## Generate Competition Alignment Matrix
 
 ```bash
@@ -454,6 +468,7 @@ python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
+python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py

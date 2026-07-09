@@ -1025,7 +1025,60 @@ severity: high, medium
 - 방어 담당이 새 action을 추가하면 alert 문구, mission rationale, expected response도 함께 추가해야 한다.
 - 실제 RF, exploit, live network action 없이 시뮬레이션 방어 판단만 설명한다.
 
-## P20. 제출 직전 브랜치/패키지 동결
+## P20. Agent Collaboration Graph
+
+상태: 완료
+
+문제:
+
+- 개별 산출물은 많지만, AURA, MissionSimulator, TSRA-R, Operator Alerts, Metrics, Verifier가 어떻게 협력하는지 한눈에 보여주는 구조가 필요하다.
+- AI 에이전트 협력 구조는 대회 핵심 배점과 연결되므로, 말로만 설명하지 않고 evidence row count가 붙은 그래프로 남겨야 한다.
+- 공격/방어 담당이 따로 개발해도 어떤 edge가 깨지면 협력 구조가 약해지는지 확인할 기준이 필요하다.
+
+구현:
+
+```text
+src/experiments/agent_collaboration_graph.py
+outputs/report_tables/agent_collaboration_graph.csv
+outputs/report_tables/agent_collaboration_graph.md
+outputs/report_tables/agent_collaboration_graph.mmd
+```
+
+구현 방식:
+
+- `agent_interface_manifest.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
+- 협력 구조를 11개 edge로 고정한다.
+- 각 edge에 source, target, interaction, primary evidence, evidence count, validation status, safety boundary를 붙인다.
+- Markdown에는 Mermaid flowchart를 포함하고, `.mmd` 파일도 별도 생성한다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.agent_collaboration_graph` 명령으로 재생성 가능하다.
+- 완료. 11개 협력 edge가 모두 `verified` 상태다.
+- 완료. AgentRuntime, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Mission Metrics, Verifier/Package가 그래프에 포함된다.
+- 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_collaboration_graph
+```
+
+검증 결과:
+
+```text
+agent_collaboration_graph.csv: 11 edges
+validation_status: all verified
+Mermaid: outputs/report_tables/agent_collaboration_graph.mmd
+```
+
+해석:
+
+- 이 산출물은 공격-방어-AI 협력 구조를 한 장으로 보여준다.
+- 새 공격/방어 기능을 추가하면 graph edge의 evidence count 또는 validation status가 같이 유지되어야 한다.
+- 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 협력 구조만 설명한다.
+
+## P21. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

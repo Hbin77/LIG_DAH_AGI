@@ -1233,6 +1233,51 @@ severity: high, medium
 - `pace_switch`는 PACE fallback/reselect와 recovery churn 주의점을 보여준다.
 - 모든 row는 폐쇄형 시뮬레이션 알림이며 실제 RF, exploit, live network action을 포함하지 않는다.
 
+### 34. Agent Collaboration Graph를 추가한 이유
+
+대회에서 AI 에이전트 아키텍처는 에이전트가 따로 존재한다는 설명만으로는 부족하다. AURA, MissionSimulator, TSRA-R, Operator Alerts, Metrics, Verifier가 어떤 산출물로 연결되는지 한눈에 보여줘야 한다.
+
+그래서 기존 evidence를 읽어 협력 구조를 Mermaid graph와 CSV edge table로 재구성했다.
+
+구현:
+
+```text
+src/experiments/agent_collaboration_graph.py
+outputs/report_tables/agent_collaboration_graph.csv
+outputs/report_tables/agent_collaboration_graph.md
+outputs/report_tables/agent_collaboration_graph.mmd
+```
+
+edge 기준:
+
+```text
+AgentRuntime -> AURA/AURA-ML
+AURA/AURA-ML -> MissionSimulator
+MissionSimulator -> TSRA-R/TSRA-R-ML
+TSRA-R/TSRA-R-ML -> MissionSimulator
+MissionSimulator -> Mission Metrics
+Mission Metrics -> AURA/AURA-ML
+Mission Metrics -> TSRA-R/TSRA-R-ML
+AURA Capabilities -> TSRA-R Capabilities
+AttackEvent -> DefenseEvent
+DefenseEvent -> Operator Alerts
+Mission Metrics -> Verifier/Package
+```
+
+검증 결과:
+
+```text
+agent_collaboration_graph.csv: 11 edges
+validation_status: all verified
+Mermaid graph: outputs/report_tables/agent_collaboration_graph.mmd
+```
+
+해석:
+
+- 이 산출물은 공격-방어-AI 협력 구조를 제출 산출물 안에서 바로 확인하게 한다.
+- 새 기능은 이 협력 edge 중 하나 이상을 강화해야 한다.
+- 특정 edge가 evidence count 또는 verification status를 잃으면 협력 구조가 약해진 것으로 본다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

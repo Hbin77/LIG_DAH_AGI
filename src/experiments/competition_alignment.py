@@ -160,16 +160,19 @@ ALIGNMENT_SPECS = [
             "Battle timeline and incident summary merge AURA events, TSRA-R events, trace reasons, "
             "and metric movement for E5 and E7; attack-defense coverage maps each AURA capability "
             "to the TSRA-R capabilities and validation gates that cover it; response audit checks "
-            "whether required defenses are active or emitted within the response window."
+            "whether required defenses are active or emitted within the response window; the collaboration "
+            "graph summarizes the closed-loop agent cooperation evidence."
         ),
-        agent_or_component="Battle timeline / Incident summary / Coverage / Response audit",
+        agent_or_component="Battle timeline / Incident summary / Coverage / Response audit / Collaboration graph",
         evidence_files=[
             "src/experiments/battle_timeline.py",
             "src/experiments/incident_summary.py",
+            "src/experiments/agent_collaboration_graph.py",
             "src/experiments/attack_defense_coverage.py",
             "src/experiments/attack_defense_response_audit.py",
             "outputs/report_tables/battle_timeline.csv",
             "outputs/report_tables/incident_summary.csv",
+            "outputs/report_tables/agent_collaboration_graph.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
             "outputs/report_tables/attack_defense_response_audit.csv",
         ],
@@ -186,6 +189,7 @@ ALIGNMENT_SPECS = [
         row_checks=[
             RowCountCheck("outputs/report_tables/battle_timeline.csv", 40),
             RowCountCheck("outputs/report_tables/incident_summary.csv", 10),
+            RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 11),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
             RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
         ],

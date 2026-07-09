@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
     "src/experiments/operator_alerts.py",
+    "src/experiments/agent_collaboration_graph.py",
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
@@ -51,6 +52,9 @@ REQUIRED_FILES = [
     "outputs/report_tables/incident_summary.csv",
     "outputs/report_tables/operator_alerts.csv",
     "outputs/report_tables/operator_alerts.md",
+    "outputs/report_tables/agent_collaboration_graph.csv",
+    "outputs/report_tables/agent_collaboration_graph.md",
+    "outputs/report_tables/agent_collaboration_graph.mmd",
     "outputs/report_tables/competition_alignment_matrix.csv",
     "outputs/report_tables/competition_alignment_matrix.md",
     "outputs/report_tables/agent_contract_validation.csv",
@@ -509,6 +513,39 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("operator_alerts rows=56 actions=5")
 
+    collaboration_rows = read_csv("outputs/report_tables/agent_collaboration_graph.csv")
+    require(
+        len(collaboration_rows) == 11,
+        f"expected 11 collaboration graph edges, got {len(collaboration_rows)}",
+    )
+    require(
+        {row["edge_id"] for row in collaboration_rows}
+        == {f"E{index:02d}" for index in range(1, 12)},
+        "agent collaboration graph edge ids are incomplete",
+    )
+    require(
+        all(row["validation_status"] == "verified" for row in collaboration_rows),
+        "agent collaboration graph has incomplete edges",
+    )
+    collaboration_sources = {row["source"] for row in collaboration_rows}
+    collaboration_targets = {row["target"] for row in collaboration_rows}
+    require(
+        {"AURA/AURA-ML", "TSRA-R/TSRA-R-ML", "Mission Metrics"}.issubset(
+            collaboration_sources | collaboration_targets
+        ),
+        "agent collaboration graph missing core agent/metric nodes",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in collaboration_rows),
+        "agent collaboration graph missing safety boundary",
+    )
+    collaboration_mmd = (ROOT / "outputs/report_tables/agent_collaboration_graph.mmd").read_text(
+        encoding="utf-8"
+    )
+    require("flowchart LR" in collaboration_mmd, "agent collaboration Mermaid graph missing flowchart")
+    require("AURA" in collaboration_mmd and "TSRA-R" in collaboration_mmd, "Mermaid graph missing agents")
+    checks.append("agent_collaboration_graph edges=11 verified")
+
     alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
     require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
     incomplete_alignment = [
@@ -569,6 +606,14 @@ def check_zip() -> list[str]:
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
     require("outputs/report_tables/operator_alerts.md" in manifest_text, "manifest missing operator alerts")
+    require(
+        "outputs/report_tables/agent_collaboration_graph.md" in manifest_text,
+        "manifest missing agent collaboration graph",
+    )
+    require(
+        "outputs/report_tables/agent_collaboration_graph.mmd" in manifest_text,
+        "manifest missing agent collaboration Mermaid graph",
+    )
     require(
         "outputs/report_tables/competition_alignment_matrix.md" in manifest_text,
         "manifest missing competition alignment matrix",

@@ -29,6 +29,7 @@ python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
+python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py
@@ -61,13 +62,14 @@ aura_coa_cards rows: 15
 battle_timeline rows: 49
 incident_summary rows: 10
 operator_alerts rows: 56 actions=5
+agent_collaboration_graph edges: 11 verified
 competition_alignment_matrix rows: 10 verified
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 137
+package_zip entries: 141
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

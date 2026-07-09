@@ -209,6 +209,24 @@ outputs/report_tables/operator_alerts.md
 
 각 alert는 방어 action, severity, mission rationale, expected operator response, related attack context, metric snapshot, trace reason을 연결한다. 이 산출물도 폐쇄형 시뮬레이션 설명이며 실제 RF, exploit, live network action은 포함하지 않는다.
 
+## Collaboration Graph
+
+공격 에이전트, 시뮬레이터, 방어 에이전트, operator alerts, metrics, verifier의 협력 구조는 별도 graph로 재구성한다.
+
+```bash
+python3 -m src.experiments.agent_collaboration_graph
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_collaboration_graph.csv
+outputs/report_tables/agent_collaboration_graph.md
+outputs/report_tables/agent_collaboration_graph.mmd
+```
+
+이 그래프는 각 edge마다 evidence file, evidence count, validation status를 붙인다.
+
 ## 인터페이스 Manifest
 
 에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 계약은 다음 명령으로 생성한다.
