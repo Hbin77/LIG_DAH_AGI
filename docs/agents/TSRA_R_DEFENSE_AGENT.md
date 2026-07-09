@@ -153,7 +153,40 @@ Resilience Gain:
 ML/ML reactive defense: 약 85.2% +- 1.8%
 ```
 
-## 9. 현재 구현 상태
+## 9. Action Ablation
+
+TSRA-R action별 기여도를 보기 위해 full TSRA-R에서 방어 액션을 하나씩 제거하는 ablation을 추가했다.
+
+실행:
+
+```bash
+python3 -m src.experiments.run_tsra_ablation
+```
+
+산출물:
+
+```text
+outputs/batch/tsra_action_ablation_summary.csv
+outputs/figures/tsra_action_ablation.png
+```
+
+핵심 결과:
+
+```text
+full impact:              0.124
+no_priority_reroute:      0.332  delta +0.208
+no_stale_badge:           0.329  delta +0.205
+no_video_throttle:        0.111  delta -0.013
+no_pace_switch:           0.107  delta -0.017
+```
+
+해석:
+
+- `priority_reroute`를 제거하면 priority inversion이 크게 증가한다. 이 액션은 critical traffic 보호의 핵심이다.
+- `stale_badge`를 제거하면 trusted stale exposure가 크게 증가한다. 이 액션은 지휘소가 오래된 COP 정보를 최신 정보로 믿는 위험을 낮추는 핵심이다.
+- `video_throttle`과 `pace_switch`는 현재 scalar mission impact만 보면 항상 이득으로 나타나지 않는다. 따라서 이 둘은 단일 점수 최소화가 아니라 운용형 방어 기능으로 분리해서 해석한다.
+
+## 10. 현재 구현 상태
 
 완료:
 
@@ -177,7 +210,7 @@ ML/ML reactive defense: 약 85.2% +- 1.8%
 - operator alert 문구 자동 생성
 - incident report 자동 생성
 
-## 10. 런타임 구조
+## 11. 런타임 구조
 
 TSRA-R은 `src/agents/AgentRuntime` 위에서 실행된다.
 

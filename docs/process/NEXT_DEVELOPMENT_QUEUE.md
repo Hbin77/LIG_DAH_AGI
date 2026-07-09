@@ -102,7 +102,7 @@ unknown_rank: 0
 
 ## P2. TSRA-R Action Ablation
 
-상태: 다음 작업
+상태: 완료
 
 문제:
 
@@ -133,8 +133,8 @@ outputs/figures/tsra_action_ablation.png
 
 완료 기준:
 
-- 각 방어 액션 제거 시 mission impact, trusted stale exposure, priority inversion 변화가 나온다.
-- TSRA-R의 가치가 단일 mission impact가 아니라 방어 기능별 지표로 설명 가능해진다.
+- 완료. 각 방어 액션 제거 시 mission impact, trusted stale exposure, priority inversion 변화가 나온다.
+- 완료. TSRA-R의 가치가 단일 mission impact가 아니라 방어 기능별 지표로 설명 가능해진다.
 
 검증:
 
@@ -143,9 +143,33 @@ python3 -m src.experiments.run_tsra_ablation
 python3 -m compileall src
 ```
 
+검증 결과:
+
+```text
+tsra_action_ablation_summary.csv: 5 conditions
+tsra_action_ablation_raw.csv: 150 rows
+conditions: full, no_priority_reroute, no_video_throttle, no_stale_badge, no_pace_switch
+figure: outputs/figures/tsra_action_ablation.png
+```
+
+핵심 결과:
+
+```text
+no_priority_reroute: mission impact +0.208, priority inversion +0.473
+no_stale_badge: mission impact +0.205, trusted stale exposure +0.388
+no_video_throttle: mission impact -0.013
+no_pace_switch: mission impact -0.017
+```
+
+해석:
+
+- `priority_reroute`는 priority inversion과 critical latency 억제에 핵심이다.
+- `stale_badge`는 trusted stale exposure 억제에 핵심이다.
+- 현재 scalar mission impact에서는 `video_throttle`, `pace_switch`가 항상 이득으로 나타나지는 않으므로 운용 목적과 지표를 분리해 해석해야 한다.
+
 ## P3. Adaptive Memory
 
-상태: 대기
+상태: 다음 작업
 
 문제:
 

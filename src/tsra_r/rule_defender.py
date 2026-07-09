@@ -8,8 +8,11 @@ from src.shared.schemas import DefenseEvent, MissionState
 
 
 class RuleTSRAR:
-    def __init__(self, mode: str = "full") -> None:
+    ACTIONS = {"priority_reroute", "video_throttle", "stale_badge", "pace_switch"}
+
+    def __init__(self, mode: str = "full", enabled_actions: set[str] | None = None) -> None:
         self.mode = mode
+        self.enabled_actions = set(enabled_actions) if enabled_actions is not None else set(self.ACTIONS)
         self.action_cooldowns: dict[str, float] = {}
         self.event_count = 0
         self.runtime = AgentRuntime(
@@ -33,6 +36,9 @@ class RuleTSRAR:
     def _ready(self, action: str, now: float, cooldown: float) -> bool:
         last = self.action_cooldowns.get(action, -10_000.0)
         return now - last >= cooldown
+
+    def _enabled(self, action: str) -> bool:
+        return action in self.enabled_actions
 
     def _event(self, state: MissionState, action: str, details: dict) -> DefenseEvent:
         self.event_count += 1
@@ -59,12 +65,17 @@ class RuleTSRAR:
         candidate_actions.append(
             {
                 "action": "priority_reroute",
+                "enabled": self._enabled("priority_reroute"),
                 "eligible": conditions["priority_reroute_needed"],
                 "ready": conditions["priority_reroute_ready"],
                 "reason": "critical traffic waiting behind video load",
             }
         )
-        if conditions["priority_reroute_needed"] and conditions["priority_reroute_ready"]:
+        if (
+            self._enabled("priority_reroute")
+            and conditions["priority_reroute_needed"]
+            and conditions["priority_reroute_ready"]
+        ):
             events.append(
                 self._event(
                     state,
@@ -76,12 +87,17 @@ class RuleTSRAR:
         candidate_actions.append(
             {
                 "action": "video_throttle",
+                "enabled": self._enabled("video_throttle"),
                 "eligible": conditions["video_throttle_needed"],
                 "ready": conditions["video_throttle_ready"],
                 "reason": "protect critical traffic capacity",
             }
         )
-        if conditions["video_throttle_needed"] and conditions["video_throttle_ready"]:
+        if (
+            self._enabled("video_throttle")
+            and conditions["video_throttle_needed"]
+            and conditions["video_throttle_ready"]
+        ):
             events.append(
                 self._event(
                     state,
@@ -93,12 +109,17 @@ class RuleTSRAR:
         candidate_actions.append(
             {
                 "action": "stale_badge",
+                "enabled": self._enabled("stale_badge"),
                 "eligible": conditions["stale_badge_needed"],
                 "ready": conditions["stale_badge_ready"],
                 "reason": "mark stale COP objects as lower trust",
             }
         )
-        if conditions["stale_badge_needed"] and conditions["stale_badge_ready"]:
+        if (
+            self._enabled("stale_badge")
+            and conditions["stale_badge_needed"]
+            and conditions["stale_badge_ready"]
+        ):
             events.append(
                 self._event(
                     state,
@@ -114,12 +135,17 @@ class RuleTSRAR:
         candidate_actions.append(
             {
                 "action": "pace_switch",
+                "enabled": self._enabled("pace_switch"),
                 "eligible": conditions["pace_switch_needed"],
                 "ready": conditions["pace_switch_ready"],
                 "reason": "SATCOM degraded beyond mission threshold",
             }
         )
-        if conditions["pace_switch_needed"] and conditions["pace_switch_ready"]:
+        if (
+            self._enabled("pace_switch")
+            and conditions["pace_switch_needed"]
+            and conditions["pace_switch_ready"]
+        ):
             target = self.runtime.call_tool(
                 "select_fallback_link",
                 tool_calls,
@@ -191,6 +217,7 @@ class RuleTSRAR:
 
         self.runtime.memory.update_belief("event_count", self.event_count)
         self.runtime.memory.update_belief("mode", self.mode)
+        self.runtime.memory.update_belief("enabled_actions", sorted(self.enabled_actions))
         self.runtime.memory.update_belief("action_cooldowns", dict(self.action_cooldowns))
         self.runtime.record_decision(
             time_sec=state.time_sec,
@@ -202,6 +229,7 @@ class RuleTSRAR:
             reason=reason,
             feedback={
                 "mode": self.mode,
+                "enabled_actions": sorted(self.enabled_actions),
                 "event_count": self.event_count,
                 "action_cooldowns": dict(self.action_cooldowns),
             },

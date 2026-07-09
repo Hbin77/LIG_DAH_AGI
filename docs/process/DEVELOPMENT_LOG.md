@@ -306,6 +306,68 @@ unknown_rank: 0
 
 모든 카드에는 실제 공격 명령이 아니라 폐쇄형 시뮬레이션 효과임을 명시했다.
 
+### 13. TSRA-R Action Ablation을 추가한 이유
+
+TSRA-R은 `priority_reroute`, `video_throttle`, `stale_badge`, `pace_switch`를 함께 실행한다. 전체 결과만 보면 어떤 액션이 어떤 지표에 기여했는지 분리하기 어렵다.
+
+그래서 full TSRA-R에서 방어 액션을 하나씩 제거하는 ablation을 추가했다.
+
+구현:
+
+```text
+src/experiments/run_tsra_ablation.py
+```
+
+Rule TSRA-R 변경:
+
+```text
+RuleTSRAR(mode="full", enabled_actions={...})
+```
+
+기본값은 모든 액션 enabled이므로 기존 E1~E7 기본 동작은 유지된다. ablation runner에서만 특정 액션을 제거한다.
+
+실험 조건:
+
+```text
+full
+no_priority_reroute
+no_video_throttle
+no_stale_badge
+no_pace_switch
+```
+
+산출물:
+
+```text
+outputs/batch/tsra_action_ablation_raw.csv
+outputs/batch/tsra_action_ablation_summary.csv
+outputs/figures/tsra_action_ablation.png
+```
+
+검증:
+
+```text
+python3 -m compileall src
+python3 -m src.experiments.run_all
+python3 -m src.experiments.run_tsra_ablation
+```
+
+결과:
+
+```text
+full impact:             0.124
+no_priority_reroute:     0.332  delta +0.208
+no_stale_badge:          0.329  delta +0.205
+no_video_throttle:       0.111  delta -0.013
+no_pace_switch:          0.107  delta -0.017
+```
+
+해석:
+
+- `priority_reroute`는 priority inversion과 critical latency 억제의 핵심이다.
+- `stale_badge`는 trusted stale exposure 억제의 핵심이다.
+- `video_throttle`, `pace_switch`는 현재 scalar mission impact에서는 항상 이득으로 나타나지 않는다. 이 둘은 운용형 방어 기능으로 분리해 다루고, 이후 정책 조건을 더 정교화해야 한다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:
