@@ -3160,3 +3160,53 @@ areas: unit_regression_execution, unit_regression_scope, final_verifier_integrat
 ```
 
 이 보강의 의미는 회귀 테스트가 로컬 편의 기능이 아니라 README, CI, final verifier, package manifest로 연결된 제출 품질 게이트가 됐다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation agent quality evidence만 강화한다.
+
+### 76. Team Handoff Contract를 추가한 이유
+
+저장소는 `hbin` 중심 협업 기준과 여러 감사 산출물을 갖고 있지만, 새 팀원이 들어왔을 때 공격/방어/ML/QA/통합 작업을 어떻게 나눠 이어가야 하는지 한 문서에서 바로 보기는 어려웠다. 특히 사용자 요구상 팀원이 추가될 수 있으므로, 개인 중심 표현 없이 역할 lane과 필수 검증 명령을 명확히 남겨야 한다.
+
+이번 변경은 팀 핸드오프 문서와 그 문서 자체를 검증하는 감사를 추가했다.
+
+추가한 파일:
+
+```text
+docs/process/TEAM_HANDOFF.md
+src/experiments/team_handoff_audit.py
+outputs/report_tables/team_handoff_audit.csv
+outputs/report_tables/team_handoff_audit.md
+```
+
+`TEAM_HANDOFF.md`가 정의하는 lane:
+
+- Attack agent: `src/aura/`, AURA attack path, ML attack path, COA, response evidence
+- Defense agent: `src/tsra_r/`, defense priority path, adaptive defense path, action attribution, stress scenarios
+- ML and metrics: `src/ml/`, metric gate, ML contribution, threshold sweep, detector calibration
+- QA and packaging: `tests/`, GitHub workflow, package builder, final verifier
+- Integration: README, process docs, competition alignment, submission readiness
+
+감사 기준:
+
+- handoff 문서가 branch, role, gate, decision record, safety, checklist section을 가져야 한다.
+- 공격/방어/ML/QA/통합 lane과 primary files가 모두 명시되어야 한다.
+- `hbin`과 `main` 브랜치 정책이 명확해야 한다.
+- fast gate와 final freeze/verification 명령이 문서에 있어야 한다.
+- `DEVELOPMENT_LOG`, `NEXT_DEVELOPMENT_QUEUE`, README reproduction, package manifest, release handoff 갱신 규칙이 있어야 한다.
+- README, verifier, package builder, readiness, alignment에 handoff audit가 연결되어야 한다.
+- closed simulation safety boundary가 유지되어야 한다.
+
+동반 수정:
+
+- README에 Team Handoff Audit 섹션과 Full Reproduction 명령을 추가했다.
+- `docs/process/GITHUB_WORKFLOW.md`의 재현 명령을 최신 fast gate 기준으로 갱신했다.
+- `scripts/build_submission_package.py`, `scripts/verify_submission_state.py`가 handoff 문서와 audit source/output을 필수로 보게 했다.
+- `submission_readiness_audit`와 `competition_alignment`가 team handoff audit를 evidence에 포함한다.
+- `reproduction_order_audit`는 새 `RO18` row로 team handoff audit 명령 순서를 검증한다.
+
+검증 결과:
+
+```text
+team_handoff_audit rows: 7 pass
+reproduction_order_audit rows: 18 pass
+```
+
+이 보강의 의미는 새 팀원이 들어와도 공격/방어/ML/QA/통합의 작업 경계와 필수 검증 경로를 같은 기준으로 공유할 수 있다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 팀 개발 계약과 closed simulation handoff evidence만 강화한다.

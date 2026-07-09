@@ -31,11 +31,11 @@ outputs/package/release_handoff.md
 - `tests/`: AgentRuntime, AURA-ML, TSRA-R 회귀 테스트
 - `scripts/`: 패키지 생성, release handoff 생성, release freeze 자동화, 최종 상태 검증, 외부 링크 검증 도구
 - `src/`: AURA, TSRA-R, Agent Runtime, 시뮬레이터, ML, 실험 코드
-- `docs/`: 시나리오, 에이전트 구조, 개발 판단 근거
+- `docs/`: 시나리오, 에이전트 구조, 개발 판단 근거, 팀 핸드오프 기준
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
-- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent quality gate audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent goal alignment audit, agent decision feedback audit, agent memory belief audit, agent memory influence audit, AURA attack decision path audit, cross-agent context audit, defense priority decision path audit, adaptive defense decision path audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent coordination latency audit, agent stress scenario audit, mission thread summary, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, defense action attribution audit, mission impact decomposition, metric gate, ML contribution audit, ML attack decision path audit, ML defense decision path audit, ML red-blue interaction audit, reactive defense tradeoff audit, ML threshold sweep, TSRA detector calibration audit, safety boundary audit, reproduction order audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
+- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent quality gate audit, team handoff audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent goal alignment audit, agent decision feedback audit, agent memory belief audit, agent memory influence audit, AURA attack decision path audit, cross-agent context audit, defense priority decision path audit, adaptive defense decision path audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent coordination latency audit, agent stress scenario audit, mission thread summary, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, defense action attribution audit, mission impact decomposition, metric gate, ML contribution audit, ML attack decision path audit, ML defense decision path audit, ML red-blue interaction audit, reactive defense tradeoff audit, ML threshold sweep, TSRA detector calibration audit, safety boundary audit, reproduction order audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
 - `outputs/models/*_metrics.json`
 
 ## 제외하는 것
@@ -104,6 +104,7 @@ submission_readiness_audit: included
 competition_alignment_matrix: included
 agent_regression_tests: included
 agent_quality_gate_audit: included
+team_handoff_audit: included
 hbin_quality_workflow: included
 ```
 

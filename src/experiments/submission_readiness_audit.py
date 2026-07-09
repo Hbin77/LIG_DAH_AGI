@@ -117,6 +117,7 @@ def build_rows() -> list[dict[str, str]]:
         "docs/process/DEVELOPMENT_LOG.md",
         "docs/process/FINAL_QA.md",
         "docs/process/SUBMISSION_PACKAGE.md",
+        "docs/process/TEAM_HANDOFF.md",
     ]
 
     decision_counts = {
@@ -169,6 +170,7 @@ def build_rows() -> list[dict[str, str]]:
         "detector_calibration": count_csv_rows("outputs/report_tables/tsra_detector_calibration_audit.csv"),
     }
     reproduction_order_rows = count_csv_rows("outputs/report_tables/reproduction_order_audit.csv")
+    team_handoff_rows = count_csv_rows("outputs/report_tables/team_handoff_audit.csv")
 
     package_inputs = [
         "scripts/build_submission_package.py",
@@ -178,6 +180,7 @@ def build_rows() -> list[dict[str, str]]:
         "scripts/verify_external_package_link.py",
         "src/experiments/reproduction_order_audit.py",
         "src/experiments/agent_quality_gate_audit.py",
+        "src/experiments/team_handoff_audit.py",
         "tests/test_agent_regression.py",
         ".github/workflows/quality.yml",
         ".gitignore",
@@ -191,6 +194,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.ml.build_dataset",
         "python3 -m unittest discover -s tests",
         "python3 -m src.experiments.agent_quality_gate_audit --fail-on-error",
+        "python3 -m src.experiments.team_handoff_audit --fail-on-error",
         "python3 -m src.experiments.run_all",
         "python3 -m src.experiments.agent_runtime_invariant_audit",
         "python3 -m src.experiments.agent_decision_causality_audit",
@@ -257,10 +261,11 @@ def build_rows() -> list[dict[str, str]]:
                     f"{command}={'yes' if command in readme else 'no'}"
                     for command in reproduction_commands
                 )
-                + f"; reproduction_order_rows={reproduction_order_rows}"
+                + f"; reproduction_order_rows={reproduction_order_rows}; team_handoff_rows={team_handoff_rows}"
             ),
             ok=all(command in readme for command in reproduction_commands)
-            and reproduction_order_rows == 17,
+            and reproduction_order_rows == 18
+            and team_handoff_rows == 7,
             handoff_value="The next developer can rebuild the same evidence without reverse-engineering command order.",
             next_gate="Any new experiment generator must be added to the Full Reproduction block.",
         ),
@@ -477,10 +482,12 @@ def build_rows() -> list[dict[str, str]]:
             evidence=process_docs,
             observed=(
                 f"process_docs_present={all_files_present(process_docs)}; "
+                f"team_handoff_rows={team_handoff_rows}; "
                 f"next_queue_has_p42={'P42' in read_text('docs/process/NEXT_DEVELOPMENT_QUEUE.md')}; "
                 f"forbidden_team_phrases={sum(docs_text.count(phrase) for phrase in forbidden_team_phrases)}"
             ),
             ok=all_files_present(process_docs)
+            and team_handoff_rows == 7
             and "P42" in read_text("docs/process/NEXT_DEVELOPMENT_QUEUE.md")
             and sum(docs_text.count(phrase) for phrase in forbidden_team_phrases) == 0,
             handoff_value="A teammate can continue from the queue and logs without inheriting personal-only wording.",

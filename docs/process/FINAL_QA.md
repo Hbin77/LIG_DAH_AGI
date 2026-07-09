@@ -12,6 +12,7 @@ python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m unittest discover -s tests
 python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
+python3 -m src.experiments.team_handoff_audit --fail-on-error
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
@@ -127,7 +128,7 @@ attack_defense_response_audit rows: 10 no missed required
 pace_transition_audit rows: 4 status=2 initial/2 fallback
 mission_impact_decomposition rows: 35 components=5
 safety_boundary_audit rows: 5 pass
-reproduction_order_audit rows: 17 pass
+reproduction_order_audit rows: 18 pass
 submission_readiness_audit rows: 10 pass
 aura_coa_cards rows: 15
 battle_timeline rows: 47
@@ -143,6 +144,7 @@ agent_collaboration_graph edges: 17 verified
 competition_alignment_matrix rows: 10 verified
 agent_regression_tests: 3 pass
 agent_quality_gate_audit rows: 6 pass
+team_handoff_audit rows: 7 pass
 ```
 
 패키지 검증:

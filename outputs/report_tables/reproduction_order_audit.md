@@ -5,28 +5,29 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 
 ## Summary
 
-- Audit rows: 17
-- Status counts: pass=17
+- Audit rows: 18
+- Status counts: pass=18
 
 | check_id | command_index | command | order_status | output_status | status |
 |---|---:|---|---|---|---|
-| RO01 | 35 | python3 -m src.experiments.defense_action_attribution_audit --fail-on-error | pass | pass | pass |
-| RO02 | 40 | python3 -m src.experiments.closed_loop_episode_replay | pass | pass | pass |
-| RO03 | 41 | python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error | pass | pass | pass |
-| RO04 | 42 | python3 -m src.experiments.agent_engagement_scorecard | pass | pass | pass |
-| RO05 | 43 | python3 -m src.experiments.mission_thread_summary --fail-on-error | pass | pass | pass |
-| RO06 | 18 | python3 -m src.experiments.cross_agent_context_audit --fail-on-error | pass | pass | pass |
-| RO07 | 19 | python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO08 | 20 | python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO09 | 47 | python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO10 | 48 | python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO11 | 49 | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | pass | pass | pass |
-| RO12 | 31 | python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO13 | 50 | python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error | pass | pass | pass |
-| RO14 | 55 | python3 -m src.experiments.competition_alignment --fail-on-incomplete | pass | pass | pass |
-| RO15 | 56 | python3 scripts/build_submission_package.py | pass | pass | pass |
-| RO16 | 57 | python3 scripts/generate_release_handoff.py | pass | pass | pass |
-| RO17 | 59 | python3 scripts/verify_submission_state.py | pass | pass | pass |
+| RO01 | 36 | python3 -m src.experiments.defense_action_attribution_audit --fail-on-error | pass | pass | pass |
+| RO02 | 41 | python3 -m src.experiments.closed_loop_episode_replay | pass | pass | pass |
+| RO03 | 42 | python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error | pass | pass | pass |
+| RO04 | 43 | python3 -m src.experiments.agent_engagement_scorecard | pass | pass | pass |
+| RO05 | 44 | python3 -m src.experiments.mission_thread_summary --fail-on-error | pass | pass | pass |
+| RO06 | 19 | python3 -m src.experiments.cross_agent_context_audit --fail-on-error | pass | pass | pass |
+| RO07 | 20 | python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO08 | 21 | python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO09 | 48 | python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO10 | 49 | python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO11 | 50 | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | pass | pass | pass |
+| RO12 | 32 | python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO13 | 51 | python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error | pass | pass | pass |
+| RO14 | 56 | python3 -m src.experiments.competition_alignment --fail-on-incomplete | pass | pass | pass |
+| RO15 | 57 | python3 scripts/build_submission_package.py | pass | pass | pass |
+| RO16 | 58 | python3 scripts/generate_release_handoff.py | pass | pass | pass |
+| RO17 | 60 | python3 scripts/verify_submission_state.py | pass | pass | pass |
+| RO18 | 6 | python3 -m src.experiments.team_handoff_audit --fail-on-error | pass | pass | pass |
 
 ## Detail
 
@@ -215,4 +216,15 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 - Output status: pass
 - Status: pass
 - Interpretation: Final verification should follow the freeze command so manifest, handoff, package, and link self-test evidence are current.
+- Safety boundary: closed simulation reproduction-order audit only; no RF, exploit, or live network action
+
+### RO18
+
+- Command: `python3 -m src.experiments.team_handoff_audit --fail-on-error`
+- Required before: python3 -m unittest discover -s tests | python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
+- Output files: outputs/report_tables/team_handoff_audit.csv | outputs/report_tables/team_handoff_audit.md
+- Order status: pass
+- Output status: pass
+- Status: pass
+- Interpretation: Team handoff audit should run after the fast regression and quality-gate checks so role lanes, branch policy, and required gate commands are verified before heavy experiments.
 - Safety boundary: closed simulation reproduction-order audit only; no RF, exploit, or live network action

@@ -308,6 +308,22 @@ SPECS = [
             "and link self-test evidence are current."
         ),
     ),
+    OrderSpec(
+        check_id="RO18",
+        command="python3 -m src.experiments.team_handoff_audit --fail-on-error",
+        required_before=(
+            "python3 -m unittest discover -s tests",
+            "python3 -m src.experiments.agent_quality_gate_audit --fail-on-error",
+        ),
+        output_files=(
+            "outputs/report_tables/team_handoff_audit.csv",
+            "outputs/report_tables/team_handoff_audit.md",
+        ),
+        interpretation=(
+            "Team handoff audit should run after the fast regression and quality-gate checks so "
+            "role lanes, branch policy, and required gate commands are verified before heavy experiments."
+        ),
+    ),
 ]
 
 

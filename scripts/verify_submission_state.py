@@ -30,6 +30,7 @@ REQUIRED_FILES = [
     "docs/process/DEVELOPMENT_LOG.md",
     "docs/process/FINAL_QA.md",
     "docs/process/SUBMISSION_PACKAGE.md",
+    "docs/process/TEAM_HANDOFF.md",
     "src/agents/runtime.py",
     "src/aura/rule_decision_engine.py",
     "src/tsra_r/rule_defender.py",
@@ -54,6 +55,7 @@ REQUIRED_FILES = [
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
     "src/experiments/agent_quality_gate_audit.py",
+    "src/experiments/team_handoff_audit.py",
     "src/experiments/agent_runtime_invariant_audit.py",
     "src/experiments/agent_loop_replay.py",
     "src/experiments/agent_decision_causality_audit.py",
@@ -123,6 +125,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/decision_trace_quality_audit.md",
     "outputs/report_tables/agent_quality_gate_audit.csv",
     "outputs/report_tables/agent_quality_gate_audit.md",
+    "outputs/report_tables/team_handoff_audit.csv",
+    "outputs/report_tables/team_handoff_audit.md",
     "outputs/report_tables/agent_runtime_invariant_audit.csv",
     "outputs/report_tables/agent_runtime_invariant_audit.md",
     "outputs/report_tables/agent_loop_replay.csv",
@@ -414,6 +418,37 @@ def check_csv_outputs() -> list[str]:
         "agent quality gate audit missing safety boundary",
     )
     checks.append("agent_quality_gate_audit rows=6 pass")
+
+    team_handoff_rows = read_csv("outputs/report_tables/team_handoff_audit.csv")
+    require(
+        len(team_handoff_rows) == 7,
+        f"expected 7 team handoff audit rows, got {len(team_handoff_rows)}",
+    )
+    failed_team_handoff = [
+        f"{row['check_id']}:{row['area']}"
+        for row in team_handoff_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_team_handoff, f"failed team handoff rows: {failed_team_handoff[:8]}")
+    required_team_handoff_areas = {
+        "handoff_document_structure",
+        "role_lane_contract",
+        "branch_policy",
+        "minimum_gate_commands",
+        "decision_record_contract",
+        "package_and_readiness_integration",
+        "safety_boundary",
+    }
+    observed_team_handoff_areas = {row["area"] for row in team_handoff_rows}
+    require(
+        observed_team_handoff_areas == required_team_handoff_areas,
+        f"team handoff audit missing areas: {sorted(required_team_handoff_areas - observed_team_handoff_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in team_handoff_rows),
+        "team handoff audit missing safety boundary",
+    )
+    checks.append("team_handoff_audit rows=7 pass")
 
     runtime_rows = read_csv("outputs/report_tables/agent_runtime_invariant_audit.csv")
     require(
@@ -1954,8 +1989,8 @@ def check_csv_outputs() -> list[str]:
 
     reproduction_order_rows = read_csv("outputs/report_tables/reproduction_order_audit.csv")
     require(
-        len(reproduction_order_rows) == 17,
-        f"expected 17 reproduction order rows, got {len(reproduction_order_rows)}",
+        len(reproduction_order_rows) == 18,
+        f"expected 18 reproduction order rows, got {len(reproduction_order_rows)}",
     )
     failed_reproduction_order = [
         f"{row['check_id']}:{row['order_status']}:{row['output_status']}"
@@ -1968,7 +2003,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         {row["check_id"] for row in reproduction_order_rows}
-        == {f"RO{index:02d}" for index in range(1, 18)},
+        == {f"RO{index:02d}" for index in range(1, 19)},
         "reproduction order audit check ids are incomplete",
     )
     require(
@@ -2044,7 +2079,16 @@ def check_csv_outputs() -> list[str]:
         ),
         "reproduction order audit missing package prerequisites",
     )
-    checks.append("reproduction_order_audit rows=17 pass")
+    require(
+        any(
+            row["check_id"] == "RO18"
+            and "unittest discover" in row["required_before"]
+            and "agent_quality_gate_audit" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
+        "reproduction order audit missing team handoff prerequisites",
+    )
+    checks.append("reproduction_order_audit rows=18 pass")
 
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(
@@ -2686,6 +2730,11 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_quality_gate_audit.md" in manifest_text,
         "manifest missing agent quality gate audit",
+    )
+    require("docs/process/TEAM_HANDOFF.md" in manifest_text, "manifest missing team handoff guide")
+    require(
+        "outputs/report_tables/team_handoff_audit.md" in manifest_text,
+        "manifest missing team handoff audit",
     )
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")

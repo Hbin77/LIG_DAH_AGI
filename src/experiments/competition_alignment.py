@@ -512,21 +512,24 @@ ALIGNMENT_SPECS = [
         competition_goal="Make the shared branch reproducible for another teammate without using main for active work.",
         implemented_mechanism=(
             "README commands, reproduction-order audit, package builder, manifest, final verifier, "
-            "agent quality gate audit, hbin quality workflow, submission readiness audit, and process docs define the shared workflow."
+            "agent quality gate audit, team handoff audit, hbin quality workflow, submission readiness audit, and process docs define the shared workflow."
         ),
         agent_or_component="README / packaging / QA scripts",
         evidence_files=[
             "README.md",
             "src/experiments/reproduction_order_audit.py",
             "src/experiments/agent_quality_gate_audit.py",
+            "src/experiments/team_handoff_audit.py",
             "scripts/build_submission_package.py",
             "scripts/verify_submission_state.py",
             "src/experiments/submission_readiness_audit.py",
             ".github/workflows/quality.yml",
             "docs/process/SUBMISSION_PACKAGE.md",
             "docs/process/GITHUB_WORKFLOW.md",
+            "docs/process/TEAM_HANDOFF.md",
             "outputs/report_tables/reproduction_order_audit.csv",
             "outputs/report_tables/agent_quality_gate_audit.csv",
+            "outputs/report_tables/team_handoff_audit.csv",
             "outputs/report_tables/submission_readiness_audit.csv",
         ],
         next_gate="Before handoff, rebuild the package and run verify_submission_state on branch hbin.",
@@ -534,8 +537,9 @@ ALIGNMENT_SPECS = [
             ContentCheck("README.md", "Do not push directly to `main`"),
         ],
         row_checks=[
-            RowCountCheck("outputs/report_tables/reproduction_order_audit.csv", 17),
+            RowCountCheck("outputs/report_tables/reproduction_order_audit.csv", 18),
             RowCountCheck("outputs/report_tables/agent_quality_gate_audit.csv", 6),
+            RowCountCheck("outputs/report_tables/team_handoff_audit.csv", 7),
             RowCountCheck("outputs/report_tables/submission_readiness_audit.csv", 10),
         ],
     ),

@@ -82,6 +82,9 @@ Add repeated experiment summaries and report figures
 python3 -m src.ml.build_dataset --rows 3000
 python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
+python3 -m unittest discover -s tests
+python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
+python3 -m src.experiments.team_handoff_audit --fail-on-error
 python3 -m src.experiments.run_all
 python3 -m src.experiments.run_batch
 ```

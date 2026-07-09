@@ -882,6 +882,19 @@ Outputs:
 
 This audit verifies that the fast agent-core regression tests, `hbin` quality workflow, README reproduction order, final verifier, and submission package are all wired together.
 
+## Team Handoff Audit
+
+```bash
+python3 -m src.experiments.team_handoff_audit --fail-on-error
+```
+
+Outputs:
+
+- `outputs/report_tables/team_handoff_audit.csv`
+- `outputs/report_tables/team_handoff_audit.md`
+
+This audit verifies that `docs/process/TEAM_HANDOFF.md` gives branch rules, attack/defense/ML/QA/integration role lanes, minimum gate commands, decision-record rules, and the closed-simulation safety boundary.
+
 ## Full Reproduction
 
 ```bash
@@ -890,6 +903,7 @@ python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m unittest discover -s tests
 python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
+python3 -m src.experiments.team_handoff_audit --fail-on-error
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error

@@ -24,12 +24,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 238
-- total_payload_bytes: 4594947
+- payload_file_count: 242
+- total_payload_bytes: 4631428
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 239
-- zip_bytes: 1989892
-- zip_sha256: `c18fcc7be22c762f1a9c736873bb8092f55df0634e40f2021039ffec1ddbe9b7`
+- zip_file_count: 243
+- zip_bytes: 2000994
+- zip_sha256: `60f84edfed0fdf5c1c54b753a34b265d47ab3f2691f19f78e7c7ae8e5e14d38a`
 
 ## 포함 파일
 
@@ -53,6 +53,7 @@
 - `docs/process/GITHUB_WORKFLOW.md`
 - `docs/process/NEXT_DEVELOPMENT_QUEUE.md`
 - `docs/process/SUBMISSION_PACKAGE.md`
+- `docs/process/TEAM_HANDOFF.md`
 - `outputs/batch/adaptive_memory_raw.csv`
 - `outputs/batch/adaptive_memory_summary.csv`
 - `outputs/batch/ml_threshold_sweep_raw.csv`
@@ -180,6 +181,8 @@
 - `outputs/report_tables/safety_boundary_audit.md`
 - `outputs/report_tables/submission_readiness_audit.csv`
 - `outputs/report_tables/submission_readiness_audit.md`
+- `outputs/report_tables/team_handoff_audit.csv`
+- `outputs/report_tables/team_handoff_audit.md`
 - `outputs/report_tables/tsra_detector_calibration_audit.csv`
 - `outputs/report_tables/tsra_detector_calibration_audit.md`
 - `outputs/report_tables/tsra_detector_calibration_bins.csv`
@@ -250,6 +253,7 @@
 - `src/experiments/run_tsra_ablation.py`
 - `src/experiments/safety_boundary_audit.py`
 - `src/experiments/submission_readiness_audit.py`
+- `src/experiments/team_handoff_audit.py`
 - `src/experiments/trace_quality_audit.py`
 - `src/experiments/trace_summary.py`
 - `src/experiments/tsra_detector_calibration_audit.py`

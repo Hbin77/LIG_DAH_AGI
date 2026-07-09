@@ -3227,3 +3227,56 @@ quality workflow: hbin branch gate, no main push trigger
 - 회귀 테스트가 로컬 편의 명령이 아니라 README, CI, final verifier, package manifest로 연결된 품질 게이트가 됐다.
 - 팀원이 AURA/TSRA-R/AgentRuntime을 수정해도 full experiment 전에 빠르게 깨지는 지점을 잡는다.
 - 이 변경은 closed simulation agent quality evidence만 추가하며 RF, exploit, live network action은 추가하지 않는다.
+
+## P61. Team Handoff Contract
+
+상태: 완료
+
+문제:
+
+- 저장소는 팀 협업 기준을 갖고 있지만, 새 팀원이 들어왔을 때 공격/방어/ML/QA/통합 작업을 어디서부터 이어갈지 한 문서에서 바로 보기 어렵다.
+- 기존 readiness audit는 팀 인계 문서가 필요하다는 방향은 확인하지만, 역할 lane, 필수 gate, decision record 규칙을 세부적으로 감사하지는 않았다.
+- 사용자 요구처럼 한 명 이상이 추가될 수 있으므로, 개인 중심 표현 없이 확장 가능한 팀 핸드오프 계약이 필요하다.
+
+구현:
+
+```text
+docs/process/TEAM_HANDOFF.md
+src/experiments/team_handoff_audit.py
+outputs/report_tables/team_handoff_audit.csv
+outputs/report_tables/team_handoff_audit.md
+```
+
+설계:
+
+- `TEAM_HANDOFF.md`는 branch rule, role lanes, change contract, minimum gate before push, decision record rule, safety boundary, handoff checklist를 가진다.
+- Role lane은 `Attack agent`, `Defense agent`, `ML and metrics`, `QA and packaging`, `Integration`으로 나눈다.
+- 각 lane은 primary files와 required evidence를 연결한다.
+- `team_handoff_audit`는 문서 구조, role lane coverage, branch policy, minimum gate commands, decision record contract, package/readiness integration, safety boundary를 검증한다.
+- README, GitHub workflow 문서, package builder, final verifier, submission readiness, competition alignment에 새 audit를 연결했다.
+
+검증:
+
+```bash
+python3 -m src.experiments.team_handoff_audit --fail-on-error
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+team_handoff_audit rows: 7 pass
+areas: handoff_document_structure, role_lane_contract, branch_policy,
+       minimum_gate_commands, decision_record_contract,
+       package_and_readiness_integration, safety_boundary
+reproduction_order_audit rows: 18 pass
+```
+
+해석:
+
+- 새 팀원은 공격/방어/ML/QA/통합 중 어느 lane을 맡아도 primary files와 required evidence를 바로 찾을 수 있다.
+- 팀 핸드오프 문서는 final verifier와 package manifest로 묶여 누락되면 검증에서 실패한다.
+- 이 변경은 팀 개발 계약과 closed simulation handoff evidence만 추가하며 RF, exploit, live network action은 추가하지 않는다.
