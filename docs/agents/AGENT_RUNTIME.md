@@ -215,6 +215,30 @@ outputs/report_tables/agent_memory_belief_audit.md
 - feedback key
 - 이전 selected action이 다음 memory의 `last_selected_action`으로 들어가는지
 
+## Tool Usage Audit
+
+AgentTool이 단순 등록 목록이 아니라 실제 판단 루프에서 호출되는지 확인한다.
+
+```bash
+python3 -m src.experiments.agent_tool_usage_audit
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_tool_usage_audit.csv
+outputs/report_tables/agent_tool_usage_audit.md
+```
+
+감사 항목:
+
+- tool invocation count
+- trace coverage
+- input_summary coverage
+- output_summary coverage
+- tool status/error count
+- tool role과 decision link
+
 ## Operator Alerts
 
 TSRA-R의 `DefenseEvent`와 `DecisionTrace`는 operator-facing alert로도 재구성한다.

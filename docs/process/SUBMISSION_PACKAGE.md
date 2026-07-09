@@ -25,7 +25,7 @@ outputs/package/submission_manifest.md
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
-- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent loop replay, agent memory belief audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, mission impact decomposition, metric gate, COA, battle timeline, incident summary, competition alignment matrix
+- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent loop replay, agent memory belief audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, mission impact decomposition, metric gate, COA, battle timeline, incident summary, competition alignment matrix
 - `outputs/models/*_metrics.json`
 
 ## 제외하는 것
@@ -43,8 +43,8 @@ outputs/package/submission_manifest.md
 패키지 생성 검증:
 
 ```text
-payload_file_count: 149
-zip_file_count: 150
+payload_file_count: 152
+zip_file_count: 153
 zip_bytes: 재생성 시 outputs/package/submission_manifest.md 기준 확인
 zip_sha256: 재생성 시 outputs/package/submission_manifest.md 기준 확인
 metric_gate_summary: included
@@ -62,6 +62,7 @@ agent_contract_validation: included
 decision_trace_quality_audit: included
 agent_loop_replay: included
 agent_memory_belief_audit: included
+agent_tool_usage_audit: included
 competition_alignment_matrix: included
 ```
 

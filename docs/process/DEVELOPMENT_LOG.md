@@ -1465,3 +1465,60 @@ last_selected_chain_match_rate: 1.0 for all rows
 - final verifier row/status/chain checks
 - competition alignment matrix
 - agent collaboration graph E14 edge
+
+### 38. Agent Tool Usage Audit를 추가한 이유
+
+사용자가 요구한 에이전트 구조는 `Agent Runtime`, `Memory`, `Tool`, `DecisionTrace`를 모두 갖춘 구조다. Memory audit로 상태 유지 증거는 보강했지만, Tool이 실제 판단 루프에서 호출된다는 증거도 별도 산출물로 분리할 필요가 있었다.
+
+추가한 것:
+
+```text
+src/experiments/agent_tool_usage_audit.py
+outputs/report_tables/agent_tool_usage_audit.csv
+outputs/report_tables/agent_tool_usage_audit.md
+```
+
+감사 방식:
+
+```text
+DecisionTrace.tool_calls
+-> agent / policy / tool_name 단위로 그룹화
+-> invocation count 계산
+-> trace coverage 계산
+-> input_summary coverage 확인
+-> output_summary coverage 확인
+-> status / error count 확인
+-> tool_role과 decision_link 기록
+```
+
+검증 결과:
+
+```text
+agent_tool_usage_audit.csv: 23 rows
+status: pass=23
+tools:
+  estimate_candidate_effect
+  estimate_detectability
+  evaluate_defense_conditions
+  generate_attack_candidates
+  predict_attack_probability
+  predict_candidate_impact
+  select_fallback_link
+```
+
+해석:
+
+- AURA는 후보 생성, mission impact what-if, detectability penalty tool을 실제 호출한다.
+- AURA-ML은 ML impact prediction tool을 추가로 호출한다.
+- TSRA-R은 방어 조건 평가와 PACE fallback 선택 tool을 실제 호출한다.
+- TSRA-R-ML은 anomaly probability prediction tool을 실제 호출한다.
+- 이 산출물은 `Tool`이 정적 코드 구조가 아니라 DecisionTrace 안에서 검증 가능한 실행 증거라는 점을 보여준다.
+
+연결한 것:
+
+- README 실행 명령
+- Agent Runtime 문서
+- package builder required paths
+- final verifier row/status/tool/input-output coverage checks
+- competition alignment matrix
+- agent collaboration graph E15 edge

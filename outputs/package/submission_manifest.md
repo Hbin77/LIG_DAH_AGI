@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 149
-- total_payload_bytes: 2747114
+- payload_file_count: 152
+- total_payload_bytes: 2782021
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 150
-- zip_bytes: 1657751
-- zip_sha256: `34db3ce9c58e230d0f650bc70a87db0304305e6eeabf8db4e08bbaf5d3c33034`
+- zip_file_count: 153
+- zip_bytes: 1665700
+- zip_sha256: `cec718c02bf62ce0726b0337156862e9e65c89758aa5dc8993729290ea6bf4d2`
 
 ## 포함 파일
 
@@ -95,6 +95,8 @@
 - `outputs/report_tables/agent_loop_replay.md`
 - `outputs/report_tables/agent_memory_belief_audit.csv`
 - `outputs/report_tables/agent_memory_belief_audit.md`
+- `outputs/report_tables/agent_tool_usage_audit.csv`
+- `outputs/report_tables/agent_tool_usage_audit.md`
 - `outputs/report_tables/attack_defense_coverage.csv`
 - `outputs/report_tables/attack_defense_coverage.md`
 - `outputs/report_tables/attack_defense_response_audit.csv`
@@ -144,6 +146,7 @@
 - `src/experiments/agent_interface_manifest.py`
 - `src/experiments/agent_loop_replay.py`
 - `src/experiments/agent_memory_belief_audit.py`
+- `src/experiments/agent_tool_usage_audit.py`
 - `src/experiments/attack_defense_coverage.py`
 - `src/experiments/attack_defense_response_audit.py`
 - `src/experiments/aura_coa_cards.py`

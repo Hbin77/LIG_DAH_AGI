@@ -8,6 +8,7 @@ Safety boundary: closed simulation collaboration graph only; no RF, exploit, or 
 flowchart LR
   Runtime[AgentRuntime\nMemory / Tools / DecisionTrace]
   Memory[AgentMemory\nBelief state / previous action]
+  Tools[AgentTool / ToolRegistry\nInput and output summaries]
   Aura[AURA / AURA-ML\nAttack agents]
   Sim[MissionSimulator\nC4ISR / SATCOM environment]
   Tsra[TSRA-R / TSRA-R-ML\nDefense agents]
@@ -19,6 +20,7 @@ flowchart LR
   Verifier[Verifier / Package\nReproducible evidence bundle]
   Runtime -->|E01 4 verified| Aura
   Runtime -->|memory state| Memory
+  Runtime -->|tool registry| Tools
   Aura -->|E02 15 verified| Sim
   Sim -->|E03 122 verified| Tsra
   Tsra -->|E04 56 verified| Sim
@@ -33,6 +35,7 @@ flowchart LR
   Tsra -->|E13 56 verified| Ledger
   Metrics -->|local before/after| Ledger
   Memory -->|E14 9 verified| Verifier
+  Tools -->|E15 23 verified| Verifier
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier
@@ -59,6 +62,7 @@ flowchart LR
 | E12 | Attack/Defense/Alert Evidence | Closed-Loop Episode Replay | 10 | verified | outputs/report_tables/closed_loop_episode_replay.csv | Shows attack, defense, alert, and metric progression in one reviewable episode record. |
 | E13 | DefenseEvent | Defense Effectiveness Ledger | 56 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
 | E14 | AgentMemory | Verifier/Package | 9 | verified | outputs/report_tables/agent_memory_belief_audit.csv | Proves memory is active loop state, not just a static trace field. |
+| E15 | AgentTool | Verifier/Package | 23 | verified | outputs/report_tables/agent_tool_usage_audit.csv | Proves tools are invoked inside agent decision loops. |
 
 ## Interaction Detail
 
@@ -186,4 +190,13 @@ flowchart LR
 - Evidence count: 9
 - Validation status: verified
 - Purpose: Proves memory is active loop state, not just a static trace field.
+- Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
+
+### E15 AgentTool -> Verifier/Package
+
+- Interaction: Tool usage audit verifies tool invocation, input summaries, and output summaries
+- Evidence: outputs/report_tables/agent_tool_usage_audit.csv
+- Evidence count: 23
+- Validation status: verified
+- Purpose: Proves tools are invoked inside agent decision loops.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

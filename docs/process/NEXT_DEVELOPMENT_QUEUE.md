@@ -1046,16 +1046,16 @@ outputs/report_tables/agent_collaboration_graph.mmd
 
 구현 방식:
 
-- `agent_interface_manifest.csv`, `agent_memory_belief_audit.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `defense_effectiveness_ledger.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
-- 협력 구조를 14개 edge로 고정한다.
+- `agent_interface_manifest.csv`, `agent_memory_belief_audit.csv`, `agent_tool_usage_audit.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `defense_effectiveness_ledger.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
+- 협력 구조를 15개 edge로 고정한다.
 - 각 edge에 source, target, interaction, primary evidence, evidence count, validation status, safety boundary를 붙인다.
 - Markdown에는 Mermaid flowchart를 포함하고, `.mmd` 파일도 별도 생성한다.
 
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_collaboration_graph` 명령으로 재생성 가능하다.
-- 완료. 14개 협력 edge가 모두 `verified` 상태다.
-- 완료. AgentRuntime, AgentMemory, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, Verifier/Package가 그래프에 포함된다.
+- 완료. 15개 협력 edge가 모두 `verified` 상태다.
+- 완료. AgentRuntime, AgentMemory, AgentTool, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, Verifier/Package가 그래프에 포함된다.
 - 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
 
 검증:
@@ -1067,7 +1067,7 @@ python3 -m src.experiments.agent_collaboration_graph
 검증 결과:
 
 ```text
-agent_collaboration_graph.csv: 14 edges
+agent_collaboration_graph.csv: 15 edges
 validation_status: all verified
 Mermaid: outputs/report_tables/agent_collaboration_graph.mmd
 ```
@@ -1253,7 +1253,66 @@ last_selected_chain_match_rate: 1.0 for all rows
 - ML TSRA-R은 anomaly probability와 active defense window를 기억한다.
 - 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 trace만 감사한다.
 
-## P24. 제출 직전 브랜치/패키지 동결
+## P24. Agent Tool Usage Audit
+
+상태: 완료
+
+문제:
+
+- AgentRuntime은 ToolRegistry를 갖고 있지만, 에이전트가 어떤 tool을 실제 판단 루프에서 호출했는지 별도 표로 확인하기 어렵다.
+- AI 에이전트 구조를 더 강하게 보이려면 tool invocation, input summary, output summary, status를 검증해야 한다.
+
+구현:
+
+```text
+src/experiments/agent_tool_usage_audit.py
+outputs/report_tables/agent_tool_usage_audit.csv
+outputs/report_tables/agent_tool_usage_audit.md
+```
+
+구현 방식:
+
+- `aura_decision_traces.jsonl`, `tsra_r_decision_traces.jsonl`을 agent/policy/tool별로 읽는다.
+- tool invocation count와 trace coverage를 계산한다.
+- input_summary와 output_summary coverage를 확인한다.
+- status/error count를 확인한다.
+- tool role과 selected decision에 어떤 식으로 연결되는지 `decision_link`로 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.agent_tool_usage_audit` 명령으로 재생성 가능하다.
+- 완료. 23개 agent/policy/tool row가 모두 `pass`다.
+- 완료. 7개 tool이 모두 포함된다: `generate_attack_candidates`, `estimate_candidate_effect`, `estimate_detectability`, `predict_candidate_impact`, `evaluate_defense_conditions`, `select_fallback_link`, `predict_attack_probability`.
+- 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_tool_usage_audit
+python3 -m src.experiments.agent_collaboration_graph
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_tool_usage_audit.csv: 23 rows
+status: pass=23
+tools: estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link
+```
+
+해석:
+
+- 이 산출물은 AgentTool이 단순 등록 목록이 아니라 실제 decision loop 안에서 호출된다는 점을 보여준다.
+- AURA는 후보 생성, 영향 예측, 탐지 가능성 평가 tool을 호출한다.
+- AURA-ML은 ML impact prediction tool을 추가로 호출한다.
+- TSRA-R은 방어 조건 평가와 PACE fallback 선택 tool을 호출한다.
+- TSRA-R-ML은 anomaly probability prediction tool을 호출한다.
+- 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 trace만 감사한다.
+
+## P25. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

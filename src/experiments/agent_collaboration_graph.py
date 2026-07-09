@@ -53,6 +53,9 @@ def evidence_counts(root: Path = Path(".")) -> dict[str, int]:
         "agent_memory_audit_rows": len(
             read_csv(root / "outputs/report_tables/agent_memory_belief_audit.csv")
         ),
+        "agent_tool_audit_rows": len(
+            read_csv(root / "outputs/report_tables/agent_tool_usage_audit.csv")
+        ),
         "aura_traces": count_agent(trace_rows, "AURA"),
         "tsra_traces": count_agent(trace_rows, "TSRA-R"),
         "trace_rows": len(trace_rows),
@@ -222,6 +225,16 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             counts["agent_memory_audit_rows"] == 9,
             "Proves memory is active loop state, not just a static trace field.",
         ),
+        (
+            "E15",
+            "AgentTool",
+            "Verifier/Package",
+            "Tool usage audit verifies tool invocation, input summaries, and output summaries",
+            "outputs/report_tables/agent_tool_usage_audit.csv",
+            counts["agent_tool_audit_rows"],
+            counts["agent_tool_audit_rows"] == 23,
+            "Proves tools are invoked inside agent decision loops.",
+        ),
     ]
     rows = []
     for edge_id, source, target, interaction, evidence, evidence_count, ok, purpose in specs:
@@ -257,6 +270,7 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             "flowchart LR",
             "  Runtime[AgentRuntime\\nMemory / Tools / DecisionTrace]",
             "  Memory[AgentMemory\\nBelief state / previous action]",
+            "  Tools[AgentTool / ToolRegistry\\nInput and output summaries]",
             "  Aura[AURA / AURA-ML\\nAttack agents]",
             "  Sim[MissionSimulator\\nC4ISR / SATCOM environment]",
             "  Tsra[TSRA-R / TSRA-R-ML\\nDefense agents]",
@@ -268,6 +282,7 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             "  Verifier[Verifier / Package\\nReproducible evidence bundle]",
             f"  Runtime -->|{line('E01')}| Aura",
             f"  Runtime -->|memory state| Memory",
+            f"  Runtime -->|tool registry| Tools",
             f"  Aura -->|{line('E02')}| Sim",
             f"  Sim -->|{line('E03')}| Tsra",
             f"  Tsra -->|{line('E04')}| Sim",
@@ -282,6 +297,7 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             f"  Tsra -->|{line('E13')}| Ledger",
             f"  Metrics -->|local before/after| Ledger",
             f"  Memory -->|{line('E14')}| Verifier",
+            f"  Tools -->|{line('E15')}| Verifier",
             f"  Tsra -->|response evidence| Replay",
             f"  Alerts -->|alert evidence| Replay",
             f"  Replay -->|episode evidence| Verifier",
