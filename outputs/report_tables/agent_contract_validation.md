@@ -49,9 +49,9 @@ Safety boundary: closed simulation event-contract validation only; no RF, exploi
 | E6_ml_aura_tsra_r | tsra-r_decision_trace_schema | pass | 61 | none |
 | E6_ml_aura_tsra_r | agent_cross_contract | pass | 89 | none |
 | E7_ml_aura_ml_tsra_r | attack_event_schema | pass | 5 | none |
-| E7_ml_aura_ml_tsra_r | defense_event_schema | pass | 34 | none |
+| E7_ml_aura_ml_tsra_r | defense_event_schema | pass | 31 | none |
 | E7_ml_aura_ml_tsra_r | metric_snapshot_schema | pass | 61 | none |
-| E7_ml_aura_ml_tsra_r | mission_event_schema | pass | 732 | none |
+| E7_ml_aura_ml_tsra_r | mission_event_schema | pass | 745 | none |
 | E7_ml_aura_ml_tsra_r | aura_decision_trace_schema | pass | 31 | none |
 | E7_ml_aura_ml_tsra_r | tsra-r_decision_trace_schema | pass | 61 | none |
-| E7_ml_aura_ml_tsra_r | agent_cross_contract | pass | 100 | none |
+| E7_ml_aura_ml_tsra_r | agent_cross_contract | pass | 97 | none |

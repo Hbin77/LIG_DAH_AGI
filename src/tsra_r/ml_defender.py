@@ -20,6 +20,8 @@ class MLTSRAR:
         alert_cooldown_sec: float = 25.0,
         mission_guard_window_sec: float = 45.0,
         guard_refresh_margin_sec: float = 20.0,
+        early_guard_probability: float = 0.50,
+        early_guard_risk_score: float = 0.85,
     ) -> None:
         self.rule = RuleTSRAR(mode="full")
         self.threshold = threshold
@@ -27,6 +29,8 @@ class MLTSRAR:
         self.alert_cooldown_sec = alert_cooldown_sec
         self.mission_guard_window_sec = mission_guard_window_sec
         self.guard_refresh_margin_sec = guard_refresh_margin_sec
+        self.early_guard_probability = early_guard_probability
+        self.early_guard_risk_score = early_guard_risk_score
         self.active_defense_until = 0.0
         self.last_alert_time = -10_000.0
         if model_path.exists():
@@ -126,6 +130,8 @@ class MLTSRAR:
                 "threshold": self.threshold,
                 "detector_triggered": detector_triggered,
                 "mission_guard_triggered": guard_triggered,
+                "early_guard_triggered": mission_guard["early_guard_triggered"],
+                "expiry_guard_triggered": mission_guard["expiry_guard_triggered"],
                 "mission_guard_reason": mission_guard["reason"],
                 "mission_guard_score": mission_guard["risk_score"],
                 "active_defense_until": self.active_defense_until,
@@ -156,6 +162,7 @@ class MLTSRAR:
         self.runtime.memory.update_belief("last_alert_time", self.last_alert_time)
         self.runtime.memory.update_belief("last_mission_guard_reason", mission_guard["reason"])
         self.runtime.memory.update_belief("last_mission_guard_score", mission_guard["risk_score"])
+        self.runtime.memory.update_belief("last_early_guard_triggered", mission_guard["early_guard_triggered"])
         self.runtime.record_decision(
             time_sec=state.time_sec,
             policy="ml_anomaly_detector",
@@ -177,6 +184,8 @@ class MLTSRAR:
                 "threshold": self.threshold,
                 "detector_triggered": detector_triggered,
                 "mission_guard_triggered": guard_triggered,
+                "early_guard_triggered": mission_guard["early_guard_triggered"],
+                "expiry_guard_triggered": mission_guard["expiry_guard_triggered"],
                 "mission_guard_reason": mission_guard["reason"],
                 "mission_guard_score": mission_guard["risk_score"],
                 "opened_window": opened_window,
@@ -230,13 +239,24 @@ class MLTSRAR:
         ):
             reasons.append("residual_link_degradation")
 
-        open_window = (
+        expiry_guard_triggered = (
             had_prior_window
             and near_or_after_window_end
             and bool(reasons)
             and probability < self.threshold
         )
+        early_pressure_reasons = {"critical_queue_pressure", "residual_link_degradation"}
+        early_guard_triggered = (
+            not had_prior_window
+            and probability >= self.early_guard_probability
+            and probability < self.threshold
+            and risk_score >= self.early_guard_risk_score
+            and bool(early_pressure_reasons.intersection(reasons))
+        )
+        open_window = expiry_guard_triggered or early_guard_triggered
         reason = "+".join(reasons) if reasons else "none"
+        if early_guard_triggered:
+            reason = f"{reason}+early_mission_pressure_guard"
         return {
             "open_window": open_window,
             "reason": reason,
@@ -244,6 +264,8 @@ class MLTSRAR:
             "had_prior_window": had_prior_window,
             "time_to_window_end_sec": round(time_to_window_end, 6),
             "near_or_after_window_end": near_or_after_window_end,
+            "early_guard_triggered": early_guard_triggered,
+            "expiry_guard_triggered": expiry_guard_triggered,
         }
 
     @staticmethod

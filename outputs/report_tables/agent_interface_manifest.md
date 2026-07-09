@@ -54,12 +54,12 @@ Safety boundary: closed simulation agent-interface manifest only; no RF, exploit
 - Goal: open reactive defense windows when anomaly probability exceeds threshold or residual mission risk remains near window expiry
 - Policies: ml_anomaly_detector
 - Input contract: time_sec, mission_phase, active_link, signals.critical_pending, signals.defense_mode, signals.links, signals.priority_inversion_rate, signals.recent_p95_critical_latency_sec, signals.stale_data_ratio, signals.total_queue_kb, signals.video_queue_kb
-- Memory contract: belief_state, decision_count, last_observed_at, last_selected_action, observation_count, belief_state.active_defense_until, belief_state.last_alert_time, belief_state.last_mission_guard_reason, belief_state.last_mission_guard_score, belief_state.last_probability
+- Memory contract: belief_state, decision_count, last_observed_at, last_selected_action, observation_count, belief_state.active_defense_until, belief_state.last_alert_time, belief_state.last_early_guard_triggered, belief_state.last_mission_guard_reason, belief_state.last_mission_guard_score, belief_state.last_probability
 - Tool contract: assess_mission_risk_guard, predict_attack_probability
 - Candidate contract: open_defense_window
 - Selected action contract: defense_events, no_op
 - Event outputs: defense_events.jsonl: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 - Evidence experiments: E7_ml_aura_ml_tsra_r
 - Trace count: 61
-- Non-no-op decisions: 24
+- Non-no-op decisions: 21
 - Safety boundary: closed simulation agent-interface manifest only; no RF, exploit, or live network action

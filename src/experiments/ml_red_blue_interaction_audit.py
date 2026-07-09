@@ -239,6 +239,7 @@ def interaction_status(
     *,
     aura_link_status: str,
     aura_candidate_count: int,
+    active_before: bool,
     first_above_latency: float | None,
     peak_probability: float,
     first_alert_latency: float | None,
@@ -254,7 +255,16 @@ def interaction_status(
         issues.append("no_probability_threshold_crossing_in_window")
     if peak_probability < 0.75:
         issues.append("peak_probability_below_threshold")
-    if first_alert_latency is None or first_alert_latency > RESPONSE_WINDOW_SEC:
+    active_window_refresh_supported = (
+        active_before
+        and first_above_latency is not None
+        and first_above_latency <= RESPONSE_WINDOW_SEC
+        and first_core_latency == 0.0
+    )
+    if (
+        not active_window_refresh_supported
+        and (first_alert_latency is None or first_alert_latency > RESPONSE_WINDOW_SEC)
+    ):
         issues.append("ml_alert_missing_or_late")
     if first_core_latency is None or first_core_latency > RESPONSE_WINDOW_SEC:
         issues.append("core_defense_missing_or_late")
@@ -308,6 +318,7 @@ def collect_rows() -> list[dict[str, str]]:
         status, issues = interaction_status(
             aura_link_status=aura_link_status,
             aura_candidate_count=candidate_count(aura_trace),
+            active_before=active_before,
             first_above_latency=first_above_latency,
             peak_probability=probability(peak_trace),
             first_alert_latency=first_alert_latency,

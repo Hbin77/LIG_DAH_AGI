@@ -26,16 +26,16 @@ flowchart LR
   Runtime -->|decision records| Trace
   Aura -->|E02 15 verified| Sim
   Sim -->|E03 122 verified| Tsra
-  Tsra -->|E04 56 verified| Sim
-  Sim -->|E05 51 verified| Metrics
+  Tsra -->|E04 53 verified| Sim
+  Sim -->|E05 48 verified| Metrics
   Metrics -->|E06 93 verified| Aura
   Metrics -->|E07 122 verified| Tsra
   Aura -->|E08 4 verified| Coverage
   Coverage -->|E09 10 verified| Tsra
-  Tsra -->|E10 56 verified| Alerts
+  Tsra -->|E10 53 verified| Alerts
   Metrics -->|E11 47 verified| Verifier
   Sim -->|E12 10 verified| Replay
-  Tsra -->|E13 56 verified| Ledger
+  Tsra -->|E13 53 verified| Ledger
   Metrics -->|local before/after| Ledger
   Memory -->|E14 9 verified| Verifier
   Tools -->|E15 24 verified| Verifier
@@ -56,16 +56,16 @@ flowchart LR
 | E01 | AgentRuntime | AURA/AURA-ML | 4 | verified | outputs/report_tables/agent_interface_manifest.csv | Proves attack agents are not just direct function calls. |
 | E02 | AURA/AURA-ML | MissionSimulator | 15 | verified | outputs/report_tables/aura_coa_cards.csv | Connects red-team decisions to simulator-visible attack effects. |
 | E03 | MissionSimulator | TSRA-R/TSRA-R-ML | 122 | verified | outputs/report_tables/agent_decision_trace_summary.csv | Shows blue-team decisions are driven by runtime observations. |
-| E04 | TSRA-R/TSRA-R-ML | MissionSimulator | 56 | verified | outputs/report_tables/operator_alerts.csv | Connects defense decisions to simulator-visible response actions. |
-| E05 | MissionSimulator | Mission Metrics | 51 | verified | outputs/report_tables/battle_timeline.csv | Keeps the red/blue loop tied to measurable mission effects. |
+| E04 | TSRA-R/TSRA-R-ML | MissionSimulator | 53 | verified | outputs/report_tables/operator_alerts.csv | Connects defense decisions to simulator-visible response actions. |
+| E05 | MissionSimulator | Mission Metrics | 48 | verified | outputs/report_tables/battle_timeline.csv | Keeps the red/blue loop tied to measurable mission effects. |
 | E06 | Mission Metrics | AURA/AURA-ML | 93 | verified | outputs/report_tables/agent_decision_trace_summary.csv | Shows attack choices can be interpreted through observed mission state and feedback. |
 | E07 | Mission Metrics | TSRA-R/TSRA-R-ML | 122 | verified | outputs/report_tables/agent_decision_trace_summary.csv | Shows defense choices can be interpreted through observed mission state and feedback. |
 | E08 | AURA Capabilities | TSRA-R Capabilities | 4 | verified | outputs/report_tables/attack_defense_coverage.csv | Makes red/blue responsibilities explicit for separate team development. |
 | E09 | AttackEvent | DefenseEvent | 10 | verified | outputs/report_tables/attack_defense_response_audit.csv | Prevents static mappings from replacing actual event-time response evidence. |
-| E10 | DefenseEvent | Operator Alerts | 56 | verified | outputs/report_tables/operator_alerts.csv | Turns TSRA-R output into human-readable response guidance. |
+| E10 | DefenseEvent | Operator Alerts | 53 | verified | outputs/report_tables/operator_alerts.csv | Turns TSRA-R output into human-readable response guidance. |
 | E11 | Mission Metrics | Verifier/Package | 47 | verified | outputs/report_tables/metric_gate_summary.csv \| outputs/report_tables/mission_impact_decomposition.csv | Keeps scalar claims backed by gates and component-level evidence. |
 | E12 | Attack/Defense/Alert Evidence | Closed-Loop Episode Replay | 10 | verified | outputs/report_tables/closed_loop_episode_replay.csv | Shows attack, defense, alert, and metric progression in one reviewable episode record. |
-| E13 | DefenseEvent | Defense Effectiveness Ledger | 56 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
+| E13 | DefenseEvent | Defense Effectiveness Ledger | 53 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
 | E14 | AgentMemory | Verifier/Package | 9 | verified | outputs/report_tables/agent_memory_belief_audit.csv | Proves memory is active loop state, not just a static trace field. |
 | E15 | AgentTool | Verifier/Package | 24 | verified | outputs/report_tables/agent_tool_usage_audit.csv | Proves tools are invoked inside agent decision loops. |
 | E16 | DecisionTrace | Verifier/Package | 399 | verified | outputs/report_tables/agent_decision_causality_audit.csv | Proves selected actions are grounded in recorded decision evidence. |
@@ -104,7 +104,7 @@ flowchart LR
 
 - Interaction: DefenseEvent records feed bounded mitigation back into the simulator
 - Evidence: outputs/report_tables/operator_alerts.csv
-- Evidence count: 56
+- Evidence count: 53
 - Validation status: verified
 - Purpose: Connects defense decisions to simulator-visible response actions.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
@@ -113,7 +113,7 @@ flowchart LR
 
 - Interaction: MetricSnapshot and battle timeline expose mission impact movement
 - Evidence: outputs/report_tables/battle_timeline.csv
-- Evidence count: 51
+- Evidence count: 48
 - Validation status: verified
 - Purpose: Keeps the red/blue loop tied to measurable mission effects.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
@@ -158,7 +158,7 @@ flowchart LR
 
 - Interaction: Defense events are translated into operator-facing mission rationale
 - Evidence: outputs/report_tables/operator_alerts.csv
-- Evidence count: 56
+- Evidence count: 53
 - Validation status: verified
 - Purpose: Turns TSRA-R output into human-readable response guidance.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
@@ -185,7 +185,7 @@ flowchart LR
 
 - Interaction: Each TSRA-R defense event is joined to local metric movement before and after response
 - Evidence: outputs/report_tables/defense_effectiveness_ledger.csv
-- Evidence count: 56
+- Evidence count: 53
 - Validation status: verified
 - Purpose: Turns defensive actions into event-level effectiveness evidence.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

@@ -38,11 +38,11 @@ Safety boundary: closed simulation metric decomposition only; no RF, exploit, or
 | E6_ml_aura_tsra_r | priority_inversion | 0.0379315 | 0.0948289 | 0.2 | 0.0189658 | 0.130393 |
 | E6_ml_aura_tsra_r | kill_chain_delay | 9.53 | 0.0529444 | 0.15 | 0.00794167 | 0.0546005 |
 | E6_ml_aura_tsra_r | recovery_instability | 2.63333 | 0.877778 | 0.05 | 0.0438889 | 0.301745 |
-| E7_ml_aura_ml_tsra_r | critical_latency | 2.60667 | 0.0434444 | 0.35 | 0.0152056 | 0.0952608 |
-| E7_ml_aura_ml_tsra_r | trusted_stale_exposure | 0.125 | 0.25 | 0.25 | 0.0625 | 0.391554 |
-| E7_ml_aura_ml_tsra_r | priority_inversion | 0.0536517 | 0.134129 | 0.2 | 0.0268259 | 0.168061 |
-| E7_ml_aura_ml_tsra_r | kill_chain_delay | 10.1067 | 0.0561481 | 0.15 | 0.00842222 | 0.0527641 |
-| E7_ml_aura_ml_tsra_r | recovery_instability | 2.8 | 0.933333 | 0.05 | 0.0466667 | 0.29236 |
+| E7_ml_aura_ml_tsra_r | critical_latency | 2.4 | 0.04 | 0.35 | 0.014 | 0.0896197 |
+| E7_ml_aura_ml_tsra_r | trusted_stale_exposure | 0.125 | 0.25 | 0.25 | 0.0625 | 0.400088 |
+| E7_ml_aura_ml_tsra_r | priority_inversion | 0.049598 | 0.123995 | 0.2 | 0.024799 | 0.158749 |
+| E7_ml_aura_ml_tsra_r | kill_chain_delay | 9.9 | 0.055 | 0.15 | 0.00825 | 0.0528116 |
+| E7_ml_aura_ml_tsra_r | recovery_instability | 2.8 | 0.933333 | 0.05 | 0.0466667 | 0.298732 |
 
 ## Experiment Summary
 
@@ -90,7 +90,7 @@ Safety boundary: closed simulation metric decomposition only; no RF, exploit, or
 
 ### E7_ml_aura_ml_tsra_r
 
-- Reported mission impact mean: 0.15962
-- Reconstructed from mean components: 0.15962
-- Reconstruction delta: 2.77556e-17
+- Reported mission impact mean: 0.156216
+- Reconstructed from mean components: 0.156216
+- Reconstruction delta: 0
 - Largest component: trusted_stale_exposure (0.0625)

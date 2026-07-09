@@ -88,7 +88,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `tsra-r-ml-trace-00001` at t=0 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.024; video_kb=0; stale=0; priority_inversion=0
 - Memory: observations=1; decisions=0; last_selected=; last_probability=0.282859; active_defense_until=0
-- Tools: predict_attack_probability -> 0.282859; assess_mission_risk_guard -> had_prior_window=False; near_or_after_window_end=True; open_window=False
+- Tools: predict_attack_probability -> 0.282859; assess_mission_risk_guard -> early_guard_triggered=False; expiry_guard_triggered=False; had_prior_window=False
 - Candidates: open_defense_window; probability=0.282859; threshold=0.75; eligible=False; total=1
 - Selected action: no_op
 - Feedback: event_count=0; active_defense_until=0
@@ -98,12 +98,12 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 ## Replay-08: E7_ml_aura_ml_tsra_r / TSRA-R-ML / action
 
 - Policy: `ml_anomaly_detector`
-- Trace: `tsra-r-ml-trace-00017` at t=80 sec
-- Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=1; queue_kb=9400.7; video_kb=8962.41; stale=0.5; priority_inversion=0.3678
-- Memory: observations=17; decisions=16; last_selected=no_op; last_probability=0.946005; active_defense_until=150
-- Tools: predict_attack_probability -> 0.946005; assess_mission_risk_guard -> had_prior_window=False; near_or_after_window_end=True; open_window=False
-- Candidates: open_defense_window; probability=0.946005; threshold=0.75; eligible=True; total=1
-- Selected action: defense_events: def-00001; ml_attack_alert; probability=0.946005; until=150 + def-00002; priority_reroute; until=150 + def-00003; video_throttle; until=140 + def-00004; stale_badge; until=170 + def-00005; pace_switch; until=180
-- Feedback: event_count=5; active_defense_until=150
-- Reason: detector opened or maintained defense window
+- Trace: `tsra-r-ml-trace-00015` at t=70 sec
+- Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=1; queue_kb=5421.4; video_kb=5239.34; stale=0.5; priority_inversion=0.2568
+- Memory: observations=15; decisions=14; last_selected=no_op; last_probability=0.503568; active_defense_until=115
+- Tools: predict_attack_probability -> 0.503568; assess_mission_risk_guard -> early_guard_triggered=True; expiry_guard_triggered=False; had_prior_window=False
+- Candidates: open_defense_window; probability=0.503568; threshold=0.75; eligible=True; total=1
+- Selected action: defense_events: def-00001; priority_reroute; until=140 + def-00002; video_throttle; until=130 + def-00003; stale_badge; until=160 + def-00004; pace_switch; until=170
+- Feedback: event_count=4; active_defense_until=115
+- Reason: mission risk guard opened or maintained defense window
 - Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or live network action

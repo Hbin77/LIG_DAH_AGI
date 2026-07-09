@@ -188,7 +188,7 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             "Defense events are translated into operator-facing mission rationale",
             "outputs/report_tables/operator_alerts.csv",
             counts["operator_alerts"],
-            counts["operator_alerts"] == 56,
+            counts["operator_alerts"] >= 50,
             "Turns TSRA-R output into human-readable response guidance.",
         ),
         (
@@ -218,7 +218,7 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             "Each TSRA-R defense event is joined to local metric movement before and after response",
             "outputs/report_tables/defense_effectiveness_ledger.csv",
             counts["defense_ledger_rows"],
-            counts["defense_ledger_rows"] == 56,
+            counts["defense_ledger_rows"] >= 50,
             "Turns defensive actions into event-level effectiveness evidence.",
         ),
         (

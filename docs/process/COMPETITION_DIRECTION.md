@@ -907,7 +907,7 @@ package excluded artifact hits: 0
 ml_contribution_audit rows: 7 pass
 AURA-ML predict_candidate_impact invocations: 52
 TSRA-R-ML predict_attack_probability invocations: 61
-E6/E7 mission impact gap: 0.0141698
+E6/E7 mission impact gap: 0.0107652
 E7 attack types: failover_chasing, queue_pressure
 E7 ML alert count: 9
 Mac MPS sample_passes: 20000000
@@ -930,10 +930,10 @@ E7 policy: ml_anomaly_detector
 E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
-ML alert active-attack overlap: 9/9
-E7 minus E6 mission impact mean: 0.0141698
-E7 detector below_threshold traces: 16
-E7 detector above_threshold traces: 45
+ML alert active-attack overlap: 8/8
+E7 minus E6 mission impact mean: 0.0107652
+E7 detector below_threshold traces: 24
+E7 detector above_threshold traces: 37
 ```
 
 ### P30. ML Threshold Sweep
@@ -1046,9 +1046,9 @@ attribution_signal: status=pass
 검증 기준:
 
 ```text
-agent_decision_feedback_audit rows: 66
-feedback_status: pass=66
-selected_event_type: attack_event=10, defense_event=56
+agent_decision_feedback_audit rows: 63
+feedback_status: pass=63
+selected_event_type: attack_event=10, defense_event=53
 feedback classes: attack_pressure_observed, attack_contained_by_defense, defense_improved, defense_held, defense_bounded_or_lagged, ml_window_triggered
 event_link_status: linked for all rows
 ```

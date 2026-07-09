@@ -8,10 +8,10 @@ Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, 
 | RDT01 | Policy separation | pass | e6_policies=rule_defense_full; e7_policies=ml_anomaly_detector; e6_trace_count=61; e7_trace_count=61 | E6 is the always-on full rule defender; E7 is the ML anomaly detector that opens or refreshes reactive defense windows. |
 | RDT02 | Pre-attack defense suppression | pass | first_attack_sec=60; e6_pre_first_defense_events=2; e7_pre_first_defense_events=0 | E7 removes the pre-attack stale-badge behavior seen in E6. This is a reactive-defense benefit, separate from mission-impact minimization. |
 | RDT03 | First-response latency cost | pass | e6_first_core_response_latency_sec=5; e7_first_ml_alert_latency_sec=20 | E7 waits for detector confidence before opening the defense window; the measured cost in the representative run is a 20 second first-alert delay. |
-| RDT04 | ML alert attack overlap | pass | ml_attack_alerts=9; active_attack_overlap=9; avg_alert_probability=0.950957; threshold=0.75 | Every E7 ML alert overlaps an active simulated attack window, so the alert stream is tied to attack context rather than arbitrary noise. |
-| RDT05 | Core defense preservation | pass | e6_core_defense_events=23; e7_core_defense_events=25; e7_actions=ml_attack_alert:9,pace_switch:3,priority_reroute:7,stale_badge:8,video_throttle:7 | E7 adds ML alerting without dropping the core response vocabulary: PACE, priority reroute, stale badge, and video throttle remain present. |
-| RDT06 | Bounded impact tradeoff | pass | e6_mission_impact_mean=0.14545; e7_mission_impact_mean=0.15962; e7_minus_e6=0.0141698; e6_std=0.0136881; e7_std=0.013507 | E7 is not sold as lower-impact than E6. Its observed cost is bounded while remaining stable across repeated seeds. |
-| RDT07 | Detector threshold evidence | pass | trace_count=61; probability_count=61; threshold=0.75; below_threshold=16; above_threshold=45; opened_window=45; no_op=37; min_probability=0.229467; max_probability=0.97963 | The ML defender is not always-on: traces include no-op decisions below threshold and defense-window openings above threshold. |
+| RDT04 | ML alert attack overlap | pass | ml_attack_alerts=8; active_attack_overlap=8; avg_alert_probability=0.940266; threshold=0.75 | Every E7 ML alert overlaps an active simulated attack window, so the alert stream is tied to attack context rather than arbitrary noise. |
+| RDT05 | Core defense preservation | pass | e6_core_defense_events=23; e7_core_defense_events=23; e7_actions=ml_attack_alert:8,pace_switch:3,priority_reroute:7,stale_badge:7,video_throttle:6 | E7 adds ML alerting without dropping the core response vocabulary: PACE, priority reroute, stale badge, and video throttle remain present. |
+| RDT06 | Bounded impact tradeoff | pass | e6_mission_impact_mean=0.14545; e7_mission_impact_mean=0.156216; e7_minus_e6=0.0107652; e6_std=0.0136881; e7_std=0.013482 | E7 is not sold as lower-impact than E6. Its observed cost is bounded while remaining stable across repeated seeds. |
+| RDT07 | Detector threshold evidence | pass | trace_count=61; probability_count=61; threshold=0.75; below_threshold=24; above_threshold=37; opened_window=38; no_op=40; min_probability=0.229467; max_probability=0.972533 | The ML defender is not always-on: traces include no-op decisions below threshold and defense-window openings above threshold. |
 
 ## Detail
 
@@ -46,7 +46,7 @@ Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, 
 
 - Requirement: ML alerts should occur during active simulated AURA-ML attack windows.
 - Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/attack_events.jsonl | outputs/experiments/E7_ml_aura_ml_tsra_r/defense_events.jsonl
-- Observed: ml_attack_alerts=9; active_attack_overlap=9; avg_alert_probability=0.950957; threshold=0.75
+- Observed: ml_attack_alerts=8; active_attack_overlap=8; avg_alert_probability=0.940266; threshold=0.75
 - Status: pass
 - Interpretation: Every E7 ML alert overlaps an active simulated attack window, so the alert stream is tied to attack context rather than arbitrary noise.
 - Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, exploit, or live network action
@@ -55,7 +55,7 @@ Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, 
 
 - Requirement: Reactive ML TSRA-R must still emit the core TSRA-R actions after detection.
 - Evidence: outputs/experiments/E6_ml_aura_tsra_r/defense_events.jsonl | outputs/experiments/E7_ml_aura_ml_tsra_r/defense_events.jsonl
-- Observed: e6_core_defense_events=23; e7_core_defense_events=25; e7_actions=ml_attack_alert:9,pace_switch:3,priority_reroute:7,stale_badge:8,video_throttle:7
+- Observed: e6_core_defense_events=23; e7_core_defense_events=23; e7_actions=ml_attack_alert:8,pace_switch:3,priority_reroute:7,stale_badge:7,video_throttle:6
 - Status: pass
 - Interpretation: E7 adds ML alerting without dropping the core response vocabulary: PACE, priority reroute, stale badge, and video throttle remain present.
 - Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, exploit, or live network action
@@ -64,7 +64,7 @@ Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, 
 
 - Requirement: Reactive defense may cost mission-impact containment versus always-on rule defense, but the cost must stay bounded.
 - Evidence: outputs/batch/repeated_experiment_summary.csv
-- Observed: e6_mission_impact_mean=0.14545; e7_mission_impact_mean=0.15962; e7_minus_e6=0.0141698; e6_std=0.0136881; e7_std=0.013507
+- Observed: e6_mission_impact_mean=0.14545; e7_mission_impact_mean=0.156216; e7_minus_e6=0.0107652; e6_std=0.0136881; e7_std=0.013482
 - Status: pass
 - Interpretation: E7 is not sold as lower-impact than E6. Its observed cost is bounded while remaining stable across repeated seeds.
 - Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, exploit, or live network action
@@ -73,7 +73,7 @@ Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, 
 
 - Requirement: E7 traces must show both below-threshold no-op behavior and above-threshold reactive windows.
 - Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_decision_traces.jsonl
-- Observed: trace_count=61; probability_count=61; threshold=0.75; below_threshold=16; above_threshold=45; opened_window=45; no_op=37; min_probability=0.229467; max_probability=0.97963
+- Observed: trace_count=61; probability_count=61; threshold=0.75; below_threshold=24; above_threshold=37; opened_window=38; no_op=40; min_probability=0.229467; max_probability=0.972533
 - Status: pass
 - Interpretation: The ML defender is not always-on: traces include no-op decisions below threshold and defense-window openings above threshold.
 - Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, exploit, or live network action

@@ -19,16 +19,16 @@ flowchart LR
   Runtime -->|decision records| Trace
   Aura -->|E02 15 verified| Sim
   Sim -->|E03 122 verified| Tsra
-  Tsra -->|E04 56 verified| Sim
-  Sim -->|E05 51 verified| Metrics
+  Tsra -->|E04 53 verified| Sim
+  Sim -->|E05 48 verified| Metrics
   Metrics -->|E06 93 verified| Aura
   Metrics -->|E07 122 verified| Tsra
   Aura -->|E08 4 verified| Coverage
   Coverage -->|E09 10 verified| Tsra
-  Tsra -->|E10 56 verified| Alerts
+  Tsra -->|E10 53 verified| Alerts
   Metrics -->|E11 47 verified| Verifier
   Sim -->|E12 10 verified| Replay
-  Tsra -->|E13 56 verified| Ledger
+  Tsra -->|E13 53 verified| Ledger
   Metrics -->|local before/after| Ledger
   Memory -->|E14 9 verified| Verifier
   Tools -->|E15 24 verified| Verifier

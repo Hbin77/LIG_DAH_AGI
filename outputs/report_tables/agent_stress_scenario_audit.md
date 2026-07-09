@@ -15,7 +15,7 @@ Safety boundary: closed simulation stress-scenario audit only; no RF, exploit, o
 | AS03 | stress_stale_cop_latency_chain | tsra_r_full | 5 | 0.772049 | 0.710987 | 0.162079 | pass |
 | AS04 | stress_stale_cop_latency_chain | tsra_r_ml | 5 | 0.754937 | 0.699806 | 0.174011 | pass |
 | AS05 | stress_pace_failover_pressure | tsra_r_full | 5 | 0.841155 | 0.80432 | 0.13917 | pass |
-| AS06 | stress_pace_failover_pressure | tsra_r_ml | 5 | 0.843971 | 0.835152 | 0.136755 | pass |
+| AS06 | stress_pace_failover_pressure | tsra_r_ml | 5 | 0.843968 | 0.835152 | 0.136758 | pass |
 
 ## Detail
 
@@ -140,19 +140,19 @@ Safety boundary: closed simulation stress-scenario audit only; no RF, exploit, o
 - Seed count: 5 (2607-2611)
 - Attack profile: stress-atk-201:failover_chasing@SATCOM/t=90-170/bw=1.1/lat+=800/loss+=0.04/queue_pressure; stress-atk-202:failover_chasing@LTE/t=165-250/bw=0.9/lat+=500/loss+=0.05/queue_pressure
 - Attack-only mission impact mean: 0.876433
-- Defended mission impact mean: 0.136755
-- Defended mission impact std: 0.00495601
+- Defended mission impact mean: 0.136758
+- Defended mission impact std: 0.00495258
 - Defended mission impact max: 0.145204
-- Mission impact reduction mean: 0.739679
-- Resilience gain mean: 0.843971
+- Mission impact reduction mean: 0.739676
+- Resilience gain mean: 0.843968
 - Resilience gain min: 0.835152
-- Resilience gain std: 0.00526448
+- Resilience gain std: 0.0052601
 - P95 reduction sec mean: 63.09
 - Trusted stale reduction mean: 0.375
-- Priority inversion reduction mean: 0.529117
-- Defense count mean: 27.8
-- Mission guard trigger count mean: 0
-- Mission guard event trace count mean: 0
+- Priority inversion reduction mean: 0.529111
+- Defense count mean: 28
+- Mission guard trigger count mean: 0.2
+- Mission guard event trace count mean: 0.2
 - Status: pass
-- Interpretation: tsra_r_ml preserved aggregate stress resilience in stress_pace_failover_pressure across 5 seeds: gain_mean=0.843971, gain_min=0.835152, defended_impact_mean=0.136755, p95_reduction_sec_mean=63.09, trusted_stale_reduction_mean=0.375, priority_inversion_reduction_mean=0.529117, mission_guard_trigger_count_mean=0, mission_guard_event_trace_count_mean=0.
+- Interpretation: tsra_r_ml preserved aggregate stress resilience in stress_pace_failover_pressure across 5 seeds: gain_mean=0.843968, gain_min=0.835152, defended_impact_mean=0.136758, p95_reduction_sec_mean=63.09, trusted_stale_reduction_mean=0.375, priority_inversion_reduction_mean=0.529111, mission_guard_trigger_count_mean=0.2, mission_guard_event_trace_count_mean=0.2.
 - Safety boundary: closed simulation stress-scenario audit only; no RF, exploit, or live network action

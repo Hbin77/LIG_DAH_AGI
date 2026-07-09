@@ -195,6 +195,19 @@ def build_rows() -> list[dict[str, str]]:
         and selected_type(trace) == "no_op"
         and event_count(trace) == 0
     )
+    pre_threshold_guard_traces = [
+        trace
+        for trace in pre_threshold_traces
+        if (trace.get("feedback") or {}).get("early_guard_triggered") is True
+    ]
+    pre_threshold_guard_event_count = sum(
+        event_count(trace) for trace in pre_threshold_guard_traces
+    )
+    pre_threshold_ml_alerts = [
+        event
+        for event in pre_threshold_defenses
+        if event.get("action") == "ml_attack_alert"
+    ]
 
     first_threshold_actions = (
         defense_actions_at(defenses, first_threshold_time)
@@ -270,27 +283,35 @@ def build_rows() -> list[dict[str, str]]:
     return [
         row(
             check_id="MDP01",
-            area="Pre-threshold no-op gate",
-            requirement="TSRA-R-ML should keep defense output silent while detector probability remains below threshold.",
+            area="Pre-threshold guard discipline",
+            requirement=(
+                "TSRA-R-ML should stay quiet below threshold except for trace-backed early mission-pressure "
+                "guard actions, and it should not emit ML attack alerts before the detector threshold."
+            ),
             evidence=[TRACE_PATH, DEFENSE_PATH],
             observed=(
                 f"trace_count={len(traces)}; first_threshold_time={fmt(first_threshold_time)}; "
                 f"pre_threshold_traces={len(pre_threshold_traces)}; "
                 f"pre_threshold_noop_count={pre_threshold_noop_count}; "
                 f"pre_threshold_defense_events={len(pre_threshold_defenses)}; "
+                f"pre_threshold_guard_traces={len(pre_threshold_guard_traces)}; "
+                f"pre_threshold_guard_event_count={pre_threshold_guard_event_count}; "
+                f"pre_threshold_ml_alerts={len(pre_threshold_ml_alerts)}; "
                 f"pre_threshold_max_probability={fmt(pre_threshold_max_probability)}; "
                 f"threshold={fmt(current_threshold)}"
             ),
             ok=(
                 bool(traces)
                 and first_threshold_time is not None
-                and len(pre_threshold_traces) == pre_threshold_noop_count
-                and not pre_threshold_defenses
+                and len(pre_threshold_traces)
+                == pre_threshold_noop_count + len(pre_threshold_guard_traces)
+                and len(pre_threshold_defenses) == pre_threshold_guard_event_count
+                and not pre_threshold_ml_alerts
                 and pre_threshold_max_probability < current_threshold
             ),
             interpretation=(
-                "The ML defender is reactive: it withholds defense events until detector confidence "
-                "crosses the configured threshold."
+                "The ML defender remains reactive: below-threshold actions are limited to an explicit "
+                "mission-pressure guard, while attack alerts still wait for detector confidence."
             ),
         ),
         row(

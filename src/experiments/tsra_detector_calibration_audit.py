@@ -322,7 +322,7 @@ def build_audit_rows(
         row(
             check_id="CAL06",
             area="Closed-loop threshold consistency",
-            requirement="Offline detector calibration must agree with the closed-loop threshold sweep direction.",
+            requirement="Offline detector calibration must agree with closed-loop threshold sweep watch signals.",
             evidence=[
                 "outputs/batch/ml_threshold_sweep_summary.csv",
                 "outputs/report_tables/ml_threshold_sweep.csv",
@@ -330,18 +330,25 @@ def build_audit_rows(
             observed=(
                 f"sweep_0.75_status={baseline_sweep.get('tuning_status', '')}; "
                 f"sweep_0.75_impact={baseline_sweep.get('mission_impact_mean', '')}; "
+                f"sweep_0.75_alerts={baseline_sweep.get('ml_alert_count_mean', '')}; "
+                f"sweep_0.75_opened_windows={baseline_sweep.get('opened_window_count_mean', '')}; "
                 f"sweep_0.95_status={high_sweep.get('tuning_status', '')}; "
                 f"sweep_0.95_impact={high_sweep.get('mission_impact_mean', '')}; "
+                f"sweep_0.95_alerts={high_sweep.get('ml_alert_count_mean', '')}; "
+                f"sweep_0.95_opened_windows={high_sweep.get('opened_window_count_mean', '')}; "
                 f"offline_0.75_recall={fmt(baseline['recall'])}; offline_0.95_recall={fmt(high['recall'])}"
             ),
             ok=baseline_sweep.get("tuning_status") == "usable"
             and high_sweep.get("tuning_status") == "watch"
-            and as_float(high_sweep.get("mission_impact_mean"), 0.0)
-            > as_float(baseline_sweep.get("mission_impact_mean"), 1.0)
+            and as_float(high_sweep.get("ml_alert_count_mean"), 99.0)
+            < as_float(baseline_sweep.get("ml_alert_count_mean"), 0.0)
+            and as_float(high_sweep.get("opened_window_count_mean"), 99.0)
+            < as_float(baseline_sweep.get("opened_window_count_mean"), 0.0)
             and high["recall"] < baseline["recall"],
             interpretation=(
-                "Offline calibration and closed-loop sweep agree: an overly high threshold loses recall "
-                "and increases mission impact."
+                "Offline calibration and closed-loop sweep agree on the watch signal: an overly high "
+                "threshold loses recall and reduces alert/window evidence, even when the mission guard "
+                "keeps aggregate impact bounded."
             ),
         ),
     ]

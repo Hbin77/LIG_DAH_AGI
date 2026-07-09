@@ -155,6 +155,8 @@ Tool: assess_mission_risk_guard
 - window 종료가 가까워졌거나 이미 지나야 한다.
 - residual_stale_cop, critical_queue_pressure, residual_link_degradation 중 하나가 있어야 한다.
 - probability가 threshold 아래일 때만 guard extension으로 해석한다.
+
+초기 공격 구간에서는 예외적으로 early mission-pressure guard를 허용한다. 이전 window가 없어도 probability가 0.50 이상, risk score가 0.85 이상이고 `critical_queue_pressure` 또는 `residual_link_degradation`이 있으면 짧은 방어 window를 연다. 이 경우에도 `ml_attack_alert`는 만들지 않고, DecisionTrace에 `early_guard_triggered=true`와 guard reason만 남긴다.
 ```
 
 출력:
@@ -183,15 +185,15 @@ mission_guard_event_trace_count_mean: 1.0
 
 ```text
 E3 AURA Attack:           impact 0.914 +- 0.056
-E5 AURA + TSRA-R Defense: impact 0.157 +- 0.029
-E7 ML AURA + ML TSRA-R Defense: impact 0.166 +- 0.012
+E5 AURA + TSRA-R Defense: impact 0.140 +- 0.026
+E7 ML AURA + ML TSRA-R Defense: impact 0.156 +- 0.013
 ```
 
 Resilience Gain:
 
 ```text
-약 82.7% +- 3.6%
-ML/ML reactive defense: 약 81.8% +- 1.8%
+TSRA-R full: 약 84.6% +- 2.9%
+ML/ML reactive defense: 약 82.8% +- 1.9%
 ```
 
 ## 9. Action Ablation
@@ -214,11 +216,11 @@ outputs/figures/tsra_action_ablation.png
 핵심 결과:
 
 ```text
-full impact:              0.157
-no_priority_reroute:      0.343  delta +0.185
-no_stale_badge:           0.363  delta +0.206
-no_video_throttle:        0.141  delta -0.017
-no_pace_switch:           0.107  delta -0.051
+full impact:              0.140
+no_priority_reroute:      0.340  delta +0.200
+no_stale_badge:           0.347  delta +0.206
+no_video_throttle:        0.117  delta -0.023
+no_pace_switch:           0.107  delta -0.033
 ```
 
 ## 10. Mission Impact Decomposition
@@ -332,7 +334,7 @@ interpretation
 현재 검증 기준:
 
 ```text
-E5 + E7 defense ledger rows: 56
+E5 + E7 defense ledger rows: 53
 actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 observed_effect labels: improved, held, degraded_or_delayed
 ```

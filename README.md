@@ -432,7 +432,7 @@ This writes:
 - `outputs/report_tables/ml_contribution_audit.csv`
 - `outputs/report_tables/ml_contribution_audit.md`
 
-The audit verifies that ML is used inside bounded agent decisions: AURA-ML model quality, TSRA-R-ML detector quality, ML tool invocations in DecisionTrace, E6/E7 closed-loop separation, E7 ML action evidence, and the Mac MPS scale experiment framing. TSRA-R-ML also records a mission-risk guard tool that can extend an already opened defense window when residual COP, queue, or link risk remains near expiry.
+The audit verifies that ML is used inside bounded agent decisions: AURA-ML model quality, TSRA-R-ML detector quality, ML tool invocations in DecisionTrace, E6/E7 closed-loop separation, E7 ML action evidence, and the Mac MPS scale experiment framing. TSRA-R-ML also records a mission-risk guard tool that can open an early pre-threshold defense window under severe mission pressure, or extend an already opened window when residual COP, queue, or link risk remains near expiry.
 
 ## Audit ML Attack Decision Path
 
@@ -458,7 +458,7 @@ This writes:
 - `outputs/report_tables/ml_defense_decision_path_audit.csv`
 - `outputs/report_tables/ml_defense_decision_path_audit.md`
 
-The audit follows the E7 TSRA-R-ML path from anomaly probability to threshold crossing, defense-window opening, alert cooldown, core TSRA-R fanout, memory continuity, and closed-loop coordination effect.
+The audit follows the E7 TSRA-R-ML path from anomaly probability to pre-threshold mission guard, threshold crossing, defense-window opening, alert cooldown, core TSRA-R fanout, memory continuity, and closed-loop coordination effect.
 
 ## Audit ML Red-Blue Interaction
 
@@ -471,7 +471,7 @@ This writes:
 - `outputs/report_tables/ml_red_blue_interaction_audit.csv`
 - `outputs/report_tables/ml_red_blue_interaction_audit.md`
 
-The audit links each E7 AURA-ML attack selection to the TSRA-R-ML probability/window response, ML alert, core defense event, and coordination outcome in the same response window.
+The audit links each E7 AURA-ML attack selection to the TSRA-R-ML probability/window response, ML alert or already-active ML window, core defense event, and coordination outcome in the same response window.
 
 ## Audit Reactive Defense Tradeoff
 

@@ -18,11 +18,11 @@ Safety boundary: closed simulation agent-engagement scorecard only; no RF, explo
 | E5_rule_aura_tsra_r | atk-00003 | queue_pressure | 0.081359 | 0.8575 | complete | 5 | 0.0021496 | pass |
 | E5_rule_aura_tsra_r | atk-00004 | queue_pressure | 0.056345 | 0.8275 | complete | 2 | 0.0395898 | pass |
 | E5_rule_aura_tsra_r | atk-00005 | queue_pressure | 0.045006 | 0.7835 | complete | 4 | 0.00214269 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00001 | queue_pressure | 0.072803 | 0.459505 | complete | 5 | 0.205612 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00002 | failover_chasing | 0.018343 | 0.721793 | complete | 6 | 0.0213565 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00003 | queue_pressure | 0.09985 | 0.798255 | complete | 6 | 0.05886 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00004 | failover_chasing | 0.046648 | 0.625517 | complete | 7 | 0.0206573 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00005 | failover_chasing | 0.059656 | 0.588246 | complete | 5 | 0.0367162 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00001 | queue_pressure | 0.072803 | 0.459505 | complete | 5 | 0.251649 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00002 | failover_chasing | 0.021344 | 0.641848 | complete | 4 | 0.025868 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00003 | failover_chasing | 0.0852 | 0.657403 | complete | 3 | 0.00132496 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00004 | queue_pressure | 0.165075 | 0.659372 | complete | 5 | 0.0375459 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00005 | failover_chasing | 0.059203 | 0.57979 | complete | 8 | 0.00163987 | pass |
 
 ## Notes
 
@@ -32,7 +32,7 @@ Safety boundary: closed simulation agent-engagement scorecard only; no RF, explo
 - E5_rule_aura_tsra_r atk-00004: attack choice, defense response, and metric movement are linked; actions=priority_reroute, video_throttle
 - E5_rule_aura_tsra_r atk-00005: attack choice, defense response, and metric movement are linked; actions=priority_reroute, stale_badge, video_throttle
 - E7_ml_aura_ml_tsra_r ml-atk-00001: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
-- E7_ml_aura_ml_tsra_r ml-atk-00002: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, priority_reroute, stale_badge, video_throttle
-- E7_ml_aura_ml_tsra_r ml-atk-00003: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
-- E7_ml_aura_ml_tsra_r ml-atk-00004: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
-- E7_ml_aura_ml_tsra_r ml-atk-00005: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, priority_reroute, stale_badge, video_throttle
+- E7_ml_aura_ml_tsra_r ml-atk-00002: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, pace_switch, priority_reroute, video_throttle
+- E7_ml_aura_ml_tsra_r ml-atk-00003: attack choice, defense response, and metric movement are linked; actions=priority_reroute, stale_badge
+- E7_ml_aura_ml_tsra_r ml-atk-00004: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, priority_reroute, stale_badge, video_throttle
+- E7_ml_aura_ml_tsra_r ml-atk-00005: attack choice, defense response, and metric movement are linked; actions=ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle

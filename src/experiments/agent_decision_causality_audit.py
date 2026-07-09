@@ -164,7 +164,7 @@ def required_tools_for_trace(trace: dict[str, Any]) -> list[str]:
             tools.append("estimate_candidate_effect")
         return tools
     if agent == "TSRA-R-ML":
-        return ["predict_attack_probability"]
+        return ["predict_attack_probability", "assess_mission_risk_guard"]
     if agent.startswith("TSRA-R"):
         tools = ["evaluate_defense_conditions"]
         actions = set(selected_action_names(selected))
@@ -201,7 +201,7 @@ def evaluate_candidate_support(
                 candidate
                 for candidate in candidates
                 if candidate.get("action") == "open_defense_window"
-                and threshold_supported(candidate)
+                and window_supported(candidate, trace)
             ]
             if window_candidates:
                 return "pass", ["open_defense_window"]
@@ -256,7 +256,7 @@ def evaluate_score_or_threshold_support(
         if agent == "TSRA-R-ML":
             for candidate in candidates:
                 if candidate.get("action") == "open_defense_window":
-                    return "pass" if threshold_supported(candidate) else "fail"
+                    return "pass" if window_supported(candidate, trace) else "fail"
             return "fail"
         selected_actions = selected_action_names(selected)
         for action in selected_actions:
@@ -277,6 +277,19 @@ def threshold_supported(candidate: dict[str, Any]) -> bool:
     probability = as_float(candidate.get("probability"))
     threshold = as_float(candidate.get("threshold"))
     return probability >= threshold
+
+
+def window_supported(candidate: dict[str, Any], trace: dict[str, Any]) -> bool:
+    if threshold_supported(candidate):
+        return True
+    if candidate.get("mission_guard_triggered") is True:
+        return True
+    feedback = trace.get("feedback") or {}
+    if feedback.get("opened_window") is True:
+        return True
+    active_until = as_float(candidate.get("active_defense_until"))
+    time_sec = as_float(trace.get("time_sec"))
+    return active_until > time_sec
 
 
 def top_candidate_actions(candidates: list[dict[str, Any]]) -> list[str]:

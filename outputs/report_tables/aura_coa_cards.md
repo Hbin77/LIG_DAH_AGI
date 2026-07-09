@@ -257,14 +257,14 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Target traffic classes: all
 - Duration: 70 sec
 - Simulated effects: latency +600ms; jitter +120ms; loss +0.03; bandwidth cap 0.45Mbps
-- Expected mission impact: 0.916793
-- Expected p95 critical latency: 174.435 sec
+- Expected mission impact: 0.836848
+- Expected p95 critical latency: 151.618 sec
 - Expected stale data ratio: 0.46
-- Expected priority inversion rate: 0.440791
+- Expected priority inversion rate: 0.371232
 - Detectability score: 0.5
-- Attack score: 0.841793
+- Attack score: 0.761848
 - Candidate rank: 1
-- Runner-up: queue_pressure on LTE (score=0.82345, impact=0.84595)
+- Runner-up: queue_pressure on LTE (score=0.740504, impact=0.763004)
 - Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -273,21 +273,21 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Agent: AURA-ML
 - Time: 160 sec
 - Mission phase: resupply_move
-- Active link at decision: LTE
-- Attack type: `queue_pressure`
-- Target link: `LTE`
-- Target traffic classes: video, telemetry
-- Duration: 80 sec
-- Simulated effects: latency +200ms; jitter +100ms; bandwidth cap 1.5Mbps; queue pressure enabled
-- Expected mission impact: 0.970755
-- Expected p95 critical latency: 121.838 sec
-- Expected stale data ratio: 0.676667
-- Expected priority inversion rate: 0.556477
-- Detectability score: 0.35
-- Attack score: 0.918255
+- Active link at decision: MESH
+- Attack type: `failover_chasing`
+- Target link: `MESH`
+- Target traffic classes: all
+- Duration: 70 sec
+- Simulated effects: latency +600ms; jitter +120ms; loss +0.03; bandwidth cap 0.45Mbps
+- Expected mission impact: 0.822403
+- Expected p95 critical latency: 61.4505 sec
+- Expected stale data ratio: 0.71
+- Expected priority inversion rate: 0.31759
+- Detectability score: 0.3
+- Attack score: 0.777403
 - Candidate rank: 1
-- Runner-up: failover_chasing on LTE (score=0.818405, impact=0.893405)
-- Selection reason: ML impact predictor selected queue_pressure
+- Runner-up: queue_pressure on MESH (score=0.692203, impact=0.714703)
+- Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
 ## COA-014: E7_ml_aura_ml_tsra_r / ml-atk-00004
@@ -296,20 +296,20 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Time: 210 sec
 - Mission phase: normal_patrol
 - Active link at decision: MESH
-- Attack type: `failover_chasing`
+- Attack type: `queue_pressure`
 - Target link: `MESH`
-- Target traffic classes: all
-- Duration: 70 sec
-- Simulated effects: latency +600ms; jitter +120ms; loss +0.03; bandwidth cap 0.45Mbps
-- Expected mission impact: 0.820517
-- Expected p95 critical latency: 145.104 sec
-- Expected stale data ratio: 0.71
-- Expected priority inversion rate: 0.324978
-- Detectability score: 0.5
-- Attack score: 0.745517
+- Target traffic classes: video, telemetry
+- Duration: 80 sec
+- Simulated effects: latency +200ms; jitter +100ms; bandwidth cap 1.5Mbps; queue pressure enabled
+- Expected mission impact: 0.801872
+- Expected p95 critical latency: 41.2243 sec
+- Expected stale data ratio: 0.676667
+- Expected priority inversion rate: 0.500637
+- Detectability score: 0.15
+- Attack score: 0.779372
 - Candidate rank: 1
-- Runner-up: queue_pressure on MESH (score=0.698869, impact=0.721369)
-- Selection reason: ML impact predictor selected failover_chasing
+- Runner-up: failover_chasing on MESH (score=0.614297, impact=0.659297)
+- Selection reason: ML impact predictor selected queue_pressure
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
 ## COA-015: E7_ml_aura_ml_tsra_r / ml-atk-00005
@@ -317,19 +317,19 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Agent: AURA-ML
 - Time: 260 sec
 - Mission phase: normal_patrol
-- Active link at decision: LTE
+- Active link at decision: MESH
 - Attack type: `failover_chasing`
-- Target link: `LTE`
+- Target link: `MESH`
 - Target traffic classes: all
 - Duration: 70 sec
 - Simulated effects: latency +600ms; jitter +120ms; loss +0.03; bandwidth cap 0.45Mbps
-- Expected mission impact: 0.783246
-- Expected p95 critical latency: 127.366 sec
+- Expected mission impact: 0.77479
+- Expected p95 critical latency: 205.933 sec
 - Expected stale data ratio: 0.46
-- Expected priority inversion rate: 0.309838
+- Expected priority inversion rate: 0.293886
 - Detectability score: 0.5
-- Attack score: 0.708246
+- Attack score: 0.69979
 - Candidate rank: 1
-- Runner-up: queue_pressure on LTE (score=0.64859, impact=0.67109)
+- Runner-up: queue_pressure on MESH (score=0.640587, impact=0.693087)
 - Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.

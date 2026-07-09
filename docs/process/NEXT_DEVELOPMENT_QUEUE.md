@@ -1000,7 +1000,7 @@ outputs/report_tables/operator_alerts.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.operator_alerts` 명령으로 재생성 가능하다.
-- 완료. E5/E7 방어 이벤트 56개가 operator alert로 변환된다.
+- 완료. E5/E7 방어 이벤트 53개가 operator alert로 변환된다.
 - 완료. 핵심 action `ml_attack_alert`, `pace_switch`, `priority_reroute`, `stale_badge`, `video_throttle`이 모두 포함된다.
 - 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
 
@@ -1013,9 +1013,9 @@ python3 -m src.experiments.operator_alerts
 검증 결과:
 
 ```text
-operator_alerts.csv: 56 alerts
-E5 alerts: 23
-E7 alerts: 33
+operator_alerts.csv: 53 alerts
+E5 alerts: 22
+E7 alerts: 31
 actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 severity: high, medium
 ```
@@ -1179,9 +1179,9 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-defense_effectiveness_ledger.csv: 56 rows
-E5 rows: 23
-E7 rows: 33
+defense_effectiveness_ledger.csv: 53 rows
+E5 rows: 22
+E7 rows: 31
 actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 observed_effect: improved, held, degraded_or_delayed
 ```
@@ -1997,8 +1997,8 @@ status: pass=7
 E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
-ML alert active-attack overlap: 9/9
-E7 minus E6 mission impact mean: 0.0141698
+ML alert active-attack overlap: 8/8
+E7 minus E6 mission impact mean: 0.0107652
 ```
 
 해석:
@@ -2179,7 +2179,7 @@ outputs/report_tables/defense_action_attribution_audit.md
 
 검증 기준:
 
-- ledger 56개 defense event를 action별로 집계한다.
+- ledger 53개 defense event를 action별로 집계한다.
 - action 5개가 모두 존재해야 한다.
 - improved_or_held_rate가 최소 0.66 이상이어야 한다.
 - `priority_reroute`는 ablation priority inversion 증가 근거를 가져야 한다.
@@ -2283,7 +2283,7 @@ outputs/report_tables/agent_decision_feedback_audit.md
 검증 기준:
 
 - E5/E7 closed-loop run만 대상으로 한다.
-- selected attack event 10개와 selected defense event 56개를 모두 포함해야 한다.
+- selected attack event 10개와 selected defense event 53개를 모두 포함해야 한다.
 - 모든 row가 실제 event log와 연결돼야 한다.
 - 모든 row가 metric feedback 또는 ledger/action attribution으로 설명돼야 한다.
 - 모든 row는 closed simulation safety boundary를 포함한다.
@@ -2298,10 +2298,10 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_decision_feedback_audit rows: 66
-feedback_status: pass=66
-selected_event_type: attack_event=10, defense_event=56
-experiments: E5_rule_aura_tsra_r=28, E7_ml_aura_ml_tsra_r=38
+agent_decision_feedback_audit rows: 63
+feedback_status: pass=63
+selected_event_type: attack_event=10, defense_event=53
+experiments: E5_rule_aura_tsra_r=27, E7_ml_aura_ml_tsra_r=36
 ```
 
 해석:
@@ -2576,7 +2576,7 @@ interaction_status: pass=5
 ml_triggered_after_attack: 1
 active_window_immediate_core_defense: 2
 active_window_bounded_refresh: 2
-first_ml_alert_latency_sec: 20 for all rows
+first_ml_alert_latency_sec <= 20 sec when a new ML alert is needed; blank is allowed for already-active ML windows
 first_core_defense_latency_sec <= 20 for all rows
 impact_reduction_from_peak > 0 for all rows
 ```
@@ -2681,3 +2681,62 @@ stale-COP mission_guard_event_trace_count_mean: 1.0
 - ML TSRA-R은 residual mission-risk guard로 stale-COP chain의 window 종료 시점 방어 누락을 줄인다.
 - ML TSRA-R은 세 stress fixture 모두에서 5-seed 평균 기준 stress threshold를 넘는 방어력을 유지한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+## P53. TSRA-R-ML Early Mission-Pressure Guard
+
+상태: 완료
+
+문제:
+
+- E7 첫 AURA-ML 공격은 60초에 시작하지만 기존 ML threshold crossing은 80초에 발생했다.
+- 70초 trace는 probability가 threshold 아래였지만 critical queue pressure와 residual link degradation이 동시에 있어 mission risk가 이미 높았다.
+- threshold를 낮추면 false alert 위험과 detector 해석이 흔들리므로, threshold 자체를 바꾸기보다 제한적인 mission-pressure guard가 필요했다.
+
+구현:
+
+```text
+src/tsra_r/ml_defender.py
+src/experiments/ml_defense_decision_path_audit.py
+src/experiments/defense_action_attribution_audit.py
+src/experiments/ml_red_blue_interaction_audit.py
+src/experiments/tsra_detector_calibration_audit.py
+scripts/verify_submission_state.py
+```
+
+검증 기준:
+
+- early guard는 probability 0.50 이상, risk score 0.85 이상, critical queue/link pressure가 있을 때만 열린다.
+- pre-threshold guard는 core defense window만 열고 `ml_attack_alert`는 만들지 않는다.
+- MDP01은 `pre_threshold_guard_traces >= 1`, `pre_threshold_ml_alerts == 0`을 확인한다.
+- reactive tradeoff는 E7이 E6보다 완전 우월하다고 주장하지 않고 bounded impact tradeoff를 기록한다.
+- row-count verifier는 56/66 고정값이 아니라 방어 이벤트 50개 이상과 필수 action coverage를 본다.
+
+검증:
+
+```bash
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+E7 mission impact mean: 0.159620 -> 0.156216
+E7 resilience gain: 0.824473 -> 0.828471
+E7-E6 mission impact gap: 0.0141698 -> 0.0107652
+pre_threshold_guard_traces: 1
+pre_threshold_ml_alerts: 0
+ml_attack_alerts: 8
+active_attack_overlap: 8
+agent_decision_feedback_audit rows: 63
+operator_alerts rows: 53
+defense_effectiveness_ledger rows: 53
+```
+
+해석:
+
+- E7은 detector threshold를 임의로 낮춘 것이 아니라, severe mission pressure만 별도 guard로 처리한다.
+- early guard는 alert를 남발하지 않고 첫 공격 구간의 core defense timing을 앞당긴다.
+- 이 변경은 closed simulation 정책과 감사 산출물만 바꾸며 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

@@ -2713,3 +2713,76 @@ stress AS06 ML impact:         0.160554 -> 0.136755
 - 새 metric gate G12는 full TSRA-R의 recovery instability mean이 2.20 이하인지 확인한다.
 - PACE audit은 이제 `satcom_to_fallback` 2개와 `fallback_reselect` 2개를 검증한다.
 - 이 변경은 실제 네트워크 동작이 아니라 closed simulation 안의 방어 정책과 감사 산출물만 바꾼다.
+
+### 68. TSRA-R-ML Early Mission-Pressure Guard를 추가한 이유
+
+PACE reselection discipline 이후에도 E7은 첫 AURA-ML 공격에서 탐지 기반 방어가 늦게 열리는 비용이 남았다. 첫 공격은 60초에 시작하지만, 기존 threshold 0.75 crossing은 80초에 발생했다. 그 사이 70초 trace에서는 probability가 0.503568 수준으로 threshold 아래였지만, critical queue pressure와 residual link degradation이 동시에 나타나 mission risk score가 0.9까지 올라갔다.
+
+이번 변경은 `MLTSRAR.assess_mission_risk_guard`를 두 갈래로 나눴다.
+
+```text
+expiry guard:
+  기존처럼 이전 ML defense window가 있고, window 종료가 가까울 때 residual risk로 연장
+
+early mission-pressure guard:
+  이전 window가 없어도 probability >= 0.50,
+  risk_score >= 0.85,
+  critical_queue_pressure 또는 residual_link_degradation이 있으면
+  pre-threshold core defense window를 제한적으로 개방
+```
+
+중요한 설계 선택:
+
+- detector threshold 자체는 0.75로 유지했다.
+- early guard는 `ml_attack_alert`를 만들지 않는다.
+- pre-threshold 구간의 ML alert 수는 0이어야 한다.
+- DecisionTrace에는 `early_guard_triggered`, `expiry_guard_triggered`, `mission_guard_reason`을 남긴다.
+- verifier와 audit는 row 수 고정값이 아니라 최소 evidence threshold와 action coverage를 본다.
+
+검증 결과:
+
+```text
+E7 single-run mission impact: 0.155 -> 0.147
+E7 30-seed mission impact mean: 0.159620 -> 0.156216
+E7 resilience gain: 0.824473 -> 0.828471
+E7-E6 mission impact gap: 0.0141698 -> 0.0107652
+
+ML defense path MDP01:
+pre_threshold_traces=16
+pre_threshold_guard_traces=1
+pre_threshold_guard_event_count=4
+pre_threshold_ml_alerts=0
+pre_threshold_max_probability=0.534851
+
+Reactive tradeoff:
+ml_attack_alerts=8
+active_attack_overlap=8
+e7_pre_first_defense_events=0
+e7_core_defense_events=23
+```
+
+동반 수정:
+
+- `defense_action_attribution_audit`는 `video_throttle`을 p95 단일 지표가 아니라 mission impact, priority inversion, latency 중 하나 이상의 local relief로 평가한다.
+- `ml_attack_alert`는 직접 치료 action이 아니라 reactive window trigger로 평가한다.
+- `ml_red_blue_interaction_audit`는 이미 열린 ML window 안에서 core defense가 즉시 실행되면 새 alert가 없어도 정상 refresh로 본다.
+- `tsra_detector_calibration_audit`는 high threshold 0.95의 비용을 mission impact 증가만이 아니라 alert/window 감소와 watch status로 본다.
+- `submission_readiness_audit`, `competition_alignment`, `agent_collaboration_graph`, `verify_submission_state`는 56/66 고정 row count 대신 50개 이상의 방어 이벤트 evidence와 필수 action coverage를 확인한다.
+
+현재 산출물:
+
+```text
+agent_decision_feedback_audit rows: 63
+battle_timeline rows: 48
+operator_alerts rows: 53
+defense_effectiveness_ledger rows: 53
+defense_action_attribution_audit rows: 5 pass
+submission_readiness_audit rows: 10 pass
+competition_alignment_matrix rows: 10 verified
+```
+
+해석:
+
+- E7은 여전히 E6보다 낮은 impact를 주장하는 구조가 아니다.
+- 대신 ML 방어자가 threshold crossing 전 severe mission pressure를 별도 guard로 처리해 첫 공격 비용을 줄이고, alert를 남발하지 않으며, E6와 다른 reactive closed-loop behavior를 유지한다.
+- 이 변경은 closed simulation 안의 방어 에이전트 정책, 감사 기준, 산출물만 바꾸며 RF, exploit, live network action은 추가하지 않는다.

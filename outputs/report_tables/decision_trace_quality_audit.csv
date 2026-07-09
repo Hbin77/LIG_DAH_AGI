@@ -7,4 +7,4 @@ E5_rule_aura_tsra_r,TSRA-R,rule_defense_full,61,1,1,1,1,1,1,1,19,22,"evaluate_de
 E6_ml_aura_tsra_r,AURA-ML,ml_impact_predictor,31,1,1,1,1,1,0.16129,0.16129,5,5,"estimate_candidate_effect, estimate_detectability, generate_attack_candidates, predict_candidate_impact",pass,
 E6_ml_aura_tsra_r,TSRA-R,rule_defense_full,61,1,1,1,1,1,1,1,21,23,"evaluate_defense_conditions, select_fallback_link",pass,
 E7_ml_aura_ml_tsra_r,AURA-ML,ml_impact_predictor,31,1,1,1,1,1,0.16129,0.16129,5,5,"estimate_candidate_effect, estimate_detectability, generate_attack_candidates, predict_candidate_impact",pass,
-E7_ml_aura_ml_tsra_r,TSRA-R-ML,ml_anomaly_detector,61,1,1,1,1,1,1,1,24,34,"assess_mission_risk_guard, predict_attack_probability",pass,
+E7_ml_aura_ml_tsra_r,TSRA-R-ML,ml_anomaly_detector,61,1,1,1,1,1,1,1,21,31,"assess_mission_risk_guard, predict_attack_probability",pass,
