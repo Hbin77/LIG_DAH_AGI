@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import re
 import subprocess
 import zipfile
 from pathlib import Path
@@ -128,6 +130,39 @@ def read_csv(path: str) -> list[dict[str, str]]:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise AssertionError(message)
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def manifest_value(manifest_text: str, key: str) -> str:
+    match = re.search(rf"^- {re.escape(key)}: `?([^`\n]+)`?$", manifest_text, re.MULTILINE)
+    require(match is not None, f"manifest missing {key}")
+    return match.group(1).strip()
+
+
+def manifest_int(manifest_text: str, key: str) -> int:
+    value = manifest_value(manifest_text, key)
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise AssertionError(f"manifest {key} is not an integer: {value}") from exc
+
+
+def manifest_file_list(manifest_text: str) -> set[str]:
+    marker = "## 포함 파일"
+    require(marker in manifest_text, "manifest missing included-file section")
+    section = manifest_text.split(marker, 1)[1]
+    return set(re.findall(r"^- `([^`]+)`$", section, flags=re.MULTILINE))
 
 
 def check_required_files() -> list[str]:
@@ -832,7 +867,9 @@ def check_zip() -> list[str]:
     require(ZIP_PATH.exists(), f"missing package ZIP: {ZIP_PATH.relative_to(ROOT)}")
     require(MANIFEST_PATH.exists(), f"missing package manifest: {MANIFEST_PATH.relative_to(ROOT)}")
     with zipfile.ZipFile(ZIP_PATH) as zf:
-        names = set(zf.namelist())
+        name_list = zf.namelist()
+    names = set(name_list)
+    require(len(name_list) == len(names), "package ZIP contains duplicate paths")
     for rel in ZIP_REQUIRED_FILES:
         require(rel in names, f"package ZIP missing {rel}")
 
@@ -850,7 +887,53 @@ def check_zip() -> list[str]:
         require(not hits, f"package ZIP contains excluded {label}: {hits[:3]}")
 
     manifest_text = MANIFEST_PATH.read_text(encoding="utf-8")
-    require("zip_sha256" in manifest_text, "manifest missing zip_sha256")
+    manifest_zip_path = manifest_value(manifest_text, "zip_path")
+    manifest_payload_count = manifest_int(manifest_text, "payload_file_count")
+    manifest_zip_file_count = manifest_int(manifest_text, "zip_file_count")
+    manifest_zip_bytes = manifest_int(manifest_text, "zip_bytes")
+    manifest_zip_sha256 = manifest_value(manifest_text, "zip_sha256")
+    manifest_files = manifest_file_list(manifest_text)
+    expected_zip_files = manifest_files | {"outputs/package/submission_manifest.md"}
+    require(
+        manifest_zip_path == ZIP_PATH.relative_to(ROOT).as_posix(),
+        f"manifest zip_path mismatch: {manifest_zip_path}",
+    )
+    require(
+        manifest_payload_count == len(manifest_files),
+        f"manifest payload_file_count mismatch: {manifest_payload_count} != {len(manifest_files)}",
+    )
+    require(
+        manifest_zip_file_count == len(names),
+        f"manifest zip_file_count mismatch: {manifest_zip_file_count} != {len(names)}",
+    )
+    require(
+        manifest_payload_count + 1 == manifest_zip_file_count,
+        "manifest payload_file_count and zip_file_count are inconsistent",
+    )
+    require(
+        manifest_zip_bytes == ZIP_PATH.stat().st_size,
+        f"manifest zip_bytes mismatch: {manifest_zip_bytes} != {ZIP_PATH.stat().st_size}",
+    )
+    actual_zip_sha256 = sha256_file(ZIP_PATH)
+    require(
+        manifest_zip_sha256 == actual_zip_sha256,
+        f"manifest zip_sha256 mismatch: {manifest_zip_sha256} != {actual_zip_sha256}",
+    )
+    require(
+        expected_zip_files == names,
+        "manifest included-file list does not match package ZIP contents",
+    )
+    stale_payload_files = []
+    with zipfile.ZipFile(ZIP_PATH) as zf:
+        for rel in sorted(manifest_files):
+            local_path = ROOT / rel
+            require(local_path.exists(), f"manifest payload missing from worktree: {rel}")
+            if sha256_file(local_path) != sha256_bytes(zf.read(rel)):
+                stale_payload_files.append(rel)
+    require(
+        not stale_payload_files,
+        f"package ZIP payload differs from worktree files: {stale_payload_files[:8]}",
+    )
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
     require("outputs/report_tables/operator_alerts.md" in manifest_text, "manifest missing operator alerts")
@@ -930,7 +1013,11 @@ def check_zip() -> list[str]:
         "outputs/report_tables/submission_readiness_audit.md" in manifest_text,
         "manifest missing submission readiness audit",
     )
-    return [f"package_zip entries={len(names)}", "package exclusions=passed"]
+    return [
+        f"package_zip entries={len(names)}",
+        "package_manifest_integrity=passed",
+        "package exclusions=passed",
+    ]
 
 
 def check_git_state(require_clean: bool) -> list[str]:

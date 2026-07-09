@@ -82,6 +82,7 @@ competition_alignment_matrix rows: 10 verified
 
 ```text
 package_zip entries: 159
+package_manifest_integrity: passed
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

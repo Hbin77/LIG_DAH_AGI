@@ -1633,3 +1633,48 @@ origin main/hbin refs: present
 - competition alignment matrix A10 row
 - agent collaboration graph E17 edge
 - FINAL_QA와 SUBMISSION_PACKAGE count
+
+### 41. Local Package Integrity Gate를 강화한 이유
+
+제출 직전에는 "ZIP 파일이 있다"보다 "그 ZIP이 현재 코드와 산출물 그대로인가"가 더 중요하다. 코드나 문서를 고친 뒤 ZIP을 다시 만들지 않으면, GitHub의 `hbin` 상태와 실제 업로드 ZIP이 달라질 수 있다.
+
+그래서 final verifier의 package 검증을 강화했다.
+
+수정한 것:
+
+```text
+scripts/verify_submission_state.py
+README.md
+docs/process/FINAL_QA.md
+docs/process/SUBMISSION_PACKAGE.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 방식:
+
+```text
+submission_manifest.md
+-> zip_path 확인
+-> payload_file_count 확인
+-> zip_file_count 확인
+-> zip_bytes 확인
+-> zip_sha256 확인
+-> manifest 포함 파일 목록과 ZIP 내부 목록 비교
+-> ZIP 내부 payload 파일 SHA-256과 현재 worktree 파일 SHA-256 비교
+-> 제외 대상 파일이 ZIP에 없는지 확인
+```
+
+검증 결과:
+
+```text
+package_zip entries: 159
+package_manifest_integrity: passed
+package exclusions: passed
+tracked_worktree: clean
+```
+
+해석:
+
+- 이제 `scripts/verify_submission_state.py --require-clean`은 오래된 ZIP이나 manifest mismatch를 잡는다.
+- 외부 클라우드 업로드 전에 `build_submission_package.py`와 final verifier를 다시 실행해야 한다.
+- 외부 링크 다운로드 권한 검증은 업로드 위치가 필요하므로 별도 P28 운영 단계로 남긴다.

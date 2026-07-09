@@ -506,7 +506,7 @@ The package includes code, docs, curated CSV summaries, figures, report tables, 
 python3 scripts/verify_submission_state.py
 ```
 
-This checks required files, core CSV row counts, safety-boundary text, package contents, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
+This checks required files, core CSV row counts, safety-boundary text, package contents, manifest ZIP SHA-256/byte-count/file-count integrity, ZIP payload parity with the current worktree, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
 
 ## Submission Readiness Audit
 

@@ -661,6 +661,7 @@ outputs/report_tables/submission_readiness_audit.md
 submission_readiness_audit rows: 10 pass
 agent_collaboration_graph edges: 17 verified
 package_zip entries: 159
+package_manifest_integrity: passed
 branch: hbin
 origin main/hbin refs: present
 ```

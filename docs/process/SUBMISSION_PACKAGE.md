@@ -47,6 +47,7 @@ payload_file_count: 158
 zip_file_count: 159
 zip_bytes: 재생성 시 outputs/package/submission_manifest.md 기준 확인
 zip_sha256: 재생성 시 outputs/package/submission_manifest.md 기준 확인
+manifest_integrity: zip_sha256, zip_bytes, zip_file_count, 포함 파일 목록, worktree payload parity 검증
 metric_gate_summary: included
 agent_interface_manifest: included
 agent_capability_matrix: included

@@ -1436,7 +1436,57 @@ origin main/hbin refs: present
 - 코드와 산출물이 준비됐는지 검증하는 단계이며, 외부 클라우드 업로드나 제출 링크 권한 검증은 별도 운영 단계로 남긴다.
 - 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 산출물만 감사한다.
 
-## P27. 외부 제출 ZIP 링크 검증
+## P27. Local Package Integrity Gate
+
+상태: 완료
+
+문제:
+
+- 로컬 ZIP과 manifest가 있어도, 코드 수정 후 ZIP을 다시 만들지 않았거나 manifest의 SHA/파일 수가 실제 ZIP과 다르면 업로드 직전에 문제가 생긴다.
+- 기존 검증은 ZIP 존재와 필수 파일 포함을 확인했지만, manifest와 실제 ZIP, 현재 worktree payload의 내용 일치까지 강하게 대조하지는 않았다.
+
+구현:
+
+```text
+scripts/verify_submission_state.py
+```
+
+구현 방식:
+
+- `outputs/package/submission_manifest.md`의 `zip_path`, `payload_file_count`, `zip_file_count`, `zip_bytes`, `zip_sha256`를 파싱한다.
+- 실제 ZIP의 파일 수, byte 크기, SHA-256과 manifest 값을 비교한다.
+- manifest의 포함 파일 목록과 ZIP 내부 파일 목록을 비교한다.
+- ZIP 내부 각 payload 파일의 SHA-256과 현재 worktree 파일의 SHA-256을 비교한다.
+- ZIP 내부 중복 경로와 제외 대상(`__pycache__`, `*.pyc`, `*.pkl`, `*.pt`, seed raw log 등)을 계속 검사한다.
+
+완료 기준:
+
+- 완료. manifest의 SHA-256, byte count, file count가 실제 ZIP과 일치해야 verifier가 통과한다.
+- 완료. ZIP payload가 현재 worktree 파일과 다르면 verifier가 실패한다.
+- 완료. README, FINAL_QA, SUBMISSION_PACKAGE 문서에 강화된 검증 범위를 반영했다.
+
+검증:
+
+```bash
+python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py --require-clean
+```
+
+검증 결과:
+
+```text
+package_zip entries: 159
+package_manifest_integrity: passed
+package exclusions: passed
+tracked_worktree: clean
+```
+
+해석:
+
+- 이 게이트는 외부 업로드 직전에 올릴 ZIP이 현재 코드/산출물과 같은 파일인지 확인한다.
+- 업로드 링크 권한 검증은 로컬 코드로 끝낼 수 없으므로 다음 운영 단계로 남긴다.
+
+## P28. 외부 제출 ZIP 링크 검증
 
 상태: 다음 작업
 
