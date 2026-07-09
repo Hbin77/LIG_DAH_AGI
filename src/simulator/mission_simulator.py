@@ -127,6 +127,8 @@ class MissionSimulator:
         effective_links = {
             name: self._effective_link_state(name, self.time_sec) for name in self.base_links
         }
+        attack_context = self._attack_context(self.time_sec)
+        defense_context = self._defense_context(self.time_sec)
         queue_count_by_type: dict[str, int] = defaultdict(int)
         queue_kb_by_type: dict[str, float] = defaultdict(float)
         total_queue_kb = 0.0
@@ -154,6 +156,8 @@ class MissionSimulator:
             recent_p95_critical_latency_sec=self._p95_critical_latency(),
             priority_inversion_rate=self._priority_inversion_rate(),
             defense_mode=self.defense_mode,
+            **attack_context,
+            **defense_context,
         )
 
     def summary(self) -> dict[str, float]:
@@ -371,6 +375,64 @@ class MissionSimulator:
             for event in self.attack_events
             if event.candidate.start_time <= time_sec < event.candidate.start_time + event.candidate.duration_sec
         ]
+
+    def _attack_context(self, time_sec: float) -> dict[str, Any]:
+        active = self._active_attacks(time_sec)
+        recent = [
+            event
+            for event in self.attack_events
+            if 0.0 <= time_sec - event.selected_at <= 45.0
+        ]
+        prior = [
+            event
+            for event in self.attack_events
+            if event.selected_at <= time_sec
+        ]
+        last = max(prior, key=lambda event: event.selected_at) if prior else None
+        return {
+            "active_attack_count": len(active),
+            "active_attack_types": self._unique(event.candidate.attack_type for event in active),
+            "active_attack_targets": self._unique(event.candidate.target_link for event in active),
+            "recent_attack_event_ids": [event.event_id for event in recent[-5:]],
+            "recent_attack_types": self._unique(event.candidate.attack_type for event in recent),
+            "recent_attack_targets": self._unique(event.candidate.target_link for event in recent),
+            "last_attack_time_sec": last.selected_at if last else None,
+            "last_attack_type": last.candidate.attack_type if last else "",
+            "last_attack_target": last.candidate.target_link if last else "",
+        }
+
+    def _defense_context(self, time_sec: float) -> dict[str, Any]:
+        active = [
+            event
+            for event in self.defense_events
+            if float((event.details or {}).get("until_sec", event.time_sec)) > time_sec
+        ]
+        recent = [
+            event
+            for event in self.defense_events
+            if 0.0 <= time_sec - event.time_sec <= 45.0
+        ]
+        prior = [
+            event
+            for event in self.defense_events
+            if event.time_sec <= time_sec
+        ]
+        last = max(prior, key=lambda event: event.time_sec) if prior else None
+        return {
+            "active_defense_actions": self._unique(event.action for event in active),
+            "recent_defense_actions": self._unique(event.action for event in recent),
+            "last_defense_time_sec": last.time_sec if last else None,
+            "last_defense_action": last.action if last else "",
+        }
+
+    @staticmethod
+    def _unique(values: Any) -> list[str]:
+        result: list[str] = []
+        for value in values:
+            text = str(value)
+            if text and text not in result:
+                result.append(text)
+        return result
 
     def _metric_snapshot(self) -> MetricSnapshot:
         p95 = self._p95_critical_latency()

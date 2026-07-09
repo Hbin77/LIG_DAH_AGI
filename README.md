@@ -298,6 +298,19 @@ This writes:
 
 The audit verifies that memory acts as a decision gate: AURA cadence and event-budget control, TSRA-R action cooldowns, TSRA-R-ML active defense windows, and adaptive TSRA-R memory policy effects.
 
+## Audit Cross-Agent Context Flow
+
+```bash
+python3 -m src.experiments.cross_agent_context_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/cross_agent_context_audit.csv`
+- `outputs/report_tables/cross_agent_context_audit.md`
+
+The audit verifies that AURA carries TSRA-R defense context and TSRA-R carries AURA attack context through observations, tool calls, AgentMemory, DecisionTrace feedback, candidate rows, and emitted defense event details.
+
 ## Audit Agent Tool Usage
 
 ```bash
@@ -840,6 +853,7 @@ python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
 python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error
 python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_memory_influence_audit --fail-on-error
+python3 -m src.experiments.cross_agent_context_audit --fail-on-error
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix

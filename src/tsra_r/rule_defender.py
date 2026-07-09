@@ -30,6 +30,11 @@ class RuleTSRAR:
             "Select the best available fallback link for PACE switching",
             self._best_fallback_link,
         )
+        self.runtime.register_tool(
+            "summarize_attack_context",
+            "Summarize recent AURA attack events for TSRA-R defense context",
+            self._summarize_attack_context,
+        )
 
     def bind_runtime(self, trace_path: Path) -> None:
         self.runtime.bind_trace_log(trace_path)
@@ -60,6 +65,12 @@ class RuleTSRAR:
             tool_calls,
             state=state,
         )
+        attack_context = self.runtime.call_tool(
+            "summarize_attack_context",
+            tool_calls,
+            state=state,
+        )
+        self._update_attack_context_belief(attack_context)
         candidate_actions: list[dict] = []
         events: list[DefenseEvent] = []
         now = state.time_sec
@@ -72,6 +83,7 @@ class RuleTSRAR:
                 "ready": conditions["priority_reroute_ready"],
                 "reason": "critical traffic waiting behind video load",
                 **self._adaptive_candidate_context("priority_reroute", extra_feedback),
+                **self._cross_agent_candidate_context("priority_reroute", attack_context),
             }
         )
         if (
@@ -83,7 +95,11 @@ class RuleTSRAR:
                 self._event(
                     state,
                     "priority_reroute",
-                    {"until_sec": now + 70, "reason": "critical traffic waiting behind video load"},
+                    {
+                        "until_sec": now + 70,
+                        "reason": "critical traffic waiting behind video load",
+                        "related_attack_context": self._compact_attack_context(attack_context),
+                    },
                 )
             )
 
@@ -95,6 +111,7 @@ class RuleTSRAR:
                 "ready": conditions["video_throttle_ready"],
                 "reason": "protect critical traffic capacity",
                 **self._adaptive_candidate_context("video_throttle", extra_feedback),
+                **self._cross_agent_candidate_context("video_throttle", attack_context),
             }
         )
         if (
@@ -106,7 +123,11 @@ class RuleTSRAR:
                 self._event(
                     state,
                     "video_throttle",
-                    {"until_sec": now + 60, "reason": "protect critical traffic capacity"},
+                    {
+                        "until_sec": now + 60,
+                        "reason": "protect critical traffic capacity",
+                        "related_attack_context": self._compact_attack_context(attack_context),
+                    },
                 )
             )
 
@@ -118,6 +139,7 @@ class RuleTSRAR:
                 "ready": conditions["stale_badge_ready"],
                 "reason": "mark stale COP objects as lower trust",
                 **self._adaptive_candidate_context("stale_badge", extra_feedback),
+                **self._cross_agent_candidate_context("stale_badge", attack_context),
             }
         )
         if (
@@ -129,7 +151,11 @@ class RuleTSRAR:
                 self._event(
                     state,
                     "stale_badge",
-                    {"until_sec": now + 90, "stale_ratio": state.stale_data_ratio},
+                    {
+                        "until_sec": now + 90,
+                        "stale_ratio": state.stale_data_ratio,
+                        "related_attack_context": self._compact_attack_context(attack_context),
+                    },
                 )
             )
 
@@ -141,6 +167,7 @@ class RuleTSRAR:
                 tool_calls,
                 events,
                 extra_feedback=extra_feedback,
+                attack_context=attack_context,
             )
             return events
 
@@ -152,6 +179,7 @@ class RuleTSRAR:
                 "ready": conditions["pace_switch_ready"],
                 "reason": conditions["pace_switch_reason"],
                 **self._adaptive_candidate_context("pace_switch", extra_feedback),
+                **self._cross_agent_candidate_context("pace_switch", attack_context),
             }
         )
         if (
@@ -174,6 +202,7 @@ class RuleTSRAR:
                             "until_sec": now + 100,
                             "move_critical": True,
                             "reason": conditions["pace_switch_reason"],
+                            "related_attack_context": self._compact_attack_context(attack_context),
                         },
                     )
                 )
@@ -185,6 +214,7 @@ class RuleTSRAR:
             tool_calls,
             events,
             extra_feedback=extra_feedback,
+            attack_context=attack_context,
         )
         return events
 
@@ -210,6 +240,64 @@ class RuleTSRAR:
             "adaptive_gate_class": decision.get("gate_class", ""),
             "adaptive_gate_reason": decision.get("reason", ""),
             "adaptive_memory_evidence": decision.get("memory_evidence", {}),
+        }
+
+    @staticmethod
+    def _summarize_attack_context(state: MissionState) -> dict:
+        active_types = list(state.active_attack_types)
+        recent_ids = list(state.recent_attack_event_ids)
+        return {
+            "active_attack_count": state.active_attack_count,
+            "active_attack_types": active_types,
+            "active_attack_targets": list(state.active_attack_targets),
+            "recent_attack_event_ids": recent_ids,
+            "recent_attack_types": list(state.recent_attack_types),
+            "recent_attack_targets": list(state.recent_attack_targets),
+            "last_attack_time_sec": state.last_attack_time_sec,
+            "last_attack_type": state.last_attack_type,
+            "last_attack_target": state.last_attack_target,
+            "attack_context_seen": bool(
+                state.active_attack_count > 0 or recent_ids or state.last_attack_type
+            ),
+        }
+
+    def _update_attack_context_belief(self, attack_context: dict) -> None:
+        self.runtime.memory.update_belief("attack_context", attack_context)
+        self.runtime.memory.update_belief(
+            "attack_context_seen",
+            bool(attack_context.get("attack_context_seen")),
+        )
+
+    def _cross_agent_candidate_context(self, action: str, attack_context: dict) -> dict:
+        return {
+            "cross_agent_attack_context": attack_context,
+            "cross_agent_attack_context_used": self._attack_context_relevant(
+                action,
+                attack_context,
+            ),
+        }
+
+    @staticmethod
+    def _attack_context_relevant(action: str, attack_context: dict) -> bool:
+        active_types = set(attack_context.get("active_attack_types") or [])
+        recent_types = set(attack_context.get("recent_attack_types") or [])
+        types = active_types | recent_types
+        if action in {"priority_reroute", "video_throttle"}:
+            return bool(types.intersection({"queue_pressure", "critical_window_degradation", "bandwidth_limit"}))
+        if action == "stale_badge":
+            return "stale_cop_induction" in types
+        if action == "pace_switch":
+            return bool(types.intersection({"link_degradation", "bandwidth_limit", "failover_chasing", "critical_window_degradation"}))
+        return bool(types)
+
+    @staticmethod
+    def _compact_attack_context(attack_context: dict) -> dict:
+        return {
+            "active_attack_count": attack_context.get("active_attack_count", 0),
+            "active_attack_types": list(attack_context.get("active_attack_types") or []),
+            "recent_attack_event_ids": list(attack_context.get("recent_attack_event_ids") or []),
+            "last_attack_type": attack_context.get("last_attack_type", ""),
+            "last_attack_target": attack_context.get("last_attack_target", ""),
         }
 
     def _evaluate_conditions(self, state: MissionState) -> dict[str, Any]:
@@ -289,6 +377,7 @@ class RuleTSRAR:
         tool_calls: list[ToolCallRecord],
         events: list[DefenseEvent],
         extra_feedback: dict | None = None,
+        attack_context: dict | None = None,
     ) -> None:
         if events:
             reason = f"emitted {len(events)} defense event(s)"
@@ -311,12 +400,16 @@ class RuleTSRAR:
         self.runtime.memory.update_belief("mode", self.mode)
         self.runtime.memory.update_belief("enabled_actions", sorted(self.enabled_actions))
         self.runtime.memory.update_belief("action_cooldowns", dict(self.action_cooldowns))
+        if attack_context is not None:
+            self._update_attack_context_belief(attack_context)
         feedback = {
             "mode": self.mode,
             "enabled_actions": sorted(self.enabled_actions),
             "event_count": self.event_count,
             "action_cooldowns": dict(self.action_cooldowns),
         }
+        if attack_context is not None:
+            feedback["attack_context"] = attack_context
         if extra_feedback:
             feedback.update(extra_feedback)
 

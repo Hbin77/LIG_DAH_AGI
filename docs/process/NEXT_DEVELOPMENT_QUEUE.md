@@ -1282,8 +1282,8 @@ outputs/report_tables/agent_tool_usage_audit.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_tool_usage_audit` 명령으로 재생성 가능하다.
-- 완료. 24개 agent/policy/tool row가 모두 `pass`다.
-- 완료. 8개 tool이 모두 포함된다: `generate_attack_candidates`, `estimate_candidate_effect`, `estimate_detectability`, `predict_candidate_impact`, `evaluate_defense_conditions`, `select_fallback_link`, `predict_attack_probability`, `assess_mission_risk_guard`.
+- 완료. 33개 agent/policy/tool row가 모두 `pass`다.
+- 완료. 10개 tool이 모두 포함된다: `generate_attack_candidates`, `estimate_candidate_effect`, `estimate_detectability`, `predict_candidate_impact`, `summarize_defense_context`, `evaluate_defense_conditions`, `select_fallback_link`, `predict_attack_probability`, `assess_mission_risk_guard`, `summarize_attack_context`.
 - 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
 
 검증:
@@ -1299,9 +1299,9 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_tool_usage_audit.csv: 24 rows
+agent_tool_usage_audit.csv: 33 rows
 status: pass=24
-tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link
+tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link, summarize_attack_context, summarize_defense_context
 ```
 
 해석:
@@ -2621,9 +2621,9 @@ python3 scripts/verify_submission_state.py
 완료 기준:
 
 ```text
-reproduction_order_audit rows: 14
-status: pass=14
-RO01-RO14 present
+reproduction_order_audit rows: 15
+status: pass=15
+RO01-RO15 present
 order_status: pass for all rows
 output_status: pass for all rows
 ```
@@ -2886,3 +2886,77 @@ emission_gate_violations: 0
 - core protection은 유지하면서 video throttle과 PACE switch 비용을 줄인다.
 - emitted defense event가 candidate-level enabled gate와 일치하므로, action과 no-action 모두 trace로 설명된다.
 - 이 변경은 closed simulation 안의 방어 정책과 감사 기준만 바꾸며 RF, exploit, live network action은 추가하지 않는다.
+
+## P56. Cross-Agent Context Flow
+
+상태: 완료
+
+문제:
+
+- 기존 closed-loop 산출물은 attack event, defense event, metric movement를 사후 조인해 보여줬다.
+- AI 에이전트 협력구조를 더 강하게 보이려면 한 에이전트의 행동 context가 상대 에이전트의 observation, tool, memory, candidate, feedback 안에 직접 들어가야 한다.
+- TSRA-R은 AURA attack context를 보고 방어했다는 근거가 필요하고, AURA는 TSRA-R defense context를 보고 이후 공격 후보를 설명할 수 있어야 한다.
+
+구현:
+
+```text
+src/shared/schemas.py
+src/simulator/mission_simulator.py
+src/agents/runtime.py
+src/aura/rule_decision_engine.py
+src/aura/ml_impact_predictor.py
+src/tsra_r/rule_defender.py
+src/tsra_r/ml_defender.py
+src/experiments/cross_agent_context_audit.py
+src/experiments/agent_tool_usage_audit.py
+```
+
+설계:
+
+- `MissionState`에 active/recent attack context와 active/recent defense context를 추가했다.
+- AURA/AURA-ML은 `summarize_defense_context` tool을 호출한다.
+- TSRA-R/TSRA-R-ML은 `summarize_attack_context` tool을 호출한다.
+- AURA candidate row에는 `cross_agent_defense_context`가 남는다.
+- TSRA-R candidate row에는 `cross_agent_attack_context`가 남는다.
+- emitted `DefenseEvent.details.related_attack_context`에도 공격 context 요약이 남는다.
+
+검증:
+
+```bash
+python3 -m src.experiments.run_all
+python3 -m src.experiments.cross_agent_context_audit --fail-on-error
+python3 -m src.experiments.agent_tool_usage_audit
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+cross_agent_context_audit rows: 6 pass
+aura_observation_context: 62/62
+tsra_observation_context: 122/122
+summarize_attack_context: 122
+summarize_defense_context: 62
+attack_handoffs: 10/10
+candidate_attack_context: 305/305
+candidate_attack_context_used: 147
+candidate_defense_context: 51/51
+candidate_defense_context_used: 47
+selected_attack_with_defense_context: 9
+defense_context_seen_traces: 51
+related_context_events: 52/52
+active_related_events: 50
+missing_related_context: 0
+agent_tool_usage_audit rows: 33 pass
+reproduction_order_audit rows: 15 pass
+submission_readiness_audit rows: 10 pass
+competition_alignment_matrix rows: 10 verified
+```
+
+해석:
+
+- 공격과 방어가 단순히 같은 시뮬레이터를 공유하는 수준을 넘어서, 상대방 행동 context를 다음 판단 루프의 입력으로 가진다.
+- TSRA-R의 방어 event는 어떤 AURA attack context 아래에서 선택됐는지 event detail로 추적된다.
+- AURA의 이후 공격 후보는 TSRA-R의 active/recent defense context를 candidate row와 feedback으로 설명한다.
+- 이 변경은 closed simulation 내부 context와 감사 증거만 강화하며 RF, exploit, live network action은 추가하지 않는다.

@@ -444,12 +444,14 @@ Rule TSRA-R:
 ```text
 AgentRuntime
   goal: minimize mission impact with bounded defensive response actions
-  memory: mode, action_cooldowns, event_count
+  memory: mode, action_cooldowns, event_count, attack_context, attack_context_seen
   tools:
+    - summarize_attack_context
     - evaluate_defense_conditions
     - select_fallback_link
   trace:
     - observation
+    - cross_agent_attack_context
     - candidate_actions
     - tool_calls
     - selected_action
@@ -462,8 +464,9 @@ ML TSRA-R:
 ```text
 AgentRuntime
   goal: open reactive defense windows when anomaly probability exceeds threshold
-  memory: active_defense_until, last_probability, last_alert_time
+  memory: active_defense_until, last_probability, last_alert_time, attack_context
   tools:
+    - summarize_attack_context
     - predict_attack_probability
     - assess_mission_risk_guard
   trace:
@@ -480,12 +483,14 @@ AgentRuntime
   goal: minimize mission impact using memory-gated defensive response actions
   memory: adaptive_policy, enabled_actions, action_cooldowns
   tools:
+    - summarize_attack_context
     - update_adaptive_action_policy
     - evaluate_defense_conditions
     - select_fallback_link
   trace:
     - memory-based enabled action set
     - candidate-level adaptive gate reason
+    - candidate-level attack context reason
     - repeated pressure/degradation counts
     - emitted defense events
     - selected no-op/action reason
@@ -497,4 +502,4 @@ AgentRuntime
 outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
 ```
 
-이제 TSRA-R의 한 번의 판단은 `DefenseEvent`만 남기지 않는다. 탐지 확률, 방어 조건, cooldown 상태, 어떤 액션이 가능했는지, 왜 no-op 또는 특정 방어 액션을 실행했는지까지 남긴다.
+이제 TSRA-R의 한 번의 판단은 `DefenseEvent`만 남기지 않는다. 탐지 확률, 방어 조건, cooldown 상태, AURA attack context, 어떤 액션이 가능했는지, 왜 no-op 또는 특정 방어 액션을 실행했는지까지 남긴다. emitted `DefenseEvent.details.related_attack_context`에도 같은 공격 context 요약이 남는다.

@@ -53,16 +53,21 @@ AURA:
   last_attack_time
   event_count
   last_attack_type
+  defense_context
+  counter_defense_context_seen
 
 TSRA-R:
   mode
   action_cooldowns
   event_count
+  attack_context
+  attack_context_seen
 
 TSRA-R-ML:
   active_defense_until
   last_probability
   last_alert_time
+  attack_context
 
 TSRA-R-ADAPTIVE:
   adaptive_policy
@@ -84,6 +89,7 @@ generate_attack_candidates
 estimate_candidate_effect
 estimate_detectability
 predict_candidate_impact
+summarize_defense_context
 ```
 
 TSRA-R 도구:
@@ -93,6 +99,7 @@ evaluate_defense_conditions
 select_fallback_link
 predict_attack_probability
 update_adaptive_action_policy
+summarize_attack_context
 ```
 
 ### DecisionTrace
@@ -350,6 +357,40 @@ outputs/report_tables/adaptive_defense_decision_path_audit.md
 - `priority_reroute`, `stale_badge` core action이 항상 enabled인지
 - `video_throttle`, `pace_switch` optional action이 memory evidence 부족 시 보류되는지
 - emitted defense event가 enabled candidate gate와 일치하는지
+
+## Cross-Agent Context Audit
+
+AURA와 TSRA-R이 같은 episode 안에서 상대 에이전트의 최근 행동을 실제 판단 루프에 넣는지 확인한다.
+
+```bash
+python3 -m src.experiments.cross_agent_context_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/cross_agent_context_audit.csv
+outputs/report_tables/cross_agent_context_audit.md
+```
+
+현재 결과:
+
+```text
+cross_agent_context_audit rows: 6 pass
+attack_handoffs: 10/10
+summarize_attack_context: 122
+summarize_defense_context: 62
+candidate_attack_context_used: 147
+candidate_defense_context_used: 47
+selected_attack_with_defense_context: 9
+missing_related_context: 0
+```
+
+해석:
+
+- TSRA-R은 AURA attack context를 observation, tool call, AgentMemory, feedback, candidate row, emitted defense event detail에 남긴다.
+- AURA는 TSRA-R defense context를 observation, tool call, AgentMemory, feedback, candidate row에 남긴다.
+- 이 감사는 공격/방어가 단순히 같은 로그 폴더에 있는 것이 아니라, 서로의 행동 context를 다음 판단 근거로 수용했는지 확인한다.
 
 ## Tool Usage Audit
 

@@ -55,6 +55,11 @@ class MLTSRAR:
             "Assess residual COP, queue, and link risk before closing a reactive defense window",
             self._assess_mission_risk_guard,
         )
+        self.runtime.register_tool(
+            "summarize_attack_context",
+            "Summarize recent AURA attack events for TSRA-R-ML reactive context",
+            RuleTSRAR._summarize_attack_context,
+        )
 
     def bind_runtime(self, trace_path: Path) -> None:
         self.runtime.bind_trace_log(trace_path)
@@ -82,6 +87,11 @@ class MLTSRAR:
 
         probability = self.runtime.call_tool(
             "predict_attack_probability",
+            tool_calls,
+            state=state,
+        )
+        attack_context = self.runtime.call_tool(
+            "summarize_attack_context",
             tool_calls,
             state=state,
         )
@@ -118,6 +128,7 @@ class MLTSRAR:
                             "threshold": self.threshold,
                             "until_sec": self.active_defense_until,
                             "reason": "ML anomaly detector opened defense window",
+                            "related_attack_context": RuleTSRAR._compact_attack_context(attack_context),
                         },
                     )
                 )
@@ -135,6 +146,10 @@ class MLTSRAR:
                 "mission_guard_reason": mission_guard["reason"],
                 "mission_guard_score": mission_guard["risk_score"],
                 "active_defense_until": self.active_defense_until,
+                "cross_agent_attack_context": attack_context,
+                "cross_agent_attack_context_used": bool(
+                    attack_context.get("attack_context_seen")
+                ),
             }
         )
 
@@ -163,6 +178,11 @@ class MLTSRAR:
         self.runtime.memory.update_belief("last_mission_guard_reason", mission_guard["reason"])
         self.runtime.memory.update_belief("last_mission_guard_score", mission_guard["risk_score"])
         self.runtime.memory.update_belief("last_early_guard_triggered", mission_guard["early_guard_triggered"])
+        self.runtime.memory.update_belief("attack_context", attack_context)
+        self.runtime.memory.update_belief(
+            "attack_context_seen",
+            bool(attack_context.get("attack_context_seen")),
+        )
         self.runtime.record_decision(
             time_sec=state.time_sec,
             policy="ml_anomaly_detector",
@@ -191,6 +211,7 @@ class MLTSRAR:
                 "opened_window": opened_window,
                 "active_defense_until": self.active_defense_until,
                 "event_count": len(events),
+                "attack_context": attack_context,
             },
         )
         return events

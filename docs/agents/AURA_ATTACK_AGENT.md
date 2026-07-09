@@ -147,12 +147,13 @@ Top-1 action match: 0.904
 
 ```text
 1. AgentRuntime이 MissionState를 observation으로 기록
-2. generate_attack_candidates tool로 후보 생성
-3. predict_candidate_impact tool이 후보별 MissionImpactScore 예측
-4. estimate_candidate_effect, estimate_detectability tool로 효과와 탐지 가능성 계산
-5. base_attack_score = predicted_mission_impact - 0.15 * detectability_score
-6. selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
-7. selection_score가 가장 높은 후보를 AttackEvent로 기록
+2. summarize_defense_context tool로 TSRA-R의 active/recent defense context를 기록
+3. generate_attack_candidates tool로 후보 생성
+4. predict_candidate_impact tool이 후보별 MissionImpactScore 예측
+5. estimate_candidate_effect, estimate_detectability tool로 효과와 탐지 가능성 계산
+6. base_attack_score = predicted_mission_impact - 0.15 * detectability_score
+7. selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
+8. selection_score가 가장 높은 후보를 AttackEvent로 기록
 ```
 
 `objective_bonus`는 임의 가산점이 아니다. AURA-ML이 앞선 공격에서 아직 `stale_cop_induction`을 쓰지 않았고, 마지막 공격 예산 구간에서 stale data risk가 남아 있을 때만 제한적으로 붙는다. 목적은 단일 high-score 전술만 반복하지 않고 mission objective 관점의 전술 커버리지를 남기는 것이다.
@@ -213,13 +214,16 @@ AURA는 `src/agents/AgentRuntime` 위에서 실행된다.
 AgentRuntime
   goal: maximize simulated mission impact while staying inside safety constraints
   memory: last_attack_time, event_count, last_attack_type, attack_type_counts, last_objective_bonus
+          defense_context, counter_defense_context_seen
   tools:
+    - summarize_defense_context
     - generate_attack_candidates
     - estimate_candidate_effect
     - estimate_detectability
     - predict_candidate_impact
   trace:
     - observation
+    - cross_agent_defense_context
     - candidate_actions
     - tool_calls
     - selected_action
@@ -235,4 +239,4 @@ outputs/experiments/<experiment>/aura_decision_traces.jsonl
 
 이제 AURA의 한 번의 판단은 단순히 `AttackEvent`만 남기지 않는다. 어떤 상태를 봤는지, 어떤 후보를 만들었는지, 각 후보 점수가 얼마였는지, 왜 no-op 또는 특정 공격 효과를 골랐는지까지 남긴다.
 
-ML AURA의 trace에는 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`이 함께 남는다. 그래서 선택 결과를 사후에 꾸민 것이 아니라, 어떤 도구 호출과 어떤 memory 상태 때문에 그 공격이 선택됐는지 재현할 수 있다.
+ML AURA의 trace에는 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`, `cross_agent_defense_context`가 함께 남는다. 그래서 선택 결과를 사후에 꾸민 것이 아니라, 어떤 도구 호출과 어떤 memory 상태 때문에 그 공격이 선택됐는지 재현할 수 있다.

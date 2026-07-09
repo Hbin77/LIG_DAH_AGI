@@ -130,6 +130,19 @@ class MissionState:
     recent_p95_critical_latency_sec: float
     priority_inversion_rate: float
     defense_mode: str = "none"
+    active_attack_count: int = 0
+    active_attack_types: list[str] = field(default_factory=list)
+    active_attack_targets: list[str] = field(default_factory=list)
+    recent_attack_event_ids: list[str] = field(default_factory=list)
+    recent_attack_types: list[str] = field(default_factory=list)
+    recent_attack_targets: list[str] = field(default_factory=list)
+    last_attack_time_sec: float | None = None
+    last_attack_type: str = ""
+    last_attack_target: str = ""
+    active_defense_actions: list[str] = field(default_factory=list)
+    recent_defense_actions: list[str] = field(default_factory=list)
+    last_defense_time_sec: float | None = None
+    last_defense_action: str = ""
 
 
 def to_plain_dict(value: Any) -> Any:

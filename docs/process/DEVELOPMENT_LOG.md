@@ -1494,7 +1494,7 @@ DecisionTrace.tool_calls
 검증 결과:
 
 ```text
-agent_tool_usage_audit.csv: 24 rows
+agent_tool_usage_audit.csv: initially 24 rows; current cross-agent context build has 33 rows
 status: pass=24
 tools:
   assess_mission_risk_guard
@@ -2567,7 +2567,7 @@ outputs/report_tables/reproduction_order_audit.md
 검증 기준:
 
 ```text
-reproduction_order_audit rows: 14
+reproduction_order_audit rows: then 14; current cross-agent context build has 15
 RO01 defense_action_attribution_audit prerequisites pass
 RO05 mission_thread_summary prerequisites pass
 RO06/RO07/RO08 ML path and red-blue interaction prerequisites pass
@@ -2884,8 +2884,58 @@ emission_gate_violations: 0
 동반 수정:
 
 - README Full Reproduction에 adaptive defense path audit 명령을 추가했다.
-- `reproduction_order_audit`는 RO14 체계로 확장했다.
+- `reproduction_order_audit`는 RO15 체계로 확장했다.
 - `submission_readiness_audit`, `competition_alignment`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
 - `docs/agents/TSRA_R_DEFENSE_AGENT.md`에 candidate-level memory gate 구조를 추가했다.
 
 이 보강의 의미는 방어 에이전트가 action을 실행한 이유만 설명하는 것이 아니라, action을 보류한 이유까지 AgentMemory와 DecisionTrace로 증명한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation 방어 정책과 감사 산출물만 바꾼다.
+
+### 71. Cross-Agent Context Flow를 추가한 이유
+
+이전 상태에서도 AURA attack event, TSRA-R defense event, battle timeline, episode replay, ML red-blue interaction audit는 존재했다. 하지만 그 증거는 주로 사후 조인에 가까웠다. 즉 "공격과 방어가 같은 시간축에서 만났다"는 것은 보였지만, 각 에이전트의 DecisionTrace 내부에 상대 에이전트의 최근 행동이 memory/tool/candidate evidence로 들어갔는지는 별도 검증이 약했다.
+
+이번 변경은 `MissionState`에 안전한 요약 context를 추가했다.
+
+```text
+active_attack_count
+active_attack_types
+recent_attack_event_ids
+last_attack_type
+active_defense_actions
+recent_defense_actions
+last_defense_action
+```
+
+AURA/AURA-ML은 `summarize_defense_context` tool을 호출하고, 그 결과를 `defense_context` belief, feedback, candidate row의 `cross_agent_defense_context`에 남긴다. TSRA-R/TSRA-R-ML은 `summarize_attack_context` tool을 호출하고, 그 결과를 `attack_context` belief, feedback, candidate row의 `cross_agent_attack_context`, emitted `DefenseEvent.details.related_attack_context`에 남긴다.
+
+추가한 감사는 `src/experiments/cross_agent_context_audit.py`다.
+
+검증 결과는 다음과 같다.
+
+```text
+cross_agent_context_audit rows: 6 pass
+aura_observation_context: 62/62
+tsra_observation_context: 122/122
+summarize_attack_context: 122
+summarize_defense_context: 62
+attack_handoffs: 10/10
+candidate_attack_context: 305/305
+candidate_attack_context_used: 147
+candidate_defense_context: 51/51
+candidate_defense_context_used: 47
+selected_attack_with_defense_context: 9
+related_context_events: 52/52
+missing_related_context: 0
+agent_tool_usage_audit rows: 33 pass
+reproduction_order_audit rows: 15 pass
+```
+
+동반 수정:
+
+- README에 cross-agent context audit 명령을 추가했다.
+- `agent_tool_usage_audit`에 `summarize_attack_context`, `summarize_defense_context` tool role을 추가했다.
+- `competition_alignment`는 이 감사를 AI agent architecture와 attack-defense cooperation의 공통 증거로 본다.
+- `submission_readiness_audit`, `reproduction_order_audit`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
+- `docs/agents/AGENT_RUNTIME.md`, `AURA_ATTACK_AGENT.md`, `TSRA_R_DEFENSE_AGENT.md`에 cross-agent context memory/tool/trace contract를 추가했다.
+
+이 보강의 의미는 공격/방어 에이전트가 단순히 같은 simulator를 공유하는 수준을 넘어, 상대 에이전트의 최근 행동 context를 다음 판단 루프 안에서 수용한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation context, trace, audit만 강화한다.

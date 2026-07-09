@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "src/aura/rule_decision_engine.py",
     "src/tsra_r/rule_defender.py",
     "src/tsra_r/adaptive_defender.py",
+    "src/experiments/cross_agent_context_audit.py",
     "src/experiments/adaptive_defense_decision_path_audit.py",
     "src/experiments/run_ml_threshold_sweep.py",
     "src/experiments/battle_timeline.py",
@@ -78,6 +79,8 @@ REQUIRED_FILES = [
     "outputs/batch/resilience_gain_summary.csv",
     "outputs/batch/tsra_action_ablation_summary.csv",
     "outputs/batch/adaptive_memory_summary.csv",
+    "outputs/report_tables/cross_agent_context_audit.csv",
+    "outputs/report_tables/cross_agent_context_audit.md",
     "outputs/report_tables/adaptive_defense_decision_path_audit.csv",
     "outputs/report_tables/adaptive_defense_decision_path_audit.md",
     "outputs/batch/ml_threshold_sweep_raw.csv",
@@ -211,6 +214,8 @@ def observed_value(row: dict[str, str], key: str) -> str:
 
 def observed_int(row: dict[str, str], key: str) -> int:
     value = observed_value(row, key)
+    if "/" in value:
+        value = value.split("/", 1)[0]
     try:
         return int(float(value))
     except ValueError:
@@ -779,8 +784,98 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("adaptive_defense_decision_path_audit rows=6 pass")
 
+    cross_agent_rows = read_csv("outputs/report_tables/cross_agent_context_audit.csv")
+    require(
+        len(cross_agent_rows) == 6,
+        f"expected 6 cross-agent context audit rows, got {len(cross_agent_rows)}",
+    )
+    failed_cross_agent_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in cross_agent_rows
+        if row.get("status") != "pass"
+    ]
+    require(
+        not failed_cross_agent_rows,
+        f"failed cross-agent context audit rows: {failed_cross_agent_rows[:8]}",
+    )
+    require(
+        {row["area"] for row in cross_agent_rows}
+        == {
+            "Shared observation context",
+            "TSRA-R attack-context tool path",
+            "Attack-to-defense handoff",
+            "AURA defense-context tool path",
+            "Defense-to-attack handoff",
+            "Event-level context consistency",
+        },
+        "cross-agent context audit has unexpected areas",
+    )
+    require(
+        any(
+            observed_int(row, "aura_observation_context") >= 60
+            and observed_int(row, "tsra_observation_context") >= 120
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG01"
+        ),
+        "cross-agent audit missing shared observation context evidence",
+    )
+    require(
+        any(
+            observed_int(row, "summarize_attack_context") == observed_int(row, "tsra_traces")
+            and observed_int(row, "feedback_attack_context") == observed_int(row, "tsra_traces")
+            and observed_int(row, "candidate_attack_context_used") > 0
+            and observed_int(row, "tool_errors") == 0
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG02"
+        ),
+        "cross-agent audit missing TSRA-R attack-context tool evidence",
+    )
+    require(
+        any(
+            observed_int(row, "attack_handoffs") >= 10
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG03"
+        ),
+        "cross-agent audit missing attack-to-defense handoff evidence",
+    )
+    require(
+        any(
+            observed_int(row, "summarize_defense_context") == observed_int(row, "aura_traces")
+            and observed_int(row, "feedback_defense_context") == observed_int(row, "aura_traces")
+            and observed_int(row, "candidate_defense_context_used") > 0
+            and observed_int(row, "selected_attack_with_defense_context") > 0
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG04"
+        ),
+        "cross-agent audit missing AURA defense-context tool evidence",
+    )
+    require(
+        any(
+            observed_int(row, "experiments_with_post_defense_context") >= 2
+            and observed_int(row, "defense_context_seen_traces") > 0
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG05"
+        ),
+        "cross-agent audit missing defense-to-attack handoff evidence",
+    )
+    require(
+        any(
+            observed_int(row, "related_context_events") == observed_int(row, "defense_events")
+            and observed_int(row, "active_related_events") > 0
+            and observed_int(row, "missing_related_context") == 0
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG06"
+        ),
+        "cross-agent audit missing event-level context evidence",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in cross_agent_rows),
+        "cross-agent context audit missing safety boundary",
+    )
+    checks.append("cross_agent_context_audit rows=6 pass")
+
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
-    require(len(tool_rows) == 24, f"expected 24 agent tool audit rows, got {len(tool_rows)}")
+    require(len(tool_rows) == 33, f"expected 33 agent tool audit rows, got {len(tool_rows)}")
     failed_tool_rows = [
         f"{row['experiment']}:{row['agent']}:{row['tool_name']}"
         for row in tool_rows
@@ -796,6 +891,8 @@ def check_csv_outputs() -> list[str]:
         "predict_attack_probability",
         "predict_candidate_impact",
         "select_fallback_link",
+        "summarize_attack_context",
+        "summarize_defense_context",
     }
     observed_tools = {row["tool_name"] for row in tool_rows}
     require(
@@ -826,7 +923,7 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in tool_rows),
         "agent tool audit missing safety boundary",
     )
-    checks.append("agent_tool_usage_audit rows=24 pass")
+    checks.append("agent_tool_usage_audit rows=33 pass")
 
     interface_rows = read_csv("outputs/report_tables/agent_interface_manifest.csv")
     require(len(interface_rows) == 4, f"expected 4 agent interface rows, got {len(interface_rows)}")
@@ -1561,8 +1658,8 @@ def check_csv_outputs() -> list[str]:
 
     reproduction_order_rows = read_csv("outputs/report_tables/reproduction_order_audit.csv")
     require(
-        len(reproduction_order_rows) == 14,
-        f"expected 14 reproduction order rows, got {len(reproduction_order_rows)}",
+        len(reproduction_order_rows) == 15,
+        f"expected 15 reproduction order rows, got {len(reproduction_order_rows)}",
     )
     failed_reproduction_order = [
         f"{row['check_id']}:{row['order_status']}:{row['output_status']}"
@@ -1575,7 +1672,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         {row["check_id"] for row in reproduction_order_rows}
-        == {f"RO{index:02d}" for index in range(1, 15)},
+        == {f"RO{index:02d}" for index in range(1, 16)},
         "reproduction order audit check ids are incomplete",
     )
     require(
@@ -1592,7 +1689,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO08"
+            row["check_id"] == "RO09"
             and "ml_attack_decision_path_audit" in row["required_before"]
             and "ml_defense_decision_path_audit" in row["required_before"]
             for row in reproduction_order_rows
@@ -1601,7 +1698,15 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO09"
+            row["check_id"] == "RO06"
+            and "run_all" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
+        "reproduction order audit missing cross-agent context prerequisite",
+    )
+    require(
+        any(
+            row["check_id"] == "RO10"
             and "run_adaptive_memory" in row["required_before"]
             for row in reproduction_order_rows
         ),
@@ -1609,7 +1714,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO11"
+            row["check_id"] == "RO12"
             and "agent_stress_scenario_audit" in row["required_before"]
             and "reproduction_order_audit" in row["required_before"]
             for row in reproduction_order_rows
@@ -1618,14 +1723,14 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO12"
+            row["check_id"] == "RO13"
             and "submission_readiness_audit" in row["required_before"]
             and "competition_alignment" in row["required_before"]
             for row in reproduction_order_rows
         ),
         "reproduction order audit missing package prerequisites",
     )
-    checks.append("reproduction_order_audit rows=14 pass")
+    checks.append("reproduction_order_audit rows=15 pass")
 
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(
@@ -2344,6 +2449,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_memory_influence_audit.md" in manifest_text,
         "manifest missing agent memory influence audit",
+    )
+    require(
+        "outputs/report_tables/cross_agent_context_audit.md" in manifest_text,
+        "manifest missing cross-agent context audit",
     )
     require(
         "outputs/report_tables/agent_tool_usage_audit.md" in manifest_text,

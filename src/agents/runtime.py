@@ -46,6 +46,19 @@ class AgentRuntime:
                 ),
                 "priority_inversion_rate": round(state.priority_inversion_rate, 4),
                 "defense_mode": state.defense_mode,
+                "active_attack_count": state.active_attack_count,
+                "active_attack_types": list(state.active_attack_types),
+                "active_attack_targets": list(state.active_attack_targets),
+                "recent_attack_event_ids": list(state.recent_attack_event_ids),
+                "recent_attack_types": list(state.recent_attack_types),
+                "recent_attack_targets": list(state.recent_attack_targets),
+                "last_attack_time_sec": state.last_attack_time_sec,
+                "last_attack_type": state.last_attack_type,
+                "last_attack_target": state.last_attack_target,
+                "active_defense_actions": list(state.active_defense_actions),
+                "recent_defense_actions": list(state.recent_defense_actions),
+                "last_defense_time_sec": state.last_defense_time_sec,
+                "last_defense_action": state.last_defense_action,
                 "links": {
                     name: {
                         "available": link.available,
@@ -135,6 +148,11 @@ class AgentRuntime:
                 "stale_data_ratio": round(value.stale_data_ratio, 4),
                 "priority_inversion_rate": round(value.priority_inversion_rate, 4),
                 "defense_mode": value.defense_mode,
+                "active_attack_count": value.active_attack_count,
+                "active_attack_types": list(value.active_attack_types),
+                "recent_attack_event_ids": list(value.recent_attack_event_ids),
+                "active_defense_actions": list(value.active_defense_actions),
+                "recent_defense_actions": list(value.recent_defense_actions),
             }
         if isinstance(value, AttackCandidate):
             return {

@@ -10,7 +10,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `aura-trace-00001` at t=0 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.024; video_kb=0; stale=0; priority_inversion=0
 - Memory: observations=1; decisions=0; last_selected=
-- Tools: none
+- Tools: summarize_defense_context -> active_defense_actions=; active_defense_count=0; counter_defense_context_seen=False
 - Candidates: none
 - Selected action: no_op
 - Feedback: attack_threshold=0.12; cooldown_sec=45; event_count=0
@@ -23,7 +23,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `aura-trace-00007` at t=60 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.155; video_kb=0; stale=0.5; priority_inversion=0.1935
 - Memory: observations=7; decisions=6; last_selected=no_op; event_count=1; last_attack_type=queue_pressure
-- Tools: generate_attack_candidates -> items=4; estimate_candidate_effectx4 -> mission_impact=0.424215; estimate_detectabilityx4 -> 0.2
+- Tools: summarize_defense_context -> active_defense_actions=stale_badge; active_defense_count=1; counter_defense_context_seen=True; generate_attack_candidates -> items=4; estimate_candidate_effectx4 -> mission_impact=0.424215; estimate_detectabilityx4 -> 0.2
 - Candidates: queue_pressure; score=0.543691; impact=0.566191; detectability=0.15; target=SATCOM || bandwidth_limit; score=0.434227; impact=0.456727; detectability=0.15; target=SATCOM || stale_cop_induction; score=0.41456; impact=0.46706; detectability=0.35; target=SATCOM; total=4
 - Selected action: attack_event; atk-00001; queue_pressure; target=SATCOM; score=0.543691
 - Feedback: attack_threshold=0.12; cooldown_sec=45
@@ -36,7 +36,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `tsra-r-trace-00001` at t=0 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.024; video_kb=0; stale=0; priority_inversion=0
 - Memory: observations=1; decisions=0; last_selected=; mode=full; event_count=0; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
-- Tools: evaluate_defense_conditions -> priority_reroute_needed=False; stale_badge_needed=False; pace_switch_needed=False; video_throttle_needed=False
+- Tools: evaluate_defense_conditions -> priority_reroute_needed=False; stale_badge_needed=False; pace_switch_needed=False; video_throttle_needed=False; summarize_attack_context -> active_attack_count=0; active_attack_targets=; active_attack_types=
 - Candidates: priority_reroute; eligible=False; ready=True; enabled=True || video_throttle; eligible=False; ready=True; enabled=True || stale_badge; eligible=False; ready=True; enabled=True; total=4
 - Selected action: no_op
 - Feedback: event_count=0; mode=full; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
@@ -49,7 +49,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `tsra-r-trace-00005` at t=20 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=0; video_kb=0; stale=0.5; priority_inversion=0.15
 - Memory: observations=5; decisions=4; last_selected=no_op; mode=full; event_count=1; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
-- Tools: evaluate_defense_conditions -> priority_reroute_needed=False; stale_badge_needed=True; pace_switch_needed=False; video_throttle_needed=False
+- Tools: evaluate_defense_conditions -> priority_reroute_needed=False; stale_badge_needed=True; pace_switch_needed=False; video_throttle_needed=False; summarize_attack_context -> active_attack_count=0; active_attack_targets=; active_attack_types=
 - Candidates: stale_badge; eligible=True; ready=True; enabled=True || priority_reroute; eligible=False; ready=True; enabled=True || video_throttle; eligible=False; ready=True; enabled=True; total=4
 - Selected action: defense_events: def-00001; stale_badge; until=110
 - Feedback: event_count=1; mode=full; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
@@ -62,7 +62,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `aura-ml-trace-00001` at t=0 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.024; video_kb=0; stale=0; priority_inversion=0
 - Memory: observations=1; decisions=0; last_selected=
-- Tools: none
+- Tools: summarize_defense_context -> active_defense_actions=; active_defense_count=0; counter_defense_context_seen=False
 - Candidates: none
 - Selected action: no_op
 - Feedback: attack_threshold=0.12; cooldown_sec=45; event_count=0
@@ -75,7 +75,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `aura-ml-trace-00007` at t=60 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.155; video_kb=0; stale=0.5; priority_inversion=0.1935
 - Memory: observations=7; decisions=6; last_selected=no_op; event_count=1; last_attack_type=queue_pressure
-- Tools: generate_attack_candidates -> items=4; predict_candidate_impactx4 -> 0.4914; estimate_candidate_effectx4 -> mission_impact=0.424215; estimate_detectabilityx4 -> 0.2
+- Tools: summarize_defense_context -> active_defense_actions=; active_defense_count=0; counter_defense_context_seen=False; generate_attack_candidates -> items=4; predict_candidate_impactx4 -> 0.4914; estimate_candidate_effectx4 -> mission_impact=0.424215; estimate_detectabilityx4 -> 0.2
 - Candidates: queue_pressure; score=0.579505; impact=0.602005; detectability=0.15; target=SATCOM || bandwidth_limit; score=0.506702; impact=0.529202; detectability=0.15; target=SATCOM || stale_cop_induction; score=0.48621; impact=0.53871; detectability=0.35; target=SATCOM; total=4
 - Selected action: attack_event; ml-atk-00001; queue_pressure; target=SATCOM; score=0.579505
 - Feedback: attack_threshold=0.12; cooldown_sec=45
@@ -88,7 +88,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `tsra-r-ml-trace-00001` at t=0 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.024; video_kb=0; stale=0; priority_inversion=0
 - Memory: observations=1; decisions=0; last_selected=; last_probability=0.282859; active_defense_until=0
-- Tools: predict_attack_probability -> 0.282859; assess_mission_risk_guard -> early_guard_triggered=False; expiry_guard_triggered=False; had_prior_window=False
+- Tools: predict_attack_probability -> 0.282859; summarize_attack_context -> active_attack_count=0; active_attack_targets=; active_attack_types=; assess_mission_risk_guard -> early_guard_triggered=False; expiry_guard_triggered=False; had_prior_window=False
 - Candidates: open_defense_window; probability=0.282859; threshold=0.75; eligible=False; total=1
 - Selected action: no_op
 - Feedback: event_count=0; active_defense_until=0
@@ -101,7 +101,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `tsra-r-ml-trace-00015` at t=70 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=1; queue_kb=5421.4; video_kb=5239.34; stale=0.5; priority_inversion=0.2568
 - Memory: observations=15; decisions=14; last_selected=no_op; last_probability=0.503568; active_defense_until=115
-- Tools: predict_attack_probability -> 0.503568; assess_mission_risk_guard -> early_guard_triggered=True; expiry_guard_triggered=False; had_prior_window=False
+- Tools: predict_attack_probability -> 0.503568; summarize_attack_context -> active_attack_count=1; active_attack_targets=SATCOM; active_attack_types=queue_pressure; assess_mission_risk_guard -> early_guard_triggered=True; expiry_guard_triggered=False; had_prior_window=False
 - Candidates: open_defense_window; probability=0.503568; threshold=0.75; eligible=True; total=1
 - Selected action: defense_events: def-00001; priority_reroute; until=140 + def-00002; video_throttle; until=130 + def-00003; stale_badge; until=160 + def-00004; pace_switch; until=170
 - Feedback: event_count=4; active_defense_until=115

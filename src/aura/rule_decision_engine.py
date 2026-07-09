@@ -43,6 +43,11 @@ class RuleAURA:
             "Estimate how obvious the simulated attack effect is to the defender",
             estimate_detectability,
         )
+        self.runtime.register_tool(
+            "summarize_defense_context",
+            "Summarize recent TSRA-R defense actions for AURA counter-defense context",
+            self._summarize_defense_context,
+        )
 
     def bind_runtime(self, trace_path: Path) -> None:
         self.runtime.bind_trace_log(trace_path)
@@ -51,6 +56,12 @@ class RuleAURA:
         observation = self.runtime.observe(state)
         tool_calls: list[ToolCallRecord] = []
         candidate_actions: list[dict] = []
+        defense_context = self.runtime.call_tool(
+            "summarize_defense_context",
+            tool_calls,
+            state=state,
+        )
+        self._update_defense_context_belief(defense_context)
 
         if state.time_sec < self.min_start_sec:
             self._record_noop(
@@ -59,6 +70,7 @@ class RuleAURA:
                 candidate_actions,
                 tool_calls,
                 f"waiting for min_start_sec={self.min_start_sec}",
+                defense_context=defense_context,
             )
             return None
         if self.event_count >= self.max_events:
@@ -68,6 +80,7 @@ class RuleAURA:
                 candidate_actions,
                 tool_calls,
                 f"max_events={self.max_events} reached",
+                defense_context=defense_context,
             )
             return None
         if state.time_sec - self.last_attack_time < self.cooldown_sec:
@@ -78,6 +91,7 @@ class RuleAURA:
                 tool_calls,
                 "attack cooldown active",
                 {"cooldown_remaining_sec": self.cooldown_sec - (state.time_sec - self.last_attack_time)},
+                defense_context=defense_context,
             )
             return None
 
@@ -111,6 +125,8 @@ class RuleAURA:
                     "score": round(score, 6),
                     "predicted_mission_impact": round(impact, 6),
                     "detectability_score": round(detectability, 6),
+                    "cross_agent_defense_context": defense_context,
+                    "cross_agent_defense_context_used": self._defense_context_used(defense_context),
                     "reason": candidate.reason,
                 }
             )
@@ -122,6 +138,7 @@ class RuleAURA:
                 candidate_actions,
                 tool_calls,
                 "no candidate actions generated",
+                defense_context=defense_context,
             )
             return None
 
@@ -140,6 +157,7 @@ class RuleAURA:
                     "attack_threshold": self.attack_threshold,
                     "best_attack_type": best_candidate.attack_type,
                 },
+                defense_context=defense_context,
             )
             return None
 
@@ -175,9 +193,38 @@ class RuleAURA:
                 "attack_threshold": self.attack_threshold,
                 "cooldown_sec": self.cooldown_sec,
                 "remaining_event_budget": self.max_events - self.event_count,
+                "defense_context": defense_context,
             },
         )
         return event
+
+    @staticmethod
+    def _summarize_defense_context(state: MissionState) -> dict:
+        active_actions = list(state.active_defense_actions)
+        recent_actions = list(state.recent_defense_actions)
+        return {
+            "defense_mode": state.defense_mode,
+            "active_defense_actions": active_actions,
+            "recent_defense_actions": recent_actions,
+            "last_defense_time_sec": state.last_defense_time_sec,
+            "last_defense_action": state.last_defense_action,
+            "active_defense_count": len(active_actions),
+            "recent_defense_count": len(recent_actions),
+            "counter_defense_context_seen": bool(
+                active_actions or recent_actions or state.defense_mode != "none"
+            ),
+        }
+
+    def _update_defense_context_belief(self, defense_context: dict) -> None:
+        self.runtime.memory.update_belief("defense_context", defense_context)
+        self.runtime.memory.update_belief(
+            "counter_defense_context_seen",
+            bool(defense_context.get("counter_defense_context_seen")),
+        )
+
+    @staticmethod
+    def _defense_context_used(defense_context: dict) -> bool:
+        return bool(defense_context.get("counter_defense_context_seen"))
 
     def _record_noop(
         self,
@@ -187,7 +234,16 @@ class RuleAURA:
         tool_calls: list[ToolCallRecord],
         reason: str,
         feedback: dict | None = None,
+        defense_context: dict | None = None,
     ) -> None:
+        feedback_payload = feedback or {
+            "attack_threshold": self.attack_threshold,
+            "cooldown_sec": self.cooldown_sec,
+            "event_count": self.event_count,
+        }
+        if defense_context is not None:
+            feedback_payload = dict(feedback_payload)
+            feedback_payload["defense_context"] = defense_context
         self.runtime.record_decision(
             time_sec=state.time_sec,
             policy="rule_attack_score",
@@ -196,10 +252,5 @@ class RuleAURA:
             tool_calls=tool_calls,
             selected_action={"type": "no_op"},
             reason=reason,
-            feedback=feedback
-            or {
-                "attack_threshold": self.attack_threshold,
-                "cooldown_sec": self.cooldown_sec,
-                "event_count": self.event_count,
-            },
+            feedback=feedback_payload,
         )

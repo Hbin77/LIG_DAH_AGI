@@ -138,7 +138,9 @@ ALIGNMENT_SPECS = [
             "decision feedback audit links selected E5/E7 events to event logs, metric feedback, "
             "closed-loop outcomes, and defense action attribution; memory influence audit verifies "
             "that cadence memory, defense cooldown memory, active defense windows, and adaptive "
-            "memory policy affect bounded agent decisions."
+            "memory policy affect bounded agent decisions; cross-agent context audit verifies that "
+            "AURA and TSRA-R carry opponent context through observations, tools, memory, feedback, "
+            "candidate rows, and emitted event details."
         ),
         agent_or_component="AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace",
         evidence_files=[
@@ -155,6 +157,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/agent_decision_feedback_audit.py",
             "src/experiments/agent_memory_belief_audit.py",
             "src/experiments/agent_memory_influence_audit.py",
+            "src/experiments/cross_agent_context_audit.py",
             "src/experiments/agent_tool_usage_audit.py",
             "src/experiments/agent_interface_manifest.py",
             "src/experiments/agent_capability_matrix.py",
@@ -168,6 +171,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/agent_decision_feedback_audit.csv",
             "outputs/report_tables/agent_memory_belief_audit.csv",
             "outputs/report_tables/agent_memory_influence_audit.csv",
+            "outputs/report_tables/cross_agent_context_audit.csv",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             "outputs/report_tables/agent_interface_manifest.csv",
             "outputs/report_tables/agent_capability_matrix.csv",
@@ -186,7 +190,8 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_decision_feedback_audit.csv", 60),
             RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_memory_influence_audit.csv", 6),
-            RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 24),
+            RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 6),
+            RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 33),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
             RowCountCheck("outputs/report_tables/agent_capability_matrix.csv", 10),
         ],
@@ -200,7 +205,8 @@ ALIGNMENT_SPECS = [
             "and metric movement for E5 and E7; attack-defense coverage maps each AURA capability "
             "to the TSRA-R capabilities and validation gates that cover it; response audit checks "
             "whether required defenses are active or emitted within the response window; the collaboration "
-            "graph summarizes the closed-loop agent cooperation evidence; episode replay joins attack, "
+            "graph summarizes the closed-loop agent cooperation evidence; cross-agent context audit "
+            "verifies attack-to-defense and defense-to-attack handoff inside DecisionTrace; episode replay joins attack, "
             "defense, alert, and metric movement per attack event; coordination latency audit checks "
             "response, operator alert, metric peak, and reduction timing per attack; ML red-blue interaction "
             "audit links each E7 AURA-ML selection to TSRA-R-ML probability, alert, core defense, "
@@ -227,6 +233,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/defense_effectiveness_ledger.py",
             "src/experiments/defense_action_attribution_audit.py",
             "src/experiments/agent_collaboration_graph.py",
+            "src/experiments/cross_agent_context_audit.py",
             "src/experiments/agent_coordination_latency_audit.py",
             "src/experiments/agent_stress_scenario_audit.py",
             "src/experiments/ml_red_blue_interaction_audit.py",
@@ -240,6 +247,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/defense_effectiveness_ledger.csv",
             "outputs/report_tables/defense_action_attribution_audit.csv",
             "outputs/report_tables/agent_collaboration_graph.csv",
+            "outputs/report_tables/cross_agent_context_audit.csv",
             "outputs/report_tables/agent_coordination_latency_audit.csv",
             "outputs/report_tables/agent_stress_scenario_audit.csv",
             "outputs/report_tables/ml_red_blue_interaction_audit.csv",
@@ -259,6 +267,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/defense_effectiveness_ledger.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/defense_action_attribution_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "attack_handoffs=10/10"),
+            ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "selected_attack_with_defense_context=9"),
             ContentCheck("outputs/report_tables/agent_coordination_latency_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_stress_scenario_audit.csv", "stress_air_defense_queue_saturation"),
             ContentCheck("outputs/report_tables/agent_stress_scenario_audit.csv", "stress_pace_failover_pressure"),
@@ -276,6 +286,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/defense_effectiveness_ledger.csv", 50),
             RowCountCheck("outputs/report_tables/defense_action_attribution_audit.csv", 5),
             RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 13),
+            RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 6),
             RowCountCheck("outputs/report_tables/agent_coordination_latency_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_stress_scenario_audit.csv", 6),
             RowCountCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", 5),
