@@ -10,7 +10,7 @@ Safety boundary: closed simulation agent quality-gate audit only; no RF, exploit
 
 | check_id | area | observed | status |
 |---|---|---|---|
-| AQG01 | unit_regression_execution | test_count=4; result=pass; output=.... \| ---------------------------------------------------------------------- \| Ran 4 tests in 0.001s \|  \| OK | pass |
+| AQG01 | unit_regression_execution | test_count=4; result=pass; output=.... \| ---------------------------------------------------------------------- \| Ran 4 tests in 0.002s \|  \| OK | pass |
 | AQG02 | unit_regression_scope | missing_scope_tokens=none | pass |
 | AQG03 | final_verifier_integration | missing_verifier_tokens=none | pass |
 | AQG04 | hbin_workflow_gate | missing_workflow_tokens=none; main_branch_trigger=false | pass |
@@ -22,7 +22,7 @@ Safety boundary: closed simulation agent quality-gate audit only; no RF, exploit
 ### AQG01 unit_regression_execution
 
 - Requirement: Agent core regression tests must execute locally and pass.
-- Observed: test_count=4; result=pass; output=.... | ---------------------------------------------------------------------- | Ran 4 tests in 0.001s |  | OK
+- Observed: test_count=4; result=pass; output=.... | ---------------------------------------------------------------------- | Ran 4 tests in 0.002s |  | OK
 - Evidence: tests/test_agent_regression.py
 - Status: pass
 - Interpretation: Fast regression tests run before full experiments, so core agent invariants fail early.

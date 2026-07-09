@@ -82,6 +82,7 @@ REQUIRED_FILES = [
     "src/experiments/reproduction_order_audit.py",
     "src/experiments/submission_readiness_audit.py",
     "outputs/experiments/experiment_summary.csv",
+    "outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
     "outputs/batch/tsra_action_ablation_summary.csv",
@@ -1692,13 +1693,19 @@ def check_csv_outputs() -> list[str]:
             observed_int(row, "active_window_traces") > 0
             and observed_int(row, "rule_tool_traces")
             == observed_int(row, "active_window_traces")
+            and observed_int(row, "delegate_trace_count")
+            == observed_int(row, "active_window_traces")
             and observed_int(row, "selected_defense_traces_with_rule_tool")
             == observed_int(row, "selected_defense_traces")
             and observed_int(row, "rule_tool_error_count") == 0
             and observed_int(row, "rule_tool_event_pairs") > 0
             and observed_int(row, "rule_tool_event_pairs")
             == observed_int(row, "selected_rule_event_pairs")
+            and observed_int(row, "rule_tool_event_pairs")
+            == observed_int(row, "delegate_rule_event_pairs")
             and observed_int(row, "rule_tool_selected_event_mismatches") == 0
+            and observed_int(row, "active_window_delegate_misses") == 0
+            and observed_int(row, "rule_tool_delegate_event_mismatches") == 0
             and "tool_name=execute_rule_defense_actions" in row["observed"]
             for row in ml_path_rows
             if row["check_id"] == "MDP05"

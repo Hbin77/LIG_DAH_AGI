@@ -133,6 +133,14 @@ predict_attack_probability
 
 `execute_rule_defense_actions`는 TSRA-R-ML의 runtime tool이다. ML detector가 방어 window를 열면, 이 tool이 bounded rule defense action(`priority_reroute`, `video_throttle`, `stale_badge`, `pace_switch`)을 실행한다. 그래서 E7의 DecisionTrace에는 "ML이 판단했다"와 "그 판단으로 어떤 core 방어 action을 실행했다"가 같은 trace 안에 남는다.
 
+추가로 내부 `RuleTSRAR` 판단은 다음 sidecar trace에 남는다.
+
+```text
+outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl
+```
+
+이 sidecar trace는 `execute_rule_defense_actions` tool output과 최종 selected rule-defense event가 같은지 검증하는 데 사용된다.
+
 성능:
 
 ```text

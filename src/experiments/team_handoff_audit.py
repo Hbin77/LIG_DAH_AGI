@@ -190,9 +190,9 @@ def collect_checks() -> list[dict[str, str]]:
     )
 
     forbidden_phrases = {
-        "나 혼자",
-        "solo work",
-        "one-person",
+        "나 " + "혼자",
+        "solo " + "work",
+        "one-" + "person",
     }
     missing_integration_tokens = {
         "docs/process/TEAM_HANDOFF.md": "docs/process/TEAM_HANDOFF.md",

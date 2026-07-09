@@ -94,6 +94,7 @@ REQUIRED_PATHS = [
     "docs/agents/AURA_ATTACK_AGENT.md",
     "docs/agents/TSRA_R_DEFENSE_AGENT.md",
     "outputs/experiments/experiment_summary.csv",
+    "outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
     "outputs/batch/tsra_action_ablation_summary.csv",
@@ -207,6 +208,11 @@ def collect_files() -> list[Path]:
 
     curated_outputs = [
         ROOT / "outputs" / "experiments" / "experiment_summary.csv",
+        ROOT
+        / "outputs"
+        / "experiments"
+        / "E7_ml_aura_ml_tsra_r"
+        / "tsra_r_rule_delegate_traces.jsonl",
         ROOT / "outputs" / "batch",
         ROOT / "outputs" / "figures",
         ROOT / "outputs" / "models",
@@ -255,6 +261,7 @@ def write_manifest(files: list[Path], zip_path: Path | None = None) -> Path:
         "- `tests/`: agent runtime, AURA-ML, TSRA-R regression tests",
         "- `docs/`: 시나리오, 에이전트, 개발 판단 근거",
         "- `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약",
+        "- `outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl`: TSRA-R-ML 내부 rule-policy delegation 증거",
         "- `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림",
         "- `outputs/report_tables/*`: trace/COA/readiness/ML contribution/closed-loop mission thread 요약표",
         "- `outputs/models/*_metrics.json`: 모델 성능 메트릭",

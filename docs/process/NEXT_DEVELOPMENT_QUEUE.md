@@ -3388,3 +3388,58 @@ MAP03 payload_selected_matches: 5
 - AURA-ML의 AttackEvent는 사후 작성된 설명이 아니라 trace에서 선택한 candidate evidence와 같은 payload를 보존한다.
 - 공격 에이전트도 방어 에이전트와 같은 수준으로 tool/candidate/selected event 연결성을 갖는다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation attack payload evidence만 강화한다.
+
+## P64. TSRA-R-ML Rule Delegate Sidecar Trace
+
+상태: 완료
+
+문제:
+
+- TSRA-R-ML 상위 trace는 detector probability, mission risk guard, defense window, `execute_rule_defense_actions` tool output을 보여준다.
+- 하지만 내부 `RuleTSRAR`가 어떤 후보 action을 평가하고 어떤 rule-defense event를 골랐는지는 별도 파일로 남지 않았다.
+- tool output parity만으로도 이벤트 일치는 확인되지만, 하위 rule policy의 candidate score와 selected action trace를 보려면 sidecar trace가 필요하다.
+
+구현:
+
+```text
+src/tsra_r/ml_defender.py
+src/experiments/ml_defense_decision_path_audit.py
+scripts/verify_submission_state.py
+tests/test_agent_regression.py
+docs/agents/AGENT_RUNTIME.md
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+```
+
+설계:
+
+- `MLTSRAR.bind_runtime(trace_path)`가 상위 trace와 함께 내부 `RuleTSRAR` runtime을 `tsra_r_rule_delegate_traces.jsonl`에 바인딩한다.
+- `tsra_r_decision_traces.jsonl`은 `TSRA-R-ML` detector/window/tool decision을 유지한다.
+- `tsra_r_rule_delegate_traces.jsonl`은 window 안에서 실행된 하위 `TSRA-R` rule-policy candidate/action trace를 보존한다.
+- `ml_defense_decision_path_audit`의 MDP05가 다음을 동시에 검증한다.
+  - active window trace 수 == rule tool trace 수
+  - active window trace 수 == delegate trace 수
+  - tool output rule event pairs == selected rule event pairs
+  - tool output rule event pairs == delegate trace selected event pairs
+
+검증:
+
+```bash
+python3 -m unittest discover -s tests
+python3 -m src.experiments.run_all
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+MDP05 delegate_trace_count == active_window_traces
+MDP05 active_window_delegate_misses: 0
+MDP05 rule_tool_delegate_event_mismatches: 0
+```
+
+해석:
+
+- TSRA-R-ML은 ML 판단 trace와 하위 rule-policy trace를 분리해 남긴다.
+- 상위 에이전트의 tool delegation과 하위 정책의 selected action이 같은 이벤트를 가리키므로, 방어 에이전트 구조가 더 검증 가능해진다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation trace evidence만 강화한다.

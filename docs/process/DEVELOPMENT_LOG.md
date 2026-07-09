@@ -3283,3 +3283,36 @@ agent_regression_tests: 4 pass
 ```
 
 이 보강의 의미는 AURA-ML의 공격 event가 trace의 tool/candidate/selected action evidence를 그대로 보존한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation attack payload evidence만 강화한다.
+
+### 79. TSRA-R-ML Rule Delegate Sidecar Trace를 추가한 이유
+
+`TSRA-R-ML`은 상위 에이전트로서 detector probability와 mission risk guard를 보고 방어 window를 연다. 그 다음 core defense action은 `execute_rule_defense_actions` tool을 통해 내부 `RuleTSRAR`가 고른다. 이전 보강으로 tool output과 selected event parity는 확인했지만, 내부 `RuleTSRAR`의 candidate score와 selected action trace 자체는 별도 파일로 남지 않았다.
+
+이번 변경은 내부 `RuleTSRAR` runtime을 sidecar trace에 바인딩했다.
+
+변경한 파일:
+
+```text
+src/tsra_r/ml_defender.py
+src/experiments/ml_defense_decision_path_audit.py
+scripts/verify_submission_state.py
+tests/test_agent_regression.py
+docs/agents/AGENT_RUNTIME.md
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+추가되는 trace:
+
+```text
+outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl
+```
+
+검증 기준:
+
+- `delegate_trace_count == active_window_traces`
+- `active_window_delegate_misses == 0`
+- `rule_tool_delegate_event_mismatches == 0`
+- `rule_tool_event_pairs == delegate_rule_event_pairs`
+
+이 보강의 의미는 TSRA-R-ML의 상위 ML 판단과 하위 rule-policy 판단을 모두 trace로 검증할 수 있다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation trace evidence만 강화한다.

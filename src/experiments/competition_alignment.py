@@ -403,6 +403,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "pre_threshold_guard_traces=1"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "first_response_latency_sec=20"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "above_threshold_no_event_refresh_traces="),
+            ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "delegate_trace_count="),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "tool_name=execute_rule_defense_actions"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "threshold_window_nondecreasing=true"),
             ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "first_ml_alert_latency_sec"),

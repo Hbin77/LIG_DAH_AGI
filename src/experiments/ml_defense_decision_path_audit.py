@@ -14,6 +14,7 @@ DEFAULT_OUTPUT_CSV = ROOT / "outputs/report_tables/ml_defense_decision_path_audi
 DEFAULT_OUTPUT_MD = ROOT / "outputs/report_tables/ml_defense_decision_path_audit.md"
 
 TRACE_PATH = f"outputs/experiments/{E7}/tsra_r_decision_traces.jsonl"
+RULE_DELEGATE_TRACE_PATH = f"outputs/experiments/{E7}/tsra_r_rule_delegate_traces.jsonl"
 DEFENSE_PATH = f"outputs/experiments/{E7}/defense_events.jsonl"
 ATTACK_PATH = f"outputs/experiments/{E7}/attack_events.jsonl"
 COORDINATION_PATH = "outputs/report_tables/agent_coordination_latency_audit.csv"
@@ -124,6 +125,10 @@ def selected_rule_event_pairs(trace: dict[str, Any]) -> list[tuple[str, str]]:
     return pairs
 
 
+def delegate_trace_by_time(traces: list[dict[str, Any]]) -> dict[float, dict[str, Any]]:
+    return {trace_time(trace): trace for trace in traces}
+
+
 def probability(trace: dict[str, Any]) -> float:
     return as_float((trace.get("feedback") or {}).get("probability"))
 
@@ -203,6 +208,7 @@ def row(
 
 def build_rows() -> list[dict[str, str]]:
     traces = read_jsonl(TRACE_PATH)
+    delegate_traces = read_jsonl(RULE_DELEGATE_TRACE_PATH)
     defenses = read_jsonl(DEFENSE_PATH)
     attacks = read_jsonl(ATTACK_PATH)
     coordination_rows = read_csv(COORDINATION_PATH)
@@ -318,6 +324,23 @@ def build_rows() -> list[dict[str, str]]:
         trace
         for trace in selected_defense_traces
         if rule_tool_event_pairs(trace, rule_tool_name) != selected_rule_event_pairs(trace)
+    ]
+    delegates_by_time = delegate_trace_by_time(delegate_traces)
+    delegate_trace_count = len(delegate_traces)
+    delegate_trace_event_pair_count = sum(
+        len(selected_rule_event_pairs(trace)) for trace in delegate_traces
+    )
+    active_window_delegate_misses = [
+        trace for trace in active_window_traces if trace_time(trace) not in delegates_by_time
+    ]
+    rule_tool_delegate_event_mismatches = [
+        trace
+        for trace in selected_defense_traces
+        if (
+            trace_time(trace) not in delegates_by_time
+            or rule_tool_event_pairs(trace, rule_tool_name)
+            != selected_rule_event_pairs(delegates_by_time[trace_time(trace)])
+        )
     ]
 
     memory_mismatches = 0
@@ -466,12 +489,13 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="MDP05",
             area="Rule-defense tool execution",
-            requirement="When TSRA-R-ML has an active defense window, it must execute bounded rule-defense actions as a recorded runtime tool call.",
-            evidence=[TRACE_PATH],
+            requirement="When TSRA-R-ML has an active defense window, it must execute bounded rule-defense actions as a recorded runtime tool call and preserve the delegated rule-policy trace.",
+            evidence=[TRACE_PATH, RULE_DELEGATE_TRACE_PATH],
             observed=(
                 f"trace_count={len(traces)}; "
                 f"active_window_traces={len(active_window_traces)}; "
                 f"rule_tool_traces={len(rule_tool_traces)}; "
+                f"delegate_trace_count={delegate_trace_count}; "
                 f"selected_defense_traces={len(selected_defense_traces)}; "
                 f"selected_defense_traces_with_rule_tool={len(selected_defense_traces_with_rule_tool)}; "
                 f"rule_tool_invocations={len(rule_tool_calls)}; "
@@ -479,25 +503,32 @@ def build_rows() -> list[dict[str, str]]:
                 f"rule_tool_output_count={rule_tool_output_count}; "
                 f"rule_tool_event_pairs={rule_tool_event_pair_count}; "
                 f"selected_rule_event_pairs={selected_rule_event_pair_count}; "
+                f"delegate_rule_event_pairs={delegate_trace_event_pair_count}; "
                 f"rule_tool_selected_event_mismatches={len(rule_tool_selected_event_mismatches)}; "
+                f"active_window_delegate_misses={len(active_window_delegate_misses)}; "
+                f"rule_tool_delegate_event_mismatches={len(rule_tool_delegate_event_mismatches)}; "
                 f"tool_name={rule_tool_name}"
             ),
             ok=(
                 bool(traces)
                 and len(active_window_traces) > 0
                 and len(rule_tool_traces) == len(active_window_traces)
+                and delegate_trace_count == len(active_window_traces)
                 and len(selected_defense_traces_with_rule_tool) == len(selected_defense_traces)
                 and len(rule_tool_calls) == len(rule_tool_traces)
                 and rule_tool_error_count == 0
                 and rule_tool_output_count == len(rule_tool_calls)
                 and rule_tool_event_pair_count > 0
                 and rule_tool_event_pair_count == selected_rule_event_pair_count
+                and delegate_trace_event_pair_count == rule_tool_event_pair_count
                 and not rule_tool_selected_event_mismatches
+                and not active_window_delegate_misses
+                and not rule_tool_delegate_event_mismatches
             ),
             interpretation=(
                 "The ML defender does not hide rule-action fanout behind an untraced method call; "
                 "the delegation appears in TSRA-R-ML DecisionTrace tool calls and the tool output "
-                "matches the final selected rule-defense events."
+                "matches both the final selected rule-defense events and the delegated TSRA-R rule-policy trace."
             ),
         ),
         row(

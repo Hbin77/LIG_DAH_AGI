@@ -131,7 +131,10 @@ feedback
 ```text
 outputs/experiments/<experiment>/aura_decision_traces.jsonl
 outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
+outputs/experiments/<experiment>/tsra_r_rule_delegate_traces.jsonl
 ```
+
+`tsra_r_rule_delegate_traces.jsonl`은 `TSRA-R-ML`이 방어 window 안에서 `execute_rule_defense_actions` tool을 호출할 때 내부 `RuleTSRAR` 판단을 별도로 남기는 sidecar trace다. 상위 `TSRA-R-ML` trace는 detector/window/tool 선택을 보여주고, sidecar trace는 하위 rule defense 후보 점수와 selected defense events를 보여준다.
 
 ## 계약 검증
 

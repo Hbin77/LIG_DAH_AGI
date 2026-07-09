@@ -68,6 +68,7 @@ class MLTSRAR:
 
     def bind_runtime(self, trace_path: Path) -> None:
         self.runtime.bind_trace_log(trace_path)
+        self.rule.bind_runtime(trace_path.with_name("tsra_r_rule_delegate_traces.jsonl"))
 
     def decide(self, state: MissionState) -> list[DefenseEvent]:
         observation = self.runtime.observe(state)

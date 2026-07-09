@@ -10,6 +10,7 @@
 - `tests/`: agent runtime, AURA-ML, TSRA-R regression tests
 - `docs/`: 시나리오, 에이전트, 개발 판단 근거
 - `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약
+- `outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl`: TSRA-R-ML 내부 rule-policy delegation 증거
 - `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림
 - `outputs/report_tables/*`: trace/COA/readiness/ML contribution/closed-loop mission thread 요약표
 - `outputs/models/*_metrics.json`: 모델 성능 메트릭
@@ -24,12 +25,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 242
-- total_payload_bytes: 4659548
+- payload_file_count: 243
+- total_payload_bytes: 5085041
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 243
-- zip_bytes: 2006335
-- zip_sha256: `3384a9d906057bbed8e9a5db7e3f86f5db6ec873d858efe0be3772788b449403`
+- zip_file_count: 244
+- zip_bytes: 2020098
+- zip_sha256: `2bffd9686c460a294a1d04b866308a28cda5d1427397eb334ffd63a5860c4855`
 
 ## 포함 파일
 
@@ -63,6 +64,7 @@
 - `outputs/batch/resilience_gain_summary.csv`
 - `outputs/batch/tsra_action_ablation_raw.csv`
 - `outputs/batch/tsra_action_ablation_summary.csv`
+- `outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl`
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/figures/E3_rule_aura_timeline.png`
 - `outputs/figures/E5_rule_aura_tsra_r_timeline.png`

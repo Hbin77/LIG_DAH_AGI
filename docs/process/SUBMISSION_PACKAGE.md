@@ -33,6 +33,7 @@ outputs/package/release_handoff.md
 - `src/`: AURA, TSRA-R, Agent Runtime, 시뮬레이터, ML, 실험 코드
 - `docs/`: 시나리오, 에이전트 구조, 개발 판단 근거, 팀 핸드오프 기준
 - `outputs/experiments/experiment_summary.csv`
+- `outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl`: `TSRA-R-ML`이 내부 `TSRA-R` rule policy를 runtime tool로 위임했는지 검증하는 bounded evidence trace
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
 - `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent quality gate audit, team handoff audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent goal alignment audit, agent decision feedback audit, agent memory belief audit, agent memory influence audit, AURA attack decision path audit, cross-agent context audit, defense priority decision path audit, adaptive defense decision path audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent coordination latency audit, agent stress scenario audit, mission thread summary, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, defense action attribution audit, mission impact decomposition, metric gate, ML contribution audit, ML attack decision path audit, ML defense decision path audit, ML red-blue interaction audit, reactive defense tradeoff audit, ML threshold sweep, TSRA detector calibration audit, safety boundary audit, reproduction order audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
@@ -43,6 +44,7 @@ outputs/package/release_handoff.md
 - `.git/`, `.venv*`, `__pycache__/`, `*.pyc`
 - `outputs/tmp*`
 - `outputs/batch/seed_*`
+- 대부분의 `outputs/experiments/*/*.jsonl` 원본 로그. 단, `E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl`은 `ml_defense_decision_path_audit`의 직접 증거라 포함한다.
 - `outputs/datasets/`
 - `outputs/models/*.pkl`
 - `outputs/models/*.pt`

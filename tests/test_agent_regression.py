@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -334,18 +336,32 @@ class TsraRRegressionTests(unittest.TestCase):
         )
         defender.model = ConstantProbabilityModel(0.91)
 
-        state = make_state(
-            time_sec=100.0,
-            links=make_links(satcom_latency_ms=1300.0, satcom_loss=0.06),
-            active_attack_types=[
-                "queue_pressure",
-                "stale_cop_induction",
-                "failover_chasing",
-            ],
-            recent_attack_types=["queue_pressure"],
-        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            trace_path = Path(temp_dir) / "tsra_r_decision_traces.jsonl"
+            defender.bind_runtime(trace_path)
+            state = make_state(
+                time_sec=100.0,
+                links=make_links(satcom_latency_ms=1300.0, satcom_loss=0.06),
+                active_attack_types=[
+                    "queue_pressure",
+                    "stale_cop_induction",
+                    "failover_chasing",
+                ],
+                recent_attack_types=["queue_pressure"],
+            )
 
-        events = defender.decide(state)
+            events = defender.decide(state)
+            delegate_path = Path(temp_dir) / "tsra_r_rule_delegate_traces.jsonl"
+            self.assertTrue(delegate_path.exists())
+            delegate_rows = [
+                json.loads(line)
+                for line in delegate_path.read_text().splitlines()
+                if line.strip()
+            ]
+            self.assertEqual(len(delegate_rows), 1)
+            self.assertEqual(delegate_rows[0]["agent"], "TSRA-R")
+            self.assertEqual(delegate_rows[0]["selected_action"]["type"], "defense_events")
+
         actions = [event.action for event in events]
         self.assertIn("ml_attack_alert", actions)
         self.assertIn("priority_reroute", actions)
@@ -376,6 +392,11 @@ class TsraRRegressionTests(unittest.TestCase):
             for event in rule_tool_calls[0].output_summary
         ]
         self.assertEqual(tool_rule_events, selected_rule_events)
+        delegate_rule_events = [
+            (event["event_id"], event["action"])
+            for event in delegate_rows[0]["selected_action"]["events"]
+        ]
+        self.assertEqual(delegate_rule_events, tool_rule_events)
         self.assertEqual(trace.feedback["event_count"], len(events))
 
 
