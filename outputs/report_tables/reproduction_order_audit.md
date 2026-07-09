@@ -10,23 +10,23 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 
 | check_id | command_index | command | order_status | output_status | status |
 |---|---:|---|---|---|---|
-| RO01 | 34 | python3 -m src.experiments.defense_action_attribution_audit --fail-on-error | pass | pass | pass |
-| RO02 | 39 | python3 -m src.experiments.closed_loop_episode_replay | pass | pass | pass |
-| RO03 | 40 | python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error | pass | pass | pass |
-| RO04 | 41 | python3 -m src.experiments.agent_engagement_scorecard | pass | pass | pass |
-| RO05 | 42 | python3 -m src.experiments.mission_thread_summary --fail-on-error | pass | pass | pass |
-| RO06 | 17 | python3 -m src.experiments.cross_agent_context_audit --fail-on-error | pass | pass | pass |
-| RO07 | 18 | python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO08 | 19 | python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO09 | 46 | python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO10 | 47 | python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO11 | 48 | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | pass | pass | pass |
-| RO12 | 30 | python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error | pass | pass | pass |
-| RO13 | 49 | python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error | pass | pass | pass |
-| RO14 | 54 | python3 -m src.experiments.competition_alignment --fail-on-incomplete | pass | pass | pass |
-| RO15 | 55 | python3 scripts/build_submission_package.py | pass | pass | pass |
-| RO16 | 56 | python3 scripts/generate_release_handoff.py | pass | pass | pass |
-| RO17 | 58 | python3 scripts/verify_submission_state.py | pass | pass | pass |
+| RO01 | 35 | python3 -m src.experiments.defense_action_attribution_audit --fail-on-error | pass | pass | pass |
+| RO02 | 40 | python3 -m src.experiments.closed_loop_episode_replay | pass | pass | pass |
+| RO03 | 41 | python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error | pass | pass | pass |
+| RO04 | 42 | python3 -m src.experiments.agent_engagement_scorecard | pass | pass | pass |
+| RO05 | 43 | python3 -m src.experiments.mission_thread_summary --fail-on-error | pass | pass | pass |
+| RO06 | 18 | python3 -m src.experiments.cross_agent_context_audit --fail-on-error | pass | pass | pass |
+| RO07 | 19 | python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO08 | 20 | python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO09 | 47 | python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO10 | 48 | python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO11 | 49 | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | pass | pass | pass |
+| RO12 | 31 | python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error | pass | pass | pass |
+| RO13 | 50 | python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error | pass | pass | pass |
+| RO14 | 55 | python3 -m src.experiments.competition_alignment --fail-on-incomplete | pass | pass | pass |
+| RO15 | 56 | python3 scripts/build_submission_package.py | pass | pass | pass |
+| RO16 | 57 | python3 scripts/generate_release_handoff.py | pass | pass | pass |
+| RO17 | 59 | python3 scripts/verify_submission_state.py | pass | pass | pass |
 
 ## Detail
 

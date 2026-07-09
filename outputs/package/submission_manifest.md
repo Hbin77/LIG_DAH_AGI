@@ -24,12 +24,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 235
-- total_payload_bytes: 4564260
+- payload_file_count: 238
+- total_payload_bytes: 4594947
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 236
-- zip_bytes: 1981322
-- zip_sha256: `30002c0f450dc79cb1d555c2006db8c92ccdf05906cc3a69376c0209dcbfb087`
+- zip_file_count: 239
+- zip_bytes: 1989892
+- zip_sha256: `c18fcc7be22c762f1a9c736873bb8092f55df0634e40f2021039ffec1ddbe9b7`
 
 ## 포함 파일
 
@@ -116,6 +116,8 @@
 - `outputs/report_tables/agent_memory_belief_audit.md`
 - `outputs/report_tables/agent_memory_influence_audit.csv`
 - `outputs/report_tables/agent_memory_influence_audit.md`
+- `outputs/report_tables/agent_quality_gate_audit.csv`
+- `outputs/report_tables/agent_quality_gate_audit.md`
 - `outputs/report_tables/agent_runtime_invariant_audit.csv`
 - `outputs/report_tables/agent_runtime_invariant_audit.md`
 - `outputs/report_tables/agent_stress_scenario_audit.csv`
@@ -213,6 +215,7 @@
 - `src/experiments/agent_loop_replay.py`
 - `src/experiments/agent_memory_belief_audit.py`
 - `src/experiments/agent_memory_influence_audit.py`
+- `src/experiments/agent_quality_gate_audit.py`
 - `src/experiments/agent_runtime_invariant_audit.py`
 - `src/experiments/agent_stress_scenario_audit.py`
 - `src/experiments/agent_tool_usage_audit.py`

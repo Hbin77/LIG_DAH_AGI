@@ -3121,3 +3121,42 @@ pass
 ```
 
 이 보강의 의미는 전체 실험 audit 전에 코드 레벨 불변식을 빠르게 잠그는 것이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation agent code의 품질 게이트만 강화한다.
+
+### 75. Agent Quality Gate Audit를 추가한 이유
+
+P59에서 회귀 테스트와 `hbin` GitHub Actions를 추가했지만, 이것만으로는 품질 게이트가 최종 재현/패키지/검증 체계에 실제로 묶였는지 한눈에 확인하기 어렵다. 협업자가 테스트 파일은 남겼지만 README, final verifier, package manifest 연결을 빼먹는 경우를 막기 위해 품질 게이트 자체를 감사 산출물로 승격했다.
+
+추가한 파일:
+
+```text
+src/experiments/agent_quality_gate_audit.py
+outputs/report_tables/agent_quality_gate_audit.csv
+outputs/report_tables/agent_quality_gate_audit.md
+```
+
+감사 기준:
+
+- unittest가 실제 실행되고 3개 이상 통과해야 한다.
+- 테스트 파일은 AgentRuntime, AURA-ML, TSRA-R 회귀 범위를 모두 포함해야 한다.
+- `verify_submission_state.py`가 unittest와 test/workflow 파일을 필수로 봐야 한다.
+- `.github/workflows/quality.yml`은 `hbin`에서 compile, unittest, package rebuild, release handoff, final verifier를 실행해야 하며 `main` push trigger는 없어야 한다.
+- README Full Reproduction은 unittest와 quality gate audit을 `run_all`보다 먼저 실행해야 한다.
+- package builder와 manifest는 `tests/test_agent_regression.py`, `.github/workflows/quality.yml`을 포함해야 한다.
+
+동반 수정:
+
+- README에 Agent Quality Gate Audit 섹션과 Full Reproduction 명령을 추가했다.
+- `scripts/build_submission_package.py`, `scripts/verify_submission_state.py`가 새 audit source/output을 필수로 보게 했다.
+- `submission_readiness_audit`와 `competition_alignment`가 새 audit을 AI agent architecture와 handoff evidence에 포함한다.
+- `FINAL_QA.md`, `SUBMISSION_PACKAGE.md`, `NEXT_DEVELOPMENT_QUEUE.md`에 품질 게이트 감사 결과를 반영했다.
+
+현재 검증 결과:
+
+```text
+agent_quality_gate_audit rows: 6 pass
+agent_regression_tests: 3 pass
+areas: unit_regression_execution, unit_regression_scope, final_verifier_integration,
+       hbin_workflow_gate, readme_reproduction_gate, package_inclusion_gate
+```
+
+이 보강의 의미는 회귀 테스트가 로컬 편의 기능이 아니라 README, CI, final verifier, package manifest로 연결된 제출 품질 게이트가 됐다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation agent quality evidence만 강화한다.

@@ -123,6 +123,7 @@ def build_rows() -> list[dict[str, str]]:
         "trace": count_csv_rows("outputs/report_tables/agent_decision_trace_summary.csv"),
         "contract": count_csv_rows("outputs/report_tables/agent_contract_validation.csv"),
         "quality": count_csv_rows("outputs/report_tables/decision_trace_quality_audit.csv"),
+        "quality_gate": count_csv_rows("outputs/report_tables/agent_quality_gate_audit.csv"),
         "runtime": count_csv_rows("outputs/report_tables/agent_runtime_invariant_audit.csv"),
         "loop": count_csv_rows("outputs/report_tables/agent_loop_replay.csv"),
         "causality": count_csv_rows("outputs/report_tables/agent_decision_causality_audit.csv"),
@@ -176,6 +177,9 @@ def build_rows() -> list[dict[str, str]]:
         "scripts/verify_submission_state.py",
         "scripts/verify_external_package_link.py",
         "src/experiments/reproduction_order_audit.py",
+        "src/experiments/agent_quality_gate_audit.py",
+        "tests/test_agent_regression.py",
+        ".github/workflows/quality.yml",
         ".gitignore",
     ]
     model_metrics = [
@@ -185,6 +189,8 @@ def build_rows() -> list[dict[str, str]]:
     ]
     reproduction_commands = [
         "python3 -m src.ml.build_dataset",
+        "python3 -m unittest discover -s tests",
+        "python3 -m src.experiments.agent_quality_gate_audit --fail-on-error",
         "python3 -m src.experiments.run_all",
         "python3 -m src.experiments.agent_runtime_invariant_audit",
         "python3 -m src.experiments.agent_decision_causality_audit",
@@ -300,11 +306,12 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R05",
             area="Decision evidence",
-            requirement="DecisionTrace, contract, causality, margin, goal alignment, feedback, memory, memory influence, AURA attack path, cross-agent context, defense priority path, and tool evidence must all be generated.",
+            requirement="DecisionTrace, contract, quality gate, causality, margin, goal alignment, feedback, memory, memory influence, AURA attack path, cross-agent context, defense priority path, and tool evidence must all be generated.",
             evidence=[
                 "outputs/report_tables/agent_decision_trace_summary.csv",
                 "outputs/report_tables/agent_contract_validation.csv",
                 "outputs/report_tables/decision_trace_quality_audit.csv",
+                "outputs/report_tables/agent_quality_gate_audit.csv",
                 "outputs/report_tables/agent_runtime_invariant_audit.csv",
                 "outputs/report_tables/agent_loop_replay.csv",
                 "outputs/report_tables/agent_decision_causality_audit.csv",
@@ -323,6 +330,7 @@ def build_rows() -> list[dict[str, str]]:
                 decision_counts["trace"] >= 200
                 and decision_counts["contract"] == 49
                 and decision_counts["quality"] == 9
+                and decision_counts["quality_gate"] == 6
                 and decision_counts["runtime"] == 9
                 and decision_counts["loop"] == 8
                 and decision_counts["causality"] == 399

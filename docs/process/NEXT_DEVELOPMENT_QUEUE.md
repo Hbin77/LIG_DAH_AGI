@@ -3175,3 +3175,55 @@ package inclusion: tests/test_agent_regression.py and hbin quality workflow requ
 - 산출물 감사는 그대로 유지하되, 코드 수정 직후 빠르게 깨지는 회귀를 먼저 잡을 수 있게 됐다.
 - AURA-ML의 persisted event identity, TSRA-R defense priority ordering, AgentRuntime memory chain 같은 핵심 불변식이 테스트로 고정됐다.
 - 이 변경은 closed simulation agent code의 품질 게이트만 추가하며 RF, exploit, live network action은 추가하지 않는다.
+
+## P60. Agent Quality Gate Audit
+
+상태: 완료
+
+문제:
+
+- P59에서 빠른 회귀 테스트와 `hbin` GitHub Actions는 추가됐지만, 이 품질 게이트가 README 재현 순서, final verifier, 제출 패키지까지 실제로 연결됐는지 별도 산출물은 없었다.
+- 협업자가 테스트나 workflow를 로컬에만 두고 package/verifier 연결을 빼먹으면, 최종 산출물에서는 품질 게이트가 빠질 수 있다.
+- 따라서 품질 게이트 자체도 CSV/MD로 감사해야 한다.
+
+구현:
+
+```text
+src/experiments/agent_quality_gate_audit.py
+outputs/report_tables/agent_quality_gate_audit.csv
+outputs/report_tables/agent_quality_gate_audit.md
+```
+
+검증 기준:
+
+- `python3 -m unittest discover -s tests`가 실행되고 3개 이상 테스트가 통과해야 한다.
+- 테스트 파일은 AgentRuntime, AURA-ML, TSRA-R 회귀 범위를 모두 포함해야 한다.
+- `scripts/verify_submission_state.py`는 unittest 실행과 test/workflow 파일 요구를 포함해야 한다.
+- `.github/workflows/quality.yml`은 `hbin`에서 compile, unittest, package rebuild, release handoff, final verifier를 실행해야 하며 `main` push trigger를 갖지 않아야 한다.
+- README Full Reproduction은 unittest와 quality gate audit을 heavy experiment보다 먼저 실행해야 한다.
+- package builder와 manifest는 test source와 hbin quality workflow를 포함해야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+agent_quality_gate_audit rows: 6 pass
+areas: unit_regression_execution, unit_regression_scope, final_verifier_integration,
+       hbin_workflow_gate, readme_reproduction_gate, package_inclusion_gate
+agent_regression_tests: 3 pass
+quality workflow: hbin branch gate, no main push trigger
+```
+
+해석:
+
+- 회귀 테스트가 로컬 편의 명령이 아니라 README, CI, final verifier, package manifest로 연결된 품질 게이트가 됐다.
+- 팀원이 AURA/TSRA-R/AgentRuntime을 수정해도 full experiment 전에 빠르게 깨지는 지점을 잡는다.
+- 이 변경은 closed simulation agent quality evidence만 추가하며 RF, exploit, live network action은 추가하지 않는다.

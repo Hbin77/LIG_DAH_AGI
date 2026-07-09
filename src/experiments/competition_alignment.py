@@ -154,7 +154,8 @@ ALIGNMENT_SPECS = [
             "audit verifies attack candidate score formulas, selected AttackEvent links, event agent identity, "
             "cadence gates, and tactical/context coverage; defense priority "
             "path audit verifies formula-backed TSRA-R priority scores, selected event details, "
-            "event ordering, and no-op consistency."
+            "event ordering, and no-op consistency; agent quality gate audit verifies that fast "
+            "regression tests, hbin CI, final verifier, README reproduction, and package inclusion are wired together."
         ),
         agent_or_component="AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace",
         evidence_files=[
@@ -164,6 +165,7 @@ ALIGNMENT_SPECS = [
             "src/agents/schema.py",
             "src/experiments/validate_event_contracts.py",
             "src/experiments/trace_quality_audit.py",
+            "src/experiments/agent_quality_gate_audit.py",
             "src/experiments/agent_loop_replay.py",
             "src/experiments/agent_decision_causality_audit.py",
             "src/experiments/agent_decision_margin_audit.py",
@@ -180,6 +182,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/agent_decision_trace_summary.csv",
             "outputs/report_tables/agent_contract_validation.csv",
             "outputs/report_tables/decision_trace_quality_audit.csv",
+            "outputs/report_tables/agent_quality_gate_audit.csv",
             "outputs/report_tables/agent_loop_replay.csv",
             "outputs/report_tables/agent_decision_causality_audit.csv",
             "outputs/report_tables/agent_decision_margin_audit.csv",
@@ -201,6 +204,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 200),
             RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 49),
             RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 9),
+            RowCountCheck("outputs/report_tables/agent_quality_gate_audit.csv", 6),
             RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
             RowCountCheck("outputs/report_tables/agent_decision_causality_audit.csv", 399),
             RowCountCheck("outputs/report_tables/agent_decision_margin_audit.csv", 399),
@@ -508,18 +512,21 @@ ALIGNMENT_SPECS = [
         competition_goal="Make the shared branch reproducible for another teammate without using main for active work.",
         implemented_mechanism=(
             "README commands, reproduction-order audit, package builder, manifest, final verifier, "
-            "submission readiness audit, and process docs define the shared workflow."
+            "agent quality gate audit, hbin quality workflow, submission readiness audit, and process docs define the shared workflow."
         ),
         agent_or_component="README / packaging / QA scripts",
         evidence_files=[
             "README.md",
             "src/experiments/reproduction_order_audit.py",
+            "src/experiments/agent_quality_gate_audit.py",
             "scripts/build_submission_package.py",
             "scripts/verify_submission_state.py",
             "src/experiments/submission_readiness_audit.py",
+            ".github/workflows/quality.yml",
             "docs/process/SUBMISSION_PACKAGE.md",
             "docs/process/GITHUB_WORKFLOW.md",
             "outputs/report_tables/reproduction_order_audit.csv",
+            "outputs/report_tables/agent_quality_gate_audit.csv",
             "outputs/report_tables/submission_readiness_audit.csv",
         ],
         next_gate="Before handoff, rebuild the package and run verify_submission_state on branch hbin.",
@@ -528,6 +535,7 @@ ALIGNMENT_SPECS = [
         ],
         row_checks=[
             RowCountCheck("outputs/report_tables/reproduction_order_audit.csv", 17),
+            RowCountCheck("outputs/report_tables/agent_quality_gate_audit.csv", 6),
             RowCountCheck("outputs/report_tables/submission_readiness_audit.csv", 10),
         ],
     ),

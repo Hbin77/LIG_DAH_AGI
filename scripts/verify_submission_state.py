@@ -53,6 +53,7 @@ REQUIRED_FILES = [
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
+    "src/experiments/agent_quality_gate_audit.py",
     "src/experiments/agent_runtime_invariant_audit.py",
     "src/experiments/agent_loop_replay.py",
     "src/experiments/agent_decision_causality_audit.py",
@@ -120,6 +121,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_contract_validation.md",
     "outputs/report_tables/decision_trace_quality_audit.csv",
     "outputs/report_tables/decision_trace_quality_audit.md",
+    "outputs/report_tables/agent_quality_gate_audit.csv",
+    "outputs/report_tables/agent_quality_gate_audit.md",
     "outputs/report_tables/agent_runtime_invariant_audit.csv",
     "outputs/report_tables/agent_runtime_invariant_audit.md",
     "outputs/report_tables/agent_loop_replay.csv",
@@ -381,6 +384,36 @@ def check_csv_outputs() -> list[str]:
         "trace quality audit has incomplete reason coverage",
     )
     checks.append("decision_trace_quality_audit rows=9 pass")
+
+    quality_gate_rows = read_csv("outputs/report_tables/agent_quality_gate_audit.csv")
+    require(
+        len(quality_gate_rows) == 6,
+        f"expected 6 agent quality gate audit rows, got {len(quality_gate_rows)}",
+    )
+    failed_quality_gate = [
+        f"{row['check_id']}:{row['area']}"
+        for row in quality_gate_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_quality_gate, f"failed agent quality gate rows: {failed_quality_gate[:8]}")
+    required_quality_gate_areas = {
+        "unit_regression_execution",
+        "unit_regression_scope",
+        "final_verifier_integration",
+        "hbin_workflow_gate",
+        "readme_reproduction_gate",
+        "package_inclusion_gate",
+    }
+    observed_quality_gate_areas = {row["area"] for row in quality_gate_rows}
+    require(
+        observed_quality_gate_areas == required_quality_gate_areas,
+        f"agent quality gate missing areas: {sorted(required_quality_gate_areas - observed_quality_gate_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in quality_gate_rows),
+        "agent quality gate audit missing safety boundary",
+    )
+    checks.append("agent_quality_gate_audit rows=6 pass")
 
     runtime_rows = read_csv("outputs/report_tables/agent_runtime_invariant_audit.csv")
     require(
@@ -2650,6 +2683,10 @@ def check_zip() -> list[str]:
     )
     require("tests/test_agent_regression.py" in manifest_text, "manifest missing agent regression tests")
     require(".github/workflows/quality.yml" in manifest_text, "manifest missing hbin quality workflow")
+    require(
+        "outputs/report_tables/agent_quality_gate_audit.md" in manifest_text,
+        "manifest missing agent quality gate audit",
+    )
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
     require("outputs/report_tables/operator_alerts.md" in manifest_text, "manifest missing operator alerts")

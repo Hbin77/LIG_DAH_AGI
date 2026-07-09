@@ -11,6 +11,7 @@ python3 -m src.ml.build_dataset --rows 3000
 python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m unittest discover -s tests
+python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
@@ -141,6 +142,7 @@ agent_engagement_scorecard rows: 10 pass
 agent_collaboration_graph edges: 17 verified
 competition_alignment_matrix rows: 10 verified
 agent_regression_tests: 3 pass
+agent_quality_gate_audit rows: 6 pass
 ```
 
 패키지 검증:

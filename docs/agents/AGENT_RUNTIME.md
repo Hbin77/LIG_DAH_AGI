@@ -706,6 +706,19 @@ python3 -m unittest discover -s tests
 
 `scripts/verify_submission_state.py`는 이 unittest를 직접 실행한다. `.github/workflows/quality.yml`도 `hbin` push에서 compile, regression test, package rebuild, final verifier를 실행한다.
 
+품질 게이트 연결 상태는 다음 감사로 확인한다.
+
+```bash
+python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
+```
+
+현재 감사 결과:
+
+```text
+agent_quality_gate_audit rows: 6 pass
+agent_regression_tests: 3 pass
+```
+
 ## 다음 개선
 
 1. Adaptive Memory 정책을 더 많은 mission phase별 rule로 분리

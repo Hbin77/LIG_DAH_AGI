@@ -16,6 +16,9 @@ jobs:
           ref: hbin
           fetch-depth: 0
 
+      - name: Ensure hbin branch context
+        run: git checkout hbin
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
