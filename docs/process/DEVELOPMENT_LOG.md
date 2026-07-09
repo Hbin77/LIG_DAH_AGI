@@ -927,6 +927,49 @@ non-no-op decisions: present for all agents
 - 이 산출물은 AURA와 TSRA-R을 따로 고도화할 때 깨지면 안 되는 인터페이스 기준이다.
 - `verify_submission_state.py`와 `competition_alignment.py`에 연결해 필수 산출물로 만들었다.
 
+### 25. Agent Capability Matrix를 추가한 이유
+
+Agent Interface Manifest는 각 agent의 입력/도구/출력 계약을 보여준다. 하지만 실제 개발을 나누려면 "각 agent가 어떤 capability를 가지고 있고, 그 capability가 어떤 실험 증거와 연결되는지"가 필요하다.
+
+그래서 AURA 공격 효과와 TSRA-R 방어 액션을 같은 형식으로 정리하는 capability matrix를 추가했다.
+
+구현:
+
+```text
+src/experiments/agent_capability_matrix.py
+outputs/report_tables/agent_capability_matrix.csv
+outputs/report_tables/agent_capability_matrix.md
+```
+
+집계 기준:
+
+- AURA COA cards: 선택된 attack capability와 예상 impact
+- E5/E7 defense events: 실제 방어 action 사용 횟수
+- TSRA-R action ablation: action 제거 시 metric 변화
+- adaptive memory summary: adaptive gating 효과
+- metric gate summary: capability별 validation gate
+
+검증:
+
+```text
+python3 -m src.experiments.agent_capability_matrix
+```
+
+결과:
+
+```text
+agent_capability_matrix.csv: 10 capabilities
+attack side: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_induction
+defense side: ml_attack_alert, pace_switch, priority_reroute, stale_badge,
+              video_throttle, adaptive_optional_action_gating
+```
+
+해석:
+
+- 이 산출물은 공격/방어 에이전트를 capability 단위로 분리 개발하기 위한 기준표다.
+- `priority_reroute`, `stale_badge`, `ml_attack_alert`, adaptive gating 같은 핵심 capability가 어떤 evidence와 gate를 갖는지 바로 확인할 수 있다.
+- final verifier와 competition alignment에 연결해 필수 산출물로 만들었다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

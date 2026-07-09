@@ -716,7 +716,59 @@ all agents: tool contract present, non-no-op decision present
 - 이 산출물은 공격/방어 에이전트를 따로 개발하기 위한 인터페이스 기준표다.
 - 새 agent나 policy를 추가할 때 입력·도구·출력 계약이 manifest에 반영되는지 확인할 수 있다.
 
-## P14. 제출 직전 브랜치/패키지 동결
+## P14. Agent Capability Matrix
+
+상태: 완료
+
+문제:
+
+- interface manifest는 agent별 계약을 보여주지만, 각 capability가 어떤 실험 증거와 metric gate로 검증되는지는 따로 봐야 한다.
+- AURA 공격 효과와 TSRA-R 방어 액션을 같은 기준으로 정리해야 공격/방어 담당이 각각 무엇을 고도화할지 명확해진다.
+- 특히 `priority_reroute`, `stale_badge`, `ml_attack_alert`, adaptive gating 같은 핵심 capability가 어떤 evidence에 연결되는지 보여줘야 한다.
+
+구현:
+
+```text
+src/experiments/agent_capability_matrix.py
+outputs/report_tables/agent_capability_matrix.csv
+outputs/report_tables/agent_capability_matrix.md
+```
+
+구현 방식:
+
+- AURA COA cards에서 선택된 attack capability를 집계한다.
+- E5/E7 defense events에서 TSRA-R defense action capability를 집계한다.
+- TSRA action ablation, adaptive memory summary, metric gate를 읽어 observed effect와 validation gate를 붙인다.
+- 모든 row에 safety boundary를 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.agent_capability_matrix` 명령으로 재생성 가능하다.
+- 완료. attack/defense capability 10개가 생성된다.
+- 완료. 핵심 capability `queue_pressure`, `priority_reroute`, `stale_badge`, `ml_attack_alert`, `adaptive_optional_action_gating`이 포함된다.
+- 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_capability_matrix
+```
+
+검증 결과:
+
+```text
+agent_capability_matrix.csv: 10 capabilities
+attack side: 4
+defense side: 6
+required capabilities: present
+```
+
+해석:
+
+- 이 산출물은 에이전트별 "할 수 있는 일"을 runtime action과 검증 evidence에 연결한다.
+- 공격/방어 에이전트를 따로 고도화할 때 capability 단위로 작업을 나눌 수 있다.
+
+## P15. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

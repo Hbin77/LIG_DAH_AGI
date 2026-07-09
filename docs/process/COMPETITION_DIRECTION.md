@@ -132,9 +132,10 @@ Metrics
 4. DecisionTrace가 reason, memory, tool, candidate, selected action을 충분히 남기는지 검증한다.
 5. 대표 agent loop replay로 observe-memory-tool-candidate-decision-feedback 흐름을 확인한다.
 6. 에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 인터페이스를 manifest로 명시한다.
-7. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
-8. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-9. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+7. 에이전트 capability를 runtime action, observed effect, validation gate에 연결한다.
+8. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
+9. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+10. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -482,6 +483,32 @@ outputs/report_tables/agent_interface_manifest.md
 agent_interface_manifest rows: 4
 attack side: AURA, AURA-ML
 defense side: TSRA-R, TSRA-R-ML
+```
+
+### P14. Agent Capability Matrix
+
+상태: 완료
+
+목적:
+
+- AURA 공격 capability와 TSRA-R 방어 capability를 같은 표에서 관리한다.
+- 각 capability를 runtime action, decision source, observed effect, validation gate에 연결한다.
+- 공격/방어 에이전트 고도화 작업을 capability 단위로 분리할 수 있게 한다.
+
+산출물:
+
+```text
+src/experiments/agent_capability_matrix.py
+outputs/report_tables/agent_capability_matrix.csv
+outputs/report_tables/agent_capability_matrix.md
+```
+
+검증 결과:
+
+```text
+agent_capability_matrix rows: 10
+attack capabilities: 4
+defense capabilities: 6
 ```
 
 ## 최종 판단 기준

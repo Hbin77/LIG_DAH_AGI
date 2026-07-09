@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 118
-- total_payload_bytes: 2296968
+- payload_file_count: 121
+- total_payload_bytes: 2329009
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 119
-- zip_bytes: 1568468
-- zip_sha256: `2bf7ef2f51a9e3eb5a9b164948dcd33c8a34d0f840094d19500e3db7e9800321`
+- zip_file_count: 122
+- zip_bytes: 1576594
+- zip_sha256: `4206b947c1b06bae4137adeaaa4e479978d09169d1c2cb6f7a85c001a7927ace`
 
 ## 포함 파일
 
@@ -80,6 +80,8 @@
 - `outputs/models/tsra_detector_metrics.json`
 - `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.csv`
 - `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.md`
+- `outputs/report_tables/agent_capability_matrix.csv`
+- `outputs/report_tables/agent_capability_matrix.md`
 - `outputs/report_tables/agent_contract_validation.csv`
 - `outputs/report_tables/agent_contract_validation.md`
 - `outputs/report_tables/agent_decision_trace_summary.csv`
@@ -118,6 +120,7 @@
 - `src/aura/ml_impact_predictor.py`
 - `src/aura/rule_decision_engine.py`
 - `src/experiments/__init__.py`
+- `src/experiments/agent_capability_matrix.py`
 - `src/experiments/agent_interface_manifest.py`
 - `src/experiments/agent_loop_replay.py`
 - `src/experiments/aura_coa_cards.py`

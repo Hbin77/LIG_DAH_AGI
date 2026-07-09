@@ -181,6 +181,19 @@ This writes:
 
 The manifest lists each active attack/defense agent's goal, policies, input contract, memory contract, tool contract, candidate actions, selected actions, and event outputs.
 
+## Generate Agent Capability Matrix
+
+```bash
+python3 -m src.experiments.agent_capability_matrix
+```
+
+This writes:
+
+- `outputs/report_tables/agent_capability_matrix.csv`
+- `outputs/report_tables/agent_capability_matrix.md`
+
+The matrix maps AURA/TSRA-R capabilities to runtime actions, decision sources, evidence counts, observed effects, and validation gates.
+
 ## Generate AURA COA Cards
 
 ```bash
@@ -363,6 +376,7 @@ python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
 python3 -m src.experiments.agent_interface_manifest
+python3 -m src.experiments.agent_capability_matrix
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards

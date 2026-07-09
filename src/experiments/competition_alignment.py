@@ -122,14 +122,16 @@ ALIGNMENT_SPECS = [
             "src/experiments/trace_quality_audit.py",
             "src/experiments/agent_loop_replay.py",
             "src/experiments/agent_interface_manifest.py",
+            "src/experiments/agent_capability_matrix.py",
             "outputs/report_tables/agent_decision_trace_summary.csv",
             "outputs/report_tables/agent_contract_validation.csv",
             "outputs/report_tables/decision_trace_quality_audit.csv",
             "outputs/report_tables/agent_loop_replay.csv",
             "outputs/report_tables/agent_interface_manifest.csv",
+            "outputs/report_tables/agent_capability_matrix.csv",
         ],
         next_gate=(
-            "Agent changes must keep attack/defense interfaces explicit and pass contract plus trace-quality validation."
+            "Agent changes must keep attack/defense interfaces and capabilities explicit."
         ),
         row_checks=[
             RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 200),
@@ -137,6 +139,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
+            RowCountCheck("outputs/report_tables/agent_capability_matrix.csv", 10),
         ],
     ),
     AlignmentSpec(

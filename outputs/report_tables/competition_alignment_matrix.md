@@ -8,7 +8,7 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 | A01 | Defense mission grounding | MissionSimulator / scenario docs | verified | Any new feature must map to SATCOM, C4ISR, COP, PACE, or critical traffic. |
 | A02 | Attack scenario | AURA | verified | Attack improvements must produce COA cards and never introduce live RF, exploit, or packet actions. |
 | A03 | Defense architecture | TSRA-R | verified | Defense changes must be checked against mission impact plus at least one action-specific metric. |
-| A04 | AI agent architecture | AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace | verified | Agent changes must keep attack/defense interfaces explicit and pass contract plus trace-quality validation. |
+| A04 | AI agent architecture | AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace | verified | Agent changes must keep attack/defense interfaces and capabilities explicit. |
 | A05 | Attack-defense cooperation | Battle timeline / Incident summary | verified | New experiments must preserve attack events, defense events, trace reasons, and metric snapshots. |
 | A06 | ML contribution | AURA ML / TSRA-R ML | verified | ML claims must state task, metric, model role, and whether the model changes closed-loop behavior. |
 | A07 | Repeatable evidence | Experiment runners | verified | Metric claims must pass metric_gate_summary and point to batch or dedicated experiments. |
@@ -49,10 +49,10 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 
 - Goal: Show agent structure beyond direct Python policy calls.
 - Mechanism: AgentRuntime wraps observe, memory summary, tool calls, candidate scoring, selected action, DecisionTrace, and feedback updates.
-- Evidence: src/agents/runtime.py | src/agents/memory.py | src/agents/tools.py | src/agents/schema.py | src/experiments/validate_event_contracts.py | src/experiments/trace_quality_audit.py | src/experiments/agent_loop_replay.py | src/experiments/agent_interface_manifest.py | outputs/report_tables/agent_decision_trace_summary.csv | outputs/report_tables/agent_contract_validation.csv | outputs/report_tables/decision_trace_quality_audit.csv | outputs/report_tables/agent_loop_replay.csv | outputs/report_tables/agent_interface_manifest.csv
+- Evidence: src/agents/runtime.py | src/agents/memory.py | src/agents/tools.py | src/agents/schema.py | src/experiments/validate_event_contracts.py | src/experiments/trace_quality_audit.py | src/experiments/agent_loop_replay.py | src/experiments/agent_interface_manifest.py | src/experiments/agent_capability_matrix.py | outputs/report_tables/agent_decision_trace_summary.csv | outputs/report_tables/agent_contract_validation.csv | outputs/report_tables/decision_trace_quality_audit.csv | outputs/report_tables/agent_loop_replay.csv | outputs/report_tables/agent_interface_manifest.csv | outputs/report_tables/agent_capability_matrix.csv
 - Status: verified
-- Notes: outputs/report_tables/agent_decision_trace_summary.csv rows=215; outputs/report_tables/agent_contract_validation.csv rows=49; outputs/report_tables/decision_trace_quality_audit.csv rows=9; outputs/report_tables/agent_loop_replay.csv rows=8; outputs/report_tables/agent_interface_manifest.csv rows=4
-- Next gate: Agent changes must keep attack/defense interfaces explicit and pass contract plus trace-quality validation.
+- Notes: outputs/report_tables/agent_decision_trace_summary.csv rows=215; outputs/report_tables/agent_contract_validation.csv rows=49; outputs/report_tables/decision_trace_quality_audit.csv rows=9; outputs/report_tables/agent_loop_replay.csv rows=8; outputs/report_tables/agent_interface_manifest.csv rows=4; outputs/report_tables/agent_capability_matrix.csv rows=10
+- Next gate: Agent changes must keep attack/defense interfaces and capabilities explicit.
 
 ### A05 Attack-defense cooperation
 

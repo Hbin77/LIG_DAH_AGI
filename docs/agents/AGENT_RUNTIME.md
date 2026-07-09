@@ -209,6 +209,23 @@ outputs/report_tables/agent_interface_manifest.md
 
 이 manifest는 AURA/AURA-ML을 `attack`, TSRA-R/TSRA-R-ML을 `defense` side로 분리해 보여준다.
 
+## Capability Matrix
+
+에이전트별 capability와 검증 증거는 다음 명령으로 생성한다.
+
+```bash
+python3 -m src.experiments.agent_capability_matrix
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_capability_matrix.csv
+outputs/report_tables/agent_capability_matrix.md
+```
+
+이 matrix는 AURA 공격 효과와 TSRA-R 방어 액션을 runtime action, decision source, observed effect, validation gate에 연결한다.
+
 예시:
 
 ```json

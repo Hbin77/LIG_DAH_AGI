@@ -33,6 +33,7 @@ REQUIRED_FILES = [
     "src/experiments/trace_quality_audit.py",
     "src/experiments/agent_loop_replay.py",
     "src/experiments/agent_interface_manifest.py",
+    "src/experiments/agent_capability_matrix.py",
     "src/experiments/metric_gate.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -53,6 +54,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_loop_replay.md",
     "outputs/report_tables/agent_interface_manifest.csv",
     "outputs/report_tables/agent_interface_manifest.md",
+    "outputs/report_tables/agent_capability_matrix.csv",
+    "outputs/report_tables/agent_capability_matrix.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -230,6 +233,32 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("agent_interface_manifest rows=4 agents=attack/defense")
 
+    capability_rows = read_csv("outputs/report_tables/agent_capability_matrix.csv")
+    require(len(capability_rows) == 10, f"expected 10 capability rows, got {len(capability_rows)}")
+    capability_sides = {row["side"] for row in capability_rows}
+    require(capability_sides == {"attack", "defense"}, f"unexpected capability sides: {sorted(capability_sides)}")
+    capabilities = {row["capability"] for row in capability_rows}
+    required_capabilities = {
+        "queue_pressure",
+        "priority_reroute",
+        "stale_badge",
+        "ml_attack_alert",
+        "adaptive_optional_action_gating",
+    }
+    require(
+        required_capabilities.issubset(capabilities),
+        f"capability matrix missing required capabilities: {sorted(required_capabilities - capabilities)}",
+    )
+    require(
+        all(row["validation_gate"] for row in capability_rows),
+        "capability matrix has rows without validation gates",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in capability_rows),
+        "capability matrix missing safety boundary",
+    )
+    checks.append("agent_capability_matrix rows=10 attack/defense")
+
     metric_gate_rows = read_csv("outputs/report_tables/metric_gate_summary.csv")
     require(len(metric_gate_rows) == 11, f"expected 11 metric gate rows, got {len(metric_gate_rows)}")
     failed_metric_gates = [
@@ -371,6 +400,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_interface_manifest.md" in manifest_text,
         "manifest missing agent interface manifest",
+    )
+    require(
+        "outputs/report_tables/agent_capability_matrix.md" in manifest_text,
+        "manifest missing agent capability matrix",
     )
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,
