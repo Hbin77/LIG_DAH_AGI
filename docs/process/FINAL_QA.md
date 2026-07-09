@@ -43,7 +43,7 @@ python3 scripts/build_submission_package.py
 python3 scripts/generate_release_handoff.py
 python3 scripts/freeze_release_candidate.py
 python3 scripts/verify_submission_state.py
-python3 scripts/verify_external_package_link.py "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" --allow-file-url
+python3 scripts/verify_external_package_link.py "file://$(pwd)/outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip" --allow-file-url
 ```
 
 ## 검증 결과

@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIR = ROOT / "outputs" / "package"
-DEFAULT_ZIP = PACKAGE_DIR / "DAH2026_source_LIG_DAH_AGI.zip"
+DEFAULT_ZIP = PACKAGE_DIR / "DAH2026_소스코드_LIG_DAH_AGI.zip"
 MANIFEST_PATH = PACKAGE_DIR / "submission_manifest.md"
 ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
 
@@ -256,7 +256,7 @@ def parse_args() -> argparse.Namespace:
         "--output",
         type=Path,
         default=DEFAULT_ZIP,
-        help="ZIP output path. Defaults to outputs/package/DAH2026_source_LIG_DAH_AGI.zip",
+        help="ZIP output path. Defaults to outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip",
     )
     parser.add_argument(
         "--manifest-only",

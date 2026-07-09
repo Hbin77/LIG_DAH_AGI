@@ -291,7 +291,7 @@ outputs/package/submission_manifest.md
 검증 결과:
 
 ```text
-package zip: outputs/package/DAH2026_source_LIG_DAH_AGI.zip
+package zip: outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip
 zip size:    about 1.5MB
 excluded:    __pycache__, tmp logs, datasets, model binaries, seed-level logs
 ```
@@ -817,6 +817,22 @@ outputs/report_tables/agent_engagement_scorecard.md
 agent_engagement_scorecard rows: 10
 scorecard_status: pass=10
 covered experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+```
+
+### P25. 제출 ZIP 파일명 기준
+
+목적:
+
+- 최종 업로드 대상 ZIP을 예선 안내서의 `DAH2026_소스코드_[팀명].zip` 형식과 맞춘다.
+- manifest, release handoff, local/external link verifier가 같은 파일을 기준으로 움직이게 한다.
+- 제출 직전 수동 rename으로 SHA-256 검증 기준이 흔들리는 상황을 없앤다.
+
+기준:
+
+```text
+package zip: outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip
+branch: hbin
+main: preserve
 ```
 
 ## 최종 판단 기준

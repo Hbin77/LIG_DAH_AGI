@@ -11,7 +11,7 @@ from typing import Callable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ZIP_PATH = ROOT / "outputs" / "package" / "DAH2026_source_LIG_DAH_AGI.zip"
+ZIP_PATH = ROOT / "outputs" / "package" / "DAH2026_소스코드_LIG_DAH_AGI.zip"
 MANIFEST_PATH = ROOT / "outputs" / "package" / "submission_manifest.md"
 EXPECTED_ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
 
@@ -1186,7 +1186,7 @@ def check_git_state(require_clean: bool) -> list[str]:
         tracked_dirty = [
             line
             for line in status.splitlines()
-            if line and not line.startswith("?? ") and "outputs/package/DAH2026_source_LIG_DAH_AGI.zip" not in line
+            if line and not line.startswith("?? ") and "outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip" not in line
         ]
         require(not tracked_dirty, f"tracked working tree is dirty: {tracked_dirty[:8]}")
         checks.append("tracked_worktree=clean")

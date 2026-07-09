@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "outputs/package/submission_manifest.md"
-ZIP_PATH = ROOT / "outputs/package/DAH2026_source_LIG_DAH_AGI.zip"
+ZIP_PATH = ROOT / "outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip"
 
 
 def run_step(label: str, command: list[str]) -> None:

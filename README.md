@@ -521,7 +521,7 @@ python3 scripts/build_submission_package.py
 
 This writes:
 
-- `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
+- `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
 - `outputs/package/submission_manifest.md`
 
 The package includes code, docs, curated CSV summaries, figures, report tables, and model metric JSON files. It excludes regenerated temporary logs, seed-level batch directories, synthetic datasets, Python caches, and model binaries such as `.pkl` or `.pt`. ZIP entries are path-sorted with fixed metadata so repeated builds from the same payload produce a stable SHA-256.
@@ -556,17 +556,17 @@ This checks required files, core CSV row counts, safety-boundary text, package c
 
 ## Verify External Package Link
 
-After uploading `outputs/package/DAH2026_source_LIG_DAH_AGI.zip` to the submission cloud, verify that the public download link serves the same ZIP recorded in `outputs/package/submission_manifest.md`:
+After uploading `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip` to the submission cloud, verify that the public download link serves the same ZIP recorded in `outputs/package/submission_manifest.md`:
 
 ```bash
-python3 scripts/verify_external_package_link.py "https://example.com/download/DAH2026_source_LIG_DAH_AGI.zip"
+python3 scripts/verify_external_package_link.py "https://example.com/download/DAH2026_소스코드_LIG_DAH_AGI.zip"
 ```
 
 Local self-test against the current ZIP:
 
 ```bash
 python3 scripts/verify_external_package_link.py \
-  "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" \
+  "file://$(pwd)/outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip" \
   --allow-file-url
 ```
 

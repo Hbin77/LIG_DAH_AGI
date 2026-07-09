@@ -1515,7 +1515,7 @@ scripts/verify_external_package_link.py
 
 ```bash
 python3 scripts/verify_external_package_link.py \
-  "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" \
+  "file://$(pwd)/outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip" \
   --allow-file-url
 ```
 
@@ -1686,7 +1686,7 @@ freeze_status: pass
 
 완료 기준:
 
-- `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`가 최신 manifest와 일치한다.
+- `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`가 최신 manifest와 일치한다.
 - 외부 제출 링크가 비로그인 환경에서 다운로드된다.
 - 외부 링크 verifier가 `status: pass`를 출력한다.
 - `origin/main`은 유지되고 `origin/hbin`만 최신 개발 커밋을 가리킨다.
@@ -1783,6 +1783,35 @@ experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 
 - AURA가 왜 공격을 골랐는지, TSRA-R이 무엇으로 대응했는지, mission impact가 어떻게 움직였는지를 같은 row에서 볼 수 있다.
 - 공격/방어/AI 에이전트 협력 구조의 evidence가 더 직접적으로 연결됐다.
+
+## P35. 제출 ZIP 공식 파일명 정렬
+
+상태: 완료
+
+문제:
+
+- 제출 ZIP의 내부 품질은 검증됐지만, 기본 파일명이 안내서의 `DAH2026_소스코드_[팀명].zip` 형식과 다르면 업로드 단계에서 사람이 다시 이름을 바꾸게 된다.
+- 사람이 수동으로 이름을 바꾸면 manifest의 `zip_path`, release handoff, 외부 링크 self-test 명령과 어긋날 수 있다.
+
+구현:
+
+```text
+scripts/build_submission_package.py
+scripts/freeze_release_candidate.py
+scripts/verify_submission_state.py
+docs/process/SUBMISSION_PACKAGE.md
+```
+
+검증 기준:
+
+- `build_submission_package.py`의 기본 ZIP 경로가 `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`이다.
+- `verify_submission_state.py`가 manifest의 `zip_path`, ZIP byte count, SHA-256, entry count를 같은 경로 기준으로 검증한다.
+- 외부 링크 verifier의 로컬 self-test 명령도 같은 파일을 바라본다.
+
+해석:
+
+- 제출 직전 수동 rename을 없애고, 생성된 파일 그대로 업로드할 수 있게 했다.
+- ZIP 파일은 여전히 Git에 올리지 않고, manifest와 검증 스크립트만 추적한다.
 
 ## 진행 원칙
 

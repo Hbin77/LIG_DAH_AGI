@@ -1716,7 +1716,7 @@ python3 scripts/verify_external_package_link.py "https://..."
 
 ```bash
 python3 scripts/verify_external_package_link.py \
-  "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" \
+  "file://$(pwd)/outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip" \
   --allow-file-url
 ```
 
@@ -1925,3 +1925,32 @@ experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 - 공격 이벤트 10건 모두 공격 선택 margin, 방어 이벤트 수, response status, peak 대비 impact reduction으로 연결된다.
 - E7의 AURA-ML trace와 attack event agent 표기 차이는 AURA 계열 agent로 조인되게 처리했다.
 - closed simulation evidence만 결합하며 실제 공격 기능은 추가하지 않았다.
+
+### 48. 제출 ZIP 공식 파일명 정렬
+
+제출 직전 운영에서 같은 ZIP을 가리키는 이름이 여러 개 있으면 업로드, manifest 검증, 외부 링크 검증 단계에서 혼선이 생긴다. 이번 변경은 기본 생성 파일명과 문서의 검증 명령을 예선 안내서 형식에 맞춰 하나로 정렬했다.
+
+변경한 기준:
+
+```text
+outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip
+```
+
+적용 범위:
+
+```text
+scripts/build_submission_package.py
+scripts/freeze_release_candidate.py
+scripts/verify_submission_state.py
+README.md
+docs/process/SUBMISSION_PACKAGE.md
+docs/process/FINAL_QA.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+docs/process/COMPETITION_DIRECTION.md
+```
+
+판단:
+
+- 기본 파일명은 `DAH2026_소스코드_[팀명].zip` 제출 형식과 맞춘다.
+- ZIP 자체는 Git에 커밋하지 않고, manifest와 SHA-256 검증으로 동일성을 확인한다.
+- `main`은 그대로 두고 `hbin`에서만 이 기준을 공유한다.

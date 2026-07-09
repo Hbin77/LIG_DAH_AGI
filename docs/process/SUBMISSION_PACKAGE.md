@@ -13,10 +13,16 @@ python3 scripts/build_submission_package.py
 산출물:
 
 ```text
-outputs/package/DAH2026_source_LIG_DAH_AGI.zip
+outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip
 outputs/package/submission_manifest.md
 outputs/package/release_handoff.md
 ```
+
+파일명 기준:
+
+- 기본 ZIP 파일명은 예선 안내서의 `DAH2026_소스코드_[팀명].zip` 형식에 맞춘다.
+- 팀 식별자는 GitHub repository와 같은 `LIG_DAH_AGI`를 사용한다.
+- 자동 생성 manifest, release handoff, local/external link verifier는 모두 이 기본 파일명을 기준으로 검증한다.
 
 ## 포함하는 것
 
@@ -94,5 +100,6 @@ outputs/batch/seed_*: 0
 - 개발 산출물은 계속 `hbin` 브랜치에 커밋한다.
 - `main` 브랜치는 보호용 기본 브랜치로 유지한다.
 - ZIP 파일은 로컬 생성 산출물로 두고 Git에는 올리지 않는다.
+- 제출 업로드 대상 ZIP은 `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip` 하나로 본다.
 - 같은 payload에서 같은 SHA-256이 나오도록 ZIP entry 순서와 metadata를 고정한다.
 - ZIP을 외부 클라우드에 올릴 때는 `outputs/package/submission_manifest.md`의 SHA-256 값을 함께 확인한다.
