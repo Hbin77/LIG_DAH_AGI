@@ -2006,6 +2006,58 @@ E7 minus E6 mission impact mean: 0.0167761
 - 탐지 기반 reactive 방어라는 설계 차이를 사전 방어 억제, alert overlap, threshold trace, bounded cost로 설명한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
+## P40. ML Threshold Sweep
+
+상태: 완료
+
+문제:
+
+- TSRA-R-ML의 `threshold=0.75`가 코드상 존재하지만, 값 선택 근거가 별도 실험으로 고정되어 있지 않았다.
+- threshold가 낮거나 높을 때 alert 수, no-op, latency, mission impact가 어떻게 바뀌는지 확인해야 한다.
+
+구현:
+
+```text
+src/experiments/run_ml_threshold_sweep.py
+outputs/batch/ml_threshold_sweep_raw.csv
+outputs/batch/ml_threshold_sweep_summary.csv
+outputs/report_tables/ml_threshold_sweep.csv
+outputs/report_tables/ml_threshold_sweep.md
+```
+
+검증 기준:
+
+- threshold 0.55, 0.65, 0.75, 0.85, 0.95를 모두 실행한다.
+- threshold마다 10 deterministic seeds를 사용한다.
+- 0.75 baseline은 usable이어야 한다.
+- 0.95 high threshold는 watch로 분리되어야 한다.
+- 0.95 mission impact mean은 0.75보다 높아야 한다.
+- 모든 row는 closed simulation safety boundary를 포함한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.run_ml_threshold_sweep
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+ml_threshold_sweep_raw rows: 50
+ml_threshold_sweep_summary rows: 5
+0.75 status: usable
+0.95 status: watch
+0.75 mission impact mean: 0.161111
+0.95 mission impact mean: 0.232634
+```
+
+해석:
+
+- 현재 E7 threshold는 plateau 안에 있다.
+- 너무 높은 threshold는 방어창 개방을 늦춰 mission impact를 올린다.
+- threshold는 숨은 상수가 아니라 재실행 가능한 tuning parameter다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

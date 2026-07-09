@@ -395,6 +395,21 @@ This writes:
 
 The audit explains E7 as a reactive ML-defense tradeoff: it suppresses pre-attack defense events, exposes first-response latency, verifies ML alerts against active attack windows, preserves core TSRA-R actions, and bounds the mission-impact cost versus E6.
 
+## Run ML Threshold Sweep
+
+```bash
+python3 -m src.experiments.run_ml_threshold_sweep
+```
+
+This writes:
+
+- `outputs/batch/ml_threshold_sweep_raw.csv`
+- `outputs/batch/ml_threshold_sweep_summary.csv`
+- `outputs/report_tables/ml_threshold_sweep.csv`
+- `outputs/report_tables/ml_threshold_sweep.md`
+
+The sweep runs TSRA-R-ML thresholds `0.55`, `0.65`, `0.75`, `0.85`, and `0.95` across 10 deterministic seeds. It records mission impact, alert timing, no-op behavior, and watch/usable status so the anomaly threshold is a measured tuning parameter rather than a hidden constant.
+
 ## Generate Attack-Defense Coverage
 
 ```bash
@@ -666,6 +681,7 @@ python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.ml_contribution_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
+python3 -m src.experiments.run_ml_threshold_sweep
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay

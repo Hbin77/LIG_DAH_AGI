@@ -2124,3 +2124,46 @@ E7 minus E6 mission impact mean: 0.0167761
 - 그 비용으로 첫 alert가 20초 늦고, repeated metric에서 E7 impact가 E6보다 0.0167761 높다.
 - core defense action은 유지되므로 E7은 방어 기능 축소가 아니라 reactive trigger 구조의 차이를 보여준다.
 - 실제 공격 기능은 추가하지 않고 closed simulation trace, event log, batch metric만 읽는다.
+
+### 53. ML Threshold Sweep을 추가한 이유
+
+`MLTSRAR(threshold=0.75)`는 코드상 명시되어 있지만, 왜 그 값이 말이 되는지 별도 산출물이 없으면 임의 상수처럼 보인다. E7을 강화하려면 threshold를 숨기지 말고 운영 파라미터로 노출하고, 낮은 threshold와 높은 threshold의 tradeoff를 수치로 보여줘야 한다.
+
+이번 변경은 TSRA-R-ML anomaly threshold sweep을 추가했다.
+
+추가한 것:
+
+```text
+src/experiments/run_ml_threshold_sweep.py
+outputs/batch/ml_threshold_sweep_raw.csv
+outputs/batch/ml_threshold_sweep_summary.csv
+outputs/report_tables/ml_threshold_sweep.csv
+outputs/report_tables/ml_threshold_sweep.md
+```
+
+실험 설정:
+
+```text
+thresholds: 0.55, 0.65, 0.75, 0.85, 0.95
+runs per threshold: 10 deterministic seeds
+agent pair: AURA-ML + TSRA-R-ML
+```
+
+검증 결과:
+
+```text
+ml_threshold_sweep_raw rows: 50
+ml_threshold_sweep_summary rows: 5
+0.55 impact_mean: 0.161111, status: usable
+0.65 impact_mean: 0.161111, status: usable
+0.75 impact_mean: 0.161111, status: usable
+0.85 impact_mean: 0.161111, status: usable
+0.95 impact_mean: 0.232634, status: watch
+```
+
+해석:
+
+- 0.55~0.85 구간은 같은 impact plateau를 보인다.
+- 0.95는 alert 수가 줄고 first alert latency가 늘며 mission impact가 올라간다.
+- 현재 E7 baseline threshold 0.75는 plateau 안에 있고, 너무 높은 0.95는 watch로 분리된다.
+- 실제 공격 기능은 추가하지 않고 closed simulation threshold tuning만 수행한다.

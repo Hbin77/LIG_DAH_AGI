@@ -242,13 +242,15 @@ ALIGNMENT_SPECS = [
             "from anomaly probability; ML contribution audit ties model quality, tool invocation, E6/E7 "
             "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together; "
             "reactive defense tradeoff audit explains E7's pre-attack suppression, alert overlap, "
-            "first-response cost, and bounded mission-impact tradeoff versus E6."
+            "first-response cost, and bounded mission-impact tradeoff versus E6; threshold sweep "
+            "makes the anomaly threshold a measured tuning parameter instead of a hidden constant."
         ),
         agent_or_component="AURA ML / TSRA-R ML",
         evidence_files=[
             "src/ml/train_aura_impact_model.py",
             "src/ml/train_tsra_detector.py",
             "src/ml/train_aura_mps_mlp.py",
+            "src/experiments/run_ml_threshold_sweep.py",
             "src/experiments/ml_contribution_audit.py",
             "src/experiments/reactive_defense_tradeoff_audit.py",
             "outputs/models/aura_impact_model_metrics.json",
@@ -258,6 +260,9 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/ml_contribution_audit.md",
             "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
             "outputs/report_tables/reactive_defense_tradeoff_audit.md",
+            "outputs/batch/ml_threshold_sweep_summary.csv",
+            "outputs/report_tables/ml_threshold_sweep.csv",
+            "outputs/report_tables/ml_threshold_sweep.md",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             "outputs/report_tables/metric_gate_summary.csv",
         ],
@@ -269,10 +274,13 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_pre_first_defense_events=0"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "active_attack_overlap=9"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_minus_e6=0.0167761"),
+            ContentCheck("outputs/report_tables/ml_threshold_sweep.csv", "baseline threshold balances alert timing"),
+            ContentCheck("outputs/report_tables/ml_threshold_sweep.csv", "watch"),
         ],
         row_checks=[
             RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7),
             RowCountCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", 7),
+            RowCountCheck("outputs/batch/ml_threshold_sweep_summary.csv", 5),
         ],
     ),
     AlignmentSpec(

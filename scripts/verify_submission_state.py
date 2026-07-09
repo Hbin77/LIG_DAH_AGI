@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "src/aura/rule_decision_engine.py",
     "src/tsra_r/rule_defender.py",
     "src/tsra_r/adaptive_defender.py",
+    "src/experiments/run_ml_threshold_sweep.py",
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
     "src/experiments/operator_alerts.py",
@@ -64,6 +65,8 @@ REQUIRED_FILES = [
     "outputs/batch/resilience_gain_summary.csv",
     "outputs/batch/tsra_action_ablation_summary.csv",
     "outputs/batch/adaptive_memory_summary.csv",
+    "outputs/batch/ml_threshold_sweep_raw.csv",
+    "outputs/batch/ml_threshold_sweep_summary.csv",
     "outputs/report_tables/agent_decision_trace_summary.csv",
     "outputs/report_tables/aura_coa_cards.csv",
     "outputs/report_tables/battle_timeline.csv",
@@ -115,6 +118,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/ml_contribution_audit.md",
     "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
     "outputs/report_tables/reactive_defense_tradeoff_audit.md",
+    "outputs/report_tables/ml_threshold_sweep.csv",
+    "outputs/report_tables/ml_threshold_sweep.md",
     "outputs/report_tables/safety_boundary_audit.csv",
     "outputs/report_tables/safety_boundary_audit.md",
     "outputs/report_tables/submission_readiness_audit.csv",
@@ -857,6 +862,47 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("reactive_defense_tradeoff_audit rows=7 pass")
 
+    threshold_raw_rows = read_csv("outputs/batch/ml_threshold_sweep_raw.csv")
+    threshold_summary_rows = read_csv("outputs/batch/ml_threshold_sweep_summary.csv")
+    threshold_report_rows = read_csv("outputs/report_tables/ml_threshold_sweep.csv")
+    require(
+        len(threshold_raw_rows) == 50,
+        f"expected 50 ML threshold sweep raw rows, got {len(threshold_raw_rows)}",
+    )
+    require(
+        len(threshold_summary_rows) == 5,
+        f"expected 5 ML threshold sweep summary rows, got {len(threshold_summary_rows)}",
+    )
+    require(
+        threshold_report_rows == threshold_summary_rows,
+        "ML threshold sweep report CSV differs from batch summary",
+    )
+    required_thresholds = {"0.55", "0.65", "0.75", "0.85", "0.95"}
+    observed_thresholds = {row["threshold"] for row in threshold_summary_rows}
+    require(
+        observed_thresholds == required_thresholds,
+        f"ML threshold sweep has unexpected thresholds: {sorted(observed_thresholds)}",
+    )
+    by_threshold = {row["threshold"]: row for row in threshold_summary_rows}
+    require(
+        by_threshold["0.75"]["tuning_status"] == "usable",
+        "ML threshold sweep baseline 0.75 is not usable",
+    )
+    require(
+        by_threshold["0.95"]["tuning_status"] == "watch",
+        "ML threshold sweep high threshold 0.95 should be watch",
+    )
+    require(
+        float(by_threshold["0.95"]["mission_impact_mean"])
+        > float(by_threshold["0.75"]["mission_impact_mean"]),
+        "ML threshold sweep does not show high-threshold impact cost",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in threshold_summary_rows),
+        "ML threshold sweep summary missing safety boundary",
+    )
+    checks.append("ml_threshold_sweep rows=5 raw=50 status=usable/watch")
+
     safety_rows = read_csv("outputs/report_tables/safety_boundary_audit.csv")
     require(len(safety_rows) == 5, f"expected 5 safety boundary rows, got {len(safety_rows)}")
     failed_safety = [
@@ -1405,6 +1451,14 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/reactive_defense_tradeoff_audit.md" in manifest_text,
         "manifest missing reactive defense tradeoff audit",
+    )
+    require(
+        "outputs/batch/ml_threshold_sweep_summary.csv" in manifest_text,
+        "manifest missing ML threshold sweep summary",
+    )
+    require(
+        "outputs/report_tables/ml_threshold_sweep.md" in manifest_text,
+        "manifest missing ML threshold sweep report",
     )
     require(
         "outputs/report_tables/safety_boundary_audit.md" in manifest_text,

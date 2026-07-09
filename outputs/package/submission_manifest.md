@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 179
-- total_payload_bytes: 3382584
+- payload_file_count: 184
+- total_payload_bytes: 3426464
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 180
-- zip_bytes: 1761602
-- zip_sha256: `bf1549ef9f4f88d2b3f3938490e390ac63fbfad0d1d824e53985fc21f6bdd885`
+- zip_file_count: 185
+- zip_bytes: 1771850
+- zip_sha256: `dea08a15ce8450f4a66426f5d438c1884553d30eef11df78a26ccd62b64fe878`
 
 ## 포함 파일
 
@@ -52,6 +52,8 @@
 - `docs/process/SUBMISSION_PACKAGE.md`
 - `outputs/batch/adaptive_memory_raw.csv`
 - `outputs/batch/adaptive_memory_summary.csv`
+- `outputs/batch/ml_threshold_sweep_raw.csv`
+- `outputs/batch/ml_threshold_sweep_summary.csv`
 - `outputs/batch/repeated_experiment_raw.csv`
 - `outputs/batch/repeated_experiment_summary.csv`
 - `outputs/batch/resilience_gain_summary.csv`
@@ -131,6 +133,8 @@
 - `outputs/report_tables/ml_contribution_audit.md`
 - `outputs/report_tables/ml_model_comparison.csv`
 - `outputs/report_tables/ml_model_comparison.md`
+- `outputs/report_tables/ml_threshold_sweep.csv`
+- `outputs/report_tables/ml_threshold_sweep.md`
 - `outputs/report_tables/operator_alerts.csv`
 - `outputs/report_tables/operator_alerts.md`
 - `outputs/report_tables/pace_transition_audit.csv`
@@ -188,6 +192,7 @@
 - `src/experiments/run_adaptive_memory.py`
 - `src/experiments/run_all.py`
 - `src/experiments/run_batch.py`
+- `src/experiments/run_ml_threshold_sweep.py`
 - `src/experiments/run_tsra_ablation.py`
 - `src/experiments/safety_boundary_audit.py`
 - `src/experiments/submission_readiness_audit.py`

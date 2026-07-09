@@ -915,6 +915,26 @@ E7 detector below_threshold traces: 16
 E7 detector above_threshold traces: 45
 ```
 
+### P30. ML Threshold Sweep
+
+목적:
+
+- TSRA-R-ML anomaly threshold를 숨은 상수가 아니라 재현 가능한 tuning parameter로 관리한다.
+- 너무 높은 threshold가 방어창 개방을 늦추고 mission impact를 올리는지 확인한다.
+- E7 baseline threshold 0.75가 sweep plateau 안에 있는지 확인한다.
+
+검증 기준:
+
+```text
+ml_threshold_sweep_raw rows: 50
+ml_threshold_sweep_summary rows: 5
+thresholds: 0.55, 0.65, 0.75, 0.85, 0.95
+0.75 status: usable
+0.95 status: watch
+0.75 mission impact mean: 0.161111
+0.95 mission impact mean: 0.232634
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.
