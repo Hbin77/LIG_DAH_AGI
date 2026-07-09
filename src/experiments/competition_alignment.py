@@ -145,6 +145,8 @@ ALIGNMENT_SPECS = [
             "and previous-action carryover across decision loops; tool usage audit verifies actual "
             "tool invocations with input and output summaries; runtime invariant audit verifies "
             "trace ordering, memory counters, selected-event links, and E7 rule-delegate sidecar coverage; "
+            "trace summary, interface manifest, and loop replay include the same E7 rule-delegate "
+            "sidecar so internal ML-to-rule delegation is visible in human-readable artifacts; "
             "causality audit verifies selected "
             "actions against candidate, tool, and score/threshold evidence; margin audit records "
             "top-score, threshold, eligible-ready, and no-op decision support; goal-alignment audit "
@@ -228,14 +230,26 @@ ALIGNMENT_SPECS = [
                 "outputs/report_tables/agent_tool_usage_audit.csv",
                 "E7_ml_aura_ml_tsra_r,TSRA-R,rule_defense_full,evaluate_defense_conditions",
             ),
+            ContentCheck(
+                "outputs/report_tables/agent_decision_trace_summary.csv",
+                "E7_ml_aura_ml_tsra_r,tsra_r_rule_delegate_traces.jsonl",
+            ),
+            ContentCheck(
+                "outputs/report_tables/agent_loop_replay.csv",
+                "E7_ml_aura_ml_tsra_r,TSRA-R,rule_defense_full,tsra_r_rule_delegate_traces.jsonl",
+            ),
+            ContentCheck(
+                "outputs/report_tables/agent_interface_manifest.csv",
+                "E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r",
+            ),
         ],
         row_checks=[
-            RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 200),
+            RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 262),
             RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 50),
             RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_runtime_invariant_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_quality_gate_audit.csv", 6),
-            RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
+            RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 10),
             RowCountCheck("outputs/report_tables/agent_decision_causality_audit.csv", 446),
             RowCountCheck("outputs/report_tables/agent_decision_margin_audit.csv", 446),
             RowCountCheck("outputs/report_tables/agent_goal_alignment_audit.csv", 446),

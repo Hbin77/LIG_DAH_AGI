@@ -15,6 +15,7 @@ DEFAULT_EXPERIMENTS = [
 TRACE_FILES = [
     "aura_decision_traces.jsonl",
     "tsra_r_decision_traces.jsonl",
+    "tsra_r_rule_delegate_traces.jsonl",
 ]
 DEFAULT_OUTPUT_CSV = Path("outputs/report_tables/agent_interface_manifest.csv")
 DEFAULT_OUTPUT_MD = Path("outputs/report_tables/agent_interface_manifest.md")

@@ -15,12 +15,15 @@ DEFAULT_EXPERIMENTS = [
 TRACE_FILES = [
     "aura_decision_traces.jsonl",
     "tsra_r_decision_traces.jsonl",
+    "tsra_r_rule_delegate_traces.jsonl",
 ]
 DEFAULT_OUTPUT_CSV = Path("outputs/report_tables/agent_decision_trace_summary.csv")
 DEFAULT_OUTPUT_MD = Path("outputs/report_tables/agent_decision_trace_summary.md")
 
 FIELDNAMES = [
     "experiment",
+    "trace_file",
+    "trace_id",
     "time_sec",
     "agent",
     "policy",
@@ -54,7 +57,7 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def summarize_trace(experiment: str, trace: dict[str, Any]) -> dict[str, Any]:
+def summarize_trace(experiment: str, trace_file: str, trace: dict[str, Any]) -> dict[str, Any]:
     observation = trace.get("observation") or {}
     signals = observation.get("signals") or {}
     selected = summarize_selected_action(trace.get("selected_action") or {})
@@ -65,6 +68,8 @@ def summarize_trace(experiment: str, trace: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "experiment": experiment,
+        "trace_file": trace_file,
+        "trace_id": trace.get("trace_id", ""),
         "time_sec": format_float(trace.get("time_sec")),
         "agent": trace.get("agent", ""),
         "policy": trace.get("policy", ""),
@@ -184,8 +189,17 @@ def collect_rows(experiment_root: Path, experiments: list[str]) -> list[dict[str
         for trace_filename in TRACE_FILES:
             path = experiment_root / experiment / trace_filename
             for trace in load_jsonl(path):
-                rows.append(summarize_trace(experiment, trace))
-    return sorted(rows, key=lambda row: (row["experiment"], float(row["time_sec"] or 0), row["agent"]))
+                rows.append(summarize_trace(experiment, trace_filename, trace))
+    return sorted(
+        rows,
+        key=lambda row: (
+            row["experiment"],
+            float(row["time_sec"] or 0),
+            row["agent"],
+            row["trace_file"],
+            row["trace_id"],
+        ),
+    )
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -200,6 +214,8 @@ def write_markdown(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     visible_fields = [
         "experiment",
+        "trace_file",
+        "trace_id",
         "time_sec",
         "agent",
         "policy",

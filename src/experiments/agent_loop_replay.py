@@ -14,6 +14,7 @@ DEFAULT_EXPERIMENTS = [
 TRACE_FILES = [
     "aura_decision_traces.jsonl",
     "tsra_r_decision_traces.jsonl",
+    "tsra_r_rule_delegate_traces.jsonl",
 ]
 DEFAULT_OUTPUT_CSV = Path("outputs/report_tables/agent_loop_replay.csv")
 DEFAULT_OUTPUT_MD = Path("outputs/report_tables/agent_loop_replay.md")
@@ -22,6 +23,7 @@ FIELDNAMES = [
     "experiment",
     "agent",
     "policy",
+    "trace_file",
     "trace_id",
     "time_sec",
     "loop_case",
@@ -58,7 +60,9 @@ def collect_rows(experiment_root: Path, experiments: list[str]) -> list[dict[str
         traces = []
         exp_dir = experiment_root / experiment
         for filename in TRACE_FILES:
-            traces.extend(read_jsonl(exp_dir / filename))
+            for trace in read_jsonl(exp_dir / filename):
+                trace["_trace_file"] = filename
+                traces.append(trace)
         grouped = group_by_agent_policy(traces)
         for (agent, policy), group in sorted(grouped.items()):
             for loop_case, trace in representative_traces(group):
@@ -108,6 +112,7 @@ def summarize_trace(experiment: str, loop_case: str, trace: dict[str, Any]) -> d
         "experiment": experiment,
         "agent": str(trace.get("agent", "")),
         "policy": str(trace.get("policy", "")),
+        "trace_file": str(trace.get("_trace_file", "")),
         "trace_id": str(trace.get("trace_id", "")),
         "time_sec": format_value(trace.get("time_sec")),
         "loop_case": loop_case,
@@ -367,7 +372,7 @@ def write_markdown(path: Path, rows: list[dict[str, str]]) -> None:
                 f"## Replay-{idx:02d}: {row['experiment']} / {row['agent']} / {row['loop_case']}",
                 "",
                 f"- Policy: `{row['policy']}`",
-                f"- Trace: `{row['trace_id']}` at t={row['time_sec']} sec",
+                f"- Trace: `{row['trace_id']}` from `{row['trace_file']}` at t={row['time_sec']} sec",
                 f"- Observe: {row['observe']}",
                 f"- Memory: {row['memory']}",
                 f"- Tools: {row['tools']}",

@@ -338,8 +338,28 @@ def check_csv_outputs() -> list[str]:
     checks.append("adaptive_memory_summary conditions=full/adaptive")
 
     trace_rows = read_csv("outputs/report_tables/agent_decision_trace_summary.csv")
-    require(len(trace_rows) >= 200, f"trace summary too small: {len(trace_rows)} rows")
-    checks.append(f"agent_decision_trace_summary rows={len(trace_rows)}")
+    require(len(trace_rows) == 262, f"expected 262 trace summary rows, got {len(trace_rows)}")
+    e7_delegate_summary_rows = [
+        row
+        for row in trace_rows
+        if row["experiment"] == "E7_ml_aura_ml_tsra_r"
+        and row.get("trace_file") == "tsra_r_rule_delegate_traces.jsonl"
+        and row["agent"] == "TSRA-R"
+        and row["policy"] == "rule_defense_full"
+    ]
+    require(
+        len(e7_delegate_summary_rows) == 47,
+        f"trace summary expected 47 E7 delegate rows, got {len(e7_delegate_summary_rows)}",
+    )
+    require(
+        any(row["selected_action"] != "no_op" for row in e7_delegate_summary_rows),
+        "trace summary E7 delegate rows never select a defense action",
+    )
+    require(
+        all(row.get("trace_id") for row in e7_delegate_summary_rows),
+        "trace summary E7 delegate rows missing trace ids",
+    )
+    checks.append("agent_decision_trace_summary rows=262 sidecar=47 pass")
 
     contract_rows = read_csv("outputs/report_tables/agent_contract_validation.csv")
     require(len(contract_rows) == 50, f"expected 50 contract checks, got {len(contract_rows)}")
@@ -550,7 +570,7 @@ def check_csv_outputs() -> list[str]:
     checks.append("agent_runtime_invariant_audit rows=10 pass")
 
     replay_rows = read_csv("outputs/report_tables/agent_loop_replay.csv")
-    require(len(replay_rows) == 8, f"expected 8 agent loop replay rows, got {len(replay_rows)}")
+    require(len(replay_rows) == 10, f"expected 10 agent loop replay rows, got {len(replay_rows)}")
     replay_agents = {row["agent"] for row in replay_rows}
     require(
         {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"}.issubset(replay_agents),
@@ -569,7 +589,29 @@ def check_csv_outputs() -> list[str]:
         all(row["observe"] and row["memory"] and row["selected_action"] and row["reason"] for row in replay_rows),
         "agent loop replay has incomplete loop summaries",
     )
-    checks.append("agent_loop_replay rows=8 agents/cases=complete")
+    require(
+        any(
+            row["experiment"] == "E7_ml_aura_ml_tsra_r"
+            and row["agent"] == "TSRA-R"
+            and row["policy"] == "rule_defense_full"
+            and row.get("trace_file") == "tsra_r_rule_delegate_traces.jsonl"
+            and row["loop_case"] == "no_op"
+            for row in replay_rows
+        ),
+        "agent loop replay missing E7 rule delegate no-op representative",
+    )
+    require(
+        any(
+            row["experiment"] == "E7_ml_aura_ml_tsra_r"
+            and row["agent"] == "TSRA-R"
+            and row["policy"] == "rule_defense_full"
+            and row.get("trace_file") == "tsra_r_rule_delegate_traces.jsonl"
+            and row["loop_case"] == "action"
+            for row in replay_rows
+        ),
+        "agent loop replay missing E7 rule delegate action representative",
+    )
+    checks.append("agent_loop_replay rows=10 agents/cases/sidecar=complete")
 
     causality_rows = read_csv("outputs/report_tables/agent_decision_causality_audit.csv")
     require(
@@ -1398,7 +1440,20 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in interface_rows),
         "agent interface manifest missing safety boundary",
     )
-    checks.append("agent_interface_manifest rows=4 agents=attack/defense")
+    tsra_interface_row = next(row for row in interface_rows if row["agent"] == "TSRA-R")
+    require(
+        "E7_ml_aura_ml_tsra_r" in tsra_interface_row["evidence_experiments"],
+        "agent interface manifest TSRA-R row missing E7 rule delegate evidence",
+    )
+    require(
+        int(float(tsra_interface_row["trace_count"])) == 108,
+        f"expected TSRA-R interface trace_count 108, got {tsra_interface_row['trace_count']}",
+    )
+    require(
+        int(float(tsra_interface_row["non_noop_count"])) == 35,
+        f"expected TSRA-R interface non_noop_count 35, got {tsra_interface_row['non_noop_count']}",
+    )
+    checks.append("agent_interface_manifest rows=4 agents=attack/defense sidecar=present")
 
     capability_rows = read_csv("outputs/report_tables/agent_capability_matrix.csv")
     require(len(capability_rows) == 10, f"expected 10 capability rows, got {len(capability_rows)}")

@@ -281,7 +281,7 @@ def build_rows() -> list[dict[str, str]]:
             ),
             ok=all_files_present(runtime_files)
             and count_csv_rows("outputs/report_tables/agent_interface_manifest.csv") == 4
-            and decision_counts["runtime"] == 9,
+            and decision_counts["runtime"] == 10,
             handoff_value="The agent claim is backed by code modules and generated interface evidence.",
             next_gate="Runtime changes must regenerate runtime invariant, interface, memory, tool, and causality audits.",
         ),
@@ -332,22 +332,22 @@ def build_rows() -> list[dict[str, str]]:
             ],
             observed=", ".join(f"{key}={value}" for key, value in decision_counts.items()),
             ok=(
-                decision_counts["trace"] >= 200
-                and decision_counts["contract"] == 49
-                and decision_counts["quality"] == 9
+                decision_counts["trace"] == 262
+                and decision_counts["contract"] == 50
+                and decision_counts["quality"] == 10
                 and decision_counts["quality_gate"] == 6
-                and decision_counts["runtime"] == 9
-                and decision_counts["loop"] == 8
-                and decision_counts["causality"] == 399
-                and decision_counts["margin"] == 399
-                and decision_counts["goal_alignment"] == 399
+                and decision_counts["runtime"] == 10
+                and decision_counts["loop"] == 10
+                and decision_counts["causality"] == 446
+                and decision_counts["margin"] == 446
+                and decision_counts["goal_alignment"] == 446
                 and decision_counts["feedback"] >= 60
                 and decision_counts["memory"] == 9
                 and decision_counts["memory_influence"] == 6
                 and decision_counts["aura_attack_path"] == 6
                 and decision_counts["cross_agent_context"] == 8
                 and decision_counts["defense_priority_path"] == 6
-                and decision_counts["tool"] == 34
+                and decision_counts["tool"] == 37
             ),
             handoff_value="Agent decisions remain explainable by generated evidence, not only by source code.",
             next_gate="Policy changes must keep causality, margin, goal alignment, memory, and tool evidence passing final verification.",
@@ -420,7 +420,7 @@ def build_rows() -> list[dict[str, str]]:
                 and metric_counts["gates"] == 12
                 and metric_counts["ml_contribution"] == 7
                 and metric_counts["ml_attack_path"] == 6
-                and metric_counts["ml_defense_path"] == 7
+                and metric_counts["ml_defense_path"] == 8
                 and metric_counts["ml_interaction"] == 5
                 and metric_counts["reactive_tradeoff"] == 7
                 and metric_counts["threshold_sweep"] == 5

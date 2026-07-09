@@ -51,7 +51,7 @@ python3 -m compileall src
 검증 결과:
 
 ```text
-agent_decision_trace_summary.csv: 215 rows
+agent_decision_trace_summary.csv: 262 rows
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 experiments: E3_rule_aura, E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 ```
@@ -351,7 +351,7 @@ docs/process/FINAL_QA.md
 experiment_summary rows: 7
 repeated_experiment_summary rows: 7
 resilience_gain_summary rows: 4
-agent_decision_trace_summary rows: 215
+agent_decision_trace_summary rows: 262
 aura_coa_cards rows: 15
 battle_timeline rows: 49
 incident_summary rows: 10
@@ -593,7 +593,7 @@ outputs/report_tables/agent_loop_replay.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_loop_replay` 명령으로 재생성 가능하다.
-- 완료. AURA, AURA-ML, TSRA-R, TSRA-R-ML의 `no_op`/`action` replay 8개가 생성된다.
+- 완료. AURA, AURA-ML, TSRA-R, TSRA-R-ML과 E7 rule delegate의 `no_op`/`action` replay 10개가 생성된다.
 - 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix에 연결됐다.
 
 검증:
@@ -605,7 +605,7 @@ python3 -m src.experiments.agent_loop_replay
 검증 결과:
 
 ```text
-agent_loop_replay.csv: 8 replay rows
+agent_loop_replay.csv: 10 replay rows
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 cases: no_op, action
 missing loop fields: 0
@@ -3804,3 +3804,59 @@ E7 rule delegate rows: 47 pass
 - E7 내부 rule-defense 위임도 후보/도구/점수/목표 정렬 기준을 통과한다.
 - 이 변경은 방어 에이전트 sidecar를 단순 부속 로그가 아니라 독립적으로 감사되는 판단 루프로 강화한다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation decision-quality evidence만 강화한다.
+
+## P72. Rule Delegate Summary And Replay Coverage
+
+상태: 완료
+
+문제:
+
+- E7 rule delegate sidecar는 contract, quality, runtime, causality, margin, goal alignment 감사에는 포함됐다.
+- 하지만 사람이 직접 읽는 `agent_decision_trace_summary`, `agent_interface_manifest`, `agent_loop_replay`는 main trace만 읽고 있었다.
+- 그래서 E7 ML TSRA-R이 내부에서 rule-defense 판단 루프를 어떻게 위임했는지 검증기는 알지만, 사람이 보는 요약 산출물에서는 덜 드러났다.
+
+구현:
+
+```text
+src/experiments/trace_summary.py
+src/experiments/agent_interface_manifest.py
+src/experiments/agent_loop_replay.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AGENT_RUNTIME.md
+docs/process/FINAL_QA.md
+```
+
+설계:
+
+- 세 산출물 생성기의 `TRACE_FILES`에 `tsra_r_rule_delegate_traces.jsonl`을 추가했다.
+- trace summary에는 `trace_file`, `trace_id` 컬럼을 추가해 main trace와 sidecar trace를 구분한다.
+- loop replay에는 `trace_file` 컬럼과 Markdown 출처 표기를 추가해 E7 delegate의 대표 `no_op`/`action` 루프가 별도 evidence로 보이게 했다.
+- interface manifest는 TSRA-R row에 E5 main trace와 E7 sidecar evidence를 합쳐 관측된 방어 인터페이스를 설명한다.
+- final verifier는 trace summary 262 rows, E7 sidecar summary 47 rows, loop replay 10 rows, TSRA-R interface trace_count 108 / non_noop_count 35를 강제한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.trace_summary
+python3 -m src.experiments.agent_interface_manifest
+python3 -m src.experiments.agent_loop_replay
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+agent_decision_trace_summary rows: 262
+E7 rule delegate trace summary rows: 47
+agent_loop_replay rows: 10
+agent_interface_manifest TSRA-R trace_count: 108
+agent_interface_manifest TSRA-R non_noop_count: 35
+```
+
+해석:
+
+- E7 ML 방어 에이전트의 내부 rule delegate 판단이 더 이상 숨은 부속 로그로만 남지 않는다.
+- 검증기와 사람이 읽는 요약 산출물이 같은 trace evidence를 보게 되므로, 에이전트 구조 설명과 실제 파일 증거의 간극이 줄어든다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation explainability evidence만 강화한다.

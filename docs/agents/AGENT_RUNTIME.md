@@ -213,6 +213,8 @@ Replay는 각 active agent/policy에서 `no_op` 판단과 실제 action 판단�
 observe -> memory -> tools -> candidates -> selected_action -> feedback -> reason
 ```
 
+E7 `tsra_r_rule_delegate_traces.jsonl` sidecar도 replay 입력에 포함된다. 따라서 ML TSRA-R의 외부 판단뿐 아니라 내부 rule-defense delegate의 대표 `no_op`/`action` 루프도 같은 형식으로 읽을 수 있다.
+
 ## Decision Causality Audit
 
 DecisionTrace의 `selected_action`이 후보, 도구 호출, 점수 또는 threshold 근거와 맞는지 확인한다.

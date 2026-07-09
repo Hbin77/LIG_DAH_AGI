@@ -501,7 +501,7 @@ outputs/report_tables/agent_loop_replay.md
 검증 결과:
 
 ```text
-agent_loop_replay rows: 8
+agent_loop_replay rows: 10
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 cases: no_op, action
 ```

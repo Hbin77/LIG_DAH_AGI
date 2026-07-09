@@ -100,14 +100,14 @@ agent_stress_scenario_audit rows: 6 seeds: 5 pass
 reactive_defense_tradeoff_audit rows: 7 pass
 ml_threshold_sweep_summary rows: 5
 tsra_detector_calibration_audit rows: 6 pass
-agent_decision_trace_summary rows: 215
+agent_decision_trace_summary rows: 262
 agent_contract_validation rows: 50 pass
 agent_contract_validation includes E7 tsra-r_rule_delegate_trace_schema rows: 47
 decision_trace_quality_audit rows: 10 pass
 decision_trace_quality_audit includes E7 TSRA-R rule delegate traces: 47
 agent_runtime_invariant_audit rows: 10 pass
 agent_runtime_invariant_audit includes tsra_r_rule_delegate_traces.jsonl: 47
-agent_loop_replay rows: 8
+agent_loop_replay rows: 10
 agent_decision_causality_audit rows: 446 pass
 agent_decision_margin_audit rows: 446 pass
 agent_goal_alignment_audit rows: 446 pass
