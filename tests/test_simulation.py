@@ -1,0 +1,163 @@
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+from src.tsra_agent.evaluator import resilience_gain
+from src.tsra_agent.ml_policy import (
+    DEFAULT_MODEL_PATH,
+    DEFAULT_POLICY_CONFIG_PATH,
+    DEFAULT_SKLEARN_MODEL_PATH,
+    generate_training_samples,
+    load_model,
+    load_policy_config,
+    load_sklearn_model,
+)
+from src.tsra_agent.models import AttackMode
+from src.tsra_agent.simulator import MissionSimulator
+
+
+class SimulationMetricTests(unittest.TestCase):
+    def test_baseline_has_no_detection_or_recovery_penalty(self) -> None:
+        baseline = MissionSimulator(180, 7, AttackMode.NONE, defense_enabled=False).run("baseline")
+        attacked = MissionSimulator(180, 7, AttackMode.HYBRID, defense_enabled=False).run("attacked")
+
+        self.assertIsNone(baseline.metrics.attack_start_tick)
+        self.assertIsNone(baseline.metrics.detection_time)
+        self.assertLess(baseline.metrics.mission_impact_score, attacked.metrics.mission_impact_score)
+
+    def test_hybrid_attack_creates_priority_inversion(self) -> None:
+        attacked = MissionSimulator(180, 7, AttackMode.HYBRID, defense_enabled=False).run("attacked")
+
+        self.assertGreater(attacked.metrics.priority_inversion_rate, 0)
+        self.assertGreater(attacked.metrics.expired_messages, 0)
+
+    def test_tsra_reduces_inversion_and_records_recovery(self) -> None:
+        defended = MissionSimulator(
+            180,
+            7,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="tsra",
+        ).run("defended")
+
+        self.assertEqual(defended.metrics.priority_inversion_rate, 0)
+        self.assertEqual(defended.metrics.detection_time, 1)
+        self.assertEqual(defended.metrics.recovery_time, 3)
+        self.assertGreater(defended.metrics.compressed_messages, 0)
+        self.assertEqual(defended.metrics.expired_messages, 0)
+
+    def test_tsra_outperforms_rule_defense(self) -> None:
+        baseline = MissionSimulator(180, 7, AttackMode.NONE, defense_enabled=False).run("baseline")
+        attacked = MissionSimulator(180, 7, AttackMode.HYBRID, defense_enabled=False).run("attacked")
+        rule = MissionSimulator(
+            180,
+            7,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="rule",
+        ).run("rule_defended")
+        tsra = MissionSimulator(
+            180,
+            7,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="tsra",
+        ).run("defended")
+
+        self.assertLess(tsra.metrics.mission_impact_score, rule.metrics.mission_impact_score)
+        self.assertGreater(
+            resilience_gain(attacked.metrics, tsra.metrics, baseline.metrics),
+            resilience_gain(attacked.metrics, rule.metrics, baseline.metrics),
+        )
+
+    def test_ml_model_is_trained_and_policy_is_competitive(self) -> None:
+        self.assertTrue(DEFAULT_MODEL_PATH.exists())
+        self.assertTrue(DEFAULT_POLICY_CONFIG_PATH.exists())
+        self.assertTrue(DEFAULT_SKLEARN_MODEL_PATH.exists())
+        model = load_model()
+        policy_config = load_policy_config()
+        sklearn_model = load_sklearn_model()
+        self.assertGreaterEqual(model.metrics["validation_f1"], 0.99)
+        self.assertLessEqual(policy_config["ml_priority_threshold"], 0.35)
+        self.assertTrue(hasattr(sklearn_model, "predict_proba"))
+
+        sklearn_report = Path("models/tsra_sklearn_training_report.json")
+        tuning_report = Path("models/tsra_ml_tuning_report.json")
+        report = json.loads(sklearn_report.read_text(encoding="utf-8"))
+        tuning = json.loads(tuning_report.read_text(encoding="utf-8"))
+        self.assertGreaterEqual(report["metrics"]["validation_f1"], 0.99)
+        self.assertGreaterEqual(tuning["validation_result"]["metrics"]["resilience_gain_percent"], 70.0)
+
+        baseline = MissionSimulator(180, 7, AttackMode.NONE, defense_enabled=False).run("baseline")
+        attacked = MissionSimulator(180, 7, AttackMode.HYBRID, defense_enabled=False).run("attacked")
+        tsra = MissionSimulator(
+            180,
+            7,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="tsra",
+        ).run("defended")
+        ml = MissionSimulator(
+            180,
+            7,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="ml",
+        ).run("ml_defended")
+
+        self.assertEqual(ml.metrics.priority_inversion_rate, 0)
+        self.assertEqual(ml.metrics.expired_messages, 0)
+        self.assertGreater(ml.metrics.compressed_messages, 0)
+        self.assertLessEqual(ml.metrics.backlog_messages, tsra.metrics.backlog_messages)
+        self.assertLessEqual(ml.metrics.recovery_time, tsra.metrics.recovery_time)
+        self.assertGreater(
+            resilience_gain(attacked.metrics, ml.metrics, baseline.metrics),
+            85.0,
+        )
+
+    def test_training_data_contains_both_classes(self) -> None:
+        labels = [sample.label for sample in generate_training_samples(200, 1234)]
+        self.assertIn(0, labels)
+        self.assertIn(1, labels)
+
+
+class CliArtifactTests(unittest.TestCase):
+    def test_cli_writes_summary_report_and_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "run"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "src.tsra_agent.cli",
+                    "--scenario",
+                    "hybrid",
+                    "--ticks",
+                    "80",
+                    "--seeds",
+                    "7,11",
+                    "--output-dir",
+                    str(output_dir),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertIn("outputs:", result.stdout)
+            summary = json.loads((output_dir / "summary.json").read_text(encoding="utf-8"))
+            manifest = json.loads((output_dir / "run_manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(summary["seeds"], [7, 11])
+            self.assertIn("defended", summary["aggregate"])
+            self.assertIn("ml_defended", summary["aggregate"])
+            self.assertEqual(manifest["schema_version"], "tsra-run-manifest/v1")
+            self.assertTrue((output_dir / "incident_report.md").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

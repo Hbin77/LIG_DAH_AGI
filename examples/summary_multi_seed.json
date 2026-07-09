@@ -1,0 +1,1553 @@
+{
+  "scenario": "hybrid",
+  "ticks": 180,
+  "seeds": [
+    7,
+    11,
+    19,
+    23,
+    31
+  ],
+  "experiments": {
+    "baseline": "E1 no attack, default mission routing baseline",
+    "attacked": "E2 hybrid AURA-lite mission-effect attack without defense",
+    "rule_defended": "E3 threshold rule defense against the same attack",
+    "defended": "E4/E5 TSRA-R risk-fusion defense against the same attack",
+    "ml_defended": "E6 TSRA-ML trained ensemble and tuned action-gate defense against the same attack",
+    "guarded_baseline": "False-alarm check: TSRA-R monitoring under no attack",
+    "ml_guarded_baseline": "False-alarm check: TSRA-ML monitoring under no attack"
+  },
+  "runs": [
+    {
+      "seed": 7,
+      "baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 205,
+        "lost_messages": 3,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.25
+      },
+      "attacked": {
+        "generated_messages": 208,
+        "delivered_messages": 121,
+        "lost_messages": 34,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 53,
+        "expired_messages": 49,
+        "p95_critical_latency": 10.0,
+        "stale_data_ratio": 0.2397,
+        "priority_inversion_rate": 0.0769,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 84.44
+      },
+      "rule_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 125,
+        "lost_messages": 11,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 72,
+        "expired_messages": 68,
+        "p95_critical_latency": 8.0,
+        "stale_data_ratio": 0.112,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": null,
+        "detection_time": 1,
+        "recovery_time": null,
+        "mission_impact_score": 60.33
+      },
+      "defended": {
+        "generated_messages": 208,
+        "delivered_messages": 143,
+        "lost_messages": 10,
+        "deferred_messages": 14,
+        "shed_messages": 0,
+        "compressed_messages": 41,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0054,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 39,
+        "detection_time": 1,
+        "recovery_time": 3,
+        "mission_impact_score": 13.5
+      },
+      "ml_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 143,
+        "lost_messages": 10,
+        "deferred_messages": 14,
+        "shed_messages": 0,
+        "compressed_messages": 41,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0054,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 38,
+        "detection_time": 1,
+        "recovery_time": 2,
+        "mission_impact_score": 13.5
+      },
+      "guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 205,
+        "lost_messages": 3,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.25
+      },
+      "ml_guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 205,
+        "lost_messages": 3,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.25
+      },
+      "rule_resilience_gain_percent": 31.64,
+      "resilience_gain_percent": 93.11,
+      "ml_resilience_gain_percent": 93.11
+    },
+    {
+      "seed": 11,
+      "baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 203,
+        "lost_messages": 5,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.95
+      },
+      "attacked": {
+        "generated_messages": 208,
+        "delivered_messages": 125,
+        "lost_messages": 30,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 53,
+        "expired_messages": 49,
+        "p95_critical_latency": 11.0,
+        "stale_data_ratio": 0.232,
+        "priority_inversion_rate": 0.0727,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 84.35
+      },
+      "rule_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 127,
+        "lost_messages": 9,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 72,
+        "expired_messages": 68,
+        "p95_critical_latency": 8.8,
+        "stale_data_ratio": 0.1339,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": null,
+        "detection_time": 1,
+        "recovery_time": null,
+        "mission_impact_score": 62.05
+      },
+      "defended": {
+        "generated_messages": 208,
+        "delivered_messages": 144,
+        "lost_messages": 10,
+        "deferred_messages": 12,
+        "shed_messages": 0,
+        "compressed_messages": 42,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 6.7,
+        "stale_data_ratio": 0.0215,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 39,
+        "detection_time": 1,
+        "recovery_time": 3,
+        "mission_impact_score": 18.96
+      },
+      "ml_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 144,
+        "lost_messages": 10,
+        "deferred_messages": 12,
+        "shed_messages": 0,
+        "compressed_messages": 42,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 6.7,
+        "stale_data_ratio": 0.0215,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 38,
+        "detection_time": 1,
+        "recovery_time": 2,
+        "mission_impact_score": 18.96
+      },
+      "guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 203,
+        "lost_messages": 5,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.95
+      },
+      "ml_guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 203,
+        "lost_messages": 5,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.95
+      },
+      "rule_resilience_gain_percent": 29.58,
+      "resilience_gain_percent": 86.72,
+      "ml_resilience_gain_percent": 86.72
+    },
+    {
+      "seed": 19,
+      "baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 206,
+        "lost_messages": 2,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 7.9
+      },
+      "attacked": {
+        "generated_messages": 208,
+        "delivered_messages": 122,
+        "lost_messages": 33,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 53,
+        "expired_messages": 49,
+        "p95_critical_latency": 9.0,
+        "stale_data_ratio": 0.2459,
+        "priority_inversion_rate": 0.0588,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 81.93
+      },
+      "rule_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 121,
+        "lost_messages": 15,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 72,
+        "expired_messages": 68,
+        "p95_critical_latency": 10.0,
+        "stale_data_ratio": 0.0909,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": null,
+        "detection_time": 1,
+        "recovery_time": null,
+        "mission_impact_score": 64.38
+      },
+      "defended": {
+        "generated_messages": 208,
+        "delivered_messages": 145,
+        "lost_messages": 9,
+        "deferred_messages": 14,
+        "shed_messages": 0,
+        "compressed_messages": 40,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 5.4,
+        "stale_data_ratio": 0.0108,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 39,
+        "detection_time": 1,
+        "recovery_time": 3,
+        "mission_impact_score": 15.88
+      },
+      "ml_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 145,
+        "lost_messages": 9,
+        "deferred_messages": 14,
+        "shed_messages": 0,
+        "compressed_messages": 40,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 5.4,
+        "stale_data_ratio": 0.0108,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 38,
+        "detection_time": 1,
+        "recovery_time": 2,
+        "mission_impact_score": 15.88
+      },
+      "guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 206,
+        "lost_messages": 2,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 7.9
+      },
+      "ml_guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 206,
+        "lost_messages": 2,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 7.9
+      },
+      "rule_resilience_gain_percent": 23.71,
+      "resilience_gain_percent": 89.22,
+      "ml_resilience_gain_percent": 89.22
+    },
+    {
+      "seed": 23,
+      "baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 205,
+        "lost_messages": 3,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.25
+      },
+      "attacked": {
+        "generated_messages": 208,
+        "delivered_messages": 130,
+        "lost_messages": 25,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 53,
+        "expired_messages": 49,
+        "p95_critical_latency": 10.0,
+        "stale_data_ratio": 0.2462,
+        "priority_inversion_rate": 0.0526,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 80.73
+      },
+      "rule_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 123,
+        "lost_messages": 13,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 72,
+        "expired_messages": 68,
+        "p95_critical_latency": 7.0,
+        "stale_data_ratio": 0.0894,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": null,
+        "detection_time": 1,
+        "recovery_time": null,
+        "mission_impact_score": 58.21
+      },
+      "defended": {
+        "generated_messages": 208,
+        "delivered_messages": 146,
+        "lost_messages": 8,
+        "deferred_messages": 13,
+        "shed_messages": 0,
+        "compressed_messages": 41,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.6,
+        "stale_data_ratio": 0.0107,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 39,
+        "detection_time": 1,
+        "recovery_time": 3,
+        "mission_impact_score": 14.04
+      },
+      "ml_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 146,
+        "lost_messages": 8,
+        "deferred_messages": 13,
+        "shed_messages": 0,
+        "compressed_messages": 41,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.6,
+        "stale_data_ratio": 0.0107,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 38,
+        "detection_time": 1,
+        "recovery_time": 2,
+        "mission_impact_score": 14.04
+      },
+      "guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 205,
+        "lost_messages": 3,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.25
+      },
+      "ml_guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 205,
+        "lost_messages": 3,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 8.25
+      },
+      "rule_resilience_gain_percent": 31.07,
+      "resilience_gain_percent": 92.01,
+      "ml_resilience_gain_percent": 92.01
+    },
+    {
+      "seed": 31,
+      "baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 207,
+        "lost_messages": 1,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 7.55
+      },
+      "attacked": {
+        "generated_messages": 208,
+        "delivered_messages": 125,
+        "lost_messages": 30,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 53,
+        "expired_messages": 49,
+        "p95_critical_latency": 9.0,
+        "stale_data_ratio": 0.216,
+        "priority_inversion_rate": 0.0536,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 79.36
+      },
+      "rule_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 131,
+        "lost_messages": 5,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 72,
+        "expired_messages": 68,
+        "p95_critical_latency": 9.0,
+        "stale_data_ratio": 0.1374,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": null,
+        "detection_time": 1,
+        "recovery_time": null,
+        "mission_impact_score": 61.17
+      },
+      "defended": {
+        "generated_messages": 208,
+        "delivered_messages": 146,
+        "lost_messages": 7,
+        "deferred_messages": 12,
+        "shed_messages": 0,
+        "compressed_messages": 43,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 5.0,
+        "stale_data_ratio": 0.0053,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 39,
+        "detection_time": 1,
+        "recovery_time": 3,
+        "mission_impact_score": 14.15
+      },
+      "ml_defended": {
+        "generated_messages": 208,
+        "delivered_messages": 146,
+        "lost_messages": 7,
+        "deferred_messages": 12,
+        "shed_messages": 0,
+        "compressed_messages": 43,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 5.0,
+        "stale_data_ratio": 0.0053,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 38,
+        "detection_time": 1,
+        "recovery_time": 2,
+        "mission_impact_score": 14.15
+      },
+      "guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 207,
+        "lost_messages": 1,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 7.55
+      },
+      "ml_guarded_baseline": {
+        "generated_messages": 208,
+        "delivered_messages": 207,
+        "lost_messages": 1,
+        "deferred_messages": 0,
+        "shed_messages": 0,
+        "compressed_messages": 0,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": null,
+        "attack_end_tick": null,
+        "detection_tick": null,
+        "recovery_tick": null,
+        "detection_time": null,
+        "recovery_time": null,
+        "mission_impact_score": 7.55
+      },
+      "rule_resilience_gain_percent": 25.33,
+      "resilience_gain_percent": 90.81,
+      "ml_resilience_gain_percent": 90.81
+    }
+  ],
+  "aggregate": {
+    "baseline": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 205.2,
+        "stdev": 1.3266,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 2.8,
+        "stdev": 1.3266,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 4.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "attack_end_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "mission_impact_score": {
+        "mean": 8.18,
+        "stdev": 0.4643,
+        "count": 5
+      }
+    },
+    "attacked": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 124.6,
+        "stdev": 3.1369,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 30.4,
+        "stdev": 3.1369,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 53,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 49,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 9.8,
+        "stdev": 0.7483,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.236,
+        "stdev": 0.0112,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0629,
+        "stdev": 0.01,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": 35,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_end_tick": {
+        "mean": 148,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "mission_impact_score": {
+        "mean": 82.162,
+        "stdev": 1.9966,
+        "count": 5
+      }
+    },
+    "rule_defended": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 125.4,
+        "stdev": 3.4409,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 10.6,
+        "stdev": 3.4409,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 72,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 68,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 8.56,
+        "stdev": 1.0072,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.1127,
+        "stdev": 0.0204,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": 35,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_end_tick": {
+        "mean": 148,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_tick": {
+        "mean": 36,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_time": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "mission_impact_score": {
+        "mean": 61.228,
+        "stdev": 2.0263,
+        "count": 5
+      }
+    },
+    "defended": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 144.8,
+        "stdev": 1.1662,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 8.8,
+        "stdev": 1.1662,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 13,
+        "stdev": 0.8944,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 41.4,
+        "stdev": 1.0198,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 5.14,
+        "stdev": 0.9069,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.0107,
+        "stdev": 0.0059,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": 35,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_end_tick": {
+        "mean": 148,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_tick": {
+        "mean": 36,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_tick": {
+        "mean": 39,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_time": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_time": {
+        "mean": 3,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "mission_impact_score": {
+        "mean": 15.306,
+        "stdev": 1.9941,
+        "count": 5
+      }
+    },
+    "ml_defended": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 144.8,
+        "stdev": 1.1662,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 8.8,
+        "stdev": 1.1662,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 13,
+        "stdev": 0.8944,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 41.4,
+        "stdev": 1.0198,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 5.14,
+        "stdev": 0.9069,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.0107,
+        "stdev": 0.0059,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": 35,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_end_tick": {
+        "mean": 148,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_tick": {
+        "mean": 36,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_tick": {
+        "mean": 38,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_time": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_time": {
+        "mean": 2,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "mission_impact_score": {
+        "mean": 15.306,
+        "stdev": 1.9941,
+        "count": 5
+      }
+    },
+    "guarded_baseline": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 205.2,
+        "stdev": 1.3266,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 2.8,
+        "stdev": 1.3266,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 4.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "attack_end_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "mission_impact_score": {
+        "mean": 8.18,
+        "stdev": 0.4643,
+        "count": 5
+      }
+    },
+    "ml_guarded_baseline": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 205.2,
+        "stdev": 1.3266,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 2.8,
+        "stdev": 1.3266,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 4.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "attack_end_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_tick": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "detection_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "recovery_time": {
+        "mean": null,
+        "stdev": null,
+        "count": 0
+      },
+      "mission_impact_score": {
+        "mean": 8.18,
+        "stdev": 0.4643,
+        "count": 5
+      }
+    },
+    "rule_resilience_gain_percent": {
+      "mean": 28.266,
+      "stdev": 3.1733,
+      "count": 5
+    },
+    "resilience_gain_percent": {
+      "mean": 90.374,
+      "stdev": 2.2377,
+      "count": 5
+    },
+    "ml_resilience_gain_percent": {
+      "mean": 90.374,
+      "stdev": 2.2377,
+      "count": 5
+    }
+  }
+}

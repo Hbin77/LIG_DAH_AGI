@@ -1,0 +1,20 @@
+{
+  "model_path": "/Users/kth88/Documents/LIG/models/tsra_ml_policy.json",
+  "report_path": "models/tsra_ml_training_report.json",
+  "seed": 20260709,
+  "samples": 10000,
+  "epochs": 260,
+  "metrics": {
+    "train_accuracy": 0.9965,
+    "train_precision": 0.9939,
+    "train_recall": 0.9998,
+    "train_f1": 0.9968,
+    "train_log_loss": 0.0162,
+    "validation_accuracy": 0.9968,
+    "validation_precision": 0.9939,
+    "validation_recall": 1.0,
+    "validation_f1": 0.9969,
+    "validation_log_loss": 0.0159,
+    "samples": 10000.0
+  }
+}

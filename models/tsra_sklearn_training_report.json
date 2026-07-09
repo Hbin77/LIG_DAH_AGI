@@ -1,0 +1,21 @@
+{
+  "model_path": "models/tsra_sklearn_policy.joblib",
+  "report_path": "models/tsra_sklearn_training_report.json",
+  "seed": 20260709,
+  "samples": 100000,
+  "metrics": {
+    "validation_accuracy": 0.9952,
+    "validation_precision": 0.9914,
+    "validation_recall": 0.9999,
+    "validation_f1": 0.9956,
+    "validation_roc_auc": 1.0,
+    "validation_log_loss": 0.0119,
+    "samples": 100000.0,
+    "model_family": "StandardScaler + soft-voting GradientBoosting/RandomForest"
+  },
+  "safety_boundary": {
+    "synthetic_training_data_only": true,
+    "exploit_code": false,
+    "operational_rf_parameters": false
+  }
+}

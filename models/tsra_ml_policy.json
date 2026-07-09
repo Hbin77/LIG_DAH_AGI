@@ -1,0 +1,83 @@
+{
+  "model_type": "logistic_regression_binary_risk",
+  "feature_names": [
+    "satcom_degradation",
+    "radio_health",
+    "lte_health",
+    "mesh_health",
+    "queue_pressure",
+    "critical_queue_pressure",
+    "stale_ratio",
+    "critical_latency_pressure",
+    "priority_inversion_pressure",
+    "terminal_risk",
+    "source_trust_drop",
+    "pace_instability",
+    "defense_alerted"
+  ],
+  "weights": [
+    1.79918276,
+    0.14651024,
+    0.17465884,
+    0.01925335,
+    0.95723351,
+    0.78590031,
+    1.51679261,
+    1.66662679,
+    0.69327346,
+    0.60313711,
+    0.46865254,
+    0.42292576,
+    -0.07450848
+  ],
+  "bias": 0.67112736,
+  "means": [
+    0.35168368,
+    0.7737774,
+    0.77482027,
+    0.75114357,
+    0.38636767,
+    0.27686563,
+    0.21231914,
+    0.40225803,
+    0.1690352,
+    0.29999996,
+    0.22005661,
+    0.19704876,
+    0.45986667
+  ],
+  "scales": [
+    0.25737592,
+    0.13137338,
+    0.1308201,
+    0.14473396,
+    0.28684078,
+    0.21041738,
+    0.19453909,
+    0.28012155,
+    0.16546554,
+    0.21765273,
+    0.16832774,
+    0.15029638,
+    0.49838671
+  ],
+  "threshold": 0.5,
+  "metrics": {
+    "train_accuracy": 0.9965,
+    "train_precision": 0.9939,
+    "train_recall": 0.9998,
+    "train_f1": 0.9968,
+    "train_log_loss": 0.0162,
+    "validation_accuracy": 0.9968,
+    "validation_precision": 0.9939,
+    "validation_recall": 1.0,
+    "validation_f1": 0.9969,
+    "validation_log_loss": 0.0159,
+    "samples": 10000.0
+  },
+  "safety_boundary": {
+    "exploit_code": false,
+    "operational_rf_parameters": false,
+    "synthetic_training_data_only": true
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": "tsra-final-selection/v1",
+  "selection_basis": "Five-seed holdout comparison after adaptive snapshot, EDF scheduling, and SATCOM return hysteresis.",
+  "command": "conda run -n base python -m src.tsra_agent.cli --scenario hybrid --ticks 180 --seeds 7,11,19,23,31 --output-dir outputs/final_check_return",
+  "selected_primary_agent": "TSRA-R/TSRA-ML adaptive snapshot policy",
+  "selected_policy_config_path": "models/tsra_ml_policy_config.json",
+  "selected_policy_config": {
+    "ml_alert_threshold": 0.5,
+    "ml_priority_threshold": 0.24,
+    "ml_minimum_mode_threshold": 0.46,
+    "ml_pace_threshold": 0.36,
+    "ml_stale_badge_threshold": 0.62,
+    "ml_quarantine_threshold": 0.78,
+    "ml_recovery_threshold": 0.32,
+    "ml_weight": 0.58,
+    "heuristic_weight": 0.42,
+    "recovery_stable_ticks_required": 3,
+    "recovery_queue_threshold": 12,
+    "recovery_latency_threshold": 6.0,
+    "critical_queue_guard_threshold": 0,
+    "queue_guard_threshold": 2,
+    "satcom_guard_threshold": 0.92,
+    "satcom_return_health_threshold": 0.86,
+    "satcom_return_risk_threshold": 0.5
+  },
+  "baseline_comparison": {
+    "baseline_mission_impact": 8.18,
+    "attacked_mission_impact": 82.162,
+    "rule_defended_mission_impact": 61.228,
+    "pre_snapshot_ml_mission_impact": 24.588,
+    "final_adaptive_mission_impact": 15.306
+  },
+  "final_five_seed_metrics": {
+    "mission_impact_score": 15.306,
+    "baseline_adjusted_resilience_gain_percent": 90.374,
+    "p95_critical_latency": 5.14,
+    "stale_data_ratio": 0.0107,
+    "priority_inversion_rate": 0.0,
+    "lost_messages": 8.8,
+    "deferred_messages": 13.0,
+    "compressed_snapshot_messages": 41.4,
+    "backlog_messages": 0.0,
+    "expired_messages": 0.0,
+    "false_alarm_rate": 0.0,
+    "detection_time": 1,
+    "tsra_recovery_time": 3,
+    "ml_recovery_time": 2
+  },
+  "why_not_more_data_only": "The 100k-sample classifier improved validation F1 to 0.9956 and log loss to 0.0119, but the highest mission-level gains came from action-layer policies: adaptive snapshot compression, EDF scheduling, minimum-mode guardrails, and SATCOM return hysteresis.",
+  "safety_boundary": {
+    "synthetic_mission_event_simulator_only": true,
+    "exploit_code": false,
+    "operational_rf_parameters": false,
+    "equipment_specific_intrusion_steps": false
+  }
+}
