@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 95
-- total_payload_bytes: 2083208
+- payload_file_count: 97
+- total_payload_bytes: 2097802
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 96
-- zip_bytes: 1509721
-- zip_sha256: `be532fffe83cba42655b55039232a69c468196eeced3c6cf325cef06a7e8bf75`
+- zip_file_count: 98
+- zip_bytes: 1514747
+- zip_sha256: `765facb52d18a0949932c1454bcaed91742e6f3178bc0cb2a8b2fe77a2af6f4e`
 
 ## 포함 파일
 
@@ -46,6 +46,7 @@
 - `docs/agents/TSRA_R_DEFENSE_AGENT.md`
 - `docs/process/COMPETITION_DIRECTION.md`
 - `docs/process/DEVELOPMENT_LOG.md`
+- `docs/process/FINAL_QA.md`
 - `docs/process/GITHUB_WORKFLOW.md`
 - `docs/process/NEXT_DEVELOPMENT_QUEUE.md`
 - `docs/process/SUBMISSION_PACKAGE.md`
@@ -90,6 +91,7 @@
 - `requirements-gpu.txt`
 - `requirements.txt`
 - `scripts/build_submission_package.py`
+- `scripts/verify_submission_state.py`
 - `src/__init__.py`
 - `src/agents/__init__.py`
 - `src/agents/memory.py`

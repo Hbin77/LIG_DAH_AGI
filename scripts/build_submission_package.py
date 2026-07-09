@@ -21,6 +21,8 @@ ROOT_FILES = [
 REQUIRED_PATHS = [
     "README.md",
     "requirements.txt",
+    "scripts/build_submission_package.py",
+    "scripts/verify_submission_state.py",
     "src/agents/runtime.py",
     "src/aura/rule_decision_engine.py",
     "src/tsra_r/rule_defender.py",
@@ -33,6 +35,8 @@ REQUIRED_PATHS = [
     "docs/process/COMPETITION_DIRECTION.md",
     "docs/process/NEXT_DEVELOPMENT_QUEUE.md",
     "docs/process/DEVELOPMENT_LOG.md",
+    "docs/process/FINAL_QA.md",
+    "docs/process/SUBMISSION_PACKAGE.md",
     "docs/agents/AGENT_RUNTIME.md",
     "docs/agents/AURA_ATTACK_AGENT.md",
     "docs/agents/TSRA_R_DEFENSE_AGENT.md",

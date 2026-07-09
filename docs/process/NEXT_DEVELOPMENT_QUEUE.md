@@ -261,8 +261,8 @@ python3 scripts/build_submission_package.py
 검증 결과:
 
 ```text
-payload_file_count: 95
-zip_file_count: 96
+payload_file_count: 97
+zip_file_count: 98
 zip_bytes: 약 1.5MB
 excluded __pycache__: 0
 excluded outputs/tmp*: 0
@@ -319,23 +319,66 @@ excluded unsafe action: actual RF/exploit/live network action 없음
 
 ## P6. 최종 재현 QA
 
-상태: 다음 작업
+상태: 완료
 
 문제:
 
 - 주요 생성 도구는 준비됐지만, 최종 제출 직전에는 clean state 기준으로 한 번에 실행되는지 확인해야 한다.
 
-구현 방향:
+구현:
+
+```text
+scripts/verify_submission_state.py
+docs/process/FINAL_QA.md
+```
+
+구현 방식:
 
 - README Full Reproduction 순서대로 실행한다.
 - 패키지 manifest를 최신 산출물 기준으로 다시 생성한다.
+- 핵심 CSV row count, safety boundary, ZIP 제외 규칙, 브랜치 존재 여부를 검증한다.
 - `hbin` 원격 브랜치와 `main` 보호 상태를 마지막으로 확인한다.
 
 완료 기준:
 
-- 전체 재현 명령이 오류 없이 끝난다.
-- package manifest에 최신 timeline 산출물이 포함된다.
-- `origin/main`은 유지되고 `origin/hbin`만 최신 개발 커밋을 가리킨다.
+- 완료. 전체 재현 명령이 오류 없이 끝난다.
+- 완료. package manifest에 최신 timeline 산출물이 포함된다.
+- 완료. `origin/main`은 유지되고 `origin/hbin`만 최신 개발 커밋을 가리킨다.
+
+검증 결과:
+
+```text
+experiment_summary rows: 7
+repeated_experiment_summary rows: 7
+resilience_gain_summary rows: 4
+agent_decision_trace_summary rows: 215
+aura_coa_cards rows: 15
+battle_timeline rows: 46
+package_zip entries: 98
+package exclusions: passed
+branch: hbin
+origin main/hbin refs: present
+```
+
+## P7. Incident Summary 자동 생성
+
+상태: 다음 작업
+
+문제:
+
+- 공방 timeline은 상세하지만, 지휘관/운영자 관점의 incident summary는 아직 별도 산출물로 없다.
+
+구현 방향:
+
+- battle timeline에서 핵심 사건을 묶어 incident summary Markdown/CSV를 생성한다.
+- 공격 단계, 방어 대응, metric 변화, 잔여 위험을 incident 단위로 요약한다.
+- 실제 대응 명령이 아니라 시뮬레이션 분석 결과임을 safety boundary로 명시한다.
+
+완료 기준:
+
+- `python3 -m src.experiments.<incident_summary_tool>` 형태로 재생성 가능하다.
+- E5/E7 각각의 핵심 incident가 3~5개 단위로 요약된다.
+- AURA/TSRA-R의 판단 이유와 metric 변화가 incident summary에 연결된다.
 
 ## 진행 원칙
 

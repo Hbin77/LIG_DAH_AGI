@@ -457,8 +457,8 @@ python3 scripts/build_submission_package.py
 결과:
 
 ```text
-payload_file_count: 95
-zip_file_count: 96
+payload_file_count: 97
+zip_file_count: 98
 zip_bytes: about 1.5MB
 excluded __pycache__: 0
 excluded outputs/tmp*: 0
@@ -526,6 +526,64 @@ E7 rows: 22, attack rows: 5, defense rows: 19
 - E5는 rule AURA와 rule TSRA-R의 공방을 보여준다.
 - E7은 ML AURA와 ML TSRA-R의 탐지 기반 reactive defense 공방을 보여준다.
 - 각 row는 실제 공격 명령이 아니라 폐쇄형 시뮬레이션 event라는 safety boundary를 가진다.
+
+### 17. 최종 재현 QA를 추가한 이유
+
+최종 제출 직전에는 "파일이 있다"가 아니라 "README 재현 명령이 실제로 끝까지 실행되고, 제출 패키지가 요구 기준을 만족한다"는 증거가 필요하다. 그래서 제출 상태 검증 스크립트를 추가했다.
+
+구현:
+
+```text
+scripts/verify_submission_state.py
+docs/process/FINAL_QA.md
+```
+
+검증 범위:
+
+- 필수 파일 존재 여부
+- 핵심 CSV row count
+- AURA COA와 battle timeline의 safety boundary
+- 제출 ZIP 포함 파일
+- 제출 ZIP 제외 규칙
+- `hbin` 브랜치와 `origin/main`, `origin/hbin` 존재 여부
+
+실행:
+
+```text
+python3 -m src.ml.build_dataset --rows 3000
+python3 -m src.ml.train_aura_impact_model
+python3 -m src.ml.train_tsra_detector --rows 5000
+python3 -m src.experiments.run_all
+python3 -m src.experiments.trace_summary
+python3 -m src.experiments.battle_timeline
+python3 -m src.experiments.aura_coa_cards
+python3 -m src.experiments.run_tsra_ablation
+python3 -m src.experiments.run_adaptive_memory
+python3 -m src.experiments.run_batch
+python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py
+```
+
+결과:
+
+```text
+Full Reproduction: passed
+experiment_summary rows: 7
+repeated_experiment_summary rows: 7
+resilience_gain_summary rows: 4
+agent_decision_trace_summary rows: 215
+aura_coa_cards rows: 15
+battle_timeline rows: 46
+package exclusions: passed
+branch: hbin
+origin main/hbin refs: present
+```
+
+해석:
+
+- 현재 산출물은 README 기준으로 재현 가능하다.
+- ZIP에는 코드, 문서, 요약 CSV, figure, report table, model metric JSON이 들어간다.
+- ZIP에는 실제 공격 도구, RF 운용 파라미터, exploit, live network action이 들어가지 않는다.
 
 ## 최신 핵심 결과
 

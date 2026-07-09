@@ -269,6 +269,32 @@ defense rows: 38
 safe boundary: closed simulation only
 ```
 
+### P6. 최종 재현 QA
+
+상태: 완료
+
+목적:
+
+- README Full Reproduction 순서가 실제로 끝까지 실행되는지 확인한다.
+- 핵심 산출물 row count, 패키지 포함/제외 규칙, 브랜치 상태를 자동 검증한다.
+
+산출물:
+
+```text
+scripts/verify_submission_state.py
+docs/process/FINAL_QA.md
+```
+
+검증 결과:
+
+```text
+Full Reproduction: passed
+package exclusions: passed
+branch: hbin
+origin/main: present
+origin/hbin: present
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

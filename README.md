@@ -38,12 +38,13 @@ Read order:
 2. docs/process/COMPETITION_DIRECTION.md
 3. docs/process/NEXT_DEVELOPMENT_QUEUE.md
 4. docs/process/SUBMISSION_PACKAGE.md
-5. docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md
-6. docs/agents/AGENT_RUNTIME.md
-7. docs/agents/AURA_ATTACK_AGENT.md
-8. docs/agents/TSRA_R_DEFENSE_AGENT.md
-9. docs/Implementation_Report.md
-10. docs/Report_Ready_Summary.md
+5. docs/process/FINAL_QA.md
+6. docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md
+7. docs/agents/AGENT_RUNTIME.md
+8. docs/agents/AURA_ATTACK_AGENT.md
+9. docs/agents/TSRA_R_DEFENSE_AGENT.md
+10. docs/Implementation_Report.md
+11. docs/Report_Ready_Summary.md
 ```
 
 ## Components
@@ -251,6 +252,14 @@ This writes:
 
 The package includes code, docs, curated CSV summaries, figures, report tables, and model metric JSON files. It excludes regenerated temporary logs, seed-level batch directories, synthetic datasets, Python caches, and model binaries such as `.pkl` or `.pt`.
 
+## Verify Submission State
+
+```bash
+python3 scripts/verify_submission_state.py
+```
+
+This checks required files, core CSV row counts, safety-boundary text, package contents, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
+
 ## Full Reproduction
 
 ```bash
@@ -265,4 +274,5 @@ python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py
 ```
