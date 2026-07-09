@@ -89,7 +89,7 @@ Safety boundary: closed simulation mission-thread summary only; no RF, exploit, 
 ### thread-06 E7_ml_aura_ml_tsra_r ml-atk-00001
 
 - Attack: queue_pressure target=SATCOM at t=60
-- Attack decision: agent=AURA; score=0.579505; expected_impact=0.602005; selection_margin=0.072803; threshold_margin=0.459505
+- Attack decision: agent=AURA-ML; score=0.579505; expected_impact=0.602005; selection_margin=0.072803; threshold_margin=0.459505
 - Response: status=complete; first_required_latency_sec=10; covered_required=priority_reroute, stale_badge; defense_event_count=5; actions=ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 - Attribution: ml_attack_alert:class=reactive_window_supported,status=pass,primary=mission_impact,delta=-0.00953569 || pace_switch:class=bounded_tradeoff_supported,status=pass,primary=mission_impact,delta=-0.0217057 || priority_reroute:class=ablation_supported,status=pass,primary=priority_inversion_rate,delta=-0.0256654 || stale_badge:class=ablation_supported,status=pass,primary=trusted_stale_exposure,delta=-0.0208333 || video_throttle:class=local_metric_supported,status=pass,primary=p95_critical_latency_sec,delta=0.0153846
 - Metrics: start=0.376905; peak=0.383116; end=0.131467; reduction_from_peak=0.251649; outcome=contained after peak degradation
@@ -101,7 +101,7 @@ Safety boundary: closed simulation mission-thread summary only; no RF, exploit, 
 ### thread-07 E7_ml_aura_ml_tsra_r ml-atk-00002
 
 - Attack: failover_chasing target=LTE at t=110
-- Attack decision: agent=AURA; score=0.841848; expected_impact=0.836848; selection_margin=0.101344; threshold_margin=0.721848
+- Attack decision: agent=AURA-ML; score=0.841848; expected_impact=0.836848; selection_margin=0.101344; threshold_margin=0.721848
 - Response: status=complete; first_required_latency_sec=0; covered_required=ml_attack_alert; defense_event_count=4; actions=ml_attack_alert, pace_switch, priority_reroute, video_throttle
 - Attribution: ml_attack_alert:class=reactive_window_supported,status=pass,primary=mission_impact,delta=-0.00953569 || pace_switch:class=bounded_tradeoff_supported,status=pass,primary=mission_impact,delta=-0.0217057 || priority_reroute:class=ablation_supported,status=pass,primary=priority_inversion_rate,delta=-0.0256654 || video_throttle:class=local_metric_supported,status=pass,primary=p95_critical_latency_sec,delta=0.0153846
 - Metrics: start=0.114622; peak=0.132338; end=0.10647; reduction_from_peak=0.025868; outcome=held near attack-time impact
@@ -113,7 +113,7 @@ Safety boundary: closed simulation mission-thread summary only; no RF, exploit, 
 ### thread-08 E7_ml_aura_ml_tsra_r ml-atk-00003
 
 - Attack: failover_chasing target=MESH at t=160
-- Attack decision: agent=AURA; score=0.817403; expected_impact=0.822403; selection_margin=0.1252; threshold_margin=0.697403
+- Attack decision: agent=AURA-ML; score=0.817403; expected_impact=0.822403; selection_margin=0.1252; threshold_margin=0.697403
 - Response: status=complete; first_required_latency_sec=0; covered_required=ml_attack_alert; defense_event_count=3; actions=priority_reroute, stale_badge
 - Attribution: priority_reroute:class=ablation_supported,status=pass,primary=priority_inversion_rate,delta=-0.0256654 || stale_badge:class=ablation_supported,status=pass,primary=trusted_stale_exposure,delta=-0.0208333
 - Metrics: start=0.137802; peak=0.13899; end=0.137665; reduction_from_peak=0.00132496; outcome=held near attack-time impact
@@ -125,7 +125,7 @@ Safety boundary: closed simulation mission-thread summary only; no RF, exploit, 
 ### thread-09 E7_ml_aura_ml_tsra_r ml-atk-00004
 
 - Attack: queue_pressure target=MESH at t=210
-- Attack decision: agent=AURA; score=0.779372; expected_impact=0.801872; selection_margin=0.165075; threshold_margin=0.659372
+- Attack decision: agent=AURA-ML; score=0.779372; expected_impact=0.801872; selection_margin=0.165075; threshold_margin=0.659372
 - Response: status=complete; first_required_latency_sec=0; covered_required=priority_reroute, stale_badge; defense_event_count=5; actions=ml_attack_alert, priority_reroute, stale_badge, video_throttle
 - Attribution: ml_attack_alert:class=reactive_window_supported,status=pass,primary=mission_impact,delta=-0.00953569 || priority_reroute:class=ablation_supported,status=pass,primary=priority_inversion_rate,delta=-0.0256654 || stale_badge:class=ablation_supported,status=pass,primary=trusted_stale_exposure,delta=-0.0208333 || video_throttle:class=local_metric_supported,status=pass,primary=p95_critical_latency_sec,delta=0.0153846
 - Metrics: start=0.136148; peak=0.136148; end=0.0986017; reduction_from_peak=0.0375459; outcome=held near attack-time impact
@@ -137,7 +137,7 @@ Safety boundary: closed simulation mission-thread summary only; no RF, exploit, 
 ### thread-10 E7_ml_aura_ml_tsra_r ml-atk-00005
 
 - Attack: stale_cop_induction target=MESH at t=260
-- Attack decision: agent=AURA; score=0.779393; expected_impact=0.661893; selection_margin=0.150585; threshold_margin=0.659393
+- Attack decision: agent=AURA-ML; score=0.779393; expected_impact=0.661893; selection_margin=0.150585; threshold_margin=0.659393
 - Response: status=complete; first_required_latency_sec=0; covered_required=stale_badge; defense_event_count=7; actions=ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 - Attribution: ml_attack_alert:class=reactive_window_supported,status=pass,primary=mission_impact,delta=-0.00953569 || pace_switch:class=bounded_tradeoff_supported,status=pass,primary=mission_impact,delta=-0.0217057 || priority_reroute:class=ablation_supported,status=pass,primary=priority_inversion_rate,delta=-0.0256654 || stale_badge:class=ablation_supported,status=pass,primary=trusted_stale_exposure,delta=-0.0208333 || video_throttle:class=local_metric_supported,status=pass,primary=p95_critical_latency_sec,delta=0.0153846
 - Metrics: start=0.114642; peak=0.14835; end=0.146587; reduction_from_peak=0.00176331; outcome=covered with residual mission impact

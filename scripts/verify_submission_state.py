@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "src/aura/rule_decision_engine.py",
     "src/tsra_r/rule_defender.py",
     "src/tsra_r/adaptive_defender.py",
+    "src/experiments/aura_attack_decision_path_audit.py",
     "src/experiments/cross_agent_context_audit.py",
     "src/experiments/defense_priority_decision_path_audit.py",
     "src/experiments/adaptive_defense_decision_path_audit.py",
@@ -133,6 +134,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_memory_belief_audit.md",
     "outputs/report_tables/agent_memory_influence_audit.csv",
     "outputs/report_tables/agent_memory_influence_audit.md",
+    "outputs/report_tables/aura_attack_decision_path_audit.csv",
+    "outputs/report_tables/aura_attack_decision_path_audit.md",
     "outputs/report_tables/agent_tool_usage_audit.csv",
     "outputs/report_tables/agent_tool_usage_audit.md",
     "outputs/report_tables/agent_interface_manifest.csv",
@@ -701,6 +704,119 @@ def check_csv_outputs() -> list[str]:
         "agent memory influence audit missing safety boundary",
     )
     checks.append("agent_memory_influence_audit rows=6 pass")
+
+    aura_attack_path_rows = read_csv("outputs/report_tables/aura_attack_decision_path_audit.csv")
+    require(
+        len(aura_attack_path_rows) == 6,
+        f"expected 6 AURA attack decision path rows, got {len(aura_attack_path_rows)}",
+    )
+    failed_aura_attack_path_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in aura_attack_path_rows
+        if row.get("status") != "pass"
+    ]
+    require(
+        not failed_aura_attack_path_rows,
+        f"failed AURA attack decision path rows: {failed_aura_attack_path_rows[:8]}",
+    )
+    required_aura_attack_path_areas = {
+        "Candidate score contract",
+        "Candidate scoring toolchain",
+        "Top-score selection and event link",
+        "No-op and cadence gate discipline",
+        "AttackEvent payload consistency",
+        "Tactical and defense-context coverage",
+    }
+    observed_aura_attack_path_areas = {row["area"] for row in aura_attack_path_rows}
+    require(
+        observed_aura_attack_path_areas == required_aura_attack_path_areas,
+        f"AURA attack path audit has unexpected areas: {sorted(observed_aura_attack_path_areas)}",
+    )
+    require(
+        any(
+            observed_int(row, "candidate_total") >= 120
+            and observed_int(row, "rule_candidates") > 0
+            and observed_int(row, "ml_candidates") > 0
+            and observed_int(row, "base_formula_matches") == observed_int(row, "candidate_total")
+            and observed_int(row, "selection_formula_matches") == observed_int(row, "candidate_total")
+            for row in aura_attack_path_rows
+            if row["check_id"] == "AAP01"
+        ),
+        "AURA attack path audit missing candidate score formula evidence",
+    )
+    require(
+        any(
+            observed_int(row, "candidate_traces") == 25
+            and observed_int(row, "estimate_candidate_effect") == observed_int(row, "candidate_total")
+            and observed_int(row, "estimate_detectability") == observed_int(row, "candidate_total")
+            and observed_int(row, "predict_candidate_impact") == 51
+            and observed_int(row, "tool_errors") == 0
+            and observed_int(row, "all_trace_tool_errors") == 0
+            for row in aura_attack_path_rows
+            if row["check_id"] == "AAP02"
+        ),
+        "AURA attack path audit missing toolchain evidence",
+    )
+    require(
+        any(
+            observed_int(row, "attack_trace_count") == 25
+            and observed_int(row, "attack_event_count") == 25
+            and observed_int(row, "selected_matches_top_candidate") == 25
+            and observed_int(row, "linked_attack_events") == 25
+            and observed_int(row, "score_event_matches") == 25
+            and observed_int(row, "event_agent_matches_trace") == 25
+            and observed_int(row, "threshold_passes") == 25
+            for row in aura_attack_path_rows
+            if row["check_id"] == "AAP03"
+        ),
+        "AURA attack path audit missing selected-event linkage evidence",
+    )
+    require(
+        any(
+            observed_int(row, "pre_start_attack_events") == 0
+            and float(observed_value(row, "min_attack_gap_sec")) >= 45.0
+            and observed_int(row, "cooldown_gap_violations") == 0
+            and observed_int(row, "event_budget_violations") == 0
+            and observed_int(row, "no_op_threshold_violations") == 0
+            for row in aura_attack_path_rows
+            if row["check_id"] == "AAP04"
+        ),
+        "AURA attack path audit missing no-op/cadence gate evidence",
+    )
+    require(
+        any(
+            observed_int(row, "event_payloads") == 25
+            and observed_int(row, "impact_field_matches") == 25
+            and observed_int(row, "event_score_formula_matches") == 25
+            and observed_int(row, "allowed_agent_events") == 25
+            and observed_int(row, "rule_agent_events") == 15
+            and observed_int(row, "ml_agent_events") == 10
+            for row in aura_attack_path_rows
+            if row["check_id"] == "AAP05"
+        ),
+        "AURA attack path audit missing AttackEvent payload or agent identity evidence",
+    )
+    require(
+        any(
+            "failover_chasing" in row["observed"]
+            and "queue_pressure" in row["observed"]
+            and "stale_cop_induction" in row["observed"]
+            and "target_links=LTE,MESH,SATCOM" in row["observed"]
+            and observed_int(row, "defense_context_candidates") >= 120
+            and observed_int(row, "selected_with_defense_context") > 0
+            and observed_int(row, "objective_bonus_candidates") > 0
+            and observed_int(row, "counter_defense_bonus_candidates") > 0
+            and observed_int(row, "summarize_defense_context") == 155
+            for row in aura_attack_path_rows
+            if row["check_id"] == "AAP06"
+        ),
+        "AURA attack path audit missing tactic/context coverage evidence",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in aura_attack_path_rows),
+        "AURA attack path audit missing safety boundary",
+    )
+    checks.append("aura_attack_decision_path_audit rows=6 pass")
 
     adaptive_path_rows = read_csv("outputs/report_tables/adaptive_defense_decision_path_audit.csv")
     require(
@@ -1778,8 +1894,8 @@ def check_csv_outputs() -> list[str]:
 
     reproduction_order_rows = read_csv("outputs/report_tables/reproduction_order_audit.csv")
     require(
-        len(reproduction_order_rows) == 16,
-        f"expected 16 reproduction order rows, got {len(reproduction_order_rows)}",
+        len(reproduction_order_rows) == 17,
+        f"expected 17 reproduction order rows, got {len(reproduction_order_rows)}",
     )
     failed_reproduction_order = [
         f"{row['check_id']}:{row['order_status']}:{row['output_status']}"
@@ -1792,7 +1908,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         {row["check_id"] for row in reproduction_order_rows}
-        == {f"RO{index:02d}" for index in range(1, 17)},
+        == {f"RO{index:02d}" for index in range(1, 18)},
         "reproduction order audit check ids are incomplete",
     )
     require(
@@ -1809,7 +1925,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO10"
+            row["check_id"] == "RO11"
             and "ml_attack_decision_path_audit" in row["required_before"]
             and "ml_defense_decision_path_audit" in row["required_before"]
             for row in reproduction_order_rows
@@ -1831,11 +1947,20 @@ def check_csv_outputs() -> list[str]:
             and "cross_agent_context_audit" in row["required_before"]
             for row in reproduction_order_rows
         ),
+        "reproduction order audit missing AURA attack path prerequisites",
+    )
+    require(
+        any(
+            row["check_id"] == "RO08"
+            and "run_all" in row["required_before"]
+            and "cross_agent_context_audit" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
         "reproduction order audit missing defense priority path prerequisites",
     )
     require(
         any(
-            row["check_id"] == "RO11"
+            row["check_id"] == "RO12"
             and "run_adaptive_memory" in row["required_before"]
             for row in reproduction_order_rows
         ),
@@ -1843,7 +1968,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO13"
+            row["check_id"] == "RO14"
             and "agent_stress_scenario_audit" in row["required_before"]
             and "reproduction_order_audit" in row["required_before"]
             for row in reproduction_order_rows
@@ -1852,14 +1977,14 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO14"
+            row["check_id"] == "RO15"
             and "submission_readiness_audit" in row["required_before"]
             and "competition_alignment" in row["required_before"]
             for row in reproduction_order_rows
         ),
         "reproduction order audit missing package prerequisites",
     )
-    checks.append("reproduction_order_audit rows=16 pass")
+    checks.append("reproduction_order_audit rows=17 pass")
 
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(
@@ -2578,6 +2703,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_memory_influence_audit.md" in manifest_text,
         "manifest missing agent memory influence audit",
+    )
+    require(
+        "outputs/report_tables/aura_attack_decision_path_audit.md" in manifest_text,
+        "manifest missing AURA attack decision path audit",
     )
     require(
         "outputs/report_tables/cross_agent_context_audit.md" in manifest_text,

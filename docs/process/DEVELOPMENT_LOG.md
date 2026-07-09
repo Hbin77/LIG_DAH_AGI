@@ -2983,7 +2983,7 @@ outputs/report_tables/defense_priority_decision_path_audit.md
 동반 수정:
 
 - README Full Reproduction에 defense priority decision path audit 명령을 추가했다.
-- `reproduction_order_audit`는 RO16 체계로 확장했다.
+- `reproduction_order_audit`는 이 시점에 RO16 체계로 확장했고, 이후 AURA attack path audit 추가로 RO17 체계가 됐다.
 - `submission_readiness_audit`, `competition_alignment`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
 - `docs/agents/AGENT_RUNTIME.md`와 `docs/agents/TSRA_R_DEFENSE_AGENT.md`에 감사 목적과 현재 결과를 추가했다.
 
@@ -3012,3 +3012,72 @@ selected_without_ready: 0
 ```
 
 이 보강의 의미는 TSRA-R이 "공격 context를 읽었다"에서 끝나지 않고, 그 context를 bounded priority score로 바꿔 후보 선택, event detail, event ordering까지 일관되게 남기는 방어 에이전트가 됐다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace와 감사 체계만 강화한다.
+
+### 73. AURA Attack Decision Path Audit를 추가한 이유
+
+방어 쪽은 TSRA-R priority path audit로 후보 점수, event detail, ordering까지 검증됐다. 같은 수준으로 공격 쪽도 rule AURA와 AURA-ML이 후보를 어떻게 점수화하고, 어떤 후보를 선택하고, 그 선택이 persisted `AttackEvent`로 어떻게 이어지는지 독립적으로 검증할 필요가 있었다.
+
+추가로 E6/E7의 AURA-ML은 `DecisionTrace.agent=AURA-ML`과 `event_id=ml-atk-*`를 사용하지만, `AttackEvent.agent`는 기본값 때문에 `AURA`로 저장되고 있었다. 기존 downstream 조인은 AURA 계열로 처리해서 동작했지만, 공격 에이전트 분리 증거로는 약하다. 이번 변경에서 `MLAURA`가 생성하는 `AttackEvent`에 `agent="AURA-ML"`을 명시했다.
+
+새 감사는 `src/experiments/aura_attack_decision_path_audit.py`다. 범위는 E3~E7 전체 AURA/AURA-ML trace와 attack event다.
+
+감사 기준:
+
+- Rule AURA candidate score는 `mission_impact - 0.15 * detectability`와 일치해야 한다.
+- AURA-ML candidate score는 base score와 `objective_bonus`, `counter_defense_bonus`, `repeated_tactic_penalty` 항까지 일치해야 한다.
+- candidate-generating trace는 `generate_attack_candidates`, `estimate_candidate_effect`, `estimate_detectability`를 후보 수에 맞게 호출해야 한다.
+- AURA-ML trace는 후보마다 `predict_candidate_impact`를 호출해야 한다.
+- selected action은 같은 trace의 top-scored candidate와 일치해야 한다.
+- persisted `AttackEvent`는 selected action과 id, score, type, link, time, agent가 일치해야 한다.
+- no-op은 min-start, cooldown, max-event, threshold gate로 설명되어야 한다.
+- attack type/link coverage와 defense-context score evidence가 남아야 한다.
+
+현재 검증 결과는 다음과 같다.
+
+```text
+aura_attack_decision_path_audit rows: 6 pass
+candidate_total: 123
+rule_candidates: 72
+ml_candidates: 51
+base_formula_matches: 123
+selection_formula_matches: 123
+candidate_traces: 25
+generate_attack_candidates: 25
+estimate_candidate_effect: 123
+estimate_detectability: 123
+predict_candidate_impact: 51
+selected_matches_top_candidate: 25
+linked_attack_events: 25
+score_event_matches: 25
+event_time_matches: 25
+event_agent_matches_trace: 25
+threshold_passes: 25
+noop_traces: 130
+pre_start_noops: 30
+cooldown_noops: 80
+max_event_noops: 20
+pre_start_attack_events: 0
+min_attack_gap_sec: 50
+cooldown_gap_violations: 0
+event_budget_violations: 0
+no_op_threshold_violations: 0
+event_payloads: 25
+event_score_formula_matches: 25
+rule_agent_events: 15
+ml_agent_events: 10
+attack_types: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_induction
+target_links: LTE, MESH, SATCOM
+defense_context_candidates: 123
+selected_with_defense_context: 19
+objective_bonus_candidates: 2
+counter_defense_bonus_candidates: 15
+```
+
+동반 수정:
+
+- README Full Reproduction에 AURA attack decision path audit 명령을 추가했다.
+- `reproduction_order_audit`는 RO17 체계로 확장했다.
+- `submission_readiness_audit`, `competition_alignment`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
+- `docs/agents/AURA_ATTACK_AGENT.md`와 `docs/agents/AGENT_RUNTIME.md`에 감사 목적과 현재 결과를 추가했다.
+
+이 보강의 의미는 AURA/AURA-ML이 단순히 공격 이벤트를 생성하는 코드가 아니라, AgentRuntime tool path, 점수 공식, cadence gate, event payload, defense-context score evidence가 연결된 공격 에이전트로 검증된다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace와 감사 체계만 강화한다.

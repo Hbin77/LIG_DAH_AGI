@@ -131,6 +131,9 @@ def build_rows() -> list[dict[str, str]]:
         "feedback": count_csv_rows("outputs/report_tables/agent_decision_feedback_audit.csv"),
         "memory": count_csv_rows("outputs/report_tables/agent_memory_belief_audit.csv"),
         "memory_influence": count_csv_rows("outputs/report_tables/agent_memory_influence_audit.csv"),
+        "aura_attack_path": count_csv_rows(
+            "outputs/report_tables/aura_attack_decision_path_audit.csv"
+        ),
         "cross_agent_context": count_csv_rows("outputs/report_tables/cross_agent_context_audit.csv"),
         "defense_priority_path": count_csv_rows(
             "outputs/report_tables/defense_priority_decision_path_audit.csv"
@@ -190,6 +193,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error",
         "python3 -m src.experiments.agent_memory_influence_audit --fail-on-error",
         "python3 -m src.experiments.cross_agent_context_audit --fail-on-error",
+        "python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error",
         "python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error",
         "python3 -m src.experiments.defense_action_attribution_audit --fail-on-error",
         "python3 -m src.experiments.mission_thread_summary --fail-on-error",
@@ -250,7 +254,7 @@ def build_rows() -> list[dict[str, str]]:
                 + f"; reproduction_order_rows={reproduction_order_rows}"
             ),
             ok=all(command in readme for command in reproduction_commands)
-            and reproduction_order_rows == 16,
+            and reproduction_order_rows == 17,
             handoff_value="The next developer can rebuild the same evidence without reverse-engineering command order.",
             next_gate="Any new experiment generator must be added to the Full Reproduction block.",
         ),
@@ -296,7 +300,7 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R05",
             area="Decision evidence",
-            requirement="DecisionTrace, contract, causality, margin, goal alignment, feedback, memory, memory influence, cross-agent context, defense priority path, and tool evidence must all be generated.",
+            requirement="DecisionTrace, contract, causality, margin, goal alignment, feedback, memory, memory influence, AURA attack path, cross-agent context, defense priority path, and tool evidence must all be generated.",
             evidence=[
                 "outputs/report_tables/agent_decision_trace_summary.csv",
                 "outputs/report_tables/agent_contract_validation.csv",
@@ -309,6 +313,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/agent_decision_feedback_audit.csv",
                 "outputs/report_tables/agent_memory_belief_audit.csv",
                 "outputs/report_tables/agent_memory_influence_audit.csv",
+                "outputs/report_tables/aura_attack_decision_path_audit.csv",
                 "outputs/report_tables/cross_agent_context_audit.csv",
                 "outputs/report_tables/defense_priority_decision_path_audit.csv",
                 "outputs/report_tables/agent_tool_usage_audit.csv",
@@ -326,6 +331,7 @@ def build_rows() -> list[dict[str, str]]:
                 and decision_counts["feedback"] >= 60
                 and decision_counts["memory"] == 9
                 and decision_counts["memory_influence"] == 6
+                and decision_counts["aura_attack_path"] == 6
                 and decision_counts["cross_agent_context"] == 8
                 and decision_counts["defense_priority_path"] == 6
                 and decision_counts["tool"] == 33

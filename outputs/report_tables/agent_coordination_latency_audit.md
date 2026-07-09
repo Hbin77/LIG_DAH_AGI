@@ -83,7 +83,7 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-01 ml-atk-00001
 
-- Attack: AURA queue_pressure at t=60
+- Attack: AURA-ML queue_pressure at t=60
 - Response latency: required=10, first_defense=10
 - Operator alert latency: 10
 - Metric peak latency: 5
@@ -94,7 +94,7 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-02 ml-atk-00002
 
-- Attack: AURA failover_chasing at t=110
+- Attack: AURA-ML failover_chasing at t=110
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 20
 - Metric peak latency: 20
@@ -105,7 +105,7 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-03 ml-atk-00003
 
-- Attack: AURA failover_chasing at t=160
+- Attack: AURA-ML failover_chasing at t=160
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 0
 - Metric peak latency: 30
@@ -116,7 +116,7 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-04 ml-atk-00004
 
-- Attack: AURA queue_pressure at t=210
+- Attack: AURA-ML queue_pressure at t=210
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 10
 - Metric peak latency: 0
@@ -127,7 +127,7 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-05 ml-atk-00005
 
-- Attack: AURA stale_cop_induction at t=260
+- Attack: AURA-ML stale_cop_induction at t=260
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 0
 - Metric peak latency: 10

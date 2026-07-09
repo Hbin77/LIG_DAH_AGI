@@ -119,7 +119,7 @@ Safety boundary: closed simulation response audit only; no RF, exploit, or live 
 
 - Attack time: 60
 - Attack capability: queue_pressure
-- Attack agent: AURA
+- Attack agent: AURA-ML
 - Target link: SATCOM
 - Required runtime defenses: priority_reroute, stale_badge
 - Support defenses: video_throttle
@@ -138,7 +138,7 @@ Safety boundary: closed simulation response audit only; no RF, exploit, or live 
 
 - Attack time: 110
 - Attack capability: failover_chasing
-- Attack agent: AURA
+- Attack agent: AURA-ML
 - Target link: LTE
 - Required runtime defenses: ml_attack_alert
 - Support defenses: pace_switch, priority_reroute
@@ -157,7 +157,7 @@ Safety boundary: closed simulation response audit only; no RF, exploit, or live 
 
 - Attack time: 160
 - Attack capability: failover_chasing
-- Attack agent: AURA
+- Attack agent: AURA-ML
 - Target link: MESH
 - Required runtime defenses: ml_attack_alert
 - Support defenses: pace_switch, priority_reroute
@@ -176,7 +176,7 @@ Safety boundary: closed simulation response audit only; no RF, exploit, or live 
 
 - Attack time: 210
 - Attack capability: queue_pressure
-- Attack agent: AURA
+- Attack agent: AURA-ML
 - Target link: MESH
 - Required runtime defenses: priority_reroute, stale_badge
 - Support defenses: video_throttle
@@ -195,7 +195,7 @@ Safety boundary: closed simulation response audit only; no RF, exploit, or live 
 
 - Attack time: 260
 - Attack capability: stale_cop_induction
-- Attack agent: AURA
+- Attack agent: AURA-ML
 - Target link: MESH
 - Required runtime defenses: stale_badge
 - Support defenses: none

@@ -161,6 +161,44 @@ Top-1 action match: 0.904
 
 `counter_defense_bonus`도 임의 가산점이 아니다. AURA-ML이 TSRA-R의 active/recent defense context를 보고, PACE 전환 뒤 `failover_chasing`을 시도하거나 priority/video 방어 뒤 queue pressure를 재평가하는 경우에만 제한적으로 붙는다. 이 값과 `counter_defense_reason`은 후보 row, selected action, feedback에 남으므로 방어 맥락이 단순 로그가 아니라 공격 에이전트의 선택 점수에 들어갔는지 추적할 수 있다.
 
+### 6.3 AURA Attack Decision Path 감사
+
+AURA/AURA-ML의 공격 선택 경로는 별도 감사로 검증한다.
+
+```bash
+python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error
+```
+
+현재 감사 결과:
+
+```text
+aura_attack_decision_path_audit rows: 6 pass
+candidate_total: 123
+base_formula_matches: 123
+selection_formula_matches: 123
+generate_attack_candidates: 25
+estimate_candidate_effect: 123
+estimate_detectability: 123
+predict_candidate_impact: 51
+selected_matches_top_candidate: 25
+event_agent_matches_trace: 25
+no_op_threshold_violations: 0
+event_score_formula_matches: 25
+rule_agent_events: 15
+ml_agent_events: 10
+attack_types: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_induction
+target_links: LTE, MESH, SATCOM
+selected_with_defense_context: 19
+```
+
+해석:
+
+- AURA 후보 점수는 `mission_impact - 0.15 * detectability` 공식으로 검증된다.
+- AURA-ML은 base score에 objective/counter-defense/repeat 항을 더한 selection score까지 검증된다.
+- selected action, `AttackEvent`, event score, event time, agent label이 서로 일치한다.
+- `AURA-ML`이 만든 `AttackEvent`는 로그에서도 `agent=AURA-ML`로 남는다.
+- no-op은 시작 전, cooldown, max-event budget 같은 gate로 설명되고, threshold 이상 후보를 두고 no-op하지 않는다.
+
 ## 7. GPU-scale 실험
 
 추가 실험으로 Apple M3 Pro GPU / PyTorch MPS 기반 MLP도 구현했다.
@@ -196,6 +234,7 @@ Throughput: 약 1,566,851 samples/sec
 - rule 기반 공격 선택
 - ML 기반 impact predictor
 - AURA-ML objective/counter-defense-aware selection score
+- AURA Attack Decision Path 감사
 - `queue_pressure`, `failover_chasing`, `stale_cop_induction` 선택 커버리지 검증
 - GPU MPS MLP 확장 실험
 - attack event JSONL 로그

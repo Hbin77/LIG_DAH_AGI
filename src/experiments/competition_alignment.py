@@ -70,21 +70,31 @@ ALIGNMENT_SPECS = [
         competition_goal="Make the attack technically concrete while staying inside a safe simulation boundary.",
         implemented_mechanism=(
             "AURA generates attack-effect candidates, estimates mission impact and detectability, "
-            "then emits simulated AttackEvent records."
+            "then emits simulated AttackEvent records; attack decision-path audit verifies candidate "
+            "score formulas, toolchain coverage, top-score selection, cadence gates, event payloads, "
+            "and tactical/context coverage."
         ),
         agent_or_component="AURA",
         evidence_files=[
             "src/aura/candidate_generator.py",
             "src/aura/impact_estimator.py",
             "src/aura/rule_decision_engine.py",
+            "src/aura/ml_impact_predictor.py",
+            "src/experiments/aura_attack_decision_path_audit.py",
             "outputs/report_tables/aura_coa_cards.csv",
+            "outputs/report_tables/aura_attack_decision_path_audit.csv",
         ],
         next_gate="Attack improvements must produce COA cards and never introduce live RF, exploit, or packet actions.",
         content_checks=[
             ContentCheck("outputs/report_tables/aura_coa_cards.csv", "Simulated effect only"),
             ContentCheck("outputs/report_tables/aura_coa_cards.csv", "no RF"),
+            ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "event_agent_matches_trace=25"),
+            ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "ml_agent_events=10"),
         ],
-        row_checks=[RowCountCheck("outputs/report_tables/aura_coa_cards.csv", 10)],
+        row_checks=[
+            RowCountCheck("outputs/report_tables/aura_coa_cards.csv", 10),
+            RowCountCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", 6),
+        ],
     ),
     AlignmentSpec(
         alignment_id="A03",
@@ -140,7 +150,9 @@ ALIGNMENT_SPECS = [
             "that cadence memory, defense cooldown memory, active defense windows, and adaptive "
             "memory policy affect bounded agent decisions; cross-agent context audit verifies that "
             "AURA and TSRA-R carry opponent context through observations, tools, memory, feedback, "
-            "candidate rows, emitted event details, and bounded policy score terms; defense priority "
+            "candidate rows, emitted event details, and bounded policy score terms; AURA attack path "
+            "audit verifies attack candidate score formulas, selected AttackEvent links, event agent identity, "
+            "cadence gates, and tactical/context coverage; defense priority "
             "path audit verifies formula-backed TSRA-R priority scores, selected event details, "
             "event ordering, and no-op consistency."
         ),
@@ -159,6 +171,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/agent_decision_feedback_audit.py",
             "src/experiments/agent_memory_belief_audit.py",
             "src/experiments/agent_memory_influence_audit.py",
+            "src/experiments/aura_attack_decision_path_audit.py",
             "src/experiments/cross_agent_context_audit.py",
             "src/experiments/defense_priority_decision_path_audit.py",
             "src/experiments/agent_tool_usage_audit.py",
@@ -174,6 +187,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/agent_decision_feedback_audit.csv",
             "outputs/report_tables/agent_memory_belief_audit.csv",
             "outputs/report_tables/agent_memory_influence_audit.csv",
+            "outputs/report_tables/aura_attack_decision_path_audit.csv",
             "outputs/report_tables/cross_agent_context_audit.csv",
             "outputs/report_tables/defense_priority_decision_path_audit.csv",
             "outputs/report_tables/agent_tool_usage_audit.csv",
@@ -194,6 +208,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_decision_feedback_audit.csv", 60),
             RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_memory_influence_audit.csv", 6),
+            RowCountCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", 6),
             RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 8),
             RowCountCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", 6),
             RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 33),
@@ -212,6 +227,8 @@ ALIGNMENT_SPECS = [
             "whether required defenses are active or emitted within the response window; the collaboration "
             "graph summarizes the closed-loop agent cooperation evidence; cross-agent context audit "
             "verifies attack-to-defense and defense-to-attack handoff plus context-to-policy score effects inside DecisionTrace; "
+            "AURA attack decision-path audit checks that selected attack events match top-scored candidates "
+            "and persisted AttackEvent payloads before downstream response audits consume them; "
             "defense priority decision-path audit checks that AURA attack context changes TSRA-R "
             "candidate priority scores and selected DefenseEvent details in a bounded, ordered way; "
             "episode replay joins attack, defense, alert, and metric movement per attack event; coordination latency audit checks "
@@ -244,6 +261,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/agent_coordination_latency_audit.py",
             "src/experiments/agent_stress_scenario_audit.py",
             "src/experiments/ml_red_blue_interaction_audit.py",
+            "src/experiments/aura_attack_decision_path_audit.py",
             "src/experiments/defense_priority_decision_path_audit.py",
             "src/experiments/attack_defense_coverage.py",
             "src/experiments/attack_defense_response_audit.py",
@@ -259,6 +277,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/agent_coordination_latency_audit.csv",
             "outputs/report_tables/agent_stress_scenario_audit.csv",
             "outputs/report_tables/ml_red_blue_interaction_audit.csv",
+            "outputs/report_tables/aura_attack_decision_path_audit.csv",
             "outputs/report_tables/defense_priority_decision_path_audit.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
             "outputs/report_tables/attack_defense_response_audit.csv",
@@ -280,6 +299,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "selected_attack_with_defense_context=9"),
             ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "selected_counter_defense_bonus_traces="),
             ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "attack_context_bonus_events="),
+            ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "selected_matches_top_candidate=25"),
+            ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "selected_with_defense_context=19"),
             ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "formula_matches="),
             ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "ordered_core_defense_traces=12/12"),
             ContentCheck("outputs/report_tables/agent_coordination_latency_audit.csv", "closed simulation"),
@@ -303,6 +324,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_coordination_latency_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_stress_scenario_audit.csv", 6),
             RowCountCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", 5),
+            RowCountCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", 6),
             RowCountCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", 6),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
             RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
@@ -505,7 +527,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("README.md", "Do not push directly to `main`"),
         ],
         row_checks=[
-            RowCountCheck("outputs/report_tables/reproduction_order_audit.csv", 16),
+            RowCountCheck("outputs/report_tables/reproduction_order_audit.csv", 17),
             RowCountCheck("outputs/report_tables/submission_readiness_audit.csv", 10),
         ],
     ),

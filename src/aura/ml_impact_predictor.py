@@ -230,6 +230,7 @@ class MLAURA:
             expected_impact=best_prediction,
             reason=f"ML impact predictor selected {best_candidate.attack_type}",
             score=best_score,
+            agent="AURA-ML",
         )
         self.runtime.memory.update_belief("last_attack_time", self.last_attack_time)
         self.runtime.memory.update_belief("event_count", self.event_count)

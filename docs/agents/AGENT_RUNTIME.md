@@ -402,6 +402,44 @@ defense_counter_reasons: counter_queue_pressure_priority_reroute, counter_video_
 - TSRA-R은 AURA attack context를 `attack_context_bonus`와 `defense_priority_score`로 바꾸고, 같은 tick의 core defense event를 점수 순서로 정렬한다.
 - 이 감사는 공격/방어가 단순히 같은 로그 폴더에 있는 것이 아니라, 서로의 행동 context를 다음 판단 근거와 정책 점수로 수용했는지 확인한다.
 
+## AURA Attack Decision Path Audit
+
+AURA/AURA-ML의 후보 생성, 점수 공식, selected action, persisted `AttackEvent`, no-op gate, tactical coverage가 같은 decision path로 이어지는지 확인한다.
+
+```bash
+python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/aura_attack_decision_path_audit.csv
+outputs/report_tables/aura_attack_decision_path_audit.md
+```
+
+현재 결과:
+
+```text
+aura_attack_decision_path_audit rows: 6 pass
+candidate_total: 123
+base_formula_matches: 123
+selection_formula_matches: 123
+selected_matches_top_candidate: 25
+event_agent_matches_trace: 25
+no_op_threshold_violations: 0
+ml_agent_events: 10
+selected_with_defense_context: 19
+```
+
+감사 항목:
+
+- Rule AURA와 AURA-ML 후보 점수 공식 일치
+- 후보별 tool call 수와 tool error
+- selected attack과 top-scored candidate, `AttackEvent` 일치
+- min-start, cooldown, max-event, threshold no-op gate
+- `AURA`/`AURA-ML` event agent label 분리
+- 전술 coverage와 defense-context score evidence
+
 ## Defense Priority Decision Path Audit
 
 TSRA-R의 attack-context-aware priority score가 후보 row, selected action, emitted `DefenseEvent.details`까지 일관되게 이어지는지 확인한다.

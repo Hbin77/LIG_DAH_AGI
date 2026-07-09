@@ -3040,3 +3040,87 @@ selected_without_ready: 0
 - TSRA-R 방어 우선순위는 단순 설명 문구가 아니라 후보 점수, 선택 action, emitted event detail까지 검증되는 decision path가 됐다.
 - AURA attack context가 방어 점수에 영향을 주지만 bounded bonus로 제한되어 과도한 자동 방어로 번지지 않는다.
 - 이 변경은 closed simulation 안의 trace 감사와 검증 체계만 강화하며 RF, exploit, live network action은 추가하지 않는다.
+
+## P58. AURA Attack Decision Path Audit
+
+상태: 완료
+
+문제:
+
+- AURA-ML은 `event_id=ml-atk-*`와 `DecisionTrace.agent=AURA-ML`을 사용하지만, `AttackEvent.agent`는 dataclass 기본값 때문에 `AURA`로 남아 있었다.
+- 기존 조인 로직은 AURA 계열 agent로 처리해서 깨지지는 않았지만, 공격/방어 에이전트를 분리해서 설명하려면 persisted event agent도 정확해야 한다.
+- E7 전용 `ml_attack_decision_path_audit`는 ML path를 잘 보여주지만, E3~E7 전체 AURA/AURA-ML의 공통 공격 경로를 한 번에 검증하는 감사가 없었다.
+
+구현:
+
+```text
+src/aura/ml_impact_predictor.py
+src/experiments/aura_attack_decision_path_audit.py
+outputs/report_tables/aura_attack_decision_path_audit.csv
+outputs/report_tables/aura_attack_decision_path_audit.md
+src/experiments/reproduction_order_audit.py
+src/experiments/submission_readiness_audit.py
+src/experiments/competition_alignment.py
+scripts/verify_submission_state.py
+scripts/build_submission_package.py
+```
+
+설계:
+
+- `MLAURA`가 생성하는 `AttackEvent`에 `agent="AURA-ML"`을 명시한다.
+- 감사는 E3~E7의 `aura_decision_traces.jsonl`과 `attack_events.jsonl`을 모두 읽는다.
+- 모든 candidate의 `mission_impact - 0.15 * detectability` 공식 일치를 확인한다.
+- AURA-ML candidate는 `base_attack_score + objective_bonus + counter_defense_bonus - repeated_tactic_penalty`도 확인한다.
+- selected action이 같은 trace의 top-scored candidate인지, persisted `AttackEvent`와 id/score/type/link/time/agent가 맞는지 확인한다.
+- no-op이 min-start, cooldown, max-event budget, threshold gate를 지키는지 확인한다.
+- attack type, target link, defense-context candidate row, objective/counter-defense bonus coverage를 확인한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.run_all
+python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+aura_attack_decision_path_audit rows: 6 pass
+candidate_total: 123
+rule_candidates: 72
+ml_candidates: 51
+base_formula_matches: 123
+selection_formula_matches: 123
+candidate_traces: 25
+generate_attack_candidates: 25
+estimate_candidate_effect: 123
+estimate_detectability: 123
+predict_candidate_impact: 51
+selected_matches_top_candidate: 25
+linked_attack_events: 25
+event_agent_matches_trace: 25
+threshold_passes: 25
+noop_traces: 130
+pre_start_attack_events: 0
+min_attack_gap_sec: 50
+cooldown_gap_violations: 0
+event_budget_violations: 0
+no_op_threshold_violations: 0
+event_score_formula_matches: 25
+rule_agent_events: 15
+ml_agent_events: 10
+attack_types: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_induction
+target_links: LTE, MESH, SATCOM
+selected_with_defense_context: 19
+objective_bonus_candidates: 2
+counter_defense_bonus_candidates: 15
+```
+
+해석:
+
+- AURA/AURA-ML은 후보를 임의로 고르는 함수가 아니라 tool call, score formula, gate, event payload가 이어지는 공격 에이전트로 검증된다.
+- AURA-ML 이벤트는 trace와 persisted event 양쪽에서 `AURA-ML`로 식별된다.
+- 이 변경은 closed simulation 안의 agent identity와 감사 체계를 강화하며 RF, exploit, live network action은 추가하지 않는다.
