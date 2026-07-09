@@ -1587,6 +1587,7 @@ def check_csv_outputs() -> list[str]:
         any(
             "selected_matches_top_candidate=5" in row["observed"]
             and "score_event_matches=5" in row["observed"]
+            and "payload_selected_matches=5" in row["observed"]
             for row in ml_attack_path_rows
             if row["check_id"] == "MAP03"
         ),

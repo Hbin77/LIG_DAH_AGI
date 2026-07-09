@@ -3335,3 +3335,56 @@ rule_tool_selected_event_mismatches: 0
 - TSRA-R-ML은 ML detector로 window를 열고, core 방어 action은 명시적 tool delegation으로 실행한다.
 - 이 변경은 "ML 점수만 낸 코드"가 아니라 observe-memory-tool-decision-trace 구조를 갖춘 방어 에이전트라는 증거를 강화한다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense delegation evidence만 강화한다.
+
+## P63. AURA-ML Attack Event Payload Parity
+
+상태: 완료
+
+문제:
+
+- ML attack path audit는 AURA-ML이 top-scored candidate를 선택하고 AttackEvent log와 score/time이 맞는지 확인한다.
+- 하지만 persisted `AttackEvent.expected_impact` payload가 trace의 selected action과 selected candidate evidence를 그대로 반영하는지는 별도 카운트로 강하게 보지 않았다.
+- 방어 쪽은 `execute_rule_defense_actions` tool output과 selected defense event parity까지 확인하므로, 공격 쪽도 같은 수준의 event payload parity가 필요하다.
+
+구현:
+
+```text
+src/experiments/ml_attack_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+tests/test_agent_regression.py
+```
+
+설계:
+
+- MAP03 `Top-score selection link`에 `payload_selected_matches`를 추가했다.
+- 각 AURA-ML selected attack trace마다 다음을 비교한다.
+  - `selected_action.score` == `AttackEvent.score`
+  - `selected_action.score` == `AttackEvent.expected_impact.selection_score`
+  - selected action의 base/objective/counter/repeated score component == expected impact component
+  - selected candidate의 `predicted_mission_impact`, `detectability_score` == expected impact payload
+  - selected action의 objective/counter-defense reason == expected impact reason
+- final verifier와 competition alignment가 `payload_selected_matches=5`를 요구한다.
+- unit regression도 AURA-ML selected event의 expected impact가 selected candidate/trace evidence와 일치하는지 확인한다.
+
+검증:
+
+```bash
+python3 -m unittest discover -s tests
+python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+agent_regression_tests: 4 pass
+ml_attack_decision_path_audit rows: 6 pass
+MAP03 payload_selected_matches: 5
+```
+
+해석:
+
+- AURA-ML의 AttackEvent는 사후 작성된 설명이 아니라 trace에서 선택한 candidate evidence와 같은 payload를 보존한다.
+- 공격 에이전트도 방어 에이전트와 같은 수준으로 tool/candidate/selected event 연결성을 갖는다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation attack payload evidence만 강화한다.

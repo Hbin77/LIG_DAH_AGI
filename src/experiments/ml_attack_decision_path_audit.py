@@ -146,6 +146,41 @@ def selection_score_formula_ok(candidate: dict[str, Any]) -> bool:
     return abs(as_float(candidate.get("score")) - (base_score + objective_bonus + counter_bonus - repeated_penalty)) <= 1e-5
 
 
+def attack_payload_matches_selection(
+    *,
+    selected: dict[str, Any],
+    candidate: dict[str, Any],
+    event: dict[str, Any],
+) -> bool:
+    expected = event.get("expected_impact") or {}
+    if not expected:
+        return False
+    numeric_pairs = [
+        (selected.get("score"), event.get("score")),
+        (selected.get("score"), expected.get("selection_score")),
+        (selected.get("base_attack_score"), expected.get("base_attack_score")),
+        (selected.get("objective_bonus"), expected.get("objective_bonus")),
+        (selected.get("counter_defense_bonus"), expected.get("counter_defense_bonus")),
+        (selected.get("repeated_tactic_penalty"), expected.get("repeated_tactic_penalty")),
+        (candidate.get("predicted_mission_impact"), expected.get("mission_impact")),
+        (candidate.get("detectability_score"), expected.get("detectability_score")),
+    ]
+    numeric_match = all(
+        abs(as_float(left) - as_float(right)) <= 1e-6
+        for left, right in numeric_pairs
+    )
+    reason_match = (
+        str(selected.get("objective_reason", "")) == str(expected.get("objective_reason", ""))
+        and str(selected.get("counter_defense_reason", ""))
+        == str(expected.get("counter_defense_reason", ""))
+    )
+    candidate_match = (
+        selected.get("attack_type") == candidate.get("action")
+        and selected.get("target_link") == candidate.get("target_link")
+    )
+    return numeric_match and reason_match and candidate_match
+
+
 def row(
     *,
     check_id: str,
@@ -213,6 +248,7 @@ def build_rows() -> list[dict[str, str]]:
     score_event_matches = 0
     time_event_matches = 0
     threshold_passes = 0
+    payload_selected_matches = 0
     for trace in attack_traces:
         selected = trace.get("selected_action") or {}
         best = best_candidate(trace)
@@ -230,6 +266,12 @@ def build_rows() -> list[dict[str, str]]:
             time_event_matches += 1
         if best and as_float(best.get("score")) >= attack_threshold:
             threshold_passes += 1
+        if event and best and attack_payload_matches_selection(
+            selected=selected,
+            candidate=best,
+            event=event,
+        ):
+            payload_selected_matches += 1
 
     all_candidates = [
         candidate
@@ -362,7 +404,9 @@ def build_rows() -> list[dict[str, str]]:
                 f"selected_matches_top_candidate={selected_matches}; "
                 f"score_event_matches={score_event_matches}; "
                 f"time_event_matches={time_event_matches}; "
-                f"threshold_passes={threshold_passes}; attack_threshold={fmt(attack_threshold)}"
+                f"threshold_passes={threshold_passes}; "
+                f"payload_selected_matches={payload_selected_matches}; "
+                f"attack_threshold={fmt(attack_threshold)}"
             ),
             ok=(
                 len(attack_traces) == len(attacks) == 5
@@ -370,10 +414,12 @@ def build_rows() -> list[dict[str, str]]:
                 and score_event_matches == len(attack_traces)
                 and time_event_matches == len(attack_traces)
                 and threshold_passes == len(attack_traces)
+                and payload_selected_matches == len(attack_traces)
             ),
             interpretation=(
                 "The chosen attack is not hand-picked after the fact; it is the top candidate in "
-                "the trace and is linked to the attack event log."
+                "the trace, linked to the attack event log, and its persisted expected-impact "
+                "payload matches the selected trace evidence."
             ),
         ),
         row(

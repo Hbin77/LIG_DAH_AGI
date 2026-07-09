@@ -3249,3 +3249,37 @@ rule_tool_selected_event_mismatches: 0
 ```
 
 이 보강의 의미는 TSRA-R-ML을 "ML 확률값 + if문"이 아니라, ML 판단, risk guard, tool delegation, selected defense event, feedback이 같은 DecisionTrace에 묶이는 방어 에이전트 구조로 올렸다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense delegation evidence만 강화한다.
+
+### 78. AURA-ML Attack Event Payload Parity를 추가한 이유
+
+방어 쪽은 `execute_rule_defense_actions` tool output과 최종 selected defense event가 같은지까지 검증한다. 같은 기준을 공격 쪽에도 적용해야 AURA-ML의 `AttackEvent`가 사후 설명이 아니라 실제 trace 선택 근거에서 나온 payload라는 점이 분명해진다.
+
+이번 변경은 `ml_attack_decision_path_audit`의 MAP03을 강화했다.
+
+변경한 파일:
+
+```text
+src/experiments/ml_attack_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+tests/test_agent_regression.py
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- `selected_action.score`와 `AttackEvent.score`가 일치해야 한다.
+- `selected_action.score`와 `AttackEvent.expected_impact.selection_score`가 일치해야 한다.
+- base/objective/counter/repeated score component가 selected action과 expected impact 사이에서 일치해야 한다.
+- selected candidate의 `predicted_mission_impact`, `detectability_score`가 expected impact payload와 일치해야 한다.
+- objective/counter-defense reason도 selected action과 expected impact 사이에서 일치해야 한다.
+- final verifier와 competition alignment는 `payload_selected_matches=5`를 요구한다.
+
+검증 의미:
+
+```text
+ml_attack_decision_path_audit MAP03 payload_selected_matches: 5
+agent_regression_tests: 4 pass
+```
+
+이 보강의 의미는 AURA-ML의 공격 event가 trace의 tool/candidate/selected action evidence를 그대로 보존한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation attack payload evidence만 강화한다.

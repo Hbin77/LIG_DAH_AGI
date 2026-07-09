@@ -202,6 +202,32 @@ class AuraMLRegressionTests(unittest.TestCase):
         selected_score = trace.selected_action["score"]
         top_candidate_score = max(row["score"] for row in trace.candidate_actions)
         self.assertAlmostEqual(selected_score, top_candidate_score)
+        selected_candidate = next(
+            row
+            for row in trace.candidate_actions
+            if row["score"] == top_candidate_score
+            and row["action"] == trace.selected_action["attack_type"]
+            and row["target_link"] == trace.selected_action["target_link"]
+        )
+        self.assertAlmostEqual(
+            event.expected_impact["selection_score"],
+            trace.selected_action["score"],
+            places=6,
+        )
+        self.assertAlmostEqual(
+            event.expected_impact["mission_impact"],
+            selected_candidate["predicted_mission_impact"],
+            places=6,
+        )
+        self.assertAlmostEqual(
+            event.expected_impact["detectability_score"],
+            selected_candidate["detectability_score"],
+            places=6,
+        )
+        self.assertEqual(
+            event.expected_impact["counter_defense_reason"],
+            trace.selected_action["counter_defense_reason"],
+        )
 
         for row in trace.candidate_actions:
             expected_selection = (
