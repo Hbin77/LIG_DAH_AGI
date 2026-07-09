@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIR = ROOT / "outputs" / "package"
 DEFAULT_ZIP = PACKAGE_DIR / "DAH2026_source_LIG_DAH_AGI.zip"
 MANIFEST_PATH = PACKAGE_DIR / "submission_manifest.md"
+ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
 
 ROOT_FILES = [
     "README.md",
@@ -237,7 +238,10 @@ def build_zip(files: list[Path], output: Path) -> Path:
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for path in package_files:
             rel = path.relative_to(ROOT).as_posix()
-            zf.write(path, arcname=rel)
+            info = zipfile.ZipInfo(rel, date_time=ZIP_TIMESTAMP)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = (path.stat().st_mode & 0xFFFF) << 16
+            zf.writestr(info, path.read_bytes())
     write_manifest(files, output)
     return output
 

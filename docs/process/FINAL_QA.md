@@ -86,6 +86,7 @@ competition_alignment_matrix rows: 10 verified
 ```text
 package_zip entries: 162
 package_manifest_integrity: passed
+package_zip_metadata: deterministic
 release_handoff: repo-only/current
 generated_branch: hbin
 freeze_status: pass

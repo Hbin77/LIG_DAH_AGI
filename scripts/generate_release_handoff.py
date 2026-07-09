@@ -107,6 +107,7 @@ def render_handoff(values: dict[str, str], branch: str) -> str:
             "",
             "```text",
             "package_manifest_integrity=passed",
+            "package_zip_metadata=deterministic",
             "release_handoff=repo-only/current",
             "tracked_worktree=clean",
             "external package link self-test status=pass",

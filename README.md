@@ -498,7 +498,7 @@ This writes:
 - `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
 - `outputs/package/submission_manifest.md`
 
-The package includes code, docs, curated CSV summaries, figures, report tables, and model metric JSON files. It excludes regenerated temporary logs, seed-level batch directories, synthetic datasets, Python caches, and model binaries such as `.pkl` or `.pt`.
+The package includes code, docs, curated CSV summaries, figures, report tables, and model metric JSON files. It excludes regenerated temporary logs, seed-level batch directories, synthetic datasets, Python caches, and model binaries such as `.pkl` or `.pt`. ZIP entries are path-sorted with fixed metadata so repeated builds from the same payload produce a stable SHA-256.
 
 ## Generate Release Handoff
 
@@ -526,7 +526,7 @@ This runs the final local freeze sequence in order: build the package, regenerat
 python3 scripts/verify_submission_state.py
 ```
 
-This checks required files, core CSV row counts, safety-boundary text, package contents, manifest ZIP SHA-256/byte-count/file-count integrity, ZIP payload parity with the current worktree, repo-only release handoff currency, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
+This checks required files, core CSV row counts, safety-boundary text, package contents, manifest ZIP SHA-256/byte-count/file-count integrity, deterministic ZIP metadata, ZIP payload parity with the current worktree, repo-only release handoff currency, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
 
 ## Verify External Package Link
 

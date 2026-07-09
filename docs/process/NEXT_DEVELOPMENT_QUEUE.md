@@ -1626,7 +1626,50 @@ external package link self-test status: pass
 - 이 스크립트는 최종 로컬 동결 절차의 표준 진입점이다.
 - 외부 제출 링크 자체는 업로드 이후에만 검증할 수 있으므로 다음 운영 단계로 남긴다.
 
-## P31. 외부 제출 ZIP 업로드와 비로그인 다운로드 확인
+## P31. Deterministic Package Build
+
+상태: 완료
+
+문제:
+
+- `freeze_release_candidate.py --require-clean`은 커밋 후에도 패키지를 다시 빌드한다.
+- 기존 ZIP 생성 방식은 파일 timestamp 같은 ZIP metadata가 실행 시점에 따라 바뀔 수 있어, 같은 payload라도 ZIP SHA가 달라지고 manifest/handoff가 dirty가 될 수 있었다.
+
+구현:
+
+```text
+scripts/build_submission_package.py
+```
+
+구현 방식:
+
+- `zipfile.write()` 대신 고정 metadata를 가진 `ZipInfo`와 `writestr()`을 사용한다.
+- ZIP entry timestamp를 고정한다.
+- 파일 권한은 안정적인 external attributes로 기록한다.
+- 파일 순서는 기존처럼 path 기준 정렬을 유지한다.
+
+검증:
+
+```bash
+python3 scripts/freeze_release_candidate.py
+python3 scripts/freeze_release_candidate.py
+```
+
+검증 결과:
+
+```text
+zip_sha256: repeated runs stable
+package_manifest_integrity: passed
+package_zip_metadata: deterministic
+freeze_status: pass
+```
+
+해석:
+
+- 같은 payload면 같은 ZIP SHA가 나온다.
+- 커밋 후 `freeze_release_candidate.py --require-clean`이 tracked worktree clean 상태를 깨지 않는다.
+
+## P32. 외부 제출 ZIP 업로드와 비로그인 다운로드 확인
 
 상태: 다음 작업
 

@@ -51,6 +51,7 @@ zip_file_count: 162
 zip_bytes: 재생성 시 outputs/package/submission_manifest.md 기준 확인
 zip_sha256: 재생성 시 outputs/package/submission_manifest.md 기준 확인
 manifest_integrity: zip_sha256, zip_bytes, zip_file_count, 포함 파일 목록, worktree payload parity 검증
+zip_metadata: path-sorted entries, fixed timestamp, deflated compression
 release_handoff: repo-only/current
 external_link_verifier: included
 metric_gate_summary: included
@@ -91,4 +92,5 @@ outputs/batch/seed_*: 0
 - 개발 산출물은 계속 `hbin` 브랜치에 커밋한다.
 - `main` 브랜치는 보호용 기본 브랜치로 유지한다.
 - ZIP 파일은 로컬 생성 산출물로 두고 Git에는 올리지 않는다.
+- 같은 payload에서 같은 SHA-256이 나오도록 ZIP entry 순서와 metadata를 고정한다.
 - ZIP을 외부 클라우드에 올릴 때는 `outputs/package/submission_manifest.md`의 SHA-256 값을 함께 확인한다.

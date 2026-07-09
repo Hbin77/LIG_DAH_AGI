@@ -1814,3 +1814,44 @@ python3 scripts/freeze_release_candidate.py --require-clean
 - 첫 번째 명령은 생성/검증 흐름을 재실행한다.
 - `--require-clean`은 커밋 후 최종 상태 확인에 사용한다.
 - 외부 다운로드 링크 검증은 업로드 후 `verify_external_package_link.py "https://..."`로 수행한다.
+
+### 45. Deterministic Package Build로 바꾼 이유
+
+`freeze_release_candidate.py --require-clean`을 커밋 후 실행했을 때 manifest와 handoff가 dirty가 되는 문제가 있었다. 원인은 ZIP 생성 시 파일 timestamp 같은 metadata가 ZIP에 들어가면서, payload가 같아도 ZIP SHA가 달라질 수 있었기 때문이다.
+
+수정한 것:
+
+```text
+scripts/build_submission_package.py
+```
+
+변경 방식:
+
+```text
+zipfile.write()
+-> ZipInfo + writestr()
+-> 고정 ZIP timestamp
+-> 안정적인 external_attr
+-> path 기준 정렬 유지
+```
+
+검증:
+
+```text
+python3 scripts/freeze_release_candidate.py
+python3 scripts/freeze_release_candidate.py
+```
+
+결과:
+
+```text
+두 번 연속 실행해도 zip_sha256 유지
+package_manifest_integrity: passed
+package_zip_metadata: deterministic
+freeze_status: pass
+```
+
+해석:
+
+- 같은 파일 payload라면 같은 ZIP SHA가 나온다.
+- 커밋 후 `--require-clean` 검증이 package rebuild 때문에 실패하지 않는다.

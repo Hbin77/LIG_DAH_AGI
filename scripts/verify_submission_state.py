@@ -13,6 +13,7 @@ from typing import Callable
 ROOT = Path(__file__).resolve().parents[1]
 ZIP_PATH = ROOT / "outputs" / "package" / "DAH2026_source_LIG_DAH_AGI.zip"
 MANIFEST_PATH = ROOT / "outputs" / "package" / "submission_manifest.md"
+EXPECTED_ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
 
 REQUIRED_FILES = [
     "README.md",
@@ -874,9 +875,21 @@ def check_zip() -> list[str]:
     require(ZIP_PATH.exists(), f"missing package ZIP: {ZIP_PATH.relative_to(ROOT)}")
     require(MANIFEST_PATH.exists(), f"missing package manifest: {MANIFEST_PATH.relative_to(ROOT)}")
     with zipfile.ZipFile(ZIP_PATH) as zf:
-        name_list = zf.namelist()
+        infos = zf.infolist()
+        name_list = [info.filename for info in infos]
     names = set(name_list)
     require(len(name_list) == len(names), "package ZIP contains duplicate paths")
+    require(name_list == sorted(name_list), "package ZIP entries are not path-sorted")
+    non_deterministic_entries = [
+        info.filename
+        for info in infos
+        if info.date_time != EXPECTED_ZIP_TIMESTAMP
+        or info.compress_type != zipfile.ZIP_DEFLATED
+    ]
+    require(
+        not non_deterministic_entries,
+        f"package ZIP has non-deterministic metadata: {non_deterministic_entries[:8]}",
+    )
     for rel in ZIP_REQUIRED_FILES:
         require(rel in names, f"package ZIP missing {rel}")
 
@@ -966,6 +979,10 @@ def check_zip() -> list[str]:
     require(
         "python3 scripts/freeze_release_candidate.py --require-clean" in handoff_text,
         "release handoff missing freeze release command",
+    )
+    require(
+        "package_zip_metadata=deterministic" in handoff_text,
+        "release handoff missing deterministic ZIP metadata check",
     )
     stale_payload_files = []
     with zipfile.ZipFile(ZIP_PATH) as zf:
@@ -1060,6 +1077,7 @@ def check_zip() -> list[str]:
     return [
         f"package_zip entries={len(names)}",
         "package_manifest_integrity=passed",
+        "package_zip_metadata=deterministic",
         "release_handoff=repo-only/current",
         "package exclusions=passed",
     ]

@@ -742,6 +742,30 @@ package_manifest_integrity: passed
 release_handoff: repo-only/current
 ```
 
+### P22. Deterministic Package Build
+
+상태: 완료
+
+목적:
+
+- 같은 payload에서 같은 ZIP SHA가 나오도록 한다.
+- release freeze를 반복 실행해도 manifest와 handoff가 불필요하게 dirty가 되지 않게 한다.
+- 최종 제출물의 재현성을 ZIP byte level까지 고정한다.
+
+산출물:
+
+```text
+scripts/build_submission_package.py
+```
+
+검증 결과:
+
+```text
+repeated freeze zip_sha256: stable
+package_manifest_integrity: passed
+package_zip_metadata: deterministic
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.
