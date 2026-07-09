@@ -660,10 +660,35 @@ outputs/report_tables/submission_readiness_audit.md
 ```text
 submission_readiness_audit rows: 10 pass
 agent_collaboration_graph edges: 17 verified
-package_zip entries: 159
+package_zip entries: 160
 package_manifest_integrity: passed
 branch: hbin
 origin main/hbin refs: present
+```
+
+### P19. External Package Link Verifier
+
+상태: 완료
+
+목적:
+
+- 외부 클라우드에 올린 제출 링크가 local manifest와 같은 ZIP을 내려주는지 검증한다.
+- 로그인 전용 링크, 잘못된 파일 링크, 손상된 ZIP 업로드를 제출 전에 잡는다.
+- 업로드 자체와 검증 도구를 분리해, 링크가 준비되면 같은 명령으로 검증할 수 있게 한다.
+
+산출물:
+
+```text
+scripts/verify_external_package_link.py
+```
+
+검증 결과:
+
+```text
+local file-url self-test: pass
+downloaded sha256: manifest zip_sha256와 일치
+downloaded bytes: manifest zip_bytes와 일치
+downloaded zip_file_count: manifest zip_file_count와 일치
 ```
 
 ## 최종 판단 기준

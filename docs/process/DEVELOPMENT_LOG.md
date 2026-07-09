@@ -1613,7 +1613,7 @@ submission_readiness_audit.csv: 10 rows
 status: pass=10
 agent_collaboration_graph.csv: 17 edges
 competition_alignment_matrix.csv: 10 rows verified
-package_zip entries: 159
+package_zip entries: 160
 branch: hbin
 origin main/hbin refs: present
 ```
@@ -1667,7 +1667,7 @@ submission_manifest.md
 검증 결과:
 
 ```text
-package_zip entries: 159
+package_zip entries: 160
 package_manifest_integrity: passed
 package exclusions: passed
 tracked_worktree: clean
@@ -1678,3 +1678,50 @@ tracked_worktree: clean
 - 이제 `scripts/verify_submission_state.py --require-clean`은 오래된 ZIP이나 manifest mismatch를 잡는다.
 - 외부 클라우드 업로드 전에 `build_submission_package.py`와 final verifier를 다시 실행해야 한다.
 - 외부 링크 다운로드 권한 검증은 업로드 위치가 필요하므로 별도 P28 운영 단계로 남긴다.
+
+### 42. External Package Link Verifier를 추가한 이유
+
+로컬 ZIP 무결성을 검증해도, 외부 클라우드에 업로드한 링크가 같은 파일을 내려주는지는 별도 문제다. 제출 링크가 로그인 전용이거나, 다른 ZIP을 가리키거나, 파일이 업로드 중 손상되면 로컬 verifier만으로는 확인할 수 없다.
+
+그래서 외부 링크를 다운로드해 local manifest와 비교하는 도구를 추가했다.
+
+추가한 것:
+
+```text
+scripts/verify_external_package_link.py
+```
+
+검증 방식:
+
+```text
+submission_manifest.md
+-> expected zip_bytes / zip_sha256 / zip_file_count 읽기
+external URL
+-> GET download
+-> bytes_read 계산
+-> SHA-256 계산
+-> ZIP entry count 계산
+-> optional Content-Length 비교
+-> expected 값과 비교
+```
+
+사용 방식:
+
+```bash
+python3 scripts/verify_external_package_link.py "https://..."
+```
+
+로컬 self-test:
+
+```bash
+python3 scripts/verify_external_package_link.py \
+  "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" \
+  --allow-file-url
+```
+
+판단:
+
+- 실제 제출 링크는 `https://`를 기본으로 요구한다.
+- URL 안에 username/password가 들어간 credential-embedded URL은 거부한다.
+- 다운로드된 ZIP의 SHA-256, byte count, ZIP entry count가 manifest와 일치해야 통과한다.
+- 이 도구는 업로드 자체를 대신하지 않는다. 업로드 후 비로그인 링크를 받아 검증하는 단계에서 사용한다.

@@ -1425,7 +1425,7 @@ python3 scripts/verify_submission_state.py
 submission_readiness_audit.csv: 10 rows
 status: pass=10
 agent_collaboration_graph.csv: 17 edges
-package_zip entries: 159
+package_zip entries: 160
 branch: hbin
 origin main/hbin refs: present
 ```
@@ -1475,7 +1475,7 @@ python3 scripts/verify_submission_state.py --require-clean
 검증 결과:
 
 ```text
-package_zip entries: 159
+package_zip entries: 160
 package_manifest_integrity: passed
 package exclusions: passed
 tracked_worktree: clean
@@ -1486,13 +1486,59 @@ tracked_worktree: clean
 - 이 게이트는 외부 업로드 직전에 올릴 ZIP이 현재 코드/산출물과 같은 파일인지 확인한다.
 - 업로드 링크 권한 검증은 로컬 코드로 끝낼 수 없으므로 다음 운영 단계로 남긴다.
 
-## P28. 외부 제출 ZIP 링크 검증
+## P28. External Package Link Verifier
+
+상태: 완료
+
+문제:
+
+- 로컬 ZIP 무결성은 검증됐지만, 외부 클라우드에 업로드한 링크가 같은 ZIP을 내려주는지는 별도 확인이 필요하다.
+- 제출 링크가 로그인 전용이거나, 잘못된 파일을 가리키거나, ZIP이 손상되면 로컬 검증만으로는 잡을 수 없다.
+
+구현:
+
+```text
+scripts/verify_external_package_link.py
+```
+
+구현 방식:
+
+- `outputs/package/submission_manifest.md`에서 기대 ZIP SHA-256, byte 크기, ZIP entry count를 읽는다.
+- 제출용 URL을 다운로드해 bytes, SHA-256, ZIP entry count를 계산한다.
+- HTTP `Content-Length`가 있으면 manifest의 `zip_bytes`와 비교한다.
+- URL에 username/password가 포함된 credential-embedded URL은 거부한다.
+- 실제 제출 링크는 `https://`를 기본으로 요구한다.
+- 로컬 self-test만 `--allow-file-url` 옵션으로 허용한다.
+
+검증:
+
+```bash
+python3 scripts/verify_external_package_link.py \
+  "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" \
+  --allow-file-url
+```
+
+검증 결과:
+
+```text
+status: pass
+bytes_read: manifest zip_bytes와 일치
+sha256: manifest zip_sha256과 일치
+zip_file_count: manifest zip_file_count와 일치
+```
+
+해석:
+
+- 외부 업로드 후에는 같은 명령의 URL만 실제 제출 링크로 바꾸면 된다.
+- 이 도구는 업로드 자체를 대신하지 않는다. 업로드와 비로그인 환경 확인은 다음 운영 단계로 남긴다.
+
+## P29. 외부 제출 ZIP 업로드와 비로그인 다운로드 확인
 
 상태: 다음 작업
 
 문제:
 
-- 로컬 ZIP과 manifest는 준비됐지만, 외부 제출 링크는 업로드 위치와 권한 설정이 필요하다.
+- 로컬 ZIP과 링크 검증기는 준비됐지만, 외부 제출 링크는 업로드 위치와 권한 설정이 필요하다.
 
 구현 방향:
 
@@ -1500,11 +1546,13 @@ tracked_worktree: clean
 - `python3 scripts/verify_submission_state.py --require-clean`
 - `outputs/package/submission_manifest.md`의 ZIP SHA-256 확인
 - 외부 클라우드 업로드 후 비로그인 다운로드 검증
+- `python3 scripts/verify_external_package_link.py "https://..."` 실행
 
 완료 기준:
 
 - `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`가 최신 manifest와 일치한다.
 - 외부 제출 링크가 비로그인 환경에서 다운로드된다.
+- 외부 링크 verifier가 `status: pass`를 출력한다.
 - `origin/main`은 유지되고 `origin/hbin`만 최신 개발 커밋을 가리킨다.
 
 ## 진행 원칙

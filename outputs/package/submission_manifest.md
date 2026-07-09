@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 158
-- total_payload_bytes: 3006603
+- payload_file_count: 159
+- total_payload_bytes: 3019111
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 159
-- zip_bytes: 1692495
-- zip_sha256: `41a95805f03415aa2f350a6ae68288701290cb621b6a6e015dc3667dee61a782`
+- zip_file_count: 160
+- zip_bytes: 1696712
+- zip_sha256: `86c5715de6ef8557af32f7589fcd6ae43da987f01716cbb6fe5965032498649f`
 
 ## 포함 파일
 
@@ -132,6 +132,7 @@
 - `requirements-gpu.txt`
 - `requirements.txt`
 - `scripts/build_submission_package.py`
+- `scripts/verify_external_package_link.py`
 - `scripts/verify_submission_state.py`
 - `src/__init__.py`
 - `src/agents/__init__.py`

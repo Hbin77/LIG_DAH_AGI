@@ -19,6 +19,7 @@ REQUIRED_FILES = [
     "requirements.txt",
     "scripts/build_submission_package.py",
     "scripts/verify_submission_state.py",
+    "scripts/verify_external_package_link.py",
     "docs/process/COMPETITION_DIRECTION.md",
     "docs/process/NEXT_DEVELOPMENT_QUEUE.md",
     "docs/process/DEVELOPMENT_LOG.md",

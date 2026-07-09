@@ -508,6 +508,24 @@ python3 scripts/verify_submission_state.py
 
 This checks required files, core CSV row counts, safety-boundary text, package contents, manifest ZIP SHA-256/byte-count/file-count integrity, ZIP payload parity with the current worktree, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
 
+## Verify External Package Link
+
+After uploading `outputs/package/DAH2026_source_LIG_DAH_AGI.zip` to the submission cloud, verify that the public download link serves the same ZIP recorded in `outputs/package/submission_manifest.md`:
+
+```bash
+python3 scripts/verify_external_package_link.py "https://example.com/download/DAH2026_source_LIG_DAH_AGI.zip"
+```
+
+Local self-test against the current ZIP:
+
+```bash
+python3 scripts/verify_external_package_link.py \
+  "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" \
+  --allow-file-url
+```
+
+This compares downloaded bytes, SHA-256, ZIP entry count, and optional `Content-Length` against the local manifest. Do not put login-only or credential-embedded URLs in this command.
+
 ## Submission Readiness Audit
 
 ```bash
