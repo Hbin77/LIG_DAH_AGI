@@ -2614,9 +2614,9 @@ python3 scripts/verify_submission_state.py
 완료 기준:
 
 ```text
-reproduction_order_audit rows: 12
-status: pass=12
-RO01-RO12 present
+reproduction_order_audit rows: 13
+status: pass=13
+RO01-RO13 present
 order_status: pass for all rows
 output_status: pass for all rows
 ```
@@ -2625,4 +2625,54 @@ output_status: pass for all rows
 
 - 재현 명령 자체를 검증 대상으로 승격했다.
 - 새 산출물이 추가될 때 README 순서, readiness, package, final verifier까지 같이 갱신해야 한다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+## P52. Agent Stress Scenario Audit
+
+상태: 완료
+
+문제:
+
+- E1~E7과 30-seed batch는 평균적 성능을 보여주지만, 특정 작전 압박 상황에서 방어 에이전트가 버티는지 별도 증거가 부족했다.
+- 공방형 에이전트 품질을 높이려면 air-defense watch, stale COP, PACE failover pressure 같은 stress fixture가 필요하다.
+
+구현:
+
+```text
+src/experiments/agent_stress_scenario_audit.py
+outputs/report_tables/agent_stress_scenario_audit.csv
+outputs/report_tables/agent_stress_scenario_audit.md
+```
+
+검증 기준:
+
+- stress scenario 3개를 생성한다.
+- 각 scenario마다 attack-only와 `tsra_r_full`, `tsra_r_ml`을 비교한다.
+- `tsra_r_full` resilience gain은 0.75 이상이어야 한다.
+- `tsra_r_ml` resilience gain은 0.70 이상이어야 한다.
+- defended mission impact는 0.25 이하여야 한다.
+- P95 latency, trusted stale exposure, priority inversion은 attack-only 대비 감소해야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_stress_scenario_audit rows: 6
+status: pass=6
+tsra_r_full resilience_gain min: 0.757678
+tsra_r_ml resilience_gain min: 0.738553
+defended_mission_impact max: 0.211772
+```
+
+해석:
+
+- 방어 에이전트가 일반 E5/E7 루프뿐 아니라 강한 폐쇄형 stress fixture에서도 mission impact를 낮춘다.
+- ML TSRA-R은 full rule defender보다 약간 보수적인 결과도 있지만, stress threshold를 넘는 방어력을 유지한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

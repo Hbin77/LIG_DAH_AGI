@@ -133,6 +133,7 @@ Metrics
 -> attack/defense event, alert, ledger, ablation 생성
 -> closed-loop episode, coordination, engagement, mission thread 생성
 -> ML attack path, ML defense path, ML red-blue interaction 감사
+-> agent stress scenario 감사
 -> safety boundary와 reproduction order 감사
 -> readiness, collaboration, competition alignment 생성
 -> package build, handoff, freeze, final verifier

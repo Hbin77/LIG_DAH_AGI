@@ -765,6 +765,19 @@ Outputs:
 
 This checks that the README `Full Reproduction` block runs generated evidence in dependency order. It prevents downstream audits from silently reading stale files created by an earlier run.
 
+## Audit Agent Stress Scenarios
+
+```bash
+python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error
+```
+
+Outputs:
+
+- `outputs/report_tables/agent_stress_scenario_audit.csv`
+- `outputs/report_tables/agent_stress_scenario_audit.md`
+
+This runs closed-simulation air-defense, stale-COP, and PACE pressure stress fixtures, then compares TSRA-R and TSRA-R-ML outcomes against attack-only outcomes.
+
 ## Verify External Package Link
 
 After uploading `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip` to the submission cloud, verify that the public download link serves the same ZIP recorded in `outputs/package/submission_manifest.md`:
@@ -842,6 +855,7 @@ python3 -m src.experiments.ml_contribution_audit --fail-on-error
 python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
 python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
 python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
+python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error
 python3 -m src.experiments.safety_boundary_audit --fail-on-error
 python3 -m src.experiments.reproduction_order_audit --fail-on-error
 python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete

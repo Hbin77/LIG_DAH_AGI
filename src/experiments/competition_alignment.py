@@ -208,7 +208,9 @@ ALIGNMENT_SPECS = [
             "adds event-level response-to-metric movement evidence; engagement scorecard joins attack "
             "decision margin, defense response, and mission-impact movement per attack; defense action "
             "attribution summarizes which defense actions have direct ablation support, local metric "
-            "support, reactive-window support, or bounded tradeoff behavior; mission thread summary "
+            "support, reactive-window support, or bounded tradeoff behavior; stress scenario audit "
+            "checks TSRA-R and TSRA-R-ML resilience under air-defense, stale-COP, and PACE pressure "
+            "fixtures; mission thread summary "
             "condenses attack decision evidence, response coverage, action attribution, operator alert "
             "count, metric movement, outcome, and residual risk into one review row per attack episode."
         ),
@@ -226,6 +228,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/defense_action_attribution_audit.py",
             "src/experiments/agent_collaboration_graph.py",
             "src/experiments/agent_coordination_latency_audit.py",
+            "src/experiments/agent_stress_scenario_audit.py",
             "src/experiments/ml_red_blue_interaction_audit.py",
             "src/experiments/attack_defense_coverage.py",
             "src/experiments/attack_defense_response_audit.py",
@@ -238,6 +241,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/defense_action_attribution_audit.csv",
             "outputs/report_tables/agent_collaboration_graph.csv",
             "outputs/report_tables/agent_coordination_latency_audit.csv",
+            "outputs/report_tables/agent_stress_scenario_audit.csv",
             "outputs/report_tables/ml_red_blue_interaction_audit.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
             "outputs/report_tables/attack_defense_response_audit.csv",
@@ -256,6 +260,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/defense_action_attribution_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_coordination_latency_audit.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/agent_stress_scenario_audit.csv", "stress_air_defense_queue_saturation"),
+            ContentCheck("outputs/report_tables/agent_stress_scenario_audit.csv", "stress_pace_failover_pressure"),
             ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "ml_triggered_after_attack"),
             ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "active_window_immediate_core_defense"),
             ContentCheck("outputs/report_tables/attack_defense_coverage.csv", "closed simulation"),
@@ -271,6 +277,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/defense_action_attribution_audit.csv", 5),
             RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 13),
             RowCountCheck("outputs/report_tables/agent_coordination_latency_audit.csv", 10),
+            RowCountCheck("outputs/report_tables/agent_stress_scenario_audit.csv", 6),
             RowCountCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", 5),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
             RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
@@ -457,7 +464,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("README.md", "Do not push directly to `main`"),
         ],
         row_checks=[
-            RowCountCheck("outputs/report_tables/reproduction_order_audit.csv", 12),
+            RowCountCheck("outputs/report_tables/reproduction_order_audit.csv", 13),
             RowCountCheck("outputs/report_tables/submission_readiness_audit.csv", 10),
         ],
     ),

@@ -5,8 +5,8 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 
 ## Summary
 
-- Audit rows: 12
-- Status counts: pass=12
+- Audit rows: 13
+- Status counts: pass=13
 
 | check_id | command_index | command | order_status | output_status | status |
 |---|---:|---|---|---|---|
@@ -18,10 +18,11 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 | RO06 | 41 | python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error | pass | pass | pass |
 | RO07 | 42 | python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error | pass | pass | pass |
 | RO08 | 43 | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | pass | pass | pass |
-| RO09 | 48 | python3 -m src.experiments.competition_alignment --fail-on-incomplete | pass | pass | pass |
-| RO10 | 49 | python3 scripts/build_submission_package.py | pass | pass | pass |
-| RO11 | 50 | python3 scripts/generate_release_handoff.py | pass | pass | pass |
-| RO12 | 52 | python3 scripts/verify_submission_state.py | pass | pass | pass |
+| RO09 | 44 | python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error | pass | pass | pass |
+| RO10 | 49 | python3 -m src.experiments.competition_alignment --fail-on-incomplete | pass | pass | pass |
+| RO11 | 50 | python3 scripts/build_submission_package.py | pass | pass | pass |
+| RO12 | 51 | python3 scripts/generate_release_handoff.py | pass | pass | pass |
+| RO13 | 53 | python3 scripts/verify_submission_state.py | pass | pass | pass |
 
 ## Detail
 
@@ -115,8 +116,19 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 
 ### RO09
 
+- Command: `python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error`
+- Required before: python3 -m src.ml.train_tsra_detector --rows 5000 | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | python3 -m src.experiments.attack_defense_response_audit
+- Output files: outputs/report_tables/agent_stress_scenario_audit.csv | outputs/report_tables/agent_stress_scenario_audit.md
+- Order status: pass
+- Output status: pass
+- Status: pass
+- Interpretation: Stress scenario audit should run after detector training, response evidence, and the ML red-blue interaction audit so robustness evidence is generated before final gates.
+- Safety boundary: closed simulation reproduction-order audit only; no RF, exploit, or live network action
+
+### RO10
+
 - Command: `python3 -m src.experiments.competition_alignment --fail-on-incomplete`
-- Required before: python3 -m src.experiments.agent_collaboration_graph | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | python3 -m src.experiments.reproduction_order_audit --fail-on-error
+- Required before: python3 -m src.experiments.agent_collaboration_graph | python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error | python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error | python3 -m src.experiments.reproduction_order_audit --fail-on-error
 - Output files: outputs/report_tables/competition_alignment_matrix.csv | outputs/report_tables/competition_alignment_matrix.md
 - Order status: pass
 - Output status: pass
@@ -124,7 +136,7 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 - Interpretation: Competition alignment should be the final evidence matrix after the graph, ML interaction, and reproduction-order checks are generated.
 - Safety boundary: closed simulation reproduction-order audit only; no RF, exploit, or live network action
 
-### RO10
+### RO11
 
 - Command: `python3 scripts/build_submission_package.py`
 - Required before: python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete | python3 -m src.experiments.competition_alignment --fail-on-incomplete
@@ -135,7 +147,7 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 - Interpretation: The package should be built only after readiness and alignment evidence have been regenerated.
 - Safety boundary: closed simulation reproduction-order audit only; no RF, exploit, or live network action
 
-### RO11
+### RO12
 
 - Command: `python3 scripts/generate_release_handoff.py`
 - Required before: python3 scripts/build_submission_package.py
@@ -146,7 +158,7 @@ Safety boundary: closed simulation reproduction-order audit only; no RF, exploit
 - Interpretation: The handoff records package metadata, so it must run after package generation.
 - Safety boundary: closed simulation reproduction-order audit only; no RF, exploit, or live network action
 
-### RO12
+### RO13
 
 - Command: `python3 scripts/verify_submission_state.py`
 - Required before: python3 scripts/freeze_release_candidate.py

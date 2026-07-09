@@ -2563,12 +2563,13 @@ outputs/report_tables/reproduction_order_audit.md
 검증 기준:
 
 ```text
-reproduction_order_audit rows: 12
+reproduction_order_audit rows: 13
 RO01 defense_action_attribution_audit prerequisites pass
 RO05 mission_thread_summary prerequisites pass
 RO06/RO07/RO08 ML path and red-blue interaction prerequisites pass
-RO10 package build prerequisites pass
-RO12 final verifier after release freeze pass
+RO09 agent stress scenario prerequisites pass
+RO11 package build prerequisites pass
+RO13 final verifier after release freeze pass
 ```
 
 해석:
@@ -2577,3 +2578,45 @@ RO12 final verifier after release freeze pass
 - `submission_readiness_audit`, `competition_alignment`, `verify_submission_state`, package manifest가 모두 reproduction order evidence를 참조한다.
 - package manifest와 release handoff는 packaging 이후에 생성되는 산출물이므로, readiness audit은 그 파일을 선행 요구하지 않도록 순환 의존성을 제거했다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation reproduction-order evidence만 생성한다.
+
+### 65. Agent Stress Scenario Audit를 추가한 이유
+
+기존 E1~E7, 30-seed batch, ML red-blue interaction audit는 평균적인 실험 체계와 E7 episode 연결을 잘 보여준다. 하지만 방어 에이전트 품질을 더 높이려면 "평균적으로 좋다"를 넘어 특정 작전 압박 상황에서도 TSRA-R이 버티는지 확인해야 한다.
+
+이번 변경은 `src/experiments/agent_stress_scenario_audit.py`를 추가했다. 이 감사는 세 가지 폐쇄형 stress fixture를 생성한다.
+
+```text
+stress_air_defense_queue_saturation
+stress_stale_cop_latency_chain
+stress_pace_failover_pressure
+```
+
+각 fixture는 attack-only 결과와 `tsra_r_full`, `tsra_r_ml` 결과를 비교한다. 임시 실행 로그는 `outputs/tmp_agent_stress_scenario/`에 남고, 검토용 산출물은 report table로 생성된다.
+
+추가한 것:
+
+```text
+src/experiments/agent_stress_scenario_audit.py
+outputs/report_tables/agent_stress_scenario_audit.csv
+outputs/report_tables/agent_stress_scenario_audit.md
+```
+
+검증 결과:
+
+```text
+agent_stress_scenario_audit rows: 6
+status: pass=6
+scenarios: air_defense_queue_saturation, stale_cop_latency_chain, pace_failover_pressure
+defender variants: tsra_r_full, tsra_r_ml
+tsra_r_full resilience_gain range: 0.757678-0.854467
+tsra_r_ml resilience_gain range: 0.738553-0.854467
+defended_mission_impact max: 0.211772
+```
+
+해석:
+
+- TSRA-R full은 세 stress fixture 모두에서 0.75 이상의 resilience gain을 유지한다.
+- TSRA-R-ML은 세 stress fixture 모두에서 0.70 이상의 resilience gain을 유지한다.
+- 모든 stress row에서 P95 latency, trusted stale exposure, priority inversion이 attack-only 대비 감소한다.
+- 이 보강은 방어 에이전트가 일반 실험뿐 아니라 특정 임무 압박 조건에서도 작동한다는 증거를 추가한다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation stress evidence만 생성한다.

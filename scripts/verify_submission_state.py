@@ -40,6 +40,7 @@ REQUIRED_FILES = [
     "src/experiments/defense_action_attribution_audit.py",
     "src/experiments/closed_loop_episode_replay.py",
     "src/experiments/agent_coordination_latency_audit.py",
+    "src/experiments/agent_stress_scenario_audit.py",
     "src/experiments/mission_thread_summary.py",
     "src/experiments/agent_engagement_scorecard.py",
     "src/experiments/agent_collaboration_graph.py",
@@ -92,6 +93,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/closed_loop_episode_replay.md",
     "outputs/report_tables/agent_coordination_latency_audit.csv",
     "outputs/report_tables/agent_coordination_latency_audit.md",
+    "outputs/report_tables/agent_stress_scenario_audit.csv",
+    "outputs/report_tables/agent_stress_scenario_audit.md",
     "outputs/report_tables/mission_thread_summary.csv",
     "outputs/report_tables/mission_thread_summary.md",
     "outputs/report_tables/agent_engagement_scorecard.csv",
@@ -1417,8 +1420,8 @@ def check_csv_outputs() -> list[str]:
 
     reproduction_order_rows = read_csv("outputs/report_tables/reproduction_order_audit.csv")
     require(
-        len(reproduction_order_rows) == 12,
-        f"expected 12 reproduction order rows, got {len(reproduction_order_rows)}",
+        len(reproduction_order_rows) == 13,
+        f"expected 13 reproduction order rows, got {len(reproduction_order_rows)}",
     )
     failed_reproduction_order = [
         f"{row['check_id']}:{row['order_status']}:{row['output_status']}"
@@ -1431,7 +1434,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         {row["check_id"] for row in reproduction_order_rows}
-        == {f"RO{index:02d}" for index in range(1, 13)},
+        == {f"RO{index:02d}" for index in range(1, 14)},
         "reproduction order audit check ids are incomplete",
     )
     require(
@@ -1458,13 +1461,22 @@ def check_csv_outputs() -> list[str]:
     require(
         any(
             row["check_id"] == "RO10"
+            and "agent_stress_scenario_audit" in row["required_before"]
+            and "reproduction_order_audit" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
+        "reproduction order audit missing stress prerequisite for alignment",
+    )
+    require(
+        any(
+            row["check_id"] == "RO11"
             and "submission_readiness_audit" in row["required_before"]
             and "competition_alignment" in row["required_before"]
             for row in reproduction_order_rows
         ),
         "reproduction order audit missing package prerequisites",
     )
-    checks.append("reproduction_order_audit rows=12 pass")
+    checks.append("reproduction_order_audit rows=13 pass")
 
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(
@@ -1736,6 +1748,76 @@ def check_csv_outputs() -> list[str]:
         "coordination latency audit missing safety boundary",
     )
     checks.append("agent_coordination_latency_audit rows=10 pass")
+
+    stress_rows = read_csv("outputs/report_tables/agent_stress_scenario_audit.csv")
+    require(len(stress_rows) == 6, f"expected 6 agent stress rows, got {len(stress_rows)}")
+    failed_stress_rows = [
+        f"{row['check_id']}:{row['scenario_id']}:{row['defender_variant']}"
+        for row in stress_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_stress_rows, f"failed agent stress rows: {failed_stress_rows[:8]}")
+    expected_stress_scenarios = {
+        "stress_air_defense_queue_saturation",
+        "stress_stale_cop_latency_chain",
+        "stress_pace_failover_pressure",
+    }
+    expected_stress_variants = {"tsra_r_full", "tsra_r_ml"}
+    observed_stress_scenarios = {row["scenario_id"] for row in stress_rows}
+    observed_stress_variants = {row["defender_variant"] for row in stress_rows}
+    require(
+        observed_stress_scenarios == expected_stress_scenarios,
+        f"unexpected stress scenarios: {sorted(observed_stress_scenarios)}",
+    )
+    require(
+        observed_stress_variants == expected_stress_variants,
+        f"unexpected stress defender variants: {sorted(observed_stress_variants)}",
+    )
+    require(
+        all(float(row["defended_mission_impact"]) <= 0.25 for row in stress_rows),
+        "stress audit has defended mission impact above ceiling",
+    )
+    require(
+        all(float(row["mission_impact_reduction"]) > 0.0 for row in stress_rows),
+        "stress audit has non-positive mission impact reduction",
+    )
+    require(
+        all(float(row["p95_reduction_sec"]) > 0.0 for row in stress_rows),
+        "stress audit has non-positive P95 reduction",
+    )
+    require(
+        all(float(row["trusted_stale_reduction"]) > 0.0 for row in stress_rows),
+        "stress audit has non-positive trusted stale reduction",
+    )
+    require(
+        all(float(row["priority_inversion_reduction"]) > 0.0 for row in stress_rows),
+        "stress audit has non-positive priority inversion reduction",
+    )
+    require(
+        all(float(row["defense_count"]) > 0.0 for row in stress_rows),
+        "stress audit has rows without defense events",
+    )
+    require(
+        all(
+            float(row["resilience_gain"]) >= 0.75
+            for row in stress_rows
+            if row["defender_variant"] == "tsra_r_full"
+        ),
+        "full TSRA-R stress resilience below threshold",
+    )
+    require(
+        all(
+            float(row["resilience_gain"]) >= 0.70
+            for row in stress_rows
+            if row["defender_variant"] == "tsra_r_ml"
+        ),
+        "ML TSRA-R stress resilience below threshold",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in stress_rows),
+        "agent stress scenario audit missing safety boundary",
+    )
+    checks.append("agent_stress_scenario_audit rows=6 pass")
 
     mission_thread_rows = read_csv("outputs/report_tables/mission_thread_summary.csv")
     require(
@@ -2024,6 +2106,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_coordination_latency_audit.md" in manifest_text,
         "manifest missing agent coordination latency audit",
+    )
+    require(
+        "outputs/report_tables/agent_stress_scenario_audit.md" in manifest_text,
+        "manifest missing agent stress scenario audit",
     )
     require(
         "outputs/report_tables/mission_thread_summary.md" in manifest_text,
