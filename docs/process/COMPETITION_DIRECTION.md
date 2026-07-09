@@ -815,8 +815,8 @@ outputs/report_tables/agent_decision_margin_audit.md
 검증 결과:
 
 ```text
-agent_decision_margin_audit rows: 399
-margin_status: pass=399
+agent_decision_margin_audit rows: 446
+margin_status: pass=446
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 ```
 
@@ -997,8 +997,8 @@ negative median probability: 0.106435
 검증 기준:
 
 ```text
-agent_goal_alignment_audit rows: 399
-goal_alignment_status: pass=399
+agent_goal_alignment_audit rows: 446
+goal_alignment_status: pass=446
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 selected types: no_op, attack_event, defense_events
 ```

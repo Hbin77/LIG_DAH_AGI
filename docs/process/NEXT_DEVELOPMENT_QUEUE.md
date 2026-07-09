@@ -1362,11 +1362,11 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_decision_causality_audit.csv: 399 rows
-causal_status: pass=399
-candidate_support: pass=399
-tool_support: pass=399
-score_or_threshold_support: pass=399
+agent_decision_causality_audit.csv: 446 rows
+causal_status: pass=446
+candidate_support: pass=446
+tool_support: pass=446
+score_or_threshold_support: pass=446
 ```
 
 해석:
@@ -1728,8 +1728,8 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_decision_margin_audit rows: 399
-margin_status: pass=399
+agent_decision_margin_audit rows: 446
+margin_status: pass=446
 safety boundary: closed simulation only
 ```
 
@@ -2148,8 +2148,8 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_goal_alignment_audit rows: 399
-goal_alignment_status: pass=399
+agent_goal_alignment_audit rows: 446
+goal_alignment_status: pass=446
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 selected types: no_op, attack_event, defense_events
 ```
@@ -3751,3 +3751,56 @@ E7 agent_cross_contract required_files includes tsra_r_rule_delegate_traces.json
 - E7 rule delegate sidecar가 공식 AgentRuntime trace contract에 포함된다.
 - defense event도 attack event처럼 selected trace event id coverage를 갖는다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace-contract evidence만 강화한다.
+
+## P71. Rule Delegate Decision Quality Coverage
+
+상태: 완료
+
+문제:
+
+- E7 rule delegate sidecar는 trace quality, runtime invariant, tool usage, schema contract에는 포함됐다.
+- 하지만 `agent_decision_causality_audit`, `agent_decision_margin_audit`, `agent_goal_alignment_audit`는 아직 main trace만 읽었다.
+- 따라서 sidecar의 selected action이 후보/도구/점수 근거와 맞는지, 선택 margin과 목표 정렬이 유효한지는 공통 판단 품질 감사에서 빠져 있었다.
+
+구현:
+
+```text
+src/experiments/agent_decision_causality_audit.py
+src/experiments/agent_decision_margin_audit.py
+src/experiments/agent_goal_alignment_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AGENT_RUNTIME.md
+docs/process/FINAL_QA.md
+```
+
+설계:
+
+- 세 감사의 `TRACE_FILES`에 `tsra_r_rule_delegate_traces.jsonl`을 추가했다.
+- 전체 row 수는 399에서 446으로 늘어난다.
+- E7 `TSRA-R / rule_defense_full` delegate 47개 row가 causality, margin, goal alignment에서 모두 pass여야 한다.
+- final verifier는 세 감사 각각에서 delegate 47 rows를 직접 요구한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_decision_causality_audit
+python3 -m src.experiments.agent_decision_margin_audit
+python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+agent_decision_causality_audit rows: 446 pass
+agent_decision_margin_audit rows: 446 pass
+agent_goal_alignment_audit rows: 446 pass
+E7 rule delegate rows: 47 pass
+```
+
+해석:
+
+- E7 내부 rule-defense 위임도 후보/도구/점수/목표 정렬 기준을 통과한다.
+- 이 변경은 방어 에이전트 sidecar를 단순 부속 로그가 아니라 독립적으로 감사되는 판단 루프로 강화한다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation decision-quality evidence만 강화한다.

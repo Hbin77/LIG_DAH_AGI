@@ -5,15 +5,15 @@ Safety boundary: closed simulation decision-causality audit only; no RF, exploit
 
 ## Summary
 
-- Audit rows: 399
-- Status counts: pass=399
+- Audit rows: 446
+- Status counts: pass=446
 - Agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 
 ## Support Counts
 
-- Candidate support: pass=399
-- Tool support: pass=399
-- Score or threshold support: pass=399
+- Candidate support: pass=446
+- Tool support: pass=446
+- Score or threshold support: pass=446
 
 ## Sample Failures
 
@@ -352,73 +352,120 @@ None.
 | E7_ml_aura_ml_tsra_r | 60 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 65 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 70 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 70 | TSRA-R | priority_reroute, stale_badge, pace_switch, video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 70 | TSRA-R-ML | priority_reroute, stale_badge, pace_switch, video_throttle | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 75 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 75 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 80 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 80 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 80 | TSRA-R-ML | ml_attack_alert | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 85 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 85 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 90 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 90 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 90 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 95 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 95 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 100 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 100 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 100 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 105 | TSRA-R | priority_reroute, stale_badge, video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 105 | TSRA-R-ML | ml_attack_alert, priority_reroute, stale_badge, video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 110 | AURA-ML | failover_chasing | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 110 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 110 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 115 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 115 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 120 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 120 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 120 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 125 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 125 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 130 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 130 | TSRA-R | priority_reroute | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 130 | TSRA-R-ML | ml_attack_alert, priority_reroute | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 135 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 135 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 140 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 140 | TSRA-R | video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 140 | TSRA-R-ML | video_throttle | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 145 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 145 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 150 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 150 | TSRA-R | pace_switch | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 150 | TSRA-R-ML | pace_switch | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 155 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 155 | TSRA-R-ML | ml_attack_alert | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 160 | AURA-ML | failover_chasing | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 160 | TSRA-R | stale_badge | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 160 | TSRA-R-ML | stale_badge | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 165 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 165 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 170 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 170 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 170 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 175 | TSRA-R | priority_reroute | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 175 | TSRA-R-ML | priority_reroute | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 180 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 180 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 180 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 185 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 185 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 190 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 190 | TSRA-R | stale_badge | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 190 | TSRA-R-ML | stale_badge | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 195 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 195 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 200 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 200 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 200 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 205 | TSRA-R | video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 205 | TSRA-R-ML | video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 210 | AURA-ML | queue_pressure | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 210 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 210 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 215 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 215 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 220 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 220 | TSRA-R | priority_reroute | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 220 | TSRA-R-ML | ml_attack_alert, priority_reroute | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 225 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 225 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 230 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 230 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 230 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 235 | TSRA-R | stale_badge | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 235 | TSRA-R-ML | stale_badge | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 240 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 240 | TSRA-R | video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 240 | TSRA-R-ML | video_throttle | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 245 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 245 | TSRA-R-ML | ml_attack_alert | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 250 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 250 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 250 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 255 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 255 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 260 | AURA-ML | stale_cop_induction | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 260 | TSRA-R | priority_reroute, pace_switch | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 260 | TSRA-R-ML | priority_reroute, pace_switch | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 265 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 265 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 270 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 270 | TSRA-R | stale_badge | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 270 | TSRA-R-ML | ml_attack_alert, stale_badge | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 275 | TSRA-R | video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 275 | TSRA-R-ML | video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 280 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 280 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 280 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 285 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 285 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 290 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 290 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 290 | TSRA-R-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 295 | TSRA-R | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 295 | TSRA-R-ML | ml_attack_alert | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 300 | AURA-ML | no_op | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 300 | TSRA-R | stale_badge | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 300 | TSRA-R-ML | stale_badge | pass | pass | pass | pass |

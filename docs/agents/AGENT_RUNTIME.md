@@ -140,6 +140,8 @@ outputs/experiments/<experiment>/tsra_r_rule_delegate_traces.jsonl
 
 공통 runtime 감사도 이 sidecar를 입력으로 읽는다. 따라서 E7의 ML 방어자 판단은 상위 `TSRA-R-ML / ml_anomaly_detector` trace뿐 아니라, 47개 `TSRA-R / rule_defense_full` delegate trace까지 `decision_trace_quality_audit`, `agent_runtime_invariant_audit`, `agent_tool_usage_audit`에서 함께 검증된다.
 
+판단 품질 감사도 sidecar를 포함한다. E7 delegate 47개 trace는 `agent_decision_causality_audit`, `agent_decision_margin_audit`, `agent_goal_alignment_audit`에서 후보/도구/점수 근거, 선택 margin, 목표 정렬을 같은 기준으로 검증받는다.
+
 ## 계약 검증
 
 AURA, TSRA-R, MissionSimulator가 공유하는 JSONL 인터페이스는 다음 명령으로 검증한다.

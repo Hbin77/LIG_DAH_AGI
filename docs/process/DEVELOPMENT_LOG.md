@@ -1553,11 +1553,11 @@ DecisionTrace
 검증 결과:
 
 ```text
-agent_decision_causality_audit.csv: 399 rows
-causal_status: pass=399
-candidate_support: pass=399
-tool_support: pass=399
-score_or_threshold_support: pass=399
+agent_decision_causality_audit.csv: 446 rows
+causal_status: pass=446
+candidate_support: pass=446
+tool_support: pass=446
+score_or_threshold_support: pass=446
 ```
 
 해석:
@@ -1883,8 +1883,8 @@ no-op decision basis
 검증 결과:
 
 ```text
-agent_decision_margin_audit rows: 399
-margin_status: pass=399
+agent_decision_margin_audit rows: 446
+margin_status: pass=446
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 ```
 
@@ -2256,10 +2256,10 @@ TSRA-R no_op
 검증 결과:
 
 ```text
-agent_goal_alignment_audit rows: 399
-status counts: pass=399
+agent_goal_alignment_audit rows: 446
+status counts: pass=446
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
-selected types: no_op=290, defense_events=84, attack_event=25
+selected types: no_op=321, defense_events=100, attack_event=25
 ```
 
 해석:
@@ -3531,3 +3531,40 @@ E7 agent_cross_contract required_files includes tsra_r_rule_delegate_traces.json
 ```
 
 이 보강의 의미는 E7 rule delegate sidecar가 보조 로그가 아니라 공식 AgentRuntime trace contract의 일부라는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace-contract evidence만 강화한다.
+
+### 86. Rule Delegate를 Causality/Margin/Goal 감사에 포함한 이유
+
+P68~P70으로 E7 rule delegate sidecar는 trace quality, runtime invariant, tool usage, schema contract까지 포함됐다. 하지만 `agent_decision_causality_audit`, `agent_decision_margin_audit`, `agent_goal_alignment_audit`는 여전히 `aura_decision_traces.jsonl`과 `tsra_r_decision_traces.jsonl`만 읽고 있었다. 즉 sidecar가 형식과 도구 호출은 검증받지만, 선택 행동이 후보/도구/점수/목표와 맞는지는 공통 판단 품질 감사에서 빠져 있었다.
+
+이번 변경은 E7 sidecar 47개 trace를 세 판단 품질 감사에 포함했다.
+
+변경한 파일:
+
+```text
+src/experiments/agent_decision_causality_audit.py
+src/experiments/agent_decision_margin_audit.py
+src/experiments/agent_goal_alignment_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AGENT_RUNTIME.md
+docs/process/FINAL_QA.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- 세 감사 모두 `tsra_r_rule_delegate_traces.jsonl`을 입력으로 읽는다.
+- 전체 row 수는 399개 main trace에서 E7 sidecar 47개를 더한 446개여야 한다.
+- E7 `TSRA-R / rule_defense_full` delegate 47개 row가 모두 pass여야 한다.
+- final verifier는 causality, margin, goal alignment 각각에서 E7 delegate 47 rows를 요구한다.
+
+검증 의미:
+
+```text
+agent_decision_causality_audit rows: 446 pass
+agent_decision_margin_audit rows: 446 pass
+agent_goal_alignment_audit rows: 446 pass
+E7 rule delegate rows: 47 pass
+```
+
+이 보강의 의미는 E7의 내부 rule-defense 위임이 단순히 존재하는 trace가 아니라, 후보/도구/점수/목표 관점에서도 독립적으로 검증되는 AgentRuntime 판단이라는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation decision-quality evidence만 강화한다.

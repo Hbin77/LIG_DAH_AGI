@@ -573,8 +573,8 @@ def check_csv_outputs() -> list[str]:
 
     causality_rows = read_csv("outputs/report_tables/agent_decision_causality_audit.csv")
     require(
-        len(causality_rows) == 399,
-        f"expected 399 decision causality rows, got {len(causality_rows)}",
+        len(causality_rows) == 446,
+        f"expected 446 decision causality rows, got {len(causality_rows)}",
     )
     failed_causality = [
         f"{row['experiment']}:{row['trace_id']}:{row['agent']}"
@@ -606,12 +606,32 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in causality_rows),
         "decision causality audit missing safety boundary",
     )
-    checks.append("agent_decision_causality_audit rows=399 pass")
+    e7_delegate_causality = [
+        row
+        for row in causality_rows
+        if row["experiment"] == "E7_ml_aura_ml_tsra_r"
+        and row["agent"] == "TSRA-R"
+        and row["policy"] == "rule_defense_full"
+    ]
+    require(
+        len(e7_delegate_causality) == 47,
+        f"decision causality audit expected 47 E7 delegate rows, got {len(e7_delegate_causality)}",
+    )
+    require(
+        all(
+            row["candidate_support"] == "pass"
+            and row["tool_support"] == "pass"
+            and row["score_or_threshold_support"] == "pass"
+            for row in e7_delegate_causality
+        ),
+        "decision causality audit has E7 delegate support failures",
+    )
+    checks.append("agent_decision_causality_audit rows=446 pass")
 
     margin_rows = read_csv("outputs/report_tables/agent_decision_margin_audit.csv")
     require(
-        len(margin_rows) == 399,
-        f"expected 399 decision margin rows, got {len(margin_rows)}",
+        len(margin_rows) == 446,
+        f"expected 446 decision margin rows, got {len(margin_rows)}",
     )
     failed_margin = [
         f"{row['experiment']}:{row['trace_id']}:{row['agent']}"
@@ -643,12 +663,27 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in margin_rows),
         "decision margin audit missing safety boundary",
     )
-    checks.append("agent_decision_margin_audit rows=399 pass")
+    e7_delegate_margins = [
+        row
+        for row in margin_rows
+        if row["experiment"] == "E7_ml_aura_ml_tsra_r"
+        and row["agent"] == "TSRA-R"
+        and row["policy"] == "rule_defense_full"
+    ]
+    require(
+        len(e7_delegate_margins) == 47,
+        f"decision margin audit expected 47 E7 delegate rows, got {len(e7_delegate_margins)}",
+    )
+    require(
+        all(row["margin_status"] == "pass" for row in e7_delegate_margins),
+        "decision margin audit has E7 delegate failures",
+    )
+    checks.append("agent_decision_margin_audit rows=446 pass")
 
     goal_rows = read_csv("outputs/report_tables/agent_goal_alignment_audit.csv")
     require(
-        len(goal_rows) == 399,
-        f"expected 399 goal alignment rows, got {len(goal_rows)}",
+        len(goal_rows) == 446,
+        f"expected 446 goal alignment rows, got {len(goal_rows)}",
     )
     failed_goal_rows = [
         f"{row['experiment']}:{row['trace_id']}:{row['agent']}"
@@ -680,7 +715,22 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in goal_rows),
         "goal alignment audit missing safety boundary",
     )
-    checks.append("agent_goal_alignment_audit rows=399 pass")
+    e7_delegate_goals = [
+        row
+        for row in goal_rows
+        if row["experiment"] == "E7_ml_aura_ml_tsra_r"
+        and row["agent"] == "TSRA-R"
+        and row["policy"] == "rule_defense_full"
+    ]
+    require(
+        len(e7_delegate_goals) == 47,
+        f"goal alignment audit expected 47 E7 delegate rows, got {len(e7_delegate_goals)}",
+    )
+    require(
+        all(row["goal_alignment_status"] == "pass" for row in e7_delegate_goals),
+        "goal alignment audit has E7 delegate failures",
+    )
+    checks.append("agent_goal_alignment_audit rows=446 pass")
 
     feedback_rows = read_csv("outputs/report_tables/agent_decision_feedback_audit.csv")
     require(

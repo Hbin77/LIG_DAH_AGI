@@ -108,9 +108,10 @@ decision_trace_quality_audit includes E7 TSRA-R rule delegate traces: 47
 agent_runtime_invariant_audit rows: 10 pass
 agent_runtime_invariant_audit includes tsra_r_rule_delegate_traces.jsonl: 47
 agent_loop_replay rows: 8
-agent_decision_causality_audit rows: 399 pass
-agent_decision_margin_audit rows: 399 pass
-agent_goal_alignment_audit rows: 399 pass
+agent_decision_causality_audit rows: 446 pass
+agent_decision_margin_audit rows: 446 pass
+agent_goal_alignment_audit rows: 446 pass
+agent decision causality/margin/goal audits include E7 rule delegate traces: 47
 agent_decision_feedback_audit rows: 62 pass
 agent_memory_belief_audit rows: 9 pass
 agent_memory_influence_audit rows: 6 pass

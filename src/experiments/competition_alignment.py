@@ -221,6 +221,10 @@ ALIGNMENT_SPECS = [
                 "E7_ml_aura_ml_tsra_r,TSRA-R,rule_defense_full,47",
             ),
             ContentCheck(
+                "outputs/report_tables/agent_decision_causality_audit.csv",
+                "E7_ml_aura_ml_tsra_r,tsra-r-trace-00001",
+            ),
+            ContentCheck(
                 "outputs/report_tables/agent_tool_usage_audit.csv",
                 "E7_ml_aura_ml_tsra_r,TSRA-R,rule_defense_full,evaluate_defense_conditions",
             ),
@@ -232,9 +236,9 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_runtime_invariant_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_quality_gate_audit.csv", 6),
             RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
-            RowCountCheck("outputs/report_tables/agent_decision_causality_audit.csv", 399),
-            RowCountCheck("outputs/report_tables/agent_decision_margin_audit.csv", 399),
-            RowCountCheck("outputs/report_tables/agent_goal_alignment_audit.csv", 399),
+            RowCountCheck("outputs/report_tables/agent_decision_causality_audit.csv", 446),
+            RowCountCheck("outputs/report_tables/agent_decision_margin_audit.csv", 446),
+            RowCountCheck("outputs/report_tables/agent_goal_alignment_audit.csv", 446),
             RowCountCheck("outputs/report_tables/agent_decision_feedback_audit.csv", 60),
             RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_memory_influence_audit.csv", 6),

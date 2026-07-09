@@ -14,6 +14,7 @@ DEFAULT_OUTPUT_MD = Path("outputs/report_tables/agent_goal_alignment_audit.md")
 TRACE_FILES = [
     "aura_decision_traces.jsonl",
     "tsra_r_decision_traces.jsonl",
+    "tsra_r_rule_delegate_traces.jsonl",
 ]
 
 SAFETY_BOUNDARY = (
