@@ -13,6 +13,7 @@ flowchart LR
   Metrics[Mission Metrics\nImpact / resilience / decomposition]
   Alerts[Operator Alerts\nMission-readable defense guidance]
   Coverage[Capability Coverage\nAttack to defense mapping]
+  Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
   Verifier[Verifier / Package\nReproducible evidence bundle]
   Runtime -->|E01 4 verified| Aura
   Aura -->|E02 15 verified| Sim
@@ -25,6 +26,10 @@ flowchart LR
   Coverage -->|E09 10 verified| Tsra
   Tsra -->|E10 56 verified| Alerts
   Metrics -->|E11 46 verified| Verifier
+  Sim -->|E12 10 verified| Replay
+  Tsra -->|response evidence| Replay
+  Alerts -->|alert evidence| Replay
+  Replay -->|episode evidence| Verifier
   Alerts -->|operator evidence| Verifier
   Coverage -->|coverage evidence| Verifier
 ```
@@ -44,6 +49,7 @@ flowchart LR
 | E09 | AttackEvent | DefenseEvent | 10 | verified | outputs/report_tables/attack_defense_response_audit.csv | Prevents static mappings from replacing actual event-time response evidence. |
 | E10 | DefenseEvent | Operator Alerts | 56 | verified | outputs/report_tables/operator_alerts.csv | Turns TSRA-R output into human-readable response guidance. |
 | E11 | Mission Metrics | Verifier/Package | 46 | verified | outputs/report_tables/metric_gate_summary.csv \| outputs/report_tables/mission_impact_decomposition.csv | Keeps scalar claims backed by gates and component-level evidence. |
+| E12 | Attack/Defense/Alert Evidence | Closed-Loop Episode Replay | 10 | verified | outputs/report_tables/closed_loop_episode_replay.csv | Shows attack, defense, alert, and metric progression in one reviewable episode record. |
 
 ## Interaction Detail
 
@@ -144,4 +150,13 @@ flowchart LR
 - Evidence count: 46
 - Validation status: verified
 - Purpose: Keeps scalar claims backed by gates and component-level evidence.
+- Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
+
+### E12 Attack/Defense/Alert Evidence -> Closed-Loop Episode Replay
+
+- Interaction: Each attack episode is joined to response coverage, operator alerts, and metric movement
+- Evidence: outputs/report_tables/closed_loop_episode_replay.csv
+- Evidence count: 10
+- Validation status: verified
+- Purpose: Shows attack, defense, alert, and metric progression in one reviewable episode record.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

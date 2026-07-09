@@ -227,6 +227,23 @@ outputs/report_tables/agent_collaboration_graph.mmd
 
 이 그래프는 각 edge마다 evidence file, evidence count, validation status를 붙인다.
 
+## Closed-Loop Episode Replay
+
+공격 1건 기준의 순차 공방 흐름은 closed-loop episode replay로 재구성한다.
+
+```bash
+python3 -m src.experiments.closed_loop_episode_replay
+```
+
+산출물:
+
+```text
+outputs/report_tables/closed_loop_episode_replay.csv
+outputs/report_tables/closed_loop_episode_replay.md
+```
+
+각 episode는 AttackEvent, response audit, defense chain, operator alert chain, mission impact start/peak/end, outcome, residual risk를 한 record로 묶는다.
+
 ## 인터페이스 Manifest
 
 에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 계약은 다음 명령으로 생성한다.

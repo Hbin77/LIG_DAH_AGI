@@ -27,6 +27,7 @@ python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
+python3 -m src.experiments.closed_loop_episode_replay
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
 python3 -m src.experiments.agent_collaboration_graph
@@ -62,14 +63,15 @@ aura_coa_cards rows: 15
 battle_timeline rows: 49
 incident_summary rows: 10
 operator_alerts rows: 56 actions=5
-agent_collaboration_graph edges: 11 verified
+closed_loop_episode_replay rows: 10 complete
+agent_collaboration_graph edges: 12 verified
 competition_alignment_matrix rows: 10 verified
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 141
+package_zip entries: 144
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

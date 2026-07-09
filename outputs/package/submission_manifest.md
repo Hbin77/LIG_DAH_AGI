@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 140
-- total_payload_bytes: 2570281
+- payload_file_count: 143
+- total_payload_bytes: 2628970
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 141
-- zip_bytes: 1625354
-- zip_sha256: `8f90569131f0f3e02f534a3ce25d5e5636bc0d02d6a3719c6b83fceb81345c93`
+- zip_file_count: 144
+- zip_bytes: 1636652
+- zip_sha256: `cc2e945ef30ad4f83f72ae00fb8abab89e88a27b56e5016ad2e871e0647ca948`
 
 ## 포함 파일
 
@@ -101,6 +101,8 @@
 - `outputs/report_tables/aura_coa_cards.md`
 - `outputs/report_tables/battle_timeline.csv`
 - `outputs/report_tables/battle_timeline.md`
+- `outputs/report_tables/closed_loop_episode_replay.csv`
+- `outputs/report_tables/closed_loop_episode_replay.md`
 - `outputs/report_tables/competition_alignment_matrix.csv`
 - `outputs/report_tables/competition_alignment_matrix.md`
 - `outputs/report_tables/decision_trace_quality_audit.csv`
@@ -141,6 +143,7 @@
 - `src/experiments/attack_defense_response_audit.py`
 - `src/experiments/aura_coa_cards.py`
 - `src/experiments/battle_timeline.py`
+- `src/experiments/closed_loop_episode_replay.py`
 - `src/experiments/competition_alignment.py`
 - `src/experiments/incident_summary.py`
 - `src/experiments/metric_gate.py`

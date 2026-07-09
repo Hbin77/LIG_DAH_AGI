@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
     "src/experiments/operator_alerts.py",
+    "src/experiments/closed_loop_episode_replay.py",
     "src/experiments/agent_collaboration_graph.py",
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
@@ -52,6 +53,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/incident_summary.csv",
     "outputs/report_tables/operator_alerts.csv",
     "outputs/report_tables/operator_alerts.md",
+    "outputs/report_tables/closed_loop_episode_replay.csv",
+    "outputs/report_tables/closed_loop_episode_replay.md",
     "outputs/report_tables/agent_collaboration_graph.csv",
     "outputs/report_tables/agent_collaboration_graph.md",
     "outputs/report_tables/agent_collaboration_graph.mmd",
@@ -513,14 +516,48 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("operator_alerts rows=56 actions=5")
 
+    episode_rows = read_csv("outputs/report_tables/closed_loop_episode_replay.csv")
+    require(
+        len(episode_rows) == 10,
+        f"expected 10 closed-loop episode rows, got {len(episode_rows)}",
+    )
+    episode_experiments = {row["experiment"] for row in episode_rows}
+    require(
+        episode_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"unexpected closed-loop episode experiments: {sorted(episode_experiments)}",
+    )
+    require(
+        all(row["response_status"] == "complete" for row in episode_rows),
+        "closed-loop episode replay has incomplete response status",
+    )
+    require(
+        {"queue_pressure", "failover_chasing"}.issubset(
+            {row["attack_type"] for row in episode_rows}
+        ),
+        "closed-loop episode replay missing attack types",
+    )
+    require(
+        all(row["defense_chain"] != "none" for row in episode_rows),
+        "closed-loop episode replay missing defense chains",
+    )
+    require(
+        all(row["operator_alert_chain"] != "none" for row in episode_rows),
+        "closed-loop episode replay missing operator alert chains",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in episode_rows),
+        "closed-loop episode replay missing safety boundary",
+    )
+    checks.append("closed_loop_episode_replay rows=10 complete")
+
     collaboration_rows = read_csv("outputs/report_tables/agent_collaboration_graph.csv")
     require(
-        len(collaboration_rows) == 11,
-        f"expected 11 collaboration graph edges, got {len(collaboration_rows)}",
+        len(collaboration_rows) == 12,
+        f"expected 12 collaboration graph edges, got {len(collaboration_rows)}",
     )
     require(
         {row["edge_id"] for row in collaboration_rows}
-        == {f"E{index:02d}" for index in range(1, 12)},
+        == {f"E{index:02d}" for index in range(1, 13)},
         "agent collaboration graph edge ids are incomplete",
     )
     require(
@@ -544,7 +581,7 @@ def check_csv_outputs() -> list[str]:
     )
     require("flowchart LR" in collaboration_mmd, "agent collaboration Mermaid graph missing flowchart")
     require("AURA" in collaboration_mmd and "TSRA-R" in collaboration_mmd, "Mermaid graph missing agents")
-    checks.append("agent_collaboration_graph edges=11 verified")
+    checks.append("agent_collaboration_graph edges=12 verified")
 
     alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
     require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
@@ -606,6 +643,10 @@ def check_zip() -> list[str]:
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
     require("outputs/report_tables/operator_alerts.md" in manifest_text, "manifest missing operator alerts")
+    require(
+        "outputs/report_tables/closed_loop_episode_replay.md" in manifest_text,
+        "manifest missing closed-loop episode replay",
+    )
     require(
         "outputs/report_tables/agent_collaboration_graph.md" in manifest_text,
         "manifest missing agent collaboration graph",

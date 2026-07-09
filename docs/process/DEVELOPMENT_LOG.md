@@ -1278,6 +1278,47 @@ Mermaid graph: outputs/report_tables/agent_collaboration_graph.mmd
 - 새 기능은 이 협력 edge 중 하나 이상을 강화해야 한다.
 - 특정 edge가 evidence count 또는 verification status를 잃으면 협력 구조가 약해진 것으로 본다.
 
+### 35. Closed-Loop Episode Replay를 추가한 이유
+
+공격-방어 루프를 이해하려면 attack event, response audit, operator alert, metric snapshot을 따로 읽어야 했다. 이 방식은 검증에는 충분하지만, 공격 1건이 어떻게 방어되고 어떤 metric 변화를 만들었는지 순차적으로 이해하기 어렵다.
+
+그래서 attack event 1개를 episode 기준으로 잡고, 방어 coverage, defense chain, operator alert chain, mission impact movement를 한 row로 묶었다.
+
+구현:
+
+```text
+src/experiments/closed_loop_episode_replay.py
+outputs/report_tables/closed_loop_episode_replay.csv
+outputs/report_tables/closed_loop_episode_replay.md
+```
+
+episode 구성:
+
+```text
+AttackEvent
+-> response audit status
+-> active/timely defense chain
+-> operator alert chain
+-> mission impact start/peak/end
+-> outcome and residual risk
+```
+
+검증 결과:
+
+```text
+closed_loop_episode_replay.csv: 10 rows
+E5 episodes: 5
+E7 episodes: 5
+response_status: complete for all rows
+```
+
+해석:
+
+- 이 산출물은 사용자가 "순차적으로 이해"할 수 있게 만든 공방 episode 표다.
+- E5/E7의 모든 공격 event가 complete response를 가진다.
+- 일부 episode는 peak 이후 impact가 크게 내려가고, 일부는 residual mission impact가 남는다. 이 차이를 숨기지 않고 outcome으로 남긴다.
+- 실제 공격이나 실제 운용 지시가 아니라 폐쇄형 시뮬레이션 replay다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

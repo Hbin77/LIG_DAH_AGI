@@ -6,6 +6,7 @@ flowchart LR
   Metrics[Mission Metrics\nImpact / resilience / decomposition]
   Alerts[Operator Alerts\nMission-readable defense guidance]
   Coverage[Capability Coverage\nAttack to defense mapping]
+  Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
   Verifier[Verifier / Package\nReproducible evidence bundle]
   Runtime -->|E01 4 verified| Aura
   Aura -->|E02 15 verified| Sim
@@ -18,5 +19,9 @@ flowchart LR
   Coverage -->|E09 10 verified| Tsra
   Tsra -->|E10 56 verified| Alerts
   Metrics -->|E11 46 verified| Verifier
+  Sim -->|E12 10 verified| Replay
+  Tsra -->|response evidence| Replay
+  Alerts -->|alert evidence| Replay
+  Replay -->|episode evidence| Verifier
   Alerts -->|operator evidence| Verifier
   Coverage -->|coverage evidence| Verifier

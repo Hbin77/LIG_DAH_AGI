@@ -161,17 +161,23 @@ ALIGNMENT_SPECS = [
             "and metric movement for E5 and E7; attack-defense coverage maps each AURA capability "
             "to the TSRA-R capabilities and validation gates that cover it; response audit checks "
             "whether required defenses are active or emitted within the response window; the collaboration "
-            "graph summarizes the closed-loop agent cooperation evidence."
+            "graph summarizes the closed-loop agent cooperation evidence; episode replay joins attack, "
+            "defense, alert, and metric movement per attack event."
         ),
-        agent_or_component="Battle timeline / Incident summary / Coverage / Response audit / Collaboration graph",
+        agent_or_component=(
+            "Battle timeline / Incident summary / Coverage / Response audit / "
+            "Episode replay / Collaboration graph"
+        ),
         evidence_files=[
             "src/experiments/battle_timeline.py",
             "src/experiments/incident_summary.py",
+            "src/experiments/closed_loop_episode_replay.py",
             "src/experiments/agent_collaboration_graph.py",
             "src/experiments/attack_defense_coverage.py",
             "src/experiments/attack_defense_response_audit.py",
             "outputs/report_tables/battle_timeline.csv",
             "outputs/report_tables/incident_summary.csv",
+            "outputs/report_tables/closed_loop_episode_replay.csv",
             "outputs/report_tables/agent_collaboration_graph.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
             "outputs/report_tables/attack_defense_response_audit.csv",
@@ -183,13 +189,16 @@ ALIGNMENT_SPECS = [
         content_checks=[
             ContentCheck("outputs/report_tables/battle_timeline.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/incident_summary.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/closed_loop_episode_replay.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_coverage.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_response_audit.csv", "closed simulation"),
         ],
         row_checks=[
             RowCountCheck("outputs/report_tables/battle_timeline.csv", 40),
             RowCountCheck("outputs/report_tables/incident_summary.csv", 10),
-            RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 11),
+            RowCountCheck("outputs/report_tables/closed_loop_episode_replay.csv", 10),
+            RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 12),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
             RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
         ],

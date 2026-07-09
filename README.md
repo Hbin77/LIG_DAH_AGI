@@ -304,6 +304,19 @@ This writes:
 
 The response audit checks E5/E7 attack events against active or timely TSRA-R defenses. It distinguishes missed required defenses from support-partial residual risk.
 
+## Generate Closed-Loop Episode Replay
+
+```bash
+python3 -m src.experiments.closed_loop_episode_replay
+```
+
+This writes:
+
+- `outputs/report_tables/closed_loop_episode_replay.csv`
+- `outputs/report_tables/closed_loop_episode_replay.md`
+
+The replay joins each defended attack event to response coverage, defense chains, operator alerts, and mission metric movement. Run it after `attack_defense_response_audit` and `operator_alerts` have been generated.
+
 ## Audit PACE Transitions
 
 ```bash
@@ -466,6 +479,7 @@ python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
+python3 -m src.experiments.closed_loop_episode_replay
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
 python3 -m src.experiments.agent_collaboration_graph

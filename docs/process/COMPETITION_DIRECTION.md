@@ -177,7 +177,8 @@ Metrics
 12. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
 13. TSRA-R 방어 이벤트는 operator alert로도 해석 가능해야 한다.
 14. 공격-시뮬레이터-방어-알림-지표-verifier 협력 구조는 graph edge로 검증한다.
-15. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+15. 공격 1건 단위의 closed-loop episode replay로 순차 흐름을 검증한다.
+16. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 

@@ -62,6 +62,9 @@ def evidence_counts(root: Path = Path(".")) -> dict[str, int]:
             read_csv(root / "outputs/report_tables/battle_timeline.csv")
         ),
         "operator_alerts": len(read_csv(root / "outputs/report_tables/operator_alerts.csv")),
+        "closed_loop_episodes": len(
+            read_csv(root / "outputs/report_tables/closed_loop_episode_replay.csv")
+        ),
         "mission_decomposition_rows": len(
             read_csv(root / "outputs/report_tables/mission_impact_decomposition.csv")
         ),
@@ -183,6 +186,16 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             counts["passing_metric_gates"] == 11 and counts["mission_decomposition_rows"] == 35,
             "Keeps scalar claims backed by gates and component-level evidence.",
         ),
+        (
+            "E12",
+            "Attack/Defense/Alert Evidence",
+            "Closed-Loop Episode Replay",
+            "Each attack episode is joined to response coverage, operator alerts, and metric movement",
+            "outputs/report_tables/closed_loop_episode_replay.csv",
+            counts["closed_loop_episodes"],
+            counts["closed_loop_episodes"] == 10,
+            "Shows attack, defense, alert, and metric progression in one reviewable episode record.",
+        ),
     ]
     rows = []
     for edge_id, source, target, interaction, evidence, evidence_count, ok, purpose in specs:
@@ -223,6 +236,7 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             "  Metrics[Mission Metrics\\nImpact / resilience / decomposition]",
             "  Alerts[Operator Alerts\\nMission-readable defense guidance]",
             "  Coverage[Capability Coverage\\nAttack to defense mapping]",
+            "  Replay[Closed-Loop Episode Replay\\nAttack / defense / alert / metric episode]",
             "  Verifier[Verifier / Package\\nReproducible evidence bundle]",
             f"  Runtime -->|{line('E01')}| Aura",
             f"  Aura -->|{line('E02')}| Sim",
@@ -235,6 +249,10 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             f"  Coverage -->|{line('E09')}| Tsra",
             f"  Tsra -->|{line('E10')}| Alerts",
             f"  Metrics -->|{line('E11')}| Verifier",
+            f"  Sim -->|{line('E12')}| Replay",
+            f"  Tsra -->|response evidence| Replay",
+            f"  Alerts -->|alert evidence| Replay",
+            f"  Replay -->|episode evidence| Verifier",
             f"  Alerts -->|operator evidence| Verifier",
             f"  Coverage -->|coverage evidence| Verifier",
         ]

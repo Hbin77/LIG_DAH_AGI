@@ -1078,7 +1078,62 @@ Mermaid: outputs/report_tables/agent_collaboration_graph.mmd
 - 새 공격/방어 기능을 추가하면 graph edge의 evidence count 또는 validation status가 같이 유지되어야 한다.
 - 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 협력 구조만 설명한다.
 
-## P21. 제출 직전 브랜치/패키지 동결
+## P21. Closed-Loop Episode Replay
+
+상태: 완료
+
+문제:
+
+- battle timeline, response audit, operator alerts는 각각 유용하지만, 공격 1건 기준으로 보면 파일을 여러 개 넘겨야 한다.
+- 공격 선택, 방어 coverage, operator alert, mission metric 변화가 한 행에 연결되어야 공방 루프를 순차적으로 이해하기 쉽다.
+- E5/E7의 각 attack event가 실제로 complete response를 받았는지, 그리고 mission impact가 어떻게 움직였는지 episode 단위로 확인할 필요가 있다.
+
+구현:
+
+```text
+src/experiments/closed_loop_episode_replay.py
+outputs/report_tables/closed_loop_episode_replay.csv
+outputs/report_tables/closed_loop_episode_replay.md
+```
+
+구현 방식:
+
+- `attack_defense_response_audit.csv`를 episode 기준으로 사용한다.
+- 원본 `attack_events.jsonl`에서 attack reason, score, expected impact를 붙인다.
+- `metric_snapshots.jsonl`에서 attack time, response window peak, window end metric을 계산한다.
+- `operator_alerts.csv`에서 response window 안의 operator-facing alert chain을 붙인다.
+- 각 row에 defense chain, response status, outcome, residual risk, safety boundary를 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.closed_loop_episode_replay` 명령으로 재생성 가능하다.
+- 완료. E5 5개, E7 5개, 총 10개 episode가 생성된다.
+- 완료. 모든 episode의 response status가 `complete`다.
+- 완료. 각 episode는 defense chain과 operator alert chain을 가진다.
+- 완료. README, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.closed_loop_episode_replay
+```
+
+검증 결과:
+
+```text
+closed_loop_episode_replay.csv: 10 episodes
+E5 episodes: 5
+E7 episodes: 5
+response_status: complete for all rows
+```
+
+해석:
+
+- 이 산출물은 공격 1건을 기준으로 공방 루프를 순차적으로 보여준다.
+- E7 첫 episode는 ML TSRA-R이 20초 뒤 방어 window를 열고, 이후 priority reroute, stale badge, PACE switch가 함께 작동하는 흐름을 보여준다.
+- 단일 숫자나 분리된 로그가 아니라 attack -> defense -> alert -> metric movement를 한 record로 묶는다.
+
+## P22. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 
