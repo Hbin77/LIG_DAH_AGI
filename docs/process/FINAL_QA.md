@@ -24,6 +24,7 @@ python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
+python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py
@@ -48,6 +49,7 @@ decision_trace_quality_audit rows: 9 pass
 agent_loop_replay rows: 8
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10
+attack_defense_coverage rows: 4 covered
 aura_coa_cards rows: 15
 battle_timeline rows: 46
 incident_summary rows: 10
@@ -57,7 +59,7 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 122
+package_zip entries: 125
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

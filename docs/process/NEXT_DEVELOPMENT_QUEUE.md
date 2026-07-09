@@ -768,7 +768,56 @@ required capabilities: present
 - 이 산출물은 에이전트별 "할 수 있는 일"을 runtime action과 검증 evidence에 연결한다.
 - 공격/방어 에이전트를 따로 고도화할 때 capability 단위로 작업을 나눌 수 있다.
 
-## P15. 제출 직전 브랜치/패키지 동결
+## P15. Attack-Defense Coverage
+
+상태: 완료
+
+문제:
+
+- Agent Capability Matrix는 공격 capability와 방어 capability를 같은 표에 놓지만, 각 공격이 어떤 방어 조합으로 커버되는지는 직접 읽어야 한다.
+- 공격 에이전트와 방어 에이전트를 따로 고도화할수록 두 작업이 서로 맞물린다는 증거가 필요하다.
+
+구현:
+
+```text
+src/experiments/attack_defense_coverage.py
+outputs/report_tables/attack_defense_coverage.csv
+outputs/report_tables/attack_defense_coverage.md
+```
+
+구현 방식:
+
+- `agent_capability_matrix.csv`에서 공격/방어 capability와 evidence count를 읽는다.
+- `metric_gate_summary.csv`에서 각 coverage mapping의 validation gate 통과 여부를 읽는다.
+- `bandwidth_limit`, `failover_chasing`, `queue_pressure`, `stale_cop_induction` 4개 공격 capability를 TSRA-R 방어 capability와 매핑한다.
+- 각 row에 coverage logic, residual risk, safety boundary를 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.attack_defense_coverage` 명령으로 재생성 가능하다.
+- 완료. 4개 공격 capability가 모두 `covered` 상태다.
+- 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.attack_defense_coverage
+```
+
+검증 결과:
+
+```text
+attack_defense_coverage.csv: 4 rows
+coverage_status: covered for all rows
+mapped attacks: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_induction
+```
+
+해석:
+
+- 이 산출물은 공격 담당과 방어 담당이 서로 다른 파일을 개발하더라도 capability 단위 연결성을 유지하게 하는 기준표다.
+- 새 공격 capability를 추가하면 반드시 대응 방어 capability와 validation gate를 같이 추가해야 한다.
+
+## P16. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

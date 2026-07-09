@@ -265,6 +265,19 @@ This writes:
 
 The gate checks whether the generated metrics still support the intended AURA/TSRA-R direction: AURA impact, TSRA-R resilience, action ablation value, adaptive memory improvement, ML defender separation, and repeated-run stability.
 
+## Generate Attack-Defense Coverage
+
+```bash
+python3 -m src.experiments.attack_defense_coverage
+```
+
+This writes:
+
+- `outputs/report_tables/attack_defense_coverage.csv`
+- `outputs/report_tables/attack_defense_coverage.md`
+
+The coverage table maps each AURA attack capability to the TSRA-R defense capabilities and validation gates that cover it. Run it after `agent_capability_matrix` and `metric_gate_summary` have been generated.
+
 ## Generate Competition Alignment Matrix
 
 ```bash
@@ -384,6 +397,7 @@ python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
+python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py

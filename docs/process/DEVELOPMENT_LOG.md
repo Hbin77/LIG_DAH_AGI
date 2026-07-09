@@ -970,6 +970,49 @@ defense side: ml_attack_alert, pace_switch, priority_reroute, stale_badge,
 - `priority_reroute`, `stale_badge`, `ml_attack_alert`, adaptive gating 같은 핵심 capability가 어떤 evidence와 gate를 갖는지 바로 확인할 수 있다.
 - final verifier와 competition alignment에 연결해 필수 산출물로 만들었다.
 
+### 27. Attack-Defense Coverage를 추가한 이유
+
+Agent Capability Matrix는 공격 capability와 방어 capability를 같은 표에 놓지만, 각 공격이 어떤 방어 capability 조합으로 커버되는지는 별도로 해석해야 했다.
+
+사용자가 요구한 방향은 공격 에이전트와 방어 에이전트를 따로 만들되, 둘이 끊어지지 않게 실제 공방 구조로 올리는 것이다. 그래서 공격 capability별 방어 coverage를 별도 산출물로 추가했다.
+
+구현:
+
+```text
+src/experiments/attack_defense_coverage.py
+outputs/report_tables/attack_defense_coverage.csv
+outputs/report_tables/attack_defense_coverage.md
+```
+
+매핑 기준:
+
+```text
+bandwidth_limit      -> priority_reroute, video_throttle, pace_switch
+failover_chasing     -> ml_attack_alert, pace_switch, adaptive_optional_action_gating
+queue_pressure       -> priority_reroute, video_throttle, stale_badge
+stale_cop_induction  -> stale_badge
+```
+
+검증:
+
+```text
+python3 -m src.experiments.attack_defense_coverage
+```
+
+결과:
+
+```text
+attack_defense_coverage.csv: 4 rows
+coverage_status: all covered
+validation_gates: all pass
+```
+
+해석:
+
+- 이 산출물은 공격 담당과 방어 담당이 각각 개발해도 capability 단위 연결성을 유지하게 한다.
+- 새 공격 capability는 반드시 대응 방어 capability, validation gate, residual risk와 함께 추가해야 한다.
+- `verify_submission_state.py`와 `competition_alignment.py`에 연결해 최종 산출물의 필수 게이트로 만들었다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

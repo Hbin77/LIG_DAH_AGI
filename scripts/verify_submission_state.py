@@ -34,6 +34,7 @@ REQUIRED_FILES = [
     "src/experiments/agent_loop_replay.py",
     "src/experiments/agent_interface_manifest.py",
     "src/experiments/agent_capability_matrix.py",
+    "src/experiments/attack_defense_coverage.py",
     "src/experiments/metric_gate.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -56,6 +57,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_interface_manifest.md",
     "outputs/report_tables/agent_capability_matrix.csv",
     "outputs/report_tables/agent_capability_matrix.md",
+    "outputs/report_tables/attack_defense_coverage.csv",
+    "outputs/report_tables/attack_defense_coverage.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -259,6 +262,40 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("agent_capability_matrix rows=10 attack/defense")
 
+    coverage_rows = read_csv("outputs/report_tables/attack_defense_coverage.csv")
+    require(len(coverage_rows) == 4, f"expected 4 attack-defense coverage rows, got {len(coverage_rows)}")
+    coverage_attacks = {row["attack_capability"] for row in coverage_rows}
+    required_coverage_attacks = {
+        "bandwidth_limit",
+        "failover_chasing",
+        "queue_pressure",
+        "stale_cop_induction",
+    }
+    require(
+        coverage_attacks == required_coverage_attacks,
+        f"unexpected attack-defense coverage attacks: {sorted(coverage_attacks)}",
+    )
+    require(
+        all(row["coverage_status"] == "covered" for row in coverage_rows),
+        "attack-defense coverage has incomplete rows",
+    )
+    require(
+        all(row["covered_by_defense_capabilities"] for row in coverage_rows),
+        "attack-defense coverage missing defense capability mappings",
+    )
+    require(
+        all(
+            ":pass" in row["validation_gates"] and ":missing" not in row["validation_gates"]
+            for row in coverage_rows
+        ),
+        "attack-defense coverage missing passing validation gates",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in coverage_rows),
+        "attack-defense coverage missing safety boundary",
+    )
+    checks.append("attack_defense_coverage rows=4 covered")
+
     metric_gate_rows = read_csv("outputs/report_tables/metric_gate_summary.csv")
     require(len(metric_gate_rows) == 11, f"expected 11 metric gate rows, got {len(metric_gate_rows)}")
     failed_metric_gates = [
@@ -404,6 +441,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_capability_matrix.md" in manifest_text,
         "manifest missing agent capability matrix",
+    )
+    require(
+        "outputs/report_tables/attack_defense_coverage.md" in manifest_text,
+        "manifest missing attack-defense coverage",
     )
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,

@@ -76,12 +76,13 @@ Metrics
 모든 기능 개발은 아래 순서를 지킨다.
 
 1. 공격-방어 연결성을 먼저 확인한다.
-2. 에이전트 입력/출력/도구/상태를 명시한다.
-3. 실제 공격 기능이 아니라 폐쇄형 시뮬레이션 효과로 구현한다.
-4. 행동 선택 이유를 `DecisionTrace`에 남긴다.
-5. 단일 실행과 반복 실행 결과를 확인한다.
-6. 개발 판단 근거를 Markdown에 남긴다.
-7. `hbin` 브랜치에만 커밋하고 푸시한다.
+2. 공격 capability가 어떤 방어 capability로 커버되는지 명시한다.
+3. 에이전트 입력/출력/도구/상태를 명시한다.
+4. 실제 공격 기능이 아니라 폐쇄형 시뮬레이션 효과로 구현한다.
+5. 행동 선택 이유를 `DecisionTrace`에 남긴다.
+6. 단일 실행과 반복 실행 결과를 확인한다.
+7. 개발 판단 근거를 Markdown에 남긴다.
+8. `hbin` 브랜치에만 커밋하고 푸시한다.
 
 ## 개발 게이트
 
@@ -133,9 +134,10 @@ Metrics
 5. 대표 agent loop replay로 observe-memory-tool-candidate-decision-feedback 흐름을 확인한다.
 6. 에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 인터페이스를 manifest로 명시한다.
 7. 에이전트 capability를 runtime action, observed effect, validation gate에 연결한다.
-8. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
-9. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-10. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+8. 공격 capability가 어떤 TSRA-R 방어 capability로 커버되는지 coverage matrix로 검증한다.
+9. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
+10. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+11. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -509,6 +511,32 @@ outputs/report_tables/agent_capability_matrix.md
 agent_capability_matrix rows: 10
 attack capabilities: 4
 defense capabilities: 6
+```
+
+### P15. Attack-Defense Coverage
+
+상태: 완료
+
+목적:
+
+- AURA 공격 capability가 어떤 TSRA-R 방어 capability로 커버되는지 명시한다.
+- 공격/방어 에이전트를 따로 개발하더라도 공방 연결성이 끊기지 않게 한다.
+- coverage 상태를 metric gate와 safety boundary까지 연결해 검증한다.
+
+산출물:
+
+```text
+src/experiments/attack_defense_coverage.py
+outputs/report_tables/attack_defense_coverage.csv
+outputs/report_tables/attack_defense_coverage.md
+```
+
+검증 결과:
+
+```text
+attack_defense_coverage rows: 4
+coverage_status: all covered
+covered attacks: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_induction
 ```
 
 ## 최종 판단 기준

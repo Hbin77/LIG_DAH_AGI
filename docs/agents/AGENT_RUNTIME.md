@@ -226,6 +226,23 @@ outputs/report_tables/agent_capability_matrix.md
 
 이 matrix는 AURA 공격 효과와 TSRA-R 방어 액션을 runtime action, decision source, observed effect, validation gate에 연결한다.
 
+## Attack-Defense Coverage
+
+AURA 공격 capability가 어떤 TSRA-R 방어 capability로 커버되는지는 다음 명령으로 생성한다.
+
+```bash
+python3 -m src.experiments.attack_defense_coverage
+```
+
+산출물:
+
+```text
+outputs/report_tables/attack_defense_coverage.csv
+outputs/report_tables/attack_defense_coverage.md
+```
+
+이 coverage table은 `bandwidth_limit`, `failover_chasing`, `queue_pressure`, `stale_cop_induction`을 각각 대응 방어 capability, validation gate, residual risk에 연결한다. 공격/방어 에이전트를 따로 개발해도 이 표가 공방 연결성 기준이 된다.
+
 예시:
 
 ```json

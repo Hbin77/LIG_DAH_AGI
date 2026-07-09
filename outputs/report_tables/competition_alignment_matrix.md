@@ -9,7 +9,7 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 | A02 | Attack scenario | AURA | verified | Attack improvements must produce COA cards and never introduce live RF, exploit, or packet actions. |
 | A03 | Defense architecture | TSRA-R | verified | Defense changes must be checked against mission impact plus at least one action-specific metric. |
 | A04 | AI agent architecture | AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace | verified | Agent changes must keep attack/defense interfaces and capabilities explicit. |
-| A05 | Attack-defense cooperation | Battle timeline / Incident summary | verified | New experiments must preserve attack events, defense events, trace reasons, and metric snapshots. |
+| A05 | Attack-defense cooperation | Battle timeline / Incident summary / Attack-defense coverage | verified | New experiments must preserve attack events, defense events, trace reasons, metric snapshots, and attack-to-defense capability coverage. |
 | A06 | ML contribution | AURA ML / TSRA-R ML | verified | ML claims must state task, metric, model role, and whether the model changes closed-loop behavior. |
 | A07 | Repeatable evidence | Experiment runners | verified | Metric claims must pass metric_gate_summary and point to batch or dedicated experiments. |
 | A08 | Adaptive defense | AdaptiveTSRA-R | verified | Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive_memory_summary. |
@@ -56,12 +56,12 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 
 ### A05 Attack-defense cooperation
 
-- Goal: Make the red and blue agents observable on one shared event timeline.
-- Mechanism: Battle timeline and incident summary merge AURA events, TSRA-R events, trace reasons, and metric movement for E5 and E7.
-- Evidence: src/experiments/battle_timeline.py | src/experiments/incident_summary.py | outputs/report_tables/battle_timeline.csv | outputs/report_tables/incident_summary.csv
+- Goal: Make the red and blue agents observable and explicitly connected by capability coverage.
+- Mechanism: Battle timeline and incident summary merge AURA events, TSRA-R events, trace reasons, and metric movement for E5 and E7; attack-defense coverage maps each AURA capability to the TSRA-R capabilities and validation gates that cover it.
+- Evidence: src/experiments/battle_timeline.py | src/experiments/incident_summary.py | src/experiments/attack_defense_coverage.py | outputs/report_tables/battle_timeline.csv | outputs/report_tables/incident_summary.csv | outputs/report_tables/attack_defense_coverage.csv
 - Status: verified
-- Notes: outputs/report_tables/battle_timeline.csv rows=46; outputs/report_tables/incident_summary.csv rows=10
-- Next gate: New experiments must preserve attack events, defense events, trace reasons, and metric snapshots.
+- Notes: outputs/report_tables/battle_timeline.csv rows=46; outputs/report_tables/incident_summary.csv rows=10; outputs/report_tables/attack_defense_coverage.csv rows=4
+- Next gate: New experiments must preserve attack events, defense events, trace reasons, metric snapshots, and attack-to-defense capability coverage.
 
 ### A06 ML contribution
 
