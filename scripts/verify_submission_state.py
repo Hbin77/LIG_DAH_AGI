@@ -28,6 +28,7 @@ REQUIRED_FILES = [
     "src/tsra_r/adaptive_defender.py",
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
+    "src/experiments/competition_alignment.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
@@ -37,6 +38,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/aura_coa_cards.csv",
     "outputs/report_tables/battle_timeline.csv",
     "outputs/report_tables/incident_summary.csv",
+    "outputs/report_tables/competition_alignment_matrix.csv",
+    "outputs/report_tables/competition_alignment_matrix.md",
     "outputs/figures/aura_tsra_architecture.png",
     "outputs/figures/batch_resilience_gain.png",
     "outputs/figures/tsra_action_ablation.png",
@@ -158,6 +161,28 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append(f"incident_summary rows={len(incident_rows)}")
 
+    alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
+    require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
+    incomplete_alignment = [
+        row["alignment_id"]
+        for row in alignment_rows
+        if row.get("evidence_status") != "verified"
+    ]
+    require(not incomplete_alignment, f"incomplete alignment rows: {incomplete_alignment}")
+    required_alignment_areas = {
+        "Attack scenario",
+        "Defense architecture",
+        "AI agent architecture",
+        "Attack-defense cooperation",
+        "Safety boundary",
+    }
+    observed_alignment_areas = {row["scoring_area"] for row in alignment_rows}
+    require(
+        required_alignment_areas.issubset(observed_alignment_areas),
+        f"alignment matrix missing required areas: {sorted(required_alignment_areas - observed_alignment_areas)}",
+    )
+    checks.append("competition_alignment_matrix rows=10 verified")
+
     return checks
 
 
@@ -195,6 +220,10 @@ def check_zip() -> list[str]:
     require("zip_sha256" in manifest_text, "manifest missing zip_sha256")
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
+    require(
+        "outputs/report_tables/competition_alignment_matrix.md" in manifest_text,
+        "manifest missing competition alignment matrix",
+    )
     return [f"package_zip entries={len(names)}", "package exclusions=passed"]
 
 

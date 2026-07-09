@@ -25,7 +25,7 @@ outputs/package/submission_manifest.md
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
-- `outputs/report_tables/*`
+- `outputs/report_tables/*`: trace, COA, battle timeline, incident summary, competition alignment matrix
 - `outputs/models/*_metrics.json`
 
 ## 제외하는 것
@@ -43,9 +43,10 @@ outputs/package/submission_manifest.md
 패키지 생성 검증:
 
 ```text
-payload_file_count: 100
-zip_file_count: 101
-zip_bytes: 약 1.5MB
+payload_file_count: 103
+zip_file_count: 104
+zip_bytes: 약 1.53MB
+competition_alignment_matrix: included
 ```
 
 ZIP 내부 제외 항목 검증:

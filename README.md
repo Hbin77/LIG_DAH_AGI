@@ -187,6 +187,19 @@ This writes:
 - `outputs/figures/batch_priority_inversion_errorbar.png`
 - `outputs/figures/batch_resilience_gain.png`
 
+## Generate Competition Alignment Matrix
+
+```bash
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+```
+
+This writes:
+
+- `outputs/report_tables/competition_alignment_matrix.csv`
+- `outputs/report_tables/competition_alignment_matrix.md`
+
+The matrix maps DAH preliminary-round goals to concrete code, generated evidence, safety boundaries, and the next development gate. Run it after the core experiment summaries, COA cards, battle timeline, incident summary, ablation, adaptive memory, and batch outputs have been generated.
+
 ## Train AURA Impact Predictor
 
 ```bash
@@ -287,6 +300,7 @@ python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py
 ```

@@ -629,6 +629,61 @@ safety boundary missing: 0
 - E7은 ML AURA/ML TSRA-R 공방 incident를 5개로 요약한다.
 - 이 산출물은 상세 timeline보다 상위 관점에서 공격-방어 결과를 설명하는 데 쓰인다.
 
+### 19. Competition Alignment Matrix를 추가한 이유
+
+대회의 핵심은 공격, 방어, AI 에이전트, 안전 경계, 실행 증거가 하나의 방향으로 맞물리는 것이다. 현재 프로젝트에는 코드와 산출물이 충분히 쌓였지만, 팀원이 추가되거나 제출 직전 수정이 들어오면 어떤 파일이 어떤 대회 목표를 증명하는지 흐려질 수 있다.
+
+그래서 대회 목표와 구현 증거를 직접 연결하는 alignment matrix 생성기를 추가했다.
+
+구현:
+
+```text
+src/experiments/competition_alignment.py
+outputs/report_tables/competition_alignment_matrix.csv
+outputs/report_tables/competition_alignment_matrix.md
+```
+
+정렬 항목:
+
+```text
+Defense mission grounding
+Attack scenario
+Defense architecture
+AI agent architecture
+Attack-defense cooperation
+ML contribution
+Repeatable evidence
+Adaptive defense
+Safety boundary
+Team handoff and reproducibility
+```
+
+검증 방식:
+
+- evidence file 존재 여부를 확인한다.
+- 핵심 CSV row count를 확인한다.
+- COA, battle timeline, incident summary의 safety boundary 문구를 확인한다.
+- 모든 alignment row가 `verified`가 아니면 `--fail-on-incomplete` 실행에서 실패한다.
+
+검증:
+
+```text
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+```
+
+결과:
+
+```text
+competition_alignment_matrix.csv: 10 rows
+evidence_status: all verified
+```
+
+해석:
+
+- 이후 새 기능은 alignment matrix의 next gate 중 하나 이상을 만족해야 한다.
+- 이 변경은 기능 추가 자체보다 개발 방향 이탈을 막는 자동 점검 장치다.
+- README, package builder, final verifier에도 연결해 제출 산출물에서 빠지지 않게 했다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

@@ -13,10 +13,12 @@ python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.battle_timeline
+python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py
 ```
@@ -37,12 +39,13 @@ agent_decision_trace_summary rows: 215
 aura_coa_cards rows: 15
 battle_timeline rows: 46
 incident_summary rows: 10
+competition_alignment_matrix rows: 10 verified
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 101
+package_zip entries: 104
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

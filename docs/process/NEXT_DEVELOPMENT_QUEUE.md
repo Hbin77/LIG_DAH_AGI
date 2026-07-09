@@ -405,7 +405,60 @@ E7 incidents: 5
 safety boundary missing: 0
 ```
 
-## P8. 제출 직전 브랜치/패키지 동결
+## P8. Competition Alignment Matrix
+
+상태: 완료
+
+문제:
+
+- 대회의 목표, 공격/방어 에이전트 구조, 안전 경계, 검증 산출물이 여러 문서와 코드에 흩어져 있다.
+- 팀원이 추가될 때 "왜 이 코드와 산출물이 필요한지"를 한눈에 확인할 기준표가 필요하다.
+- 이후 개발이 대회 방향에서 벗어나지 않도록 자동 확인 가능한 게이트가 필요하다.
+
+구현:
+
+```text
+src/experiments/competition_alignment.py
+outputs/report_tables/competition_alignment_matrix.csv
+outputs/report_tables/competition_alignment_matrix.md
+```
+
+구현 방식:
+
+- 대회 목표를 10개 alignment row로 나눴다.
+- 각 row는 scoring area, competition goal, 구현 메커니즘, 담당 컴포넌트, evidence file, next gate를 가진다.
+- 실제 파일 존재, CSV row count, safety boundary 문구를 검사해 `verified` 또는 `incomplete` 상태를 남긴다.
+- README full reproduction, package builder, final verifier에 연결했다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.competition_alignment --fail-on-incomplete` 명령으로 재생성 가능하다.
+- 완료. 10개 alignment row가 모두 `verified` 상태다.
+- 완료. 패키지 manifest와 QA 검증에서 alignment matrix 누락을 잡는다.
+
+검증:
+
+```bash
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+```
+
+검증 결과:
+
+```text
+competition_alignment_matrix.csv: 10 rows
+evidence_status: all verified
+covered areas: attack scenario, defense architecture, AI agent architecture,
+               attack-defense cooperation, ML contribution, safety boundary,
+               repeatable evidence, adaptive defense, team handoff
+```
+
+해석:
+
+- 이 산출물은 추가 기능 개발 전 방향성 점검표다.
+- 새 기능은 이 matrix의 next gate 중 하나 이상을 통과해야 한다.
+- `main`이 아니라 `hbin` 브랜치에서 이어 작업하는 협업 기준도 함께 검증한다.
+
+## P9. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

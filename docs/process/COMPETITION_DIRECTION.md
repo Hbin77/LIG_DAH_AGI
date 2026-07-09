@@ -126,9 +126,10 @@ Metrics
 
 현재 가장 중요한 개발 방향:
 
-1. AgentMemory 기반 adaptive defense를 기본 baseline과 분리해 검증한다.
-2. 공방 timeline에서 `왜 이 행동이 나왔는지`를 더 직접적으로 확인 가능하게 한다.
-3. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+1. 새 기능이 DAH 대회 목표와 직접 연결되는지 alignment matrix로 먼저 확인한다.
+2. 공격, 방어, AI 에이전트 판단 루프 중 어디를 강화하는지 명시한다.
+3. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+4. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -319,6 +320,32 @@ incident summary rows: 10
 E5 incidents: 5
 E7 incidents: 5
 safe boundary: closed simulation only
+```
+
+### P8. Competition Alignment Matrix
+
+상태: 완료
+
+목적:
+
+- 대회 목표와 현재 구현 산출물을 한 표로 연결한다.
+- 공격 시나리오, 방어 아키텍처, AI 에이전트 구조, 안전 경계, 반복 검증이 모두 실제 파일로 증명되는지 확인한다.
+- 이후 개발의 next gate를 명시해 방향이 흐려지지 않게 한다.
+
+산출물:
+
+```text
+src/experiments/competition_alignment.py
+outputs/report_tables/competition_alignment_matrix.csv
+outputs/report_tables/competition_alignment_matrix.md
+```
+
+검증 결과:
+
+```text
+competition_alignment_matrix rows: 10
+evidence_status: all verified
+checked: file existence, row counts, safety boundary text
 ```
 
 ## 최종 판단 기준

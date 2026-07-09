@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 100
-- total_payload_bytes: 2129522
+- payload_file_count: 103
+- total_payload_bytes: 2166356
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 101
-- zip_bytes: 1522170
-- zip_sha256: `7f566cf62801ab2f8288ea68a69caaf84fd2657f68d21f5768bbcfb68c21f4a5`
+- zip_file_count: 104
+- zip_bytes: 1533883
+- zip_sha256: `cb5736f78c038c368eac14dd02bf644fe5c0471c886948313af8ca45f064e802`
 
 ## 포함 파일
 
@@ -86,6 +86,8 @@
 - `outputs/report_tables/aura_coa_cards.md`
 - `outputs/report_tables/battle_timeline.csv`
 - `outputs/report_tables/battle_timeline.md`
+- `outputs/report_tables/competition_alignment_matrix.csv`
+- `outputs/report_tables/competition_alignment_matrix.md`
 - `outputs/report_tables/incident_summary.csv`
 - `outputs/report_tables/incident_summary.md`
 - `outputs/report_tables/ml_model_comparison.csv`
@@ -108,6 +110,7 @@
 - `src/experiments/__init__.py`
 - `src/experiments/aura_coa_cards.py`
 - `src/experiments/battle_timeline.py`
+- `src/experiments/competition_alignment.py`
 - `src/experiments/incident_summary.py`
 - `src/experiments/report_assets.py`
 - `src/experiments/run_adaptive_memory.py`
