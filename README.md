@@ -25,6 +25,8 @@ DAH 2026 예선용 AI 공방 에이전트 부가자료입니다. 범위는 예�
 
 ML 모델은 이미 `models/tsra_sklearn_policy.joblib`에 훈련된 상태로 포함되어 있습니다. 재훈련이 필요하면 먼저 아래를 실행합니다.
 
+번들된 scikit-learn 모델은 `scikit-learn 1.9.x` 계열에서 로드하는 것을 기준으로 합니다. 실행 전 `pip install -r requirements.txt` 또는 같은 버전대가 설치된 Conda 환경을 사용하세요.
+
 ```bash
 conda run -n base python scripts/train_sklearn_policy.py --samples 100000
 ```

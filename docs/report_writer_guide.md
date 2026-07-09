@@ -140,7 +140,7 @@ DecisionTrace는 `src/tsra_agent/runtime.py`가 만들고, CLI 실행 시 seed�
 
 | 조건 | Mission Impact | Priority Inversion | Detection Time | Recovery Time | 해석 |
 |---|---:|---:|---:|---:|---|
-| Baseline | `8.180` | `0.0` | N/A | N/A | 정상 기준 |
+| Baseline | `8.18` | `0.0` | N/A | N/A | 정상 기준 |
 | AURA attacked | `82.162` | `0.0629` | N/A | N/A | 공격 효과 확인 |
 | Rule defense | `61.228` | `0.0` | `1` | N/A | 단순 방어는 제한적 |
 | TSRA-R | `15.306` | `0.0` | `1` | `3` | 주 방어 성능 |
@@ -184,6 +184,8 @@ DecisionTrace는 `src/tsra_agent/runtime.py`가 만들고, CLI 실행 시 seed�
 ## 재현 명령
 
 Python은 Conda base 환경 기준으로 실행합니다.
+
+주의: 포함된 `models/tsra_sklearn_policy.joblib`는 `scikit-learn 1.9.x` 계열 로드를 기준으로 합니다. 실행 환경은 `requirements.txt`를 설치한 상태로 맞추는 것이 안전합니다.
 
 ```bash
 conda run -n base python -m unittest discover -s tests -v

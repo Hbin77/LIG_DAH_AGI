@@ -168,11 +168,17 @@ def check_compile_and_tests() -> list[str]:
 
 
 def check_model_and_example_evidence() -> list[str]:
+    import sklearn
+
     fallback_model = read_json(ROOT / "models/tsra_ml_policy.json")
     sklearn_report = read_json(ROOT / "models/tsra_sklearn_training_report.json")
     selection = read_json(ROOT / "models/tsra_final_selection_report.json")
     summary = read_json(ROOT / "examples/summary_multi_seed.json")
 
+    require(
+        version_tuple(sklearn.__version__) >= (1, 9, 0),
+        f"scikit-learn runtime must be >=1.9.0 for the bundled model, got {sklearn.__version__}",
+    )
     require(fallback_model["metrics"]["validation_f1"] >= 0.99, "fallback model validation_f1 below 0.99")
     require(sklearn_report["metrics"]["validation_f1"] >= 0.99, "sklearn validation_f1 below 0.99")
     require(sklearn_report["metrics"]["validation_roc_auc"] >= 0.99, "sklearn ROC-AUC below 0.99")
@@ -194,10 +200,21 @@ def check_model_and_example_evidence() -> list[str]:
     require(aggregate["ml_guarded_baseline"]["false_alarm_rate"]["mean"] == 0.0, "ML guarded baseline false alarm must be zero")
 
     return [
+        f"sklearn_runtime={sklearn.__version__} pass",
         f"sklearn_f1={sklearn_report['metrics']['validation_f1']} pass",
         f"mission_impact={attacked}->{rule_defended}->{defended} pass",
         f"resilience_gain={gain} ml={ml_gain} pass",
     ]
+
+
+def version_tuple(version: str) -> tuple[int, int, int]:
+    parts = []
+    for piece in version.split(".")[:3]:
+        match = re.match(r"(\d+)", piece)
+        parts.append(int(match.group(1)) if match else 0)
+    while len(parts) < 3:
+        parts.append(0)
+    return tuple(parts)
 
 
 def check_cli_smoke() -> list[str]:
@@ -274,6 +291,26 @@ def check_safety_boundary() -> list[str]:
     return ["safety_boundary=pass"]
 
 
+def check_documented_numbers() -> list[str]:
+    canonical_tokens = [
+        "82.162",
+        "61.228",
+        "15.306",
+        "90.374",
+        "0.9956",
+        "0.0629",
+    ]
+    docs = {
+        "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+        "docs/report_writer_guide.md": (ROOT / "docs/report_writer_guide.md").read_text(encoding="utf-8"),
+        "docs/evaluation_plan.md": (ROOT / "docs/evaluation_plan.md").read_text(encoding="utf-8"),
+    }
+    for path, text in docs.items():
+        for token in canonical_tokens:
+            require(token in text, f"{path} missing canonical metric token {token}")
+    return ["documented_numbers=canonical"]
+
+
 def check_package_zip() -> list[str]:
     result = run([sys.executable, "scripts/build_submission_zip.py"])
     zip_path = Path(result.stdout.strip().splitlines()[-1])
@@ -312,6 +349,7 @@ def main() -> None:
     checks.extend(check_model_and_example_evidence())
     checks.extend(check_cli_smoke())
     checks.extend(check_safety_boundary())
+    checks.extend(check_documented_numbers())
     checks.extend(check_package_zip())
 
     print("DEV submission verification passed")
