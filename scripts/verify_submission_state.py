@@ -28,6 +28,7 @@ REQUIRED_FILES = [
     "src/tsra_r/adaptive_defender.py",
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
+    "src/experiments/operator_alerts.py",
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
@@ -48,6 +49,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/aura_coa_cards.csv",
     "outputs/report_tables/battle_timeline.csv",
     "outputs/report_tables/incident_summary.csv",
+    "outputs/report_tables/operator_alerts.csv",
+    "outputs/report_tables/operator_alerts.md",
     "outputs/report_tables/competition_alignment_matrix.csv",
     "outputs/report_tables/competition_alignment_matrix.md",
     "outputs/report_tables/agent_contract_validation.csv",
@@ -473,6 +476,39 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append(f"incident_summary rows={len(incident_rows)}")
 
+    alert_rows = read_csv("outputs/report_tables/operator_alerts.csv")
+    require(len(alert_rows) == 56, f"expected 56 operator alert rows, got {len(alert_rows)}")
+    alert_experiments = {row["experiment"] for row in alert_rows}
+    require(
+        alert_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"unexpected operator alert experiments: {sorted(alert_experiments)}",
+    )
+    alert_actions = {row["action"] for row in alert_rows}
+    required_alert_actions = {
+        "ml_attack_alert",
+        "pace_switch",
+        "priority_reroute",
+        "stale_badge",
+        "video_throttle",
+    }
+    require(
+        required_alert_actions.issubset(alert_actions),
+        f"operator alerts missing actions: {sorted(required_alert_actions - alert_actions)}",
+    )
+    require(
+        {"high", "medium"}.issubset({row["severity"] for row in alert_rows}),
+        "operator alerts missing severity mix",
+    )
+    require(
+        all(row["operator_alert"] and row["mission_rationale"] for row in alert_rows),
+        "operator alerts missing alert text or rationale",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in alert_rows),
+        "operator alerts missing safety boundary",
+    )
+    checks.append("operator_alerts rows=56 actions=5")
+
     alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
     require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
     incomplete_alignment = [
@@ -532,6 +568,7 @@ def check_zip() -> list[str]:
     require("zip_sha256" in manifest_text, "manifest missing zip_sha256")
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
+    require("outputs/report_tables/operator_alerts.md" in manifest_text, "manifest missing operator alerts")
     require(
         "outputs/report_tables/competition_alignment_matrix.md" in manifest_text,
         "manifest missing competition alignment matrix",

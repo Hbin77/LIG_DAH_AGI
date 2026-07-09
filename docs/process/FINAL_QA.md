@@ -19,6 +19,7 @@ python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
+python3 -m src.experiments.operator_alerts
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
@@ -59,13 +60,14 @@ mission_impact_decomposition rows: 35 components=5
 aura_coa_cards rows: 15
 battle_timeline rows: 49
 incident_summary rows: 10
+operator_alerts rows: 56 actions=5
 competition_alignment_matrix rows: 10 verified
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 134
+package_zip entries: 137
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

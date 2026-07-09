@@ -175,7 +175,8 @@ Metrics
 10. PACE 전환의 reason, target link, 공격 context, recovery instability tradeoff를 감사한다.
 11. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
 12. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-13. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+13. TSRA-R 방어 이벤트는 operator alert로도 해석 가능해야 한다.
+14. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 

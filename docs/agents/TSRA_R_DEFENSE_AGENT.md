@@ -211,6 +211,52 @@ outputs/report_tables/mission_impact_decomposition.csv
 outputs/report_tables/mission_impact_decomposition.md
 ```
 
+## 11. Operator Alerts
+
+TSRA-R은 `DefenseEvent`만 남기는 데서 끝나지 않는다.
+
+방어 이벤트를 사람이 읽는 운영 알림으로 변환하는 산출물을 둔다.
+
+실행:
+
+```bash
+python3 -m src.experiments.operator_alerts
+```
+
+산출물:
+
+```text
+outputs/report_tables/operator_alerts.csv
+outputs/report_tables/operator_alerts.md
+```
+
+각 alert에는 다음이 들어간다.
+
+```text
+severity
+operator_alert
+mission_rationale
+expected_operator_response
+related_attack_context
+metric snapshot
+decision_trace_reason
+```
+
+현재 포함 action:
+
+```text
+ml_attack_alert
+pace_switch
+priority_reroute
+stale_badge
+video_throttle
+```
+
+주의:
+
+- 실제 운용 지시가 아니라 폐쇄형 시뮬레이션 알림이다.
+- RF, exploit, live network action은 포함하지 않는다.
+
 해석:
 
 - `priority_reroute`를 제거하면 priority inversion이 크게 증가한다. 이 액션은 critical traffic 보호의 핵심이다.

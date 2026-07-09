@@ -39,10 +39,10 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 ### A03 Defense architecture
 
 - Goal: Tie detection, blocking, and recovery directly to the AURA attack effects.
-- Mechanism: TSRA-R selects priority reroute, stale badge, video throttle, and PACE switch actions; ablation isolates which action protects which mission metric, and PACE transition audit explains fallback switching context.
-- Evidence: src/tsra_r/rule_defender.py | src/tsra_r/ml_defender.py | src/tsra_r/adaptive_defender.py | src/experiments/pace_transition_audit.py | outputs/batch/tsra_action_ablation_summary.csv | outputs/report_tables/pace_transition_audit.csv
+- Mechanism: TSRA-R selects priority reroute, stale badge, video throttle, and PACE switch actions; ablation isolates which action protects which mission metric, and PACE transition audit explains fallback switching context; operator alerts translate DefenseEvent records into mission-readable response guidance.
+- Evidence: src/tsra_r/rule_defender.py | src/tsra_r/ml_defender.py | src/tsra_r/adaptive_defender.py | src/experiments/pace_transition_audit.py | src/experiments/operator_alerts.py | outputs/batch/tsra_action_ablation_summary.csv | outputs/report_tables/pace_transition_audit.csv | outputs/report_tables/operator_alerts.csv
 - Status: verified
-- Notes: outputs/batch/tsra_action_ablation_summary.csv rows=5; outputs/report_tables/pace_transition_audit.csv rows=6
+- Notes: outputs/batch/tsra_action_ablation_summary.csv rows=5; outputs/report_tables/pace_transition_audit.csv rows=6; outputs/report_tables/operator_alerts.csv rows=56
 - Next gate: Defense changes must be checked against mission impact plus at least one action-specific metric.
 
 ### A04 AI agent architecture

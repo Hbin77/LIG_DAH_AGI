@@ -970,7 +970,62 @@ components: critical_latency, trusted_stale_exposure, priority_inversion,
 - E5/E7 방어 조건에서는 trusted stale exposure와 priority inversion은 낮아졌지만, PACE 복구 전환 비용이 recovery instability 성분으로 남는다.
 - 따라서 TSRA-R의 가치는 단순히 raw stale을 없애는 것이 아니라, 지휘소가 stale COP를 최신으로 믿는 위험을 줄이고 critical traffic을 보호하는 데 있다.
 
-## P19. 제출 직전 브랜치/패키지 동결
+## P19. Operator Alerts
+
+상태: 완료
+
+문제:
+
+- `defense_events.jsonl`은 기계가 읽기 좋은 이벤트 로그지만, 사람이 즉시 이해하기에는 action과 details가 짧다.
+- TSRA-R이 어떤 방어를 왜 냈고 운영자가 무엇을 주의해야 하는지 한 줄 알림으로 볼 산출물이 필요하다.
+- 방어 이벤트를 mission metric, related attack context, trace reason과 연결하면 방어 에이전트의 출력이 더 명확해진다.
+
+구현:
+
+```text
+src/experiments/operator_alerts.py
+outputs/report_tables/operator_alerts.csv
+outputs/report_tables/operator_alerts.md
+```
+
+구현 방식:
+
+- E5/E7 `defense_events.jsonl`을 읽는다.
+- 같은 시점의 `metric_snapshots.jsonl`과 `tsra_r_decision_traces.jsonl`을 붙인다.
+- active/recent/near-future attack context를 `attack_events.jsonl`에서 추론한다.
+- 각 방어 action을 severity, operator alert, mission rationale, expected operator response로 변환한다.
+- 실제 운용 지시가 아니라 폐쇄형 시뮬레이션 알림임을 safety boundary로 명시한다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.operator_alerts` 명령으로 재생성 가능하다.
+- 완료. E5/E7 방어 이벤트 56개가 operator alert로 변환된다.
+- 완료. 핵심 action `ml_attack_alert`, `pace_switch`, `priority_reroute`, `stale_badge`, `video_throttle`이 모두 포함된다.
+- 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.operator_alerts
+```
+
+검증 결과:
+
+```text
+operator_alerts.csv: 56 alerts
+E5 alerts: 23
+E7 alerts: 33
+actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
+severity: high, medium
+```
+
+해석:
+
+- 이 산출물은 TSRA-R의 방어 이벤트를 operator-facing 출력으로 바꾼다.
+- 방어 담당이 새 action을 추가하면 alert 문구, mission rationale, expected response도 함께 추가해야 한다.
+- 실제 RF, exploit, live network action 없이 시뮬레이션 방어 판단만 설명한다.
+
+## P20. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

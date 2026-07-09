@@ -129,6 +129,19 @@ This writes:
 
 The incident summary condenses the battle timeline into attack-anchored incident windows with defense response, mission impact movement, residual risk, outcome, and safety boundary.
 
+## Generate Operator Alerts
+
+```bash
+python3 -m src.experiments.operator_alerts
+```
+
+This writes:
+
+- `outputs/report_tables/operator_alerts.csv`
+- `outputs/report_tables/operator_alerts.md`
+
+The alert table translates TSRA-R `DefenseEvent` records into closed-simulation operator alerts with severity, mission rationale, expected operator response, related attack context, and metric snapshot.
+
 ## Validate Agent Event Contracts
 
 ```bash
@@ -431,6 +444,7 @@ python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
+python3 -m src.experiments.operator_alerts
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory

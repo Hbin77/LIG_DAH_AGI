@@ -192,6 +192,23 @@ Replay는 각 active agent/policy에서 `no_op` 판단과 실제 action 판단�
 observe -> memory -> tools -> candidates -> selected_action -> feedback -> reason
 ```
 
+## Operator Alerts
+
+TSRA-R의 `DefenseEvent`와 `DecisionTrace`는 operator-facing alert로도 재구성한다.
+
+```bash
+python3 -m src.experiments.operator_alerts
+```
+
+산출물:
+
+```text
+outputs/report_tables/operator_alerts.csv
+outputs/report_tables/operator_alerts.md
+```
+
+각 alert는 방어 action, severity, mission rationale, expected operator response, related attack context, metric snapshot, trace reason을 연결한다. 이 산출물도 폐쇄형 시뮬레이션 설명이며 실제 RF, exploit, live network action은 포함하지 않는다.
+
 ## 인터페이스 Manifest
 
 에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 계약은 다음 명령으로 생성한다.

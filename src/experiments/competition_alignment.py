@@ -93,7 +93,8 @@ ALIGNMENT_SPECS = [
         implemented_mechanism=(
             "TSRA-R selects priority reroute, stale badge, video throttle, and PACE switch actions; "
             "ablation isolates which action protects which mission metric, and PACE transition audit "
-            "explains fallback switching context."
+            "explains fallback switching context; operator alerts translate DefenseEvent records into "
+            "mission-readable response guidance."
         ),
         agent_or_component="TSRA-R",
         evidence_files=[
@@ -101,13 +102,16 @@ ALIGNMENT_SPECS = [
             "src/tsra_r/ml_defender.py",
             "src/tsra_r/adaptive_defender.py",
             "src/experiments/pace_transition_audit.py",
+            "src/experiments/operator_alerts.py",
             "outputs/batch/tsra_action_ablation_summary.csv",
             "outputs/report_tables/pace_transition_audit.csv",
+            "outputs/report_tables/operator_alerts.csv",
         ],
         next_gate="Defense changes must be checked against mission impact plus at least one action-specific metric.",
         row_checks=[
             RowCountCheck("outputs/batch/tsra_action_ablation_summary.csv", 5),
             RowCountCheck("outputs/report_tables/pace_transition_audit.csv", 6),
+            RowCountCheck("outputs/report_tables/operator_alerts.csv", 50),
         ],
     ),
     AlignmentSpec(

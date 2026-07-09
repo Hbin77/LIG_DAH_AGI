@@ -1191,6 +1191,48 @@ components: 5
 - E5/E7은 priority inversion과 trusted stale exposure를 낮추지만, PACE 전환 비용이 recovery instability로 남는다.
 - 이 표는 TSRA-R이 왜 raw stale 제거기가 아니라 COP 신뢰 위험 완화와 critical traffic 보호 에이전트인지 설명한다.
 
+### 33. Operator Alerts를 추가한 이유
+
+`defense_events.jsonl`은 TSRA-R이 어떤 action을 냈는지 기록하지만, 사람이 바로 이해하는 운영 알림 형태는 아니다. 방어 에이전트가 실제로 유용해 보이려면 action, metric, attack context, trace reason을 묶어 "왜 이 조치가 필요한지"를 설명해야 한다.
+
+구현:
+
+```text
+src/experiments/operator_alerts.py
+outputs/report_tables/operator_alerts.csv
+outputs/report_tables/operator_alerts.md
+```
+
+변환 기준:
+
+```text
+DefenseEvent
+-> severity
+-> operator_alert
+-> mission_rationale
+-> expected_operator_response
+-> related_attack_context
+-> metric snapshot
+```
+
+검증 결과:
+
+```text
+operator_alerts.csv: 56 rows
+E5 alerts: 23
+E7 alerts: 33
+actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
+severity: high, medium
+```
+
+해석:
+
+- `ml_attack_alert`는 ML detector가 reactive defense window를 여는 근거를 보여준다.
+- `priority_reroute`는 critical traffic 보호 이유를 보여준다.
+- `stale_badge`는 COP 객체를 최신으로 신뢰하지 말아야 하는 이유를 보여준다.
+- `pace_switch`는 PACE fallback/reselect와 recovery churn 주의점을 보여준다.
+- 모든 row는 폐쇄형 시뮬레이션 알림이며 실제 RF, exploit, live network action을 포함하지 않는다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:
