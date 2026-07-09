@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 97
-- total_payload_bytes: 2097802
+- payload_file_count: 100
+- total_payload_bytes: 2129522
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 98
-- zip_bytes: 1514747
-- zip_sha256: `765facb52d18a0949932c1454bcaed91742e6f3178bc0cb2a8b2fe77a2af6f4e`
+- zip_file_count: 101
+- zip_bytes: 1522170
+- zip_sha256: `7f566cf62801ab2f8288ea68a69caaf84fd2657f68d21f5768bbcfb68c21f4a5`
 
 ## 포함 파일
 
@@ -86,6 +86,8 @@
 - `outputs/report_tables/aura_coa_cards.md`
 - `outputs/report_tables/battle_timeline.csv`
 - `outputs/report_tables/battle_timeline.md`
+- `outputs/report_tables/incident_summary.csv`
+- `outputs/report_tables/incident_summary.md`
 - `outputs/report_tables/ml_model_comparison.csv`
 - `outputs/report_tables/ml_model_comparison.md`
 - `requirements-gpu.txt`
@@ -106,6 +108,7 @@
 - `src/experiments/__init__.py`
 - `src/experiments/aura_coa_cards.py`
 - `src/experiments/battle_timeline.py`
+- `src/experiments/incident_summary.py`
 - `src/experiments/report_assets.py`
 - `src/experiments/run_adaptive_memory.py`
 - `src/experiments/run_all.py`

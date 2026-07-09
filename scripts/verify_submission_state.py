@@ -27,6 +27,7 @@ REQUIRED_FILES = [
     "src/tsra_r/rule_defender.py",
     "src/tsra_r/adaptive_defender.py",
     "src/experiments/battle_timeline.py",
+    "src/experiments/incident_summary.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
@@ -35,6 +36,7 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_decision_trace_summary.csv",
     "outputs/report_tables/aura_coa_cards.csv",
     "outputs/report_tables/battle_timeline.csv",
+    "outputs/report_tables/incident_summary.csv",
     "outputs/figures/aura_tsra_architecture.png",
     "outputs/figures/batch_resilience_gain.png",
     "outputs/figures/tsra_action_ablation.png",
@@ -139,6 +141,23 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append(f"battle_timeline rows={len(battle_rows)}")
 
+    incident_rows = read_csv("outputs/report_tables/incident_summary.csv")
+    incident_experiments = {row["experiment"] for row in incident_rows}
+    require(
+        incident_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"unexpected incident summary experiments: {sorted(incident_experiments)}",
+    )
+    for experiment in incident_experiments:
+        subset = [row for row in incident_rows if row["experiment"] == experiment]
+        require(3 <= len(subset) <= 5, f"{experiment} should have 3-5 incidents, got {len(subset)}")
+        require(all(row["attack_summary"] for row in subset), f"{experiment} incident missing attack summary")
+        require(all(row["defense_response"] for row in subset), f"{experiment} incident missing defense response")
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in incident_rows),
+        "incident summary missing safety boundary",
+    )
+    checks.append(f"incident_summary rows={len(incident_rows)}")
+
     return checks
 
 
@@ -175,6 +194,7 @@ def check_zip() -> list[str]:
     manifest_text = MANIFEST_PATH.read_text(encoding="utf-8")
     require("zip_sha256" in manifest_text, "manifest missing zip_sha256")
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
+    require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
     return [f"package_zip entries={len(names)}", "package exclusions=passed"]
 
 

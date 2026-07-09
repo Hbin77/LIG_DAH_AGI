@@ -457,8 +457,8 @@ python3 scripts/build_submission_package.py
 결과:
 
 ```text
-payload_file_count: 97
-zip_file_count: 98
+payload_file_count: 100
+zip_file_count: 101
 zip_bytes: about 1.5MB
 excluded __pycache__: 0
 excluded outputs/tmp*: 0
@@ -584,6 +584,50 @@ origin main/hbin refs: present
 - 현재 산출물은 README 기준으로 재현 가능하다.
 - ZIP에는 코드, 문서, 요약 CSV, figure, report table, model metric JSON이 들어간다.
 - ZIP에는 실제 공격 도구, RF 운용 파라미터, exploit, live network action이 들어가지 않는다.
+
+### 18. Incident Summary를 추가한 이유
+
+Battle Timeline은 상세하지만 한 행에 담긴 정보가 많다. 운영자 관점에서는 "공격 하나가 발생했고, 방어자가 어떻게 대응했고, metric이 어떻게 움직였는가"를 incident 단위로 보는 산출물이 필요하다.
+
+그래서 attack event를 기준으로 timeline window를 묶는 incident summary 생성기를 추가했다.
+
+구현:
+
+```text
+src/experiments/incident_summary.py
+outputs/report_tables/incident_summary.csv
+outputs/report_tables/incident_summary.md
+```
+
+요약 기준:
+
+- AURA attack event를 incident 시작점으로 둔다.
+- 다음 attack event 전까지의 TSRA-R defense event를 같은 incident window로 묶는다.
+- mission impact, critical latency, trusted stale exposure, priority inversion의 peak/end 값을 계산한다.
+- 잔여 위험과 결과를 incident 단위로 표시한다.
+- 모든 행에 closed simulation safety boundary를 남긴다.
+
+검증:
+
+```text
+python3 -m compileall src
+python3 -m src.experiments.incident_summary
+```
+
+결과:
+
+```text
+incident_summary.csv: 10 rows
+E5 incidents: 5
+E7 incidents: 5
+safety boundary missing: 0
+```
+
+해석:
+
+- E5는 rule AURA/rule TSRA-R 공방 incident를 5개로 요약한다.
+- E7은 ML AURA/ML TSRA-R 공방 incident를 5개로 요약한다.
+- 이 산출물은 상세 timeline보다 상위 관점에서 공격-방어 결과를 설명하는 데 쓰인다.
 
 ## 최신 핵심 결과
 

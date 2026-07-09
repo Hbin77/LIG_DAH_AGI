@@ -43,8 +43,8 @@ outputs/package/submission_manifest.md
 패키지 생성 검증:
 
 ```text
-payload_file_count: 97
-zip_file_count: 98
+payload_file_count: 100
+zip_file_count: 101
 zip_bytes: 약 1.5MB
 ```
 

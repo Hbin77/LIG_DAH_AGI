@@ -295,6 +295,32 @@ origin/main: present
 origin/hbin: present
 ```
 
+### P7. Incident Summary 자동 생성
+
+상태: 완료
+
+목적:
+
+- 상세 battle timeline을 incident 단위로 압축한다.
+- 공격, 방어 대응, metric 변화, 잔여 위험, 결과를 한 행으로 요약한다.
+
+산출물:
+
+```text
+src/experiments/incident_summary.py
+outputs/report_tables/incident_summary.csv
+outputs/report_tables/incident_summary.md
+```
+
+검증 결과:
+
+```text
+incident summary rows: 10
+E5 incidents: 5
+E7 incidents: 5
+safe boundary: closed simulation only
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

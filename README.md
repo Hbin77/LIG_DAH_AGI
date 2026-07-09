@@ -116,6 +116,19 @@ This writes:
 
 The battle timeline merges AURA attack events, TSRA-R defense events, DecisionTrace reasons, and metric snapshots for E5 and E7 on the same event-time axis.
 
+## Generate Incident Summary
+
+```bash
+python3 -m src.experiments.incident_summary
+```
+
+This writes:
+
+- `outputs/report_tables/incident_summary.csv`
+- `outputs/report_tables/incident_summary.md`
+
+The incident summary condenses the battle timeline into attack-anchored incident windows with defense response, mission impact movement, residual risk, outcome, and safety boundary.
+
 ## Generate AURA COA Cards
 
 ```bash
@@ -269,6 +282,7 @@ python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.battle_timeline
+python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory

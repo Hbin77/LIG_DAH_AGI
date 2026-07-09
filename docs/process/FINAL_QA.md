@@ -36,12 +36,13 @@ adaptive_memory_summary conditions: full_tsra_r, adaptive_tsra_r
 agent_decision_trace_summary rows: 215
 aura_coa_cards rows: 15
 battle_timeline rows: 46
+incident_summary rows: 10
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 98
+package_zip entries: 101
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

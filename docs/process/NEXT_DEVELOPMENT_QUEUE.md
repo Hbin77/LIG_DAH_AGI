@@ -261,8 +261,8 @@ python3 scripts/build_submission_package.py
 검증 결과:
 
 ```text
-payload_file_count: 97
-zip_file_count: 98
+payload_file_count: 100
+zip_file_count: 101
 zip_bytes: 약 1.5MB
 excluded __pycache__: 0
 excluded outputs/tmp*: 0
@@ -354,7 +354,8 @@ resilience_gain_summary rows: 4
 agent_decision_trace_summary rows: 215
 aura_coa_cards rows: 15
 battle_timeline rows: 46
-package_zip entries: 98
+incident_summary rows: 10
+package_zip entries: 101
 package exclusions: passed
 branch: hbin
 origin main/hbin refs: present
@@ -362,13 +363,21 @@ origin main/hbin refs: present
 
 ## P7. Incident Summary 자동 생성
 
-상태: 다음 작업
+상태: 완료
 
 문제:
 
 - 공방 timeline은 상세하지만, 지휘관/운영자 관점의 incident summary는 아직 별도 산출물로 없다.
 
-구현 방향:
+구현:
+
+```text
+src/experiments/incident_summary.py
+outputs/report_tables/incident_summary.csv
+outputs/report_tables/incident_summary.md
+```
+
+구현 방식:
 
 - battle timeline에서 핵심 사건을 묶어 incident summary Markdown/CSV를 생성한다.
 - 공격 단계, 방어 대응, metric 변화, 잔여 위험을 incident 단위로 요약한다.
@@ -376,9 +385,46 @@ origin main/hbin refs: present
 
 완료 기준:
 
-- `python3 -m src.experiments.<incident_summary_tool>` 형태로 재생성 가능하다.
-- E5/E7 각각의 핵심 incident가 3~5개 단위로 요약된다.
-- AURA/TSRA-R의 판단 이유와 metric 변화가 incident summary에 연결된다.
+- 완료. `python3 -m src.experiments.incident_summary` 형태로 재생성 가능하다.
+- 완료. E5/E7 각각의 핵심 incident가 5개 단위로 요약된다.
+- 완료. AURA/TSRA-R의 판단 이유와 metric 변화가 incident summary에 연결된다.
+
+검증:
+
+```bash
+python3 -m compileall src
+python3 -m src.experiments.incident_summary
+```
+
+검증 결과:
+
+```text
+incident_summary.csv: 10 rows
+E5 incidents: 5
+E7 incidents: 5
+safety boundary missing: 0
+```
+
+## P8. 제출 직전 브랜치/패키지 동결
+
+상태: 다음 작업
+
+문제:
+
+- 기능 산출물은 준비됐지만, 제출 직전에는 새 기능 추가보다 ZIP 업로드, 링크 권한, 브랜치 상태 확인이 더 중요하다.
+
+구현 방향:
+
+- `python3 scripts/build_submission_package.py`
+- `python3 scripts/verify_submission_state.py --require-clean`
+- ZIP SHA-256 확인
+- 외부 클라우드 업로드 후 비로그인 다운로드 검증
+
+완료 기준:
+
+- `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`가 최신 manifest와 일치한다.
+- 외부 제출 링크가 비로그인 환경에서 다운로드된다.
+- `origin/main`은 유지되고 `origin/hbin`만 최신 개발 커밋을 가리킨다.
 
 ## 진행 원칙
 
