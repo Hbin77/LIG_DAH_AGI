@@ -2519,3 +2519,29 @@ positive_reductions: 5
 ```
 
 이 보강의 의미는 AURA-ML이 단순히 attack event 5개를 만든 것이 아니라, AgentRuntime tool path와 scoring formula, memory gate, post-action feedback을 갖춘 공격 에이전트로 검증된다는 점이다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+### 63. ML Red-Blue Interaction Audit를 추가한 이유
+
+ML attack decision path와 ML defense decision path는 각각 공격 에이전트와 방어 에이전트의 내부 판단 흐름을 증명한다. 하지만 E7 전체를 보면 더 중요한 질문은 "AURA-ML이 고른 공격이 TSRA-R-ML의 probability/window/alert/core defense로 같은 response window 안에서 이어졌는가"다.
+
+그래서 `src/experiments/ml_red_blue_interaction_audit.py`를 추가했다. 이 감사는 E7의 AURA trace, TSRA-R trace, attack event, defense event, coordination latency audit를 한 row로 묶는다.
+
+검증 결과는 다음과 같다.
+
+```text
+ml_red_blue_interaction_audit rows: 5
+interaction_status: pass=5
+interaction_class:
+  ml_triggered_after_attack=1
+  active_window_immediate_core_defense=2
+  active_window_bounded_refresh=2
+first_ml_alert_latency_sec: 20 for all rows
+first_core_defense_latency_sec <= 20 for all rows
+impact_reduction_from_peak > 0 for all rows
+```
+
+해석:
+
+- 첫 E7 공격은 AURA-ML 선택 이후 TSRA-R-ML이 20초 뒤 probability threshold를 넘고 alert/core defense를 낸다.
+- 이후 공격들은 이미 열린 ML defense window 안에서 즉시 또는 10초 안에 core defense로 이어진다.
+- 이 산출물은 "공격 에이전트"와 "방어 에이전트"가 각각 존재한다는 수준을 넘어, 같은 closed-loop episode 안에서 서로 맞물려 작동했다는 증거다.

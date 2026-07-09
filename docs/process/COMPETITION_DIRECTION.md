@@ -1099,6 +1099,20 @@ AURA-ML은 공격 event를 만드는 코드만으로는 부족하다. 대회 방
 
 이 방향은 공격 에이전트를 "공격 실행기"가 아니라 mission-impact simulator 안에서 판단, 기억, 도구 호출, 사후 feedback을 갖춘 AI 에이전트로 증명하는 쪽이다. 실제 RF, exploit, live network 동작은 계속 배제한다.
 
+### P40. ML Red-Blue Interaction Audit
+
+공격 path와 방어 path를 따로 보여주는 것만으로는 공방형 AI 구조의 마지막 연결이 약하다. 핵심은 AURA-ML이 선택한 공격이 TSRA-R-ML의 probability, active defense window, ML alert, core defense action, coordination outcome으로 같은 episode 안에서 이어지는지다.
+
+이번 보강은 `ml_red_blue_interaction_audit`로 다음 흐름을 검증한다.
+
+- AURA-ML selected attack trace와 attack event가 연결된다.
+- TSRA-R-ML probability가 response window 안에서 threshold를 넘는다.
+- ML alert와 core defense action이 bounded latency 안에 발생한다.
+- interaction class가 첫 탐지형과 active-window refresh형으로 나뉜다.
+- coordination audit의 positive reduction과 연결된다.
+
+이 방향은 "공격 에이전트와 방어 에이전트를 따로 만들었다"에서 끝나지 않고, 두 에이전트가 같은 폐쇄형 시뮬레이션 episode 안에서 상호작용했다는 증거를 남기는 쪽이다.
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

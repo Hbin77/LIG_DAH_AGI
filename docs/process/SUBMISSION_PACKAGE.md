@@ -33,7 +33,7 @@ outputs/package/release_handoff.md
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
-- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent goal alignment audit, agent decision feedback audit, agent memory belief audit, agent memory influence audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent coordination latency audit, mission thread summary, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, defense action attribution audit, mission impact decomposition, metric gate, ML contribution audit, ML attack decision path audit, ML defense decision path audit, reactive defense tradeoff audit, ML threshold sweep, TSRA detector calibration audit, safety boundary audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
+- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent goal alignment audit, agent decision feedback audit, agent memory belief audit, agent memory influence audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent coordination latency audit, mission thread summary, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, defense action attribution audit, mission impact decomposition, metric gate, ML contribution audit, ML attack decision path audit, ML defense decision path audit, ML red-blue interaction audit, reactive defense tradeoff audit, ML threshold sweep, TSRA detector calibration audit, safety boundary audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
 - `outputs/models/*_metrics.json`
 
 ## 제외하는 것
@@ -64,6 +64,7 @@ metric_gate_summary: included
 ml_contribution_audit: included
 ml_attack_decision_path_audit: included
 ml_defense_decision_path_audit: included
+ml_red_blue_interaction_audit: included
 reactive_defense_tradeoff_audit: included
 ml_threshold_sweep: included
 tsra_detector_calibration_audit: included

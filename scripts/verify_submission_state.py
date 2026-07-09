@@ -65,6 +65,7 @@ REQUIRED_FILES = [
     "src/experiments/ml_contribution_audit.py",
     "src/experiments/ml_attack_decision_path_audit.py",
     "src/experiments/ml_defense_decision_path_audit.py",
+    "src/experiments/ml_red_blue_interaction_audit.py",
     "src/experiments/reactive_defense_tradeoff_audit.py",
     "src/experiments/tsra_detector_calibration_audit.py",
     "src/experiments/safety_boundary_audit.py",
@@ -141,6 +142,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/ml_attack_decision_path_audit.md",
     "outputs/report_tables/ml_defense_decision_path_audit.csv",
     "outputs/report_tables/ml_defense_decision_path_audit.md",
+    "outputs/report_tables/ml_red_blue_interaction_audit.csv",
+    "outputs/report_tables/ml_red_blue_interaction_audit.md",
     "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
     "outputs/report_tables/reactive_defense_tradeoff_audit.md",
     "outputs/report_tables/ml_threshold_sweep.csv",
@@ -1136,6 +1139,64 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("ml_defense_decision_path_audit rows=6 pass")
 
+    ml_interaction_rows = read_csv("outputs/report_tables/ml_red_blue_interaction_audit.csv")
+    require(
+        len(ml_interaction_rows) == 5,
+        f"expected 5 ML red-blue interaction rows, got {len(ml_interaction_rows)}",
+    )
+    failed_ml_interactions = [
+        f"{row['attack_event_id']}:{row['interaction_class']}"
+        for row in ml_interaction_rows
+        if row.get("interaction_status") != "pass"
+    ]
+    require(not failed_ml_interactions, f"failed ML red-blue interactions: {failed_ml_interactions[:8]}")
+    require(
+        {row["experiment"] for row in ml_interaction_rows} == {"E7_ml_aura_ml_tsra_r"},
+        "ML red-blue interaction audit must only cover E7 ML-vs-ML episodes",
+    )
+    interaction_classes = {row["interaction_class"] for row in ml_interaction_rows}
+    require(
+        {
+            "ml_triggered_after_attack",
+            "active_window_immediate_core_defense",
+            "active_window_bounded_refresh",
+        }.issubset(interaction_classes),
+        f"ML red-blue interaction audit missing interaction classes: {sorted(interaction_classes)}",
+    )
+    require(
+        all(row["aura_selection_link_status"] == "linked" for row in ml_interaction_rows),
+        "ML red-blue interaction audit has unlinked AURA selections",
+    )
+    require(
+        all(float(row["aura_candidate_count"]) > 0 for row in ml_interaction_rows),
+        "ML red-blue interaction audit has rows without AURA candidates",
+    )
+    require(
+        all(float(row["first_above_threshold_latency_sec"]) <= 20.0 for row in ml_interaction_rows),
+        "ML red-blue interaction audit has slow threshold crossing",
+    )
+    require(
+        all(float(row["first_ml_alert_latency_sec"]) == 20.0 for row in ml_interaction_rows),
+        "ML red-blue interaction audit expected ML alert latency of 20 seconds for each E7 attack",
+    )
+    require(
+        all(float(row["first_core_defense_latency_sec"]) <= 20.0 for row in ml_interaction_rows),
+        "ML red-blue interaction audit has slow core defense response",
+    )
+    require(
+        all(float(row["peak_probability_in_response_window"]) >= 0.75 for row in ml_interaction_rows),
+        "ML red-blue interaction audit has below-threshold peak probability",
+    )
+    require(
+        all(float(row["impact_reduction_from_peak"]) > 0.0 for row in ml_interaction_rows),
+        "ML red-blue interaction audit has no positive post-peak reduction",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in ml_interaction_rows),
+        "ML red-blue interaction audit missing safety boundary",
+    )
+    checks.append("ml_red_blue_interaction_audit rows=5 pass")
+
     tradeoff_rows = read_csv("outputs/report_tables/reactive_defense_tradeoff_audit.csv")
     require(
         len(tradeoff_rows) == 7,
@@ -2013,6 +2074,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/ml_defense_decision_path_audit.md" in manifest_text,
         "manifest missing ML defense decision path audit",
+    )
+    require(
+        "outputs/report_tables/ml_red_blue_interaction_audit.md" in manifest_text,
+        "manifest missing ML red-blue interaction audit",
     )
     require(
         "outputs/report_tables/reactive_defense_tradeoff_audit.md" in manifest_text,

@@ -460,6 +460,19 @@ This writes:
 
 The audit follows the E7 TSRA-R-ML path from anomaly probability to threshold crossing, defense-window opening, alert cooldown, core TSRA-R fanout, memory continuity, and closed-loop coordination effect.
 
+## Audit ML Red-Blue Interaction
+
+```bash
+python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/ml_red_blue_interaction_audit.csv`
+- `outputs/report_tables/ml_red_blue_interaction_audit.md`
+
+The audit links each E7 AURA-ML attack selection to the TSRA-R-ML probability/window response, ML alert, core defense event, and coordination outcome in the same response window.
+
 ## Audit Reactive Defense Tradeoff
 
 ```bash
@@ -804,6 +817,7 @@ python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.ml_contribution_audit --fail-on-error
 python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
 python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
 python3 -m src.experiments.run_ml_threshold_sweep
 python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error

@@ -202,7 +202,9 @@ ALIGNMENT_SPECS = [
             "whether required defenses are active or emitted within the response window; the collaboration "
             "graph summarizes the closed-loop agent cooperation evidence; episode replay joins attack, "
             "defense, alert, and metric movement per attack event; coordination latency audit checks "
-            "response, operator alert, metric peak, and reduction timing per attack; the defense effectiveness ledger "
+            "response, operator alert, metric peak, and reduction timing per attack; ML red-blue interaction "
+            "audit links each E7 AURA-ML selection to TSRA-R-ML probability, alert, core defense, "
+            "and coordination outcome; the defense effectiveness ledger "
             "adds event-level response-to-metric movement evidence; engagement scorecard joins attack "
             "decision margin, defense response, and mission-impact movement per attack; defense action "
             "attribution summarizes which defense actions have direct ablation support, local metric "
@@ -224,6 +226,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/defense_action_attribution_audit.py",
             "src/experiments/agent_collaboration_graph.py",
             "src/experiments/agent_coordination_latency_audit.py",
+            "src/experiments/ml_red_blue_interaction_audit.py",
             "src/experiments/attack_defense_coverage.py",
             "src/experiments/attack_defense_response_audit.py",
             "outputs/report_tables/battle_timeline.csv",
@@ -235,6 +238,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/defense_action_attribution_audit.csv",
             "outputs/report_tables/agent_collaboration_graph.csv",
             "outputs/report_tables/agent_coordination_latency_audit.csv",
+            "outputs/report_tables/ml_red_blue_interaction_audit.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
             "outputs/report_tables/attack_defense_response_audit.csv",
         ],
@@ -252,6 +256,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/defense_action_attribution_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_coordination_latency_audit.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "ml_triggered_after_attack"),
+            ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "active_window_immediate_core_defense"),
             ContentCheck("outputs/report_tables/attack_defense_coverage.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_response_audit.csv", "closed simulation"),
         ],
@@ -265,6 +271,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/defense_action_attribution_audit.csv", 5),
             RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 13),
             RowCountCheck("outputs/report_tables/agent_coordination_latency_audit.csv", 10),
+            RowCountCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", 5),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
             RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
         ],
@@ -282,6 +289,8 @@ ALIGNMENT_SPECS = [
             "closed-loop attack feedback; "
             "ML defense decision-path audit follows E7 from probability threshold to defense window, "
             "alert cooldown, core action fanout, memory continuity, and coordination effect; "
+            "ML red-blue interaction audit joins AURA-ML attack selection with TSRA-R-ML probability, "
+            "alert, core defense, and coordination outcome per E7 episode; "
             "reactive defense tradeoff audit explains E7's pre-attack suppression, alert overlap, "
             "first-response cost, and bounded mission-impact tradeoff versus E6; threshold sweep "
             "makes the anomaly threshold a measured tuning parameter instead of a hidden constant; "
@@ -296,6 +305,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/ml_contribution_audit.py",
             "src/experiments/ml_attack_decision_path_audit.py",
             "src/experiments/ml_defense_decision_path_audit.py",
+            "src/experiments/ml_red_blue_interaction_audit.py",
             "src/experiments/reactive_defense_tradeoff_audit.py",
             "src/experiments/tsra_detector_calibration_audit.py",
             "outputs/models/aura_impact_model_metrics.json",
@@ -307,6 +317,8 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/ml_attack_decision_path_audit.md",
             "outputs/report_tables/ml_defense_decision_path_audit.csv",
             "outputs/report_tables/ml_defense_decision_path_audit.md",
+            "outputs/report_tables/ml_red_blue_interaction_audit.csv",
+            "outputs/report_tables/ml_red_blue_interaction_audit.md",
             "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
             "outputs/report_tables/reactive_defense_tradeoff_audit.md",
             "outputs/batch/ml_threshold_sweep_summary.csv",
@@ -329,6 +341,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "first_response_latency_sec=20"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "above_threshold_no_event_refresh_traces=22"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "threshold_window_nondecreasing=true"),
+            ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "first_ml_alert_latency_sec"),
+            ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "ml_triggered_after_attack"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_pre_first_defense_events=0"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "active_attack_overlap=9"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_minus_e6=0.0167761"),
@@ -342,6 +356,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7),
             RowCountCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", 6),
             RowCountCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", 6),
+            RowCountCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", 5),
             RowCountCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", 7),
             RowCountCheck("outputs/batch/ml_threshold_sweep_summary.csv", 5),
             RowCountCheck("outputs/report_tables/tsra_detector_calibration_audit.csv", 6),

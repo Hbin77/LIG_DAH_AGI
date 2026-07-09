@@ -2532,3 +2532,56 @@ positive_reductions: 5
 - no-op, cooldown, max-event gate가 있어 무조건 공격하지 않는 에이전트 구조를 유지한다.
 - 선택된 attack event는 closed-loop defense response와 metric feedback까지 연결된다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+## P50. ML Red-Blue Interaction Audit
+
+상태: 완료
+
+문제:
+
+- ML attack path와 ML defense path가 각각은 검증됐지만, E7 episode 안에서 AURA-ML 선택과 TSRA-R-ML 반응이 한 row로 직접 연결되지는 않았다.
+- 공방형 AI 에이전트 구조를 더 강하게 보이려면 attack selection trace, probability threshold, ML alert, core defense, coordination outcome을 같은 response window 안에서 묶어야 한다.
+
+구현:
+
+```text
+src/experiments/ml_red_blue_interaction_audit.py
+outputs/report_tables/ml_red_blue_interaction_audit.csv
+outputs/report_tables/ml_red_blue_interaction_audit.md
+```
+
+검증 기준:
+
+- E7 attack event 5개를 모두 포함한다.
+- 각 row는 AURA-ML trace와 attack event가 score/time/type/link 기준으로 연결되어야 한다.
+- 각 row는 TSRA-R-ML probability가 response window 안에서 threshold 이상이어야 한다.
+- 각 row는 ML alert latency 20초를 가져야 한다.
+- 각 row는 core defense latency 20초 이하를 가져야 한다.
+- 각 row는 coordination latency audit에서 pass이고 positive impact reduction을 가져야 한다.
+- interaction class는 `ml_triggered_after_attack`, `active_window_immediate_core_defense`, `active_window_bounded_refresh`를 모두 포함해야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+ml_red_blue_interaction_audit rows: 5
+interaction_status: pass=5
+ml_triggered_after_attack: 1
+active_window_immediate_core_defense: 2
+active_window_bounded_refresh: 2
+first_ml_alert_latency_sec: 20 for all rows
+first_core_defense_latency_sec <= 20 for all rows
+impact_reduction_from_peak > 0 for all rows
+```
+
+해석:
+
+- E7은 AURA-ML과 TSRA-R-ML이 따로 존재하는 데서 끝나지 않고, attack episode 단위로 서로 반응하는 구조를 가진다.
+- 첫 공격은 ML detection이 새로 열리는 케이스이고, 이후 공격들은 이미 열린 defense window가 유지/refresh되는 케이스다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
