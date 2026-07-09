@@ -1691,6 +1691,51 @@ freeze_status: pass
 - 외부 링크 verifier가 `status: pass`를 출력한다.
 - `origin/main`은 유지되고 `origin/hbin`만 최신 개발 커밋을 가리킨다.
 
+## P33. Agent Decision Margin Audit
+
+상태: 완료
+
+문제:
+
+- 기존 causality audit은 선택이 후보, 도구, 점수/threshold와 맞는지 확인한다.
+- 하지만 심사자가 보기에는 "얼마나 확실하게 그 행동을 골랐는가"가 별도 증거로 있으면 에이전트 판단 구조가 더 설득력 있다.
+
+구현:
+
+```text
+src/experiments/agent_decision_margin_audit.py
+outputs/report_tables/agent_decision_margin_audit.csv
+outputs/report_tables/agent_decision_margin_audit.md
+```
+
+검증 내용:
+
+- AURA selected score와 runner-up score 차이
+- AURA attack threshold 대비 margin
+- TSRA-R eligible/ready defense action count
+- TSRA-R-ML anomaly probability와 threshold margin
+- no-op 판단 근거
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_decision_margin_audit
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_decision_margin_audit rows: 399
+margin_status: pass=399
+safety boundary: closed simulation only
+```
+
+해석:
+
+- AgentRuntime의 DecisionTrace가 단순 로그가 아니라 선택 확신도와 no-op 근거까지 설명하는 evidence가 됐다.
+- AURA/TSRA-R 양쪽 모두 같은 audit schema에서 비교된다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

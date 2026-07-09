@@ -127,7 +127,8 @@ ALIGNMENT_SPECS = [
             "DecisionTrace, and feedback updates; memory belief audit verifies evolving belief state "
             "and previous-action carryover across decision loops; tool usage audit verifies actual "
             "tool invocations with input and output summaries; causality audit verifies selected "
-            "actions against candidate, tool, and score/threshold evidence."
+            "actions against candidate, tool, and score/threshold evidence; margin audit records "
+            "top-score, threshold, eligible-ready, and no-op decision support."
         ),
         agent_or_component="AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace",
         evidence_files=[
@@ -139,6 +140,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/trace_quality_audit.py",
             "src/experiments/agent_loop_replay.py",
             "src/experiments/agent_decision_causality_audit.py",
+            "src/experiments/agent_decision_margin_audit.py",
             "src/experiments/agent_memory_belief_audit.py",
             "src/experiments/agent_tool_usage_audit.py",
             "src/experiments/agent_interface_manifest.py",
@@ -148,6 +150,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/decision_trace_quality_audit.csv",
             "outputs/report_tables/agent_loop_replay.csv",
             "outputs/report_tables/agent_decision_causality_audit.csv",
+            "outputs/report_tables/agent_decision_margin_audit.csv",
             "outputs/report_tables/agent_memory_belief_audit.csv",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             "outputs/report_tables/agent_interface_manifest.csv",
@@ -162,6 +165,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
             RowCountCheck("outputs/report_tables/agent_decision_causality_audit.csv", 399),
+            RowCountCheck("outputs/report_tables/agent_decision_margin_audit.csv", 399),
             RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 23),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),

@@ -207,6 +207,19 @@ This writes:
 
 The audit verifies that selected actions are supported by candidate actions, tool calls, and score or threshold evidence inside `DecisionTrace` records.
 
+## Audit Agent Decision Margin
+
+```bash
+python3 -m src.experiments.agent_decision_margin_audit
+```
+
+This writes:
+
+- `outputs/report_tables/agent_decision_margin_audit.csv`
+- `outputs/report_tables/agent_decision_margin_audit.md`
+
+The audit records top-score margins, threshold margins, eligible/ready defense counts, and no-op basis so each agent action has quantitative decision support.
+
 ## Audit Agent Memory Belief State
 
 ```bash
@@ -571,6 +584,7 @@ python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
 python3 -m src.experiments.agent_decision_causality_audit
+python3 -m src.experiments.agent_decision_margin_audit
 python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest

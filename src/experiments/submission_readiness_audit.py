@@ -125,6 +125,7 @@ def build_rows() -> list[dict[str, str]]:
         "quality": count_csv_rows("outputs/report_tables/decision_trace_quality_audit.csv"),
         "loop": count_csv_rows("outputs/report_tables/agent_loop_replay.csv"),
         "causality": count_csv_rows("outputs/report_tables/agent_decision_causality_audit.csv"),
+        "margin": count_csv_rows("outputs/report_tables/agent_decision_margin_audit.csv"),
         "memory": count_csv_rows("outputs/report_tables/agent_memory_belief_audit.csv"),
         "tool": count_csv_rows("outputs/report_tables/agent_tool_usage_audit.csv"),
     }
@@ -163,6 +164,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.ml.build_dataset",
         "python3 -m src.experiments.run_all",
         "python3 -m src.experiments.agent_decision_causality_audit",
+        "python3 -m src.experiments.agent_decision_margin_audit",
         "python3 -m src.experiments.run_batch",
         "python3 scripts/build_submission_package.py",
         "python3 scripts/verify_submission_state.py",
@@ -251,6 +253,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/decision_trace_quality_audit.csv",
                 "outputs/report_tables/agent_loop_replay.csv",
                 "outputs/report_tables/agent_decision_causality_audit.csv",
+                "outputs/report_tables/agent_decision_margin_audit.csv",
                 "outputs/report_tables/agent_memory_belief_audit.csv",
                 "outputs/report_tables/agent_tool_usage_audit.csv",
             ],
@@ -261,6 +264,7 @@ def build_rows() -> list[dict[str, str]]:
                 and decision_counts["quality"] == 9
                 and decision_counts["loop"] == 8
                 and decision_counts["causality"] == 399
+                and decision_counts["margin"] == 399
                 and decision_counts["memory"] == 9
                 and decision_counts["tool"] == 23
             ),

@@ -216,6 +216,29 @@ outputs/report_tables/agent_decision_causality_audit.md
 - TSRA-R-ML probability threshold support
 - no-op 선택 근거
 
+## Decision Margin Audit
+
+DecisionTrace의 선택이 단순히 유효한지뿐 아니라 얼마나 강한 근거를 가졌는지 확인한다.
+
+```bash
+python3 -m src.experiments.agent_decision_margin_audit
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_decision_margin_audit.csv
+outputs/report_tables/agent_decision_margin_audit.md
+```
+
+감사 항목:
+
+- AURA selected score와 runner-up score 차이
+- AURA attack threshold 대비 margin
+- TSRA-R eligible/ready defense action count
+- TSRA-R-ML anomaly probability와 threshold margin
+- no-op 판단의 근거
+
 ## Memory/Belief Audit
 
 AgentMemory가 단순 필드가 아니라 다음 판단에 이어지는 loop state인지 확인한다.

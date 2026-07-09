@@ -43,6 +43,7 @@ REQUIRED_FILES = [
     "src/experiments/trace_quality_audit.py",
     "src/experiments/agent_loop_replay.py",
     "src/experiments/agent_decision_causality_audit.py",
+    "src/experiments/agent_decision_margin_audit.py",
     "src/experiments/agent_memory_belief_audit.py",
     "src/experiments/agent_tool_usage_audit.py",
     "src/experiments/agent_interface_manifest.py",
@@ -81,6 +82,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_loop_replay.md",
     "outputs/report_tables/agent_decision_causality_audit.csv",
     "outputs/report_tables/agent_decision_causality_audit.md",
+    "outputs/report_tables/agent_decision_margin_audit.csv",
+    "outputs/report_tables/agent_decision_margin_audit.md",
     "outputs/report_tables/agent_memory_belief_audit.csv",
     "outputs/report_tables/agent_memory_belief_audit.md",
     "outputs/report_tables/agent_tool_usage_audit.csv",
@@ -325,6 +328,43 @@ def check_csv_outputs() -> list[str]:
         "decision causality audit missing safety boundary",
     )
     checks.append("agent_decision_causality_audit rows=399 pass")
+
+    margin_rows = read_csv("outputs/report_tables/agent_decision_margin_audit.csv")
+    require(
+        len(margin_rows) == 399,
+        f"expected 399 decision margin rows, got {len(margin_rows)}",
+    )
+    failed_margin = [
+        f"{row['experiment']}:{row['trace_id']}:{row['agent']}"
+        for row in margin_rows
+        if row.get("margin_status") != "pass"
+    ]
+    require(not failed_margin, f"failed decision margin rows: {failed_margin[:8]}")
+    require(
+        {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"}.issubset({row["agent"] for row in margin_rows}),
+        "decision margin audit missing attack/defense agent variants",
+    )
+    require(
+        {"no_op", "attack_event", "defense_events"}.issubset({row["selected_type"] for row in margin_rows}),
+        "decision margin audit missing selected action types",
+    )
+    require(
+        any(row["selection_margin"] not in ("", None) for row in margin_rows),
+        "decision margin audit has no selection margin evidence",
+    )
+    require(
+        any(row["threshold_margin"] not in ("", None) for row in margin_rows),
+        "decision margin audit has no threshold margin evidence",
+    )
+    require(
+        any(row["no_op_basis"] not in ("", None) for row in margin_rows),
+        "decision margin audit has no no-op basis evidence",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in margin_rows),
+        "decision margin audit missing safety boundary",
+    )
+    checks.append("agent_decision_margin_audit rows=399 pass")
 
     memory_rows = read_csv("outputs/report_tables/agent_memory_belief_audit.csv")
     require(
@@ -1033,6 +1073,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_decision_causality_audit.md" in manifest_text,
         "manifest missing agent decision causality audit",
+    )
+    require(
+        "outputs/report_tables/agent_decision_margin_audit.md" in manifest_text,
+        "manifest missing agent decision margin audit",
     )
     require(
         "outputs/report_tables/agent_memory_belief_audit.md" in manifest_text,

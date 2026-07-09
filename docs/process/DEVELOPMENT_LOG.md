@@ -1855,3 +1855,39 @@ freeze_status: pass
 
 - 같은 파일 payload라면 같은 ZIP SHA가 나온다.
 - 커밋 후 `--require-clean` 검증이 package rebuild 때문에 실패하지 않는다.
+
+### 46. Agent Decision Margin Audit를 추가한 이유
+
+기존 `agent_decision_causality_audit.py`는 selected action이 candidate, tool, score 또는 threshold 근거와 일치하는지 확인했다. 이번 변경은 거기서 한 단계 더 나아가, 선택이 얼마나 강한 근거를 가졌는지 별도 산출물로 남긴다.
+
+추가한 것:
+
+```text
+src/experiments/agent_decision_margin_audit.py
+outputs/report_tables/agent_decision_margin_audit.csv
+outputs/report_tables/agent_decision_margin_audit.md
+```
+
+검증 항목:
+
+```text
+AURA selected score vs runner-up score
+AURA attack threshold margin
+TSRA-R eligible/ready defense action count
+TSRA-R-ML anomaly probability threshold margin
+no-op decision basis
+```
+
+검증 결과:
+
+```text
+agent_decision_margin_audit rows: 399
+margin_status: pass=399
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+```
+
+해석:
+
+- 이제 DecisionTrace는 "무엇을 골랐다"뿐 아니라 "얼마나 확실하게 골랐다"를 보여준다.
+- no-op도 무행동이 아니라 threshold, cooldown, active window, eligible/ready 조건에 의해 설명된다.
+- 실제 공격 도구나 live network action은 추가하지 않고 closed simulation evidence만 강화했다.

@@ -660,7 +660,7 @@ outputs/report_tables/submission_readiness_audit.md
 ```text
 submission_readiness_audit rows: 10 pass
 agent_collaboration_graph edges: 17 verified
-package_zip entries: 162
+package_zip entries: 165
 package_manifest_integrity: passed
 release_handoff: repo-only/current
 branch: hbin
@@ -764,6 +764,33 @@ scripts/build_submission_package.py
 repeated freeze zip_sha256: stable
 package_manifest_integrity: passed
 package_zip_metadata: deterministic
+```
+
+### P23. Agent Decision Margin Audit
+
+상태: 완료
+
+목적:
+
+- AgentRuntime의 DecisionTrace가 행동 선택 결과뿐 아니라 선택 확신도까지 설명하게 한다.
+- 공격 에이전트는 top-score와 runner-up score 차이를 남긴다.
+- 방어 에이전트는 eligible/ready 조건과 ML threshold margin을 남긴다.
+- no-op 판단도 조건 미달 또는 active window 유지 상태로 설명한다.
+
+산출물:
+
+```text
+src/experiments/agent_decision_margin_audit.py
+outputs/report_tables/agent_decision_margin_audit.csv
+outputs/report_tables/agent_decision_margin_audit.md
+```
+
+검증 결과:
+
+```text
+agent_decision_margin_audit rows: 399
+margin_status: pass=399
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 ```
 
 ## 최종 판단 기준
