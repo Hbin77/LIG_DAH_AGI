@@ -3626,7 +3626,8 @@ docs/process/NEXT_DEVELOPMENT_QUEUE.md
 검증 기준:
 
 - trace summary 회귀 테스트는 E7 `TSRA-R / rule_defense_full` sidecar 47 rows, `trace_file`, `trace_id`, non-no-op 선택 존재를 확인한다.
-- interface manifest 회귀 테스트는 TSRA-R row의 `evidence_experiments`, `trace_count=108`, `non_noop_count=35`, defense tool contract를 확인한다.
+- interface manifest 회귀 테스트는 CI에서도 추적되는 E7 sidecar 단독 입력으로 TSRA-R row의 `evidence_experiments`, `trace_count=47`, `non_noop_count=16`, defense tool contract를 확인한다.
+- final verifier는 생성된 `agent_interface_manifest.csv`에서 E5와 E7 evidence를 합친 `trace_count=108`, `non_noop_count=35`를 계속 확인한다.
 - loop replay 회귀 테스트는 sidecar에서 대표 `no_op`과 `action` 루프가 모두 생성되는지 확인한다.
 - quality gate와 final verifier의 최소 regression test 기준을 7개로 올렸다.
 
@@ -3638,4 +3639,4 @@ agent_quality_gate_audit rows: 6 pass
 agent_regression_tests=7 pass
 ```
 
-이 보강의 의미는 E7 rule delegate sidecar가 산출물에만 우연히 들어간 상태가 아니라, 소스 테스트/quality gate/final verifier에서 모두 보호되는 에이전트 evidence가 됐다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation regression evidence만 강화한다.
+이 보강의 의미는 E7 rule delegate sidecar가 산출물에만 우연히 들어간 상태가 아니라, 소스 테스트/quality gate/final verifier에서 모두 보호되는 에이전트 evidence가 됐다는 점이다. unit test는 raw fixture 가용성에 덜 민감한 E7 sidecar 단독 계약을 보고, final verifier는 제출 산출물 전체 계약을 본다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation regression evidence만 강화한다.

@@ -3885,7 +3885,8 @@ outputs/report_tables/agent_quality_gate_audit.md
 
 - `AgentSummaryRegressionTests`를 추가해 실제 `outputs/experiments/E7_ml_aura_ml_tsra_r` 산출물을 읽는다.
 - trace summary는 E7 `TSRA-R / rule_defense_full` sidecar 47 rows와 `trace_file`, `trace_id` 컬럼을 확인한다.
-- interface manifest는 TSRA-R row가 E5와 E7 evidence를 합쳐 `trace_count=108`, `non_noop_count=35`를 보이는지 확인한다.
+- interface manifest unit test는 CI에서도 추적되는 E7 sidecar 단독 입력으로 `trace_count=47`, `non_noop_count=16`을 확인한다.
+- final verifier는 생성된 `agent_interface_manifest.csv`에서 E5와 E7 evidence를 합친 `trace_count=108`, `non_noop_count=35`를 계속 강제한다.
 - loop replay는 sidecar의 대표 `no_op`/`action` 두 케이스가 모두 존재하는지 확인한다.
 - quality gate와 final verifier의 regression test 최소 기준을 7개로 올렸다.
 
@@ -3909,5 +3910,6 @@ agent_regression_tests=7 pass
 해석:
 
 - sidecar human-readable coverage는 이제 생성 산출물, final verifier, unit regression test 세 층에서 보호된다.
+- unit test는 raw fixture 가용성에 덜 민감한 E7 sidecar 단독 계약을 보고, final verifier는 제출 산출물 전체 계약을 본다.
 - 에이전트 구조를 설명하는 파일과 실제 DecisionTrace evidence가 다시 벌어지는 위험을 줄인다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation regression evidence만 강화한다.

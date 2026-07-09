@@ -462,15 +462,15 @@ class AgentSummaryRegressionTests(unittest.TestCase):
     def test_interface_manifest_merges_rule_delegate_into_tsra_r_contract(self) -> None:
         traces = agent_interface_manifest.collect_traces(
             Path("outputs/experiments"),
-            agent_interface_manifest.DEFAULT_EXPERIMENTS,
+            ["E7_ml_aura_ml_tsra_r"],
         )
         rows = agent_interface_manifest.build_manifest_rows(traces)
         tsra_row = next(row for row in rows if row["agent"] == "TSRA-R")
 
         self.assertEqual(tsra_row["side"], "defense")
         self.assertIn("E7_ml_aura_ml_tsra_r", tsra_row["evidence_experiments"])
-        self.assertEqual(tsra_row["trace_count"], "108")
-        self.assertEqual(tsra_row["non_noop_count"], "35")
+        self.assertEqual(tsra_row["trace_count"], "47")
+        self.assertEqual(tsra_row["non_noop_count"], "16")
         self.assertIn("evaluate_defense_conditions", tsra_row["tool_contract"])
         self.assertIn("select_fallback_link", tsra_row["tool_contract"])
 
