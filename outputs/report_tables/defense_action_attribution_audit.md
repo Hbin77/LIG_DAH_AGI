@@ -13,26 +13,26 @@ Safety boundary: closed simulation defense-action attribution audit only; no RF,
 
 | action | event_count | improved_or_held_rate | primary_metric | primary_metric_delta_mean | ablation_delta_value | attribution_class | attribution_status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| priority_reroute | 11 | 0.818182 | priority_inversion_rate | -0.0347756 | 0.410888 | ablation_supported | pass |
-| video_throttle | 14 | 0.785714 | p95_critical_latency_sec | -0.567857 | -0.371667 | local_metric_supported | pass |
-| stale_badge | 16 | 0.875 | trusted_stale_exposure | -0.00390625 | 0.38125 | ablation_supported | pass |
-| pace_switch | 6 | 0.666667 | mission_impact | -0.0232876 | -0.0506426 | bounded_tradeoff_supported | pass |
-| ml_attack_alert | 9 | 0.888889 | mission_impact | -0.0157261 |  | reactive_window_supported | pass |
+| priority_reroute | 13 | 0.846154 | priority_inversion_rate | -0.0296057 | 0.424361 | ablation_supported | pass |
+| video_throttle | 14 | 0.857143 | p95_critical_latency_sec | -0.560714 | -0.275 | local_metric_supported | pass |
+| stale_badge | 16 | 0.875 | trusted_stale_exposure | -0.00390625 | 0.375 | ablation_supported | pass |
+| pace_switch | 4 | 0.75 | mission_impact | -0.0418751 | -0.0334802 | bounded_tradeoff_supported | pass |
+| ml_attack_alert | 9 | 0.888889 | mission_impact | -0.0195514 |  | reactive_window_supported | pass |
 
 ## Interpretation
 
 ### priority_reroute
 
 - Target: reduce priority inversion and critical-traffic queuing
-- Mean deltas: impact=-0.0212136, latency=-0.545455, trusted_stale=-0.0113636, priority=-0.0347756
+- Mean deltas: impact=-0.0208093, latency=-0.492308, trusted_stale=-0.00961538, priority=-0.0296057
 - Attribution class: ablation_supported
 - Status: pass
-- Interpretation: Priority reroute has local priority-inversion relief and ablation support: removing it raises priority inversion by 0.411.
+- Interpretation: Priority reroute has local priority-inversion relief and ablation support: removing it raises priority inversion by 0.424.
 
 ### video_throttle
 
 - Target: reduce optional video pressure on critical traffic
-- Mean deltas: impact=-0.010561, latency=-0.567857, trusted_stale=0.00446429, priority=-0.0303661
+- Mean deltas: impact=-0.0127915, latency=-0.560714, trusted_stale=0.00446429, priority=-0.0301604
 - Attribution class: local_metric_supported
 - Status: pass
 - Interpretation: Video throttle is credited through local latency/priority relief rather than scalar mission-impact ablation; this records it as a bounded capacity-control tradeoff.
@@ -40,15 +40,15 @@ Safety boundary: closed simulation defense-action attribution audit only; no RF,
 ### stale_badge
 
 - Target: bound trusted stale COP exposure
-- Mean deltas: impact=-0.0128044, latency=-0.45625, trusted_stale=-0.00390625, priority=-0.0235618
+- Mean deltas: impact=-0.0133817, latency=-0.403125, trusted_stale=-0.00390625, priority=-0.0233416
 - Attribution class: ablation_supported
 - Status: pass
-- Interpretation: Stale badge is the clearest trust-protection action: ablation raises trusted stale exposure by 0.381, while local windows mostly improve or hold.
+- Interpretation: Stale badge is the clearest trust-protection action: ablation raises trusted stale exposure by 0.375, while local windows mostly improve or hold.
 
 ### pace_switch
 
 - Target: move critical traffic away from degraded active links
-- Mean deltas: impact=-0.0232876, latency=-1.06667, trusted_stale=0.0104167, priority=-0.0438112
+- Mean deltas: impact=-0.0418751, latency=-1.6, trusted_stale=0, priority=-0.0624168
 - Attribution class: bounded_tradeoff_supported
 - Status: pass
 - Interpretation: PACE switching shows local mission-impact or latency relief, but scalar ablation can undervalue recovery stability and fallback-chasing context.
@@ -56,7 +56,7 @@ Safety boundary: closed simulation defense-action attribution audit only; no RF,
 ### ml_attack_alert
 
 - Target: open reactive defense windows during active AURA-ML attack effects
-- Mean deltas: impact=-0.0157261, latency=-1.02222, trusted_stale=0.00694444, priority=-0.0365725
+- Mean deltas: impact=-0.0195514, latency=-1.02222, trusted_stale=0, priority=-0.0365841
 - Attribution class: reactive_window_supported
 - Status: pass
 - Interpretation: ML alerts are attributed as reactive-window triggers: every alert overlaps an active AURA-ML attack window and most local windows improve or hold mission impact.

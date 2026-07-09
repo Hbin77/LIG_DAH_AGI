@@ -163,20 +163,20 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Agent: AURA
 - Time: 160 sec
 - Mission phase: resupply_move
-- Active link at decision: MESH
+- Active link at decision: LTE
 - Attack type: `queue_pressure`
-- Target link: `MESH`
+- Target link: `LTE`
 - Target traffic classes: video, telemetry
 - Duration: 80 sec
 - Simulated effects: latency +200ms; jitter +100ms; bandwidth cap 1.5Mbps; queue pressure enabled
 - Expected mission impact: 1
-- Expected p95 critical latency: 83.5228 sec
+- Expected p95 critical latency: 68.2658 sec
 - Expected stale data ratio: 0.676667
-- Expected priority inversion rate: 0.497087
-- Detectability score: 0.35
-- Attack score: 0.9475
+- Expected priority inversion rate: 0.497307
+- Detectability score: 0.15
+- Attack score: 0.9775
 - Candidate rank: 1
-- Runner-up: bandwidth_limit on MESH (score=0.896031, impact=0.948531)
+- Runner-up: bandwidth_limit on LTE (score=0.896141, impact=0.948641)
 - Selection reason: increase non-critical queue occupancy
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -185,20 +185,20 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Agent: AURA
 - Time: 210 sec
 - Mission phase: normal_patrol
-- Active link at decision: MESH
+- Active link at decision: LTE
 - Attack type: `queue_pressure`
-- Target link: `MESH`
+- Target link: `LTE`
 - Target traffic classes: video, telemetry
 - Duration: 80 sec
 - Simulated effects: latency +200ms; jitter +100ms; bandwidth cap 1.5Mbps; queue pressure enabled
 - Expected mission impact: 1
-- Expected p95 critical latency: 111.322 sec
+- Expected p95 critical latency: 126.09 sec
 - Expected stale data ratio: 0.676667
-- Expected priority inversion rate: 0.484047
+- Expected priority inversion rate: 0.487311
 - Detectability score: 0.35
 - Attack score: 0.9475
 - Candidate rank: 1
-- Runner-up: bandwidth_limit on MESH (score=0.889516, impact=0.942016)
+- Runner-up: bandwidth_limit on LTE (score=0.891155, impact=0.943655)
 - Selection reason: increase non-critical queue occupancy
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -214,13 +214,13 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Duration: 80 sec
 - Simulated effects: latency +200ms; jitter +100ms; bandwidth cap 1.5Mbps; queue pressure enabled
 - Expected mission impact: 0.956
-- Expected p95 critical latency: 131.655 sec
+- Expected p95 critical latency: 203.573 sec
 - Expected stale data ratio: 0.426667
-- Expected priority inversion rate: 0.478559
+- Expected priority inversion rate: 0.481991
 - Detectability score: 0.35
 - Attack score: 0.9035
 - Candidate rank: 1
-- Runner-up: stale_cop_induction on LTE (score=0.856776, impact=0.939276)
+- Runner-up: stale_cop_induction on LTE (score=0.858494, impact=0.940994)
 - Selection reason: increase non-critical queue occupancy
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -323,13 +323,13 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Target traffic classes: all
 - Duration: 70 sec
 - Simulated effects: latency +600ms; jitter +120ms; loss +0.03; bandwidth cap 0.45Mbps
-- Expected mission impact: 0.819854
-- Expected p95 critical latency: 148.766 sec
-- Expected stale data ratio: 0.71
-- Expected priority inversion rate: 0.309981
+- Expected mission impact: 0.783246
+- Expected p95 critical latency: 127.366 sec
+- Expected stale data ratio: 0.46
+- Expected priority inversion rate: 0.309838
 - Detectability score: 0.5
-- Attack score: 0.744854
+- Attack score: 0.708246
 - Candidate rank: 1
-- Runner-up: queue_pressure on LTE (score=0.696506, impact=0.719006)
+- Runner-up: queue_pressure on LTE (score=0.64859, impact=0.67109)
 - Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.

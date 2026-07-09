@@ -167,6 +167,18 @@ def build_gate_results(root: Path = Path(".")) -> list[GateResult]:
             predicate=lambda value: value <= 0.03,
             interpretation="Defended repeated-run mission impact should remain stable across seeds.",
         ),
+        make_gate(
+            gate_id="G12",
+            area="PACE reselection discipline",
+            metric="full TSRA-R recovery_instability_mean",
+            observed=f(full, "recovery_instability_mean"),
+            threshold="<= 2.20",
+            predicate=lambda value: value <= 2.20,
+            interpretation=(
+                "Full TSRA-R should avoid repeated fallback reselection unless residual mission "
+                "pressure justifies the extra recovery instability."
+            ),
+        ),
     ]
 
     return gates

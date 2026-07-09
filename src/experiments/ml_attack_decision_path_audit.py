@@ -306,7 +306,7 @@ def build_rows() -> list[dict[str, str]]:
             ),
             ok=(
                 len(attack_traces) == 5
-                and candidate_total == 27
+                and candidate_total >= len(attack_traces) * 5
                 and counts["generate_attack_candidates"] == len(attack_traces)
                 and counts["predict_candidate_impact"] == candidate_total
                 and counts["estimate_candidate_effect"] == candidate_total

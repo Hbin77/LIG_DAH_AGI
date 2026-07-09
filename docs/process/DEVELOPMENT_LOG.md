@@ -399,9 +399,9 @@ python3 -m src.experiments.run_adaptive_memory
 결과:
 
 ```text
-full TSRA-R mission impact:      0.157423
+full TSRA-R mission impact:      0.140260
 adaptive TSRA-R mission impact:  0.109489
-delta mission impact:           -0.047934
+delta mission impact:           -0.030772
 trusted stale exposure:         0.127083 -> 0.125000
 priority inversion:             0.050609 -> 0.027455
 video throttle count:           6.4 -> 3.1
@@ -862,12 +862,12 @@ python3 -m src.experiments.metric_gate --fail-on-error
 결과:
 
 ```text
-metric_gate_summary.csv: 11 gates
+metric_gate_summary.csv: 12 gates
 status: all pass
 E3-E1 impact delta: 0.456259
-E5 resilience gain: 0.826993
-E5/E3 impact ratio: 0.172152
-E6/E7 impact separation: 0.0162307
+E5 resilience gain: 0.846145
+E5/E3 impact ratio: 0.153384
+E6/E7 impact separation: 0.0141698
 ```
 
 해석:
@@ -1081,7 +1081,7 @@ tradeoff:
 
 - fallback 재선택으로 late failover 대응성은 좋아졌다.
 - 대신 PACE 전환 횟수가 늘어 scalar Mission Impact의 recovery instability 성분은 증가했다.
-- 그래도 E5 resilience 0.827, E5/E3 impact ratio 0.172로 metric gate는 통과한다.
+- 그래도 E5 resilience 0.846, E5/E3 impact ratio 0.153으로 metric gate는 통과한다.
 
 ### 30. PACE 조건을 SATCOM/fallback으로 분리한 이유
 
@@ -1140,9 +1140,9 @@ E5/E7 pace_switch event
 검증 결과:
 
 ```text
-pace_transition_audit.csv: 6 rows
+pace_transition_audit.csv: 4 rows
 satcom_to_fallback: 2
-fallback_reselect: 4
+fallback_reselect: 2
 self_transition: 0
 ```
 
@@ -2070,7 +2070,7 @@ ml_contribution_audit rows: 7
 status: pass=7
 AURA-ML predict_candidate_impact invocations: 52
 TSRA-R-ML predict_attack_probability invocations: 61
-E6/E7 mission impact gap: 0.0162307
+E6/E7 mission impact gap: 0.0141698
 Mac MPS sample_passes: 20000000
 ```
 
@@ -2116,13 +2116,13 @@ E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
 ML alerts overlapping active attack: 9/9
-E7 minus E6 mission impact mean: 0.0162307
+E7 minus E6 mission impact mean: 0.0141698
 ```
 
 해석:
 
 - E7은 pre-attack 방어 이벤트를 억제하고, 탐지 확률이 높아진 뒤 방어창을 연다.
-- 그 비용으로 첫 alert가 20초 늦고, repeated metric에서 E7 impact가 E6보다 0.0162307 높다.
+- 그 비용으로 첫 alert가 20초 늦고, repeated metric에서 E7 impact가 E6보다 0.0141698 높다.
 - core defense action은 유지되므로 E7은 방어 기능 축소가 아니라 reactive trigger 구조의 차이를 보여준다.
 - 실제 공격 기능은 추가하지 않고 closed simulation trace, event log, batch metric만 읽는다.
 
@@ -2352,7 +2352,7 @@ input defense_action_attribution_audit rows: 5
 output mission_thread_summary rows: 10
 thread_status: pass=10
 experiments: E5_rule_aura_tsra_r=5, E7_ml_aura_ml_tsra_r=5
-operator_signal_count range: 3-7
+operator_signal_count range: 2-7
 ```
 
 해석:
@@ -2422,8 +2422,8 @@ influence_status: pass=6
 MI01 AURA cooldown_noops=48, max_event_noops=12
 MI02 AURA-ML cooldown_noops=32, max_event_noops=8
 MI03 TSRA-R eligible_not_ready actions present for priority_reroute, video_throttle, stale_badge, pace_switch
-MI04 TSRA-R-ML opened_windows=45, active_window_noops=22
-MI05 Adaptive TSRA-R delta_mission_impact_mean=-0.0479341, delta_defense_count_mean=-4.93333
+MI04 TSRA-R-ML opened_windows=45, active_window_noops=21
+MI05 Adaptive TSRA-R delta_mission_impact_mean=-0.0307717, delta_defense_count_mean=-3.93333
 MI06 memory chain rows=9, pass_rows=9, min_last_selected_chain_match_rate=1
 ```
 
@@ -2484,8 +2484,8 @@ status: pass=6
 pre_threshold_noop_count: 16
 pre_threshold_defense_events: 0
 first_response_latency_sec: 20
-above_threshold_event_traces: 23
-above_threshold_no_event_refresh_traces: 22
+above_threshold_event_traces: 24
+above_threshold_no_event_refresh_traces: 21
 ml_attack_alerts: 9
 min_alert_gap_sec: 25
 memory_mismatches: 0
@@ -2670,3 +2670,46 @@ mission_guard_event_trace_count_mean: 1.0
 - 이번 변경은 ML 방어자를 full rule 방어자로 되돌린 것이 아니다.
 - detector probability가 닫히는 경계에서 residual mission risk만 확인해 방어 window를 제한적으로 연장한다.
 - Agent Runtime 관점에서는 `predict_attack_probability`와 `assess_mission_risk_guard`가 모두 ToolCallRecord에 남고, Memory에는 `last_mission_guard_reason`, `last_mission_guard_score`가 남는다.
+
+### 67. TSRA-R PACE Reselection Discipline을 추가한 이유
+
+PACE 전환은 방어 액션이지만, 링크를 너무 자주 바꾸면 복구 불안정성이 mission impact로 다시 들어온다. 기존 full TSRA-R은 active fallback link가 나빠지면 critical mission pressure가 약해도 `pace_switch`를 반복할 수 있었고, 이 때문에 E5의 recovery instability가 높게 남았다.
+
+이번 변경은 `RuleTSRAR._evaluate_conditions`에서 PACE 전환 조건을 두 단계로 나눴다.
+
+```text
+initial_pace_pressure:
+  SATCOM 최초 이탈에는 critical pending, critical latency, priority inversion,
+  total queue pressure 중 하나가 있으면 허용
+
+fallback_pace_pressure:
+  fallback 재선택에는 critical pending이 반드시 있어야 하고,
+  critical latency, priority inversion, active link latency/loss 중 하나가 같이 있어야 허용
+```
+
+추가한 것:
+
+```text
+src/tsra_r/rule_defender.py
+src/experiments/metric_gate.py G12 PACE reselection discipline
+```
+
+검증 결과:
+
+```text
+E5 mission impact mean:        0.157423 -> 0.140260
+E5 resilience gain:            0.826993 -> 0.846145
+E5 recovery_instability mean:  3.033333 -> 2.066667
+E7 mission impact mean:        0.165471 -> 0.159620
+PACE transition audit rows:    6 -> 4
+fallback reselection rows:     4 -> 2
+stress AS05 full impact:       0.142861 -> 0.139170
+stress AS06 ML impact:         0.160554 -> 0.136755
+```
+
+해석:
+
+- TSRA-R은 PACE를 많이 쓰는 방어자가 아니라, mission pressure가 있을 때만 링크 재선택 비용을 지불하는 방어자로 바뀌었다.
+- 새 metric gate G12는 full TSRA-R의 recovery instability mean이 2.20 이하인지 확인한다.
+- PACE audit은 이제 `satcom_to_fallback` 2개와 `fallback_reselect` 2개를 검증한다.
+- 이 변경은 실제 네트워크 동작이 아니라 closed simulation 안의 방어 정책과 감사 산출물만 바꾼다.

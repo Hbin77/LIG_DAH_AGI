@@ -15,14 +15,14 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | E5_rule_aura_tsra_r | atk-00001 | queue_pressure | 0 | 5 | 0.0626556 | prepositioned_defense | pass |
 | E5_rule_aura_tsra_r | atk-00002 | queue_pressure | 0 | 15 | 0.0194333 | prepositioned_defense | pass |
-| E5_rule_aura_tsra_r | atk-00003 | queue_pressure | 0 | 10 | 0.00546539 | prepositioned_defense | pass |
-| E5_rule_aura_tsra_r | atk-00004 | queue_pressure | 0 | 25 | 0.0201095 | prepositioned_defense | pass |
-| E5_rule_aura_tsra_r | atk-00005 | queue_pressure | 0 | 5 | 0.00119899 | prepositioned_defense | pass |
+| E5_rule_aura_tsra_r | atk-00003 | queue_pressure | 0 | 10 | 0.0021496 | prepositioned_defense | pass |
+| E5_rule_aura_tsra_r | atk-00004 | queue_pressure | 0 | 30 | 0.0395898 | prepositioned_defense | pass |
+| E5_rule_aura_tsra_r | atk-00005 | queue_pressure | 0 | 5 | 0.00214269 | prepositioned_defense | pass |
 | E7_ml_aura_ml_tsra_r | ml-atk-00001 | queue_pressure | 20 | 20 | 0.205612 | ml_reactive_window | pass |
 | E7_ml_aura_ml_tsra_r | ml-atk-00002 | failover_chasing | 0 | 5 | 0.0213565 | prepositioned_defense | pass |
 | E7_ml_aura_ml_tsra_r | ml-atk-00003 | queue_pressure | 0 | 0 | 0.05886 | prepositioned_defense | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00004 | failover_chasing | 0 | 0 | 0.0205729 | prepositioned_defense | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00005 | failover_chasing | 0 | 10 | 0.00262202 | prepositioned_defense | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00004 | failover_chasing | 0 | 0 | 0.0206573 | prepositioned_defense | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00005 | failover_chasing | 0 | 10 | 0.0367162 | prepositioned_defense | pass |
 
 ## Detail
 
@@ -53,22 +53,22 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 - Attack: AURA queue_pressure at t=160
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 10
-- Metric peak latency: 0
-- Impact reduction from peak: 0.00546539
+- Metric peak latency: 15
+- Impact reduction from peak: 0.0021496
 - Coordination class: prepositioned_defense
 - Status: pass
-- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=10; metric_peak_latency=0; impact_reduction_from_peak=0.00546539; issues=none
+- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=10; metric_peak_latency=15; impact_reduction_from_peak=0.0021496; issues=none
 
 ### E5_rule_aura_tsra_r E5_rule_aura_tsra_r-episode-04 atk-00004
 
 - Attack: AURA queue_pressure at t=210
 - Response latency: required=0, first_defense=0
-- Operator alert latency: 25
+- Operator alert latency: 30
 - Metric peak latency: 0
-- Impact reduction from peak: 0.0201095
+- Impact reduction from peak: 0.0395898
 - Coordination class: prepositioned_defense
 - Status: pass
-- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=25; metric_peak_latency=0; impact_reduction_from_peak=0.0201095; issues=none
+- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=30; metric_peak_latency=0; impact_reduction_from_peak=0.0395898; issues=none
 
 ### E5_rule_aura_tsra_r E5_rule_aura_tsra_r-episode-05 atk-00005
 
@@ -76,10 +76,10 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 5
 - Metric peak latency: 5
-- Impact reduction from peak: 0.00119899
+- Impact reduction from peak: 0.00214269
 - Coordination class: prepositioned_defense
 - Status: pass
-- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=5; metric_peak_latency=5; impact_reduction_from_peak=0.00119899; issues=none
+- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=5; metric_peak_latency=5; impact_reduction_from_peak=0.00214269; issues=none
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-01 ml-atk-00001
 
@@ -120,18 +120,18 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 0
 - Metric peak latency: 20
-- Impact reduction from peak: 0.0205729
+- Impact reduction from peak: 0.0206573
 - Coordination class: prepositioned_defense
 - Status: pass
-- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=0; metric_peak_latency=20; impact_reduction_from_peak=0.0205729; issues=none
+- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=0; metric_peak_latency=20; impact_reduction_from_peak=0.0206573; issues=none
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-05 ml-atk-00005
 
 - Attack: AURA failover_chasing at t=260
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 10
-- Metric peak latency: 0
-- Impact reduction from peak: 0.00262202
+- Metric peak latency: 5
+- Impact reduction from peak: 0.0367162
 - Coordination class: prepositioned_defense
 - Status: pass
-- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=10; metric_peak_latency=0; impact_reduction_from_peak=0.00262202; issues=none
+- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=10; metric_peak_latency=5; impact_reduction_from_peak=0.0367162; issues=none

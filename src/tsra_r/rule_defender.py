@@ -210,12 +210,42 @@ class RuleTSRAR:
                 or state.total_queue_kb > 6500
             )
         )
-        pace_switch_needed = satcom_link_bad or fallback_link_bad
-        pace_switch_reason = (
-            "fallback link degraded beyond mission threshold"
-            if fallback_link_bad
-            else "SATCOM degraded beyond mission threshold"
+        initial_pace_pressure = (
+            state.critical_pending > 0
+            or state.recent_p95_critical_latency_sec >= 5.0
+            or state.priority_inversion_rate >= 0.08
+            or state.total_queue_kb > 4500
         )
+        fallback_pace_pressure = (
+            state.critical_pending > 0
+            and (
+                state.recent_p95_critical_latency_sec >= 5.0
+                or state.priority_inversion_rate >= 0.08
+                or active.base_latency_ms > 700
+                or active.loss_rate > 0.04
+            )
+        )
+        pace_switch_needed = (
+            satcom_link_bad
+            and initial_pace_pressure
+        ) or (
+            fallback_link_bad
+            and fallback_pace_pressure
+        )
+        if fallback_link_bad:
+            pace_switch_reason = (
+                "fallback link degraded beyond mission threshold"
+                if fallback_pace_pressure
+                else "fallback link degraded but no critical mission pressure for reselection"
+            )
+        elif satcom_link_bad:
+            pace_switch_reason = (
+                "SATCOM degraded beyond mission threshold"
+                if initial_pace_pressure
+                else "SATCOM degraded but mission pressure below switch threshold"
+            )
+        else:
+            pace_switch_reason = "active link remains within PACE threshold"
         return {
             "priority_reroute_needed": state.critical_pending > 0 and state.video_queue_kb > 500,
             "priority_reroute_ready": self._ready("priority_reroute", now, 25),
@@ -226,6 +256,8 @@ class RuleTSRAR:
             "pace_switch_needed": pace_switch_needed,
             "pace_switch_ready": self._ready("pace_switch", now, 80),
             "pace_switch_reason": pace_switch_reason,
+            "initial_pace_pressure": initial_pace_pressure,
+            "fallback_pace_pressure": fallback_pace_pressure,
         }
 
     def _record_decision(

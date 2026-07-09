@@ -11,11 +11,11 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 | ATK-03 | attack | AURA, AURA-ML | queue_pressure | 8 | targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.787551 | G01/G02 |
 | ATK-04 | attack | AURA | stale_cop_induction | 1 | targets=SATCOM; max_expected_impact=1; avg_attack_score=0.9175 | G01/G02 |
 | DEF-01 | defense | TSRA-R-ML | ml_attack_alert | 9 | ML detector opens or maintains reactive defense window; validated by E6/E7 separation gate | G10 |
-| DEF-02 | defense | TSRA-R, TSRA-R-ML | pace_switch | 6 | removal_delta_recovery_instability=-3.03333; used as bounded fallback path control | G03/G04 |
-| DEF-03 | defense | TSRA-R, TSRA-R-ML | priority_reroute | 11 | removal_delta_priority_inversion=0.410888; removal_delta_impact=0.185081 | G03/G04/G06 |
-| DEF-04 | defense | TSRA-R, TSRA-R-ML | stale_badge | 16 | removal_delta_trusted_stale=0.38125; removal_delta_impact=0.205521 | G03/G05/G07 |
-| DEF-05 | defense | TSRA-R, TSRA-R-ML | video_throttle | 14 | removal_delta_impact=-0.0165623; used as optional capacity control | G03/G09 |
-| DEF-ADAPT-01 | defense | TSRA-R-ADAPTIVE | adaptive_optional_action_gating | 30 seeds | mission_impact_improvement=0.0479341; video_throttle_reduction=3.26667 | G08/G09 |
+| DEF-02 | defense | TSRA-R, TSRA-R-ML | pace_switch | 4 | removal_delta_recovery_instability=-2.06667; used as bounded fallback path control | G03/G04 |
+| DEF-03 | defense | TSRA-R, TSRA-R-ML | priority_reroute | 13 | removal_delta_priority_inversion=0.424361; removal_delta_impact=0.19956 | G03/G04/G06 |
+| DEF-04 | defense | TSRA-R, TSRA-R-ML | stale_badge | 16 | removal_delta_trusted_stale=0.375; removal_delta_impact=0.20625 | G03/G05/G07 |
+| DEF-05 | defense | TSRA-R, TSRA-R-ML | video_throttle | 14 | removal_delta_impact=-0.0231413; used as optional capacity control | G03/G09 |
+| DEF-ADAPT-01 | defense | TSRA-R-ADAPTIVE | adaptive_optional_action_gating | 30 seeds | mission_impact_improvement=0.0307717; video_throttle_reduction=3.26667 | G08/G09 |
 
 ## Detail
 
@@ -91,9 +91,9 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Runtime actions: defense_events
 - Decision source: TSRA-R: evaluate_defense_conditions, select_fallback_link; TSRA-R-ML: predict_attack_probability, assess_mission_risk_guard, reactive defense window
 - Trigger or selection logic: active link degradation crosses mission threshold
-- Evidence count: 6
+- Evidence count: 4
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
-- Observed effect: removal_delta_recovery_instability=-3.03333; used as bounded fallback path control
+- Observed effect: removal_delta_recovery_instability=-2.06667; used as bounded fallback path control
 - Validation gate: G03/G04
 - Safety boundary: closed simulation capability matrix only; no RF, exploit, or live network action
 
@@ -104,9 +104,9 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Runtime actions: defense_events
 - Decision source: TSRA-R: evaluate_defense_conditions; TSRA-R-ML: predict_attack_probability, assess_mission_risk_guard, reactive defense window
 - Trigger or selection logic: critical traffic waits behind video or queue pressure
-- Evidence count: 11
+- Evidence count: 13
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
-- Observed effect: removal_delta_priority_inversion=0.410888; removal_delta_impact=0.185081
+- Observed effect: removal_delta_priority_inversion=0.424361; removal_delta_impact=0.19956
 - Validation gate: G03/G04/G06
 - Safety boundary: closed simulation capability matrix only; no RF, exploit, or live network action
 
@@ -119,7 +119,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Trigger or selection logic: COP stale ratio exceeds trust threshold
 - Evidence count: 16
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
-- Observed effect: removal_delta_trusted_stale=0.38125; removal_delta_impact=0.205521
+- Observed effect: removal_delta_trusted_stale=0.375; removal_delta_impact=0.20625
 - Validation gate: G03/G05/G07
 - Safety boundary: closed simulation capability matrix only; no RF, exploit, or live network action
 
@@ -132,7 +132,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Trigger or selection logic: video load threatens critical traffic capacity
 - Evidence count: 14
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
-- Observed effect: removal_delta_impact=-0.0165623; used as optional capacity control
+- Observed effect: removal_delta_impact=-0.0231413; used as optional capacity control
 - Validation gate: G03/G09
 - Safety boundary: closed simulation capability matrix only; no RF, exploit, or live network action
 
@@ -145,6 +145,6 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Trigger or selection logic: optional actions require repeated memory evidence before activation
 - Evidence count: 30 seeds
 - Evidence experiments: adaptive_memory_summary
-- Observed effect: mission_impact_improvement=0.0479341; video_throttle_reduction=3.26667
+- Observed effect: mission_impact_improvement=0.0307717; video_throttle_reduction=3.26667
 - Validation gate: G08/G09
 - Safety boundary: closed simulation capability matrix only; no RF, exploit, or live network action

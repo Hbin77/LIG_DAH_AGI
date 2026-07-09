@@ -27,13 +27,13 @@ flowchart LR
   Aura -->|E02 15 verified| Sim
   Sim -->|E03 122 verified| Tsra
   Tsra -->|E04 56 verified| Sim
-  Sim -->|E05 49 verified| Metrics
+  Sim -->|E05 51 verified| Metrics
   Metrics -->|E06 93 verified| Aura
   Metrics -->|E07 122 verified| Tsra
   Aura -->|E08 4 verified| Coverage
   Coverage -->|E09 10 verified| Tsra
   Tsra -->|E10 56 verified| Alerts
-  Metrics -->|E11 46 verified| Verifier
+  Metrics -->|E11 47 verified| Verifier
   Sim -->|E12 10 verified| Replay
   Tsra -->|E13 56 verified| Ledger
   Metrics -->|local before/after| Ledger
@@ -57,13 +57,13 @@ flowchart LR
 | E02 | AURA/AURA-ML | MissionSimulator | 15 | verified | outputs/report_tables/aura_coa_cards.csv | Connects red-team decisions to simulator-visible attack effects. |
 | E03 | MissionSimulator | TSRA-R/TSRA-R-ML | 122 | verified | outputs/report_tables/agent_decision_trace_summary.csv | Shows blue-team decisions are driven by runtime observations. |
 | E04 | TSRA-R/TSRA-R-ML | MissionSimulator | 56 | verified | outputs/report_tables/operator_alerts.csv | Connects defense decisions to simulator-visible response actions. |
-| E05 | MissionSimulator | Mission Metrics | 49 | verified | outputs/report_tables/battle_timeline.csv | Keeps the red/blue loop tied to measurable mission effects. |
+| E05 | MissionSimulator | Mission Metrics | 51 | verified | outputs/report_tables/battle_timeline.csv | Keeps the red/blue loop tied to measurable mission effects. |
 | E06 | Mission Metrics | AURA/AURA-ML | 93 | verified | outputs/report_tables/agent_decision_trace_summary.csv | Shows attack choices can be interpreted through observed mission state and feedback. |
 | E07 | Mission Metrics | TSRA-R/TSRA-R-ML | 122 | verified | outputs/report_tables/agent_decision_trace_summary.csv | Shows defense choices can be interpreted through observed mission state and feedback. |
 | E08 | AURA Capabilities | TSRA-R Capabilities | 4 | verified | outputs/report_tables/attack_defense_coverage.csv | Makes red/blue responsibilities explicit for separate team development. |
 | E09 | AttackEvent | DefenseEvent | 10 | verified | outputs/report_tables/attack_defense_response_audit.csv | Prevents static mappings from replacing actual event-time response evidence. |
 | E10 | DefenseEvent | Operator Alerts | 56 | verified | outputs/report_tables/operator_alerts.csv | Turns TSRA-R output into human-readable response guidance. |
-| E11 | Mission Metrics | Verifier/Package | 46 | verified | outputs/report_tables/metric_gate_summary.csv \| outputs/report_tables/mission_impact_decomposition.csv | Keeps scalar claims backed by gates and component-level evidence. |
+| E11 | Mission Metrics | Verifier/Package | 47 | verified | outputs/report_tables/metric_gate_summary.csv \| outputs/report_tables/mission_impact_decomposition.csv | Keeps scalar claims backed by gates and component-level evidence. |
 | E12 | Attack/Defense/Alert Evidence | Closed-Loop Episode Replay | 10 | verified | outputs/report_tables/closed_loop_episode_replay.csv | Shows attack, defense, alert, and metric progression in one reviewable episode record. |
 | E13 | DefenseEvent | Defense Effectiveness Ledger | 56 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
 | E14 | AgentMemory | Verifier/Package | 9 | verified | outputs/report_tables/agent_memory_belief_audit.csv | Proves memory is active loop state, not just a static trace field. |
@@ -113,7 +113,7 @@ flowchart LR
 
 - Interaction: MetricSnapshot and battle timeline expose mission impact movement
 - Evidence: outputs/report_tables/battle_timeline.csv
-- Evidence count: 49
+- Evidence count: 51
 - Validation status: verified
 - Purpose: Keeps the red/blue loop tied to measurable mission effects.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
@@ -167,7 +167,7 @@ flowchart LR
 
 - Interaction: Metric gates and mission decomposition are included in final verification
 - Evidence: outputs/report_tables/metric_gate_summary.csv | outputs/report_tables/mission_impact_decomposition.csv
-- Evidence count: 46
+- Evidence count: 47
 - Validation status: verified
 - Purpose: Keeps scalar claims backed by gates and component-level evidence.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

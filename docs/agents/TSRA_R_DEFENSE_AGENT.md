@@ -355,7 +355,7 @@ outputs/report_tables/pace_transition_audit.csv
 outputs/report_tables/pace_transition_audit.md
 ```
 
-현재 감사 결과는 6개 PACE 전환을 `satcom_to_fallback` 2개, `fallback_reselect` 4개로 구분한다.
+현재 감사 결과는 4개 PACE 전환을 `satcom_to_fallback` 2개, `fallback_reselect` 2개로 구분한다.
 
 ## 10. Adaptive Memory TSRA-R
 
@@ -378,7 +378,7 @@ src/experiments/run_adaptive_memory.py
 30-seed 비교 결과:
 
 ```text
-full TSRA-R impact:      0.157423
+full TSRA-R impact:      0.140260
 adaptive TSRA-R impact:  0.109489
 priority inversion:      0.050609 -> 0.027455
 video throttle count:    6.4 -> 3.1
@@ -444,6 +444,7 @@ AgentRuntime
   memory: active_defense_until, last_probability, last_alert_time
   tools:
     - predict_attack_probability
+    - assess_mission_risk_guard
   trace:
     - detector probability
     - threshold decision

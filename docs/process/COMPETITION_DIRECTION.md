@@ -279,7 +279,7 @@ outputs/figures/adaptive_memory_comparison.png
 검증 결과:
 
 ```text
-full TSRA-R impact:      0.157423
+full TSRA-R impact:      0.140260
 adaptive TSRA-R impact:  0.109489
 priority inversion:      0.050609 -> 0.027455
 video throttle count:    6.4 -> 3.1
@@ -652,9 +652,9 @@ outputs/report_tables/pace_transition_audit.md
 검증 결과:
 
 ```text
-pace_transition_audit rows: 6
+pace_transition_audit rows: 4
 satcom_to_fallback: 2
-fallback_reselect: 4
+fallback_reselect: 2
 self_transition: 0
 ```
 
@@ -907,7 +907,7 @@ package excluded artifact hits: 0
 ml_contribution_audit rows: 7 pass
 AURA-ML predict_candidate_impact invocations: 52
 TSRA-R-ML predict_attack_probability invocations: 61
-E6/E7 mission impact gap: 0.0162307
+E6/E7 mission impact gap: 0.0141698
 E7 attack types: failover_chasing, queue_pressure
 E7 ML alert count: 9
 Mac MPS sample_passes: 20000000
@@ -931,7 +931,7 @@ E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
 ML alert active-attack overlap: 9/9
-E7 minus E6 mission impact mean: 0.0162307
+E7 minus E6 mission impact mean: 0.0141698
 E7 detector below_threshold traces: 16
 E7 detector above_threshold traces: 45
 ```
@@ -1030,7 +1030,7 @@ mission_thread_summary rows: 10
 thread_status: pass=10
 experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 attack types: queue_pressure, failover_chasing
-operator_signal_count range: 3-7
+operator_signal_count range: 2-7
 response_signal: status=complete
 attribution_signal: status=pass
 ```

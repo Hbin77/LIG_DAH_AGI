@@ -198,7 +198,7 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             "Metric gates and mission decomposition are included in final verification",
             "outputs/report_tables/metric_gate_summary.csv | outputs/report_tables/mission_impact_decomposition.csv",
             counts["passing_metric_gates"] + counts["mission_decomposition_rows"],
-            counts["passing_metric_gates"] == 11 and counts["mission_decomposition_rows"] == 35,
+            counts["passing_metric_gates"] == 12 and counts["mission_decomposition_rows"] == 35,
             "Keeps scalar claims backed by gates and component-level evidence.",
         ),
         (

@@ -24,17 +24,17 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 | E5_rule_aura_tsra_r | AURA | rule_attack_score | estimate_detectability | 25 | 0.16129 | pass |
 | E5_rule_aura_tsra_r | AURA | rule_attack_score | generate_attack_candidates | 5 | 0.16129 | pass |
 | E5_rule_aura_tsra_r | TSRA-R | rule_defense_full | evaluate_defense_conditions | 61 | 1 | pass |
-| E5_rule_aura_tsra_r | TSRA-R | rule_defense_full | select_fallback_link | 3 | 0.0491803 | pass |
+| E5_rule_aura_tsra_r | TSRA-R | rule_defense_full | select_fallback_link | 1 | 0.0163934 | pass |
 | E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | estimate_candidate_effect | 25 | 0.16129 | pass |
 | E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | estimate_detectability | 25 | 0.16129 | pass |
 | E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | generate_attack_candidates | 5 | 0.16129 | pass |
 | E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | predict_candidate_impact | 25 | 0.16129 | pass |
 | E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | evaluate_defense_conditions | 61 | 1 | pass |
-| E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | select_fallback_link | 3 | 0.0491803 | pass |
-| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | estimate_candidate_effect | 27 | 0.16129 | pass |
-| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | estimate_detectability | 27 | 0.16129 | pass |
+| E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | select_fallback_link | 2 | 0.0327869 | pass |
+| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | estimate_candidate_effect | 26 | 0.16129 | pass |
+| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | estimate_detectability | 26 | 0.16129 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | generate_attack_candidates | 5 | 0.16129 | pass |
-| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | predict_candidate_impact | 27 | 0.16129 | pass |
+| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | predict_candidate_impact | 26 | 0.16129 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | assess_mission_risk_guard | 61 | 1 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | predict_attack_probability | 61 | 1 | pass |
 
@@ -52,7 +52,7 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 - Role: AURA analytic mission-impact what-if estimate
 - Rows: 5
-- Total invocations: 124
+- Total invocations: 123
 - Status: pass=5
 - Decision link: mission impact estimates feed AURA score calculation
 
@@ -60,7 +60,7 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 - Role: AURA detectability penalty estimate
 - Rows: 5
-- Total invocations: 124
+- Total invocations: 123
 - Status: pass=5
 - Decision link: detectability penalty is subtracted from AURA attack score
 
@@ -92,7 +92,7 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 - Role: AURA ML impact prediction
 - Rows: 2
-- Total invocations: 52
+- Total invocations: 51
 - Status: pass=2
 - Decision link: ML impact prediction feeds AURA-ML candidate ranking
 
@@ -100,6 +100,6 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 - Role: TSRA-R PACE fallback selection
 - Rows: 2
-- Total invocations: 6
+- Total invocations: 3
 - Status: pass=2
 - Decision link: PACE fallback selection drives TSRA-R pace_switch details

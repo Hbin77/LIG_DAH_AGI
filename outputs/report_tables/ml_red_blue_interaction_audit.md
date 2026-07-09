@@ -15,7 +15,7 @@ Safety boundary: closed simulation ML red-blue interaction audit only; no RF, ex
 | ml-atk-00002 | failover_chasing | LTE | 6 | 0 | 20 | 5 | active_window_bounded_refresh | pass |
 | ml-atk-00003 | queue_pressure | LTE | 6 | 0 | 20 | 0 | active_window_immediate_core_defense | pass |
 | ml-atk-00004 | failover_chasing | MESH | 5 | 0 | 20 | 0 | active_window_immediate_core_defense | pass |
-| ml-atk-00005 | failover_chasing | LTE | 6 | 0 | 20 | 10 | active_window_bounded_refresh | pass |
+| ml-atk-00005 | failover_chasing | LTE | 5 | 0 | 20 | 10 | active_window_bounded_refresh | pass |
 
 ## Detail
 
@@ -70,7 +70,7 @@ Safety boundary: closed simulation ML red-blue interaction audit only; no RF, ex
 - TSRA active window before attack: true
 - Peak probability in response window: 0.939345
 - Coordination class: prepositioned_defense
-- Impact reduction from peak: 0.0205729
+- Impact reduction from peak: 0.0206573
 - Interaction signal: aura_link=linked; aura_candidates=5; first_above_threshold_latency=0; first_ml_alert_latency=20; first_core_defense_latency=0; peak_probability=0.939345; issues=none
 - Status: pass
 - Safety boundary: closed simulation ML red-blue interaction audit only; no RF, exploit, or live network action
@@ -78,13 +78,13 @@ Safety boundary: closed simulation ML red-blue interaction audit only; no RF, ex
 ### ml-atk-00005 failover_chasing
 
 - AURA trace: aura-ml-trace-00027
-- AURA selected score: 0.744854
+- AURA selected score: 0.708246
 - AURA selection link: linked
-- TSRA probability at attack: 0.943596
+- TSRA probability at attack: 0.941744
 - TSRA active window before attack: true
 - Peak probability in response window: 0.963056
 - Coordination class: prepositioned_defense
-- Impact reduction from peak: 0.00262202
-- Interaction signal: aura_link=linked; aura_candidates=6; first_above_threshold_latency=0; first_ml_alert_latency=20; first_core_defense_latency=10; peak_probability=0.963056; issues=none
+- Impact reduction from peak: 0.0367162
+- Interaction signal: aura_link=linked; aura_candidates=5; first_above_threshold_latency=0; first_ml_alert_latency=20; first_core_defense_latency=10; peak_probability=0.963056; issues=none
 - Status: pass
 - Safety boundary: closed simulation ML red-blue interaction audit only; no RF, exploit, or live network action

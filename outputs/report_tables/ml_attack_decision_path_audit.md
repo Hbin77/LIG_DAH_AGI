@@ -6,9 +6,9 @@ Safety boundary: closed simulation ML attack decision-path audit only; no RF, ex
 | check_id | area | status | observed | interpretation |
 |---|---|---|---|---|
 | MAP01 | Pre-start no-op gate | pass | trace_count=31; first_attack_time=60; pre_start_traces=6; pre_start_noop_count=6; pre_start_attack_events=0 | The attack agent waits for mission context instead of emitting simulated attack effects immediately at startup. |
-| MAP02 | Candidate scoring toolchain | pass | attack_traces=5; candidate_total=27; generate_attack_candidates=5; predict_candidate_impact=27; estimate_candidate_effect=27; estimate_detectability=27; tool_errors=0 | AURA-ML uses a real tool path for selection: candidate generation, ML prediction, effect estimation, and detectability scoring all appear in DecisionTrace. |
+| MAP02 | Candidate scoring toolchain | pass | attack_traces=5; candidate_total=26; generate_attack_candidates=5; predict_candidate_impact=26; estimate_candidate_effect=26; estimate_detectability=26; tool_errors=0 | AURA-ML uses a real tool path for selection: candidate generation, ML prediction, effect estimation, and detectability scoring all appear in DecisionTrace. |
 | MAP03 | Top-score selection link | pass | attack_traces=5; attack_events=5; selected_matches_top_candidate=5; score_event_matches=5; time_event_matches=5; threshold_passes=5; attack_threshold=0.12 | The chosen attack is not hand-picked after the fact; it is the top candidate in the trace and is linked to the attack event log. |
-| MAP04 | Detectability-adjusted score | pass | candidate_total=27; score_formula_matches=27; selected_detectability_min=0.15; selected_detectability_max=0.5 | The attack score balances mission effect and detectability instead of maximizing impact blindly. |
+| MAP04 | Detectability-adjusted score | pass | candidate_total=26; score_formula_matches=26; selected_detectability_min=0.15; selected_detectability_max=0.5 | The attack score balances mission effect and detectability instead of maximizing impact blindly. |
 | MAP05 | Cadence and event budget gate | pass | attack_events=5; cooldown_noops=16; max_event_noops=4; min_attack_gap_sec=50; attacks_after_budget=0 | AURA-ML is an agent with cadence memory and an event budget, not a loop that fires every time step. |
 | MAP06 | Closed-loop attack feedback | pass | attack_types=failover_chasing,queue_pressure; target_links=LTE,MESH,SATCOM; scorecard_rows=5; scorecard_attack_links=5; complete_responses=5; positive_reductions=5; scorecard_passes=5 | The ML attack path reaches closed-loop evidence: selected attacks vary by tactic and link, then receive complete defense and metric feedback. |
 
@@ -27,7 +27,7 @@ Safety boundary: closed simulation ML attack decision-path audit only; no RF, ex
 
 - Requirement: Every selected attack decision should generate candidates and evaluate each candidate through ML impact, analytic effect, and detectability tools.
 - Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/aura_decision_traces.jsonl
-- Observed: attack_traces=5; candidate_total=27; generate_attack_candidates=5; predict_candidate_impact=27; estimate_candidate_effect=27; estimate_detectability=27; tool_errors=0
+- Observed: attack_traces=5; candidate_total=26; generate_attack_candidates=5; predict_candidate_impact=26; estimate_candidate_effect=26; estimate_detectability=26; tool_errors=0
 - Status: pass
 - Interpretation: AURA-ML uses a real tool path for selection: candidate generation, ML prediction, effect estimation, and detectability scoring all appear in DecisionTrace.
 - Safety boundary: closed simulation ML attack decision-path audit only; no RF, exploit, or live network action
@@ -45,7 +45,7 @@ Safety boundary: closed simulation ML attack decision-path audit only; no RF, ex
 
 - Requirement: Candidate score must equal predicted mission impact minus the configured detectability penalty.
 - Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/aura_decision_traces.jsonl | src/shared/metrics.py
-- Observed: candidate_total=27; score_formula_matches=27; selected_detectability_min=0.15; selected_detectability_max=0.5
+- Observed: candidate_total=26; score_formula_matches=26; selected_detectability_min=0.15; selected_detectability_max=0.5
 - Status: pass
 - Interpretation: The attack score balances mission effect and detectability instead of maximizing impact blindly.
 - Safety boundary: closed simulation ML attack decision-path audit only; no RF, exploit, or live network action

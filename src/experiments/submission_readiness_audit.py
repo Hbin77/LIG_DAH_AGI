@@ -387,7 +387,7 @@ def build_rows() -> list[dict[str, str]]:
                 and metric_counts["ablation"] == 5
                 and metric_counts["adaptive"] == 2
                 and metric_counts["decomposition"] == 35
-                and metric_counts["gates"] == 11
+                and metric_counts["gates"] == 12
                 and metric_counts["ml_contribution"] == 7
                 and metric_counts["ml_attack_path"] == 6
                 and metric_counts["ml_defense_path"] == 6

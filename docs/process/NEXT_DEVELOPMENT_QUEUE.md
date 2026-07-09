@@ -210,7 +210,7 @@ python3 -m src.experiments.run_adaptive_memory
 adaptive_memory_summary.csv: 2 conditions
 adaptive_memory_raw.csv: 60 rows
 conditions: full_tsra_r, adaptive_tsra_r
-full_tsra_r mission impact: 0.157423
+full_tsra_r mission impact: 0.140260
 adaptive_tsra_r mission impact: 0.109489
 priority inversion: 0.050609 -> 0.027455
 video throttle count: 6.4 -> 3.1
@@ -642,7 +642,7 @@ outputs/report_tables/metric_gate_summary.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.metric_gate --fail-on-error` 명령으로 재생성 가능하다.
-- 완료. 11개 metric gate가 모두 pass다.
+- 완료. 12개 metric gate가 모두 pass다.
 - 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
 
 검증:
@@ -654,10 +654,11 @@ python3 -m src.experiments.metric_gate --fail-on-error
 검증 결과:
 
 ```text
-metric_gate_summary.csv: 11 gates
+metric_gate_summary.csv: 12 gates
 status: all pass
 checked: AURA impact, TSRA-R resilience, action ablation,
-         adaptive memory, ML defender separation, repeated-run stability
+         adaptive memory, ML defender separation, repeated-run stability,
+         PACE reselection discipline
 ```
 
 해석:
@@ -894,8 +895,8 @@ outputs/report_tables/pace_transition_audit.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.pace_transition_audit` 명령으로 재생성 가능하다.
-- 완료. E5/E7 PACE 전환 6개가 감사된다.
-- 완료. SATCOM 최초 fallback 2개, fallback 재선택 4개가 구분된다.
+- 완료. E5/E7 PACE 전환 4개가 감사된다.
+- 완료. SATCOM 최초 fallback 2개, fallback 재선택 2개가 구분된다.
 - 완료. self transition은 없다.
 
 검증:
@@ -907,9 +908,9 @@ python3 -m src.experiments.pace_transition_audit
 검증 결과:
 
 ```text
-pace_transition_audit.csv: 6 rows
+pace_transition_audit.csv: 4 rows
 satcom_to_fallback: 2
-fallback_reselect: 4
+fallback_reselect: 2
 self_transition: 0
 ```
 
@@ -1997,7 +1998,7 @@ E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
 ML alert active-attack overlap: 9/9
-E7 minus E6 mission impact mean: 0.0162307
+E7 minus E6 mission impact mean: 0.0141698
 ```
 
 해석:
@@ -2252,7 +2253,7 @@ python3 scripts/verify_submission_state.py
 mission_thread_summary rows: 10
 thread_status: pass=10
 experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
-operator_signal_count range: 3-7
+operator_signal_count range: 2-7
 ```
 
 해석:
@@ -2349,8 +2350,8 @@ influence_status: pass=6
 AURA cooldown_noops: 48
 AURA-ML cooldown_noops: 32
 TSRA-R-ML opened_windows: 45
-Adaptive delta_mission_impact_mean: -0.0479341
-Adaptive delta_defense_count_mean: -4.93333
+Adaptive delta_mission_impact_mean: -0.0307717
+Adaptive delta_defense_count_mean: -3.93333
 ```
 
 해석:
@@ -2458,8 +2459,8 @@ status: pass=6
 pre_threshold_noop_count: 16
 pre_threshold_defense_events: 0
 first_response_latency_sec: 20
-above_threshold_event_traces: 23
-above_threshold_no_event_refresh_traces: 22
+above_threshold_event_traces: 24
+above_threshold_no_event_refresh_traces: 21
 ml_attack_alerts: 9
 min_alert_gap_sec: 25
 memory_mismatches: 0
