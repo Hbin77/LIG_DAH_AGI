@@ -17,6 +17,7 @@ DAH 2026 예선용 AI 공방 에이전트 부가자료입니다. 범위는 예�
 - `scripts/train_ml_policy.py`: dependency-free logistic fallback training script
 - `scripts/tune_ml_policy.py`: mission simulator 기반 TSRA-ML action gate 튜닝 스크립트
 - `docs/`: 아키텍처, 평가 계획, 안전 경계
+- `docs/report_writer_guide.md`: 보고서 담당자가 결과물, 수치, 안전 경계, 복붙 가능한 문장을 이해하기 위한 작성 가이드
 - `examples/`: 5개 seed 검증 결과 샘플
 - `tests/`: 표준 라이브러리 `unittest` 회귀 테스트
 
@@ -90,6 +91,8 @@ conda run -n base python -m unittest discover -s tests -v
 `origin/GubikoDev`는 실행 안정성, CLI, 훈련된 모델, 테스트가 강하고 `origin/hbin`은 AgentRuntime/DecisionTrace 기반 설명 가능성이 강합니다. 최종 통합본은 `GubikoDev`를 실행 베이스로 유지하고, `hbin`의 핵심 장점인 판단 trace 구조를 `src/tsra_agent/runtime.py`와 simulator 산출물로 이식했습니다.
 
 상세 비교는 `docs/agent_branch_comparison.md`에 기록했습니다.
+
+보고서 작성자는 먼저 `docs/report_writer_guide.md`를 읽으면 됩니다. 보고서에 넣을 수 있는 주장, 핵심 수치, 표 예시, 안전 경계, 재현 명령을 한 문서에 정리했습니다.
 
 ## 제출 패키지 권장
 
