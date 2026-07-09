@@ -152,11 +152,14 @@ Top-1 action match: 0.904
 4. predict_candidate_impact tool이 후보별 MissionImpactScore 예측
 5. estimate_candidate_effect, estimate_detectability tool로 효과와 탐지 가능성 계산
 6. base_attack_score = predicted_mission_impact - 0.15 * detectability_score
-7. selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
-8. selection_score가 가장 높은 후보를 AttackEvent로 기록
+7. counter_defense_bonus = bounded score term from active/recent TSRA-R defense context
+8. selection_score = base_attack_score + objective_bonus + counter_defense_bonus - repeated_tactic_penalty
+9. selection_score가 가장 높은 후보를 AttackEvent로 기록
 ```
 
 `objective_bonus`는 임의 가산점이 아니다. AURA-ML이 앞선 공격에서 아직 `stale_cop_induction`을 쓰지 않았고, 마지막 공격 예산 구간에서 stale data risk가 남아 있을 때만 제한적으로 붙는다. 목적은 단일 high-score 전술만 반복하지 않고 mission objective 관점의 전술 커버리지를 남기는 것이다.
+
+`counter_defense_bonus`도 임의 가산점이 아니다. AURA-ML이 TSRA-R의 active/recent defense context를 보고, PACE 전환 뒤 `failover_chasing`을 시도하거나 priority/video 방어 뒤 queue pressure를 재평가하는 경우에만 제한적으로 붙는다. 이 값과 `counter_defense_reason`은 후보 row, selected action, feedback에 남으므로 방어 맥락이 단순 로그가 아니라 공격 에이전트의 선택 점수에 들어갔는지 추적할 수 있다.
 
 ## 7. GPU-scale 실험
 
@@ -192,7 +195,7 @@ Throughput: 약 1,566,851 samples/sec
 - 공격 후보 생성
 - rule 기반 공격 선택
 - ML 기반 impact predictor
-- AURA-ML objective-aware selection score
+- AURA-ML objective/counter-defense-aware selection score
 - `queue_pressure`, `failover_chasing`, `stale_cop_induction` 선택 커버리지 검증
 - GPU MPS MLP 확장 실험
 - attack event JSONL 로그

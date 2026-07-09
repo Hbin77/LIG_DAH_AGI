@@ -2496,7 +2496,7 @@ threshold_window_nondecreasing: true
 
 ### 62. ML Attack Decision Path Audit를 추가한 이유
 
-방어 쪽은 `ml_defense_decision_path_audit`로 probability threshold에서 defense window까지 이어지는 흐름을 검증했다. 같은 수준으로 공격 쪽도 AURA-ML이 실제로 후보를 만들고, ML impact prediction, detectability penalty, objective-aware selection score로 top candidate를 고르고, cooldown과 event budget을 지키며, attack event와 closed-loop feedback까지 연결되는지 분해할 필요가 있었다.
+방어 쪽은 `ml_defense_decision_path_audit`로 probability threshold에서 defense window까지 이어지는 흐름을 검증했다. 같은 수준으로 공격 쪽도 AURA-ML이 실제로 후보를 만들고, ML impact prediction, detectability penalty, objective/counter-defense-aware selection score로 top candidate를 고르고, cooldown과 event budget을 지키며, attack event와 closed-loop feedback까지 연결되는지 분해할 필요가 있었다.
 
 그래서 `src/experiments/ml_attack_decision_path_audit.py`를 추가했다. 이 감사는 E7의 `aura_decision_traces.jsonl`, `attack_events.jsonl`, `agent_engagement_scorecard.csv`를 읽어서 AURA-ML decision path를 검증한다.
 
@@ -2522,7 +2522,7 @@ complete_responses: 5
 positive_reductions: 5
 ```
 
-이 보강의 의미는 AURA-ML이 단순히 attack event 5개를 만든 것이 아니라, AgentRuntime tool path와 base scoring formula, bounded objective adjustment, memory gate, post-action feedback을 갖춘 공격 에이전트로 검증된다는 점이다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+이 보강의 의미는 AURA-ML이 단순히 attack event 5개를 만든 것이 아니라, AgentRuntime tool path와 base scoring formula, bounded objective/counter-defense adjustment, memory gate, post-action feedback을 갖춘 공격 에이전트로 검증된다는 점이다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
 ### 63. ML Red-Blue Interaction Audit를 추가한 이유
 
@@ -2798,7 +2798,7 @@ competition_alignment_matrix rows: 10 verified
 
 ```text
 base_attack_score = predicted_mission_impact - 0.15 * detectability_score
-selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
+selection_score = base_attack_score + objective_bonus + counter_defense_bonus - repeated_tactic_penalty
 ```
 
 구현상 중요한 점은 다음과 같다.
@@ -2806,8 +2806,9 @@ selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
 - `base_attack_score`는 기존 detectability-adjusted attack score를 그대로 보존한다.
 - `repeated_tactic_penalty`는 같은 attack type 반복 선택에 최대 0.12까지만 붙는다.
 - `stale_cop_objective_bonus`는 마지막 attack budget 구간에서 stale COP objective가 아직 선택되지 않았고 stale data risk가 남아 있을 때만 붙는다.
-- AgentMemory에는 `attack_type_counts`, `last_objective_bonus`가 남는다.
-- DecisionTrace에는 후보별 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`이 남는다.
+- `counter_defense_bonus`는 TSRA-R의 active/recent defense context가 AURA-ML의 counter tactic과 맞물릴 때만 붙는다.
+- AgentMemory에는 `attack_type_counts`, `last_objective_bonus`, `defense_context`, `counter_defense_context_seen`이 남는다.
+- DecisionTrace에는 후보별 `base_attack_score`, `objective_bonus`, `counter_defense_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`, `counter_defense_reason`이 남는다.
 
 검증 결과는 다음과 같다.
 
@@ -2824,7 +2825,10 @@ candidate_total: 26
 score_formula_matches: 26
 selection_score_formula_matches: 26
 objective_bonus_candidates: 1
+counter_defense_bonus_candidates: 7
 selected_objective_bonus_count: 1
+selected_counter_defense_bonus_count: 3
+selected_counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_pressure
 attack_types: failover_chasing, queue_pressure, stale_cop_induction
 complete_responses: 5
 positive_reductions: 5
@@ -2835,11 +2839,11 @@ E7-E6 bounded tradeoff gap: 0.013592
 E7 resilience gain: 0.824367
 ```
 
-이 보강의 의미는 AURA-ML이 단순 모델 wrapper가 아니라 AgentMemory와 objective-aware score를 가진 공격 에이전트라는 점이다. 동시에 E7을 E6보다 무조건 좋다고 주장하지 않고, ML reactive 구조와 stale COP 전술 커버리지를 얻는 대신 bounded tradeoff가 남는다고 기록한다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+이 보강의 의미는 AURA-ML이 단순 모델 wrapper가 아니라 AgentMemory, objective-aware score, counter-defense score를 가진 공격 에이전트라는 점이다. 동시에 E7을 E6보다 무조건 좋다고 주장하지 않고, ML reactive 구조와 stale COP 전술 커버리지를 얻는 대신 bounded tradeoff가 남는다고 기록한다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
 ### 70. Adaptive TSRA-R Candidate-Level Memory Gate를 추가한 이유
 
-AURA-ML 쪽은 objective-aware selection score와 후보별 trace로 공격 선택 근거가 뚜렷해졌다. 방어 쪽에서 남은 약점은 TSRA-R이 좋은 action도 있지만, `video_throttle`과 `pace_switch` 같은 optional action의 비용이 mission impact에 남는다는 점이었다. 기존 Adaptive TSRA-R은 30-seed summary에서 이 비용을 줄였지만, 후보 action 단위로 왜 어떤 action을 보류했는지는 충분히 직접적이지 않았다.
+AURA-ML 쪽은 objective/counter-defense-aware selection score와 후보별 trace로 공격 선택 근거가 뚜렷해졌다. 방어 쪽에서 남은 약점은 TSRA-R이 좋은 action도 있지만, `video_throttle`과 `pace_switch` 같은 optional action의 비용이 mission impact에 남는다는 점이었다. 기존 Adaptive TSRA-R은 30-seed summary에서 이 비용을 줄였지만, 후보 action 단위로 왜 어떤 action을 보류했는지는 충분히 직접적이지 않았다.
 
 이번 변경은 Adaptive TSRA-R의 policy output을 action별 구조로 바꿨다.
 
@@ -2913,7 +2917,7 @@ AURA/AURA-ML은 `summarize_defense_context` tool을 호출하고, 그 결과를 
 검증 결과는 다음과 같다.
 
 ```text
-cross_agent_context_audit rows: 6 pass
+cross_agent_context_audit rows: 7 pass
 aura_observation_context: 62/62
 tsra_observation_context: 122/122
 summarize_attack_context: 122
@@ -2926,6 +2930,9 @@ candidate_defense_context_used: 47
 selected_attack_with_defense_context: 9
 related_context_events: 52/52
 missing_related_context: 0
+counter_defense_bonus_candidates: 7
+selected_counter_defense_bonus_traces: 3
+counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_pressure
 agent_tool_usage_audit rows: 33 pass
 reproduction_order_audit rows: 15 pass
 ```
@@ -2937,5 +2944,6 @@ reproduction_order_audit rows: 15 pass
 - `competition_alignment`는 이 감사를 AI agent architecture와 attack-defense cooperation의 공통 증거로 본다.
 - `submission_readiness_audit`, `reproduction_order_audit`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
 - `docs/agents/AGENT_RUNTIME.md`, `AURA_ATTACK_AGENT.md`, `TSRA_R_DEFENSE_AGENT.md`에 cross-agent context memory/tool/trace contract를 추가했다.
+- AURA-ML은 defense context를 `counter_defense_bonus`와 `counter_defense_reason`으로 바꿔 selection score와 selected action trace에 남긴다.
 
-이 보강의 의미는 공격/방어 에이전트가 단순히 같은 simulator를 공유하는 수준을 넘어, 상대 에이전트의 최근 행동 context를 다음 판단 루프 안에서 수용한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation context, trace, audit만 강화한다.
+이 보강의 의미는 공격/방어 에이전트가 단순히 같은 simulator를 공유하는 수준을 넘어, 상대 에이전트의 최근 행동 context를 다음 판단 루프와 정책 점수 안에서 수용한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation context, trace, audit만 강화한다.

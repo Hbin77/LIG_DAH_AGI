@@ -160,7 +160,7 @@ This table is generated from AURA and TSRA-R DecisionTrace JSONL logs.
 | E7_ml_aura_ml_tsra_r | 100 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
 | E7_ml_aura_ml_tsra_r | 100 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.952487 | open_defense_window | eligible=True; threshold=0.75; active_until=170 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 105 | TSRA-R-ML | ml_anomaly_detector | ml_attack_alert+priority_reroute+video_throttle+stale_badge |  | 0.961885 | open_defense_window | eligible=True; threshold=0.75; active_until=175 | detector opened or maintained defense window |
-| E7_ml_aura_ml_tsra_r | 110 | AURA-ML | ml_impact_predictor | failover_chasing | 0.761848 |  | failover_chasing | impact=0.836848; detectability=0.5 | ML impact predictor selected failover_chasing |
+| E7_ml_aura_ml_tsra_r | 110 | AURA-ML | ml_impact_predictor | failover_chasing | 0.841848 |  | failover_chasing | impact=0.836848; detectability=0.5 | ML impact predictor selected failover_chasing |
 | E7_ml_aura_ml_tsra_r | 110 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.972533 | open_defense_window | eligible=True; threshold=0.75; active_until=180 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 115 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.965304 | open_defense_window | eligible=True; threshold=0.75; active_until=185 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 120 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
@@ -175,7 +175,7 @@ This table is generated from AURA and TSRA-R DecisionTrace JSONL logs.
 | E7_ml_aura_ml_tsra_r | 150 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
 | E7_ml_aura_ml_tsra_r | 150 | TSRA-R-ML | ml_anomaly_detector | pace_switch |  | 0.96828 | open_defense_window | eligible=True; threshold=0.75; active_until=220 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 155 | TSRA-R-ML | ml_anomaly_detector | ml_attack_alert |  | 0.966892 | open_defense_window | eligible=True; threshold=0.75; active_until=225 | detector opened or maintained defense window |
-| E7_ml_aura_ml_tsra_r | 160 | AURA-ML | ml_impact_predictor | failover_chasing | 0.737403 |  | failover_chasing | impact=0.822403; detectability=0.3 | ML impact predictor selected failover_chasing |
+| E7_ml_aura_ml_tsra_r | 160 | AURA-ML | ml_impact_predictor | failover_chasing | 0.817403 |  | failover_chasing | impact=0.822403; detectability=0.3 | ML impact predictor selected failover_chasing |
 | E7_ml_aura_ml_tsra_r | 160 | TSRA-R-ML | ml_anomaly_detector | stale_badge |  | 0.916883 | open_defense_window | eligible=True; threshold=0.75; active_until=230 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 165 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.921799 | open_defense_window | eligible=True; threshold=0.75; active_until=235 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 170 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
@@ -190,7 +190,7 @@ This table is generated from AURA and TSRA-R DecisionTrace JSONL logs.
 | E7_ml_aura_ml_tsra_r | 200 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
 | E7_ml_aura_ml_tsra_r | 200 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.28753 | open_defense_window | eligible=False; threshold=0.75; active_until=245 | active defense window maintained while downstream rule actions were evaluated |
 | E7_ml_aura_ml_tsra_r | 205 | TSRA-R-ML | ml_anomaly_detector | video_throttle |  | 0.407404 | open_defense_window | eligible=False; threshold=0.75; active_until=245 | active defense window maintained while downstream rule actions were evaluated |
-| E7_ml_aura_ml_tsra_r | 210 | AURA-ML | ml_impact_predictor | queue_pressure | 0.739372 |  | queue_pressure | impact=0.801872; detectability=0.15 | ML impact predictor selected queue_pressure |
+| E7_ml_aura_ml_tsra_r | 210 | AURA-ML | ml_impact_predictor | queue_pressure | 0.779372 |  | queue_pressure | impact=0.801872; detectability=0.15 | ML impact predictor selected queue_pressure |
 | E7_ml_aura_ml_tsra_r | 210 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.394108 | open_defense_window | eligible=False; threshold=0.75; active_until=245 | active defense window maintained while downstream rule actions were evaluated |
 | E7_ml_aura_ml_tsra_r | 215 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.477419 | open_defense_window | eligible=False; threshold=0.75; active_until=245 | active defense window maintained while downstream rule actions were evaluated |
 | E7_ml_aura_ml_tsra_r | 220 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |

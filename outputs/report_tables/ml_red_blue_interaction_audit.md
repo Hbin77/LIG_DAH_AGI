@@ -36,7 +36,7 @@ Safety boundary: closed simulation ML red-blue interaction audit only; no RF, ex
 ### ml-atk-00002 failover_chasing
 
 - AURA trace: aura-ml-trace-00012
-- AURA selected score: 0.761848
+- AURA selected score: 0.841848
 - AURA selection link: linked
 - TSRA probability at attack: 0.972533
 - TSRA active window before attack: true
@@ -50,7 +50,7 @@ Safety boundary: closed simulation ML red-blue interaction audit only; no RF, ex
 ### ml-atk-00003 failover_chasing
 
 - AURA trace: aura-ml-trace-00017
-- AURA selected score: 0.737403
+- AURA selected score: 0.817403
 - AURA selection link: linked
 - TSRA probability at attack: 0.916883
 - TSRA active window before attack: true
@@ -64,7 +64,7 @@ Safety boundary: closed simulation ML red-blue interaction audit only; no RF, ex
 ### ml-atk-00004 queue_pressure
 
 - AURA trace: aura-ml-trace-00022
-- AURA selected score: 0.739372
+- AURA selected score: 0.779372
 - AURA selection link: linked
 - TSRA probability at attack: 0.394108
 - TSRA active window before attack: true

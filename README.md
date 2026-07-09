@@ -309,7 +309,7 @@ This writes:
 - `outputs/report_tables/cross_agent_context_audit.csv`
 - `outputs/report_tables/cross_agent_context_audit.md`
 
-The audit verifies that AURA carries TSRA-R defense context and TSRA-R carries AURA attack context through observations, tool calls, AgentMemory, DecisionTrace feedback, candidate rows, and emitted defense event details.
+The audit verifies that AURA carries TSRA-R defense context and TSRA-R carries AURA attack context through observations, tool calls, AgentMemory, DecisionTrace feedback, candidate rows, and emitted defense event details. It also checks that AURA-ML converts defender context into a bounded counter-defense selection-score term instead of only logging it.
 
 ## Audit Agent Tool Usage
 
@@ -471,7 +471,7 @@ This writes:
 - `outputs/report_tables/ml_attack_decision_path_audit.csv`
 - `outputs/report_tables/ml_attack_decision_path_audit.md`
 
-The audit follows the E7 AURA-ML path from startup no-op to candidate generation, ML impact prediction, detectability-adjusted base scoring, bounded objective-aware selection, cadence gating, event budget, and closed-loop attack feedback. It also checks that selected attacks cover `queue_pressure`, `failover_chasing`, and `stale_cop_induction` inside the closed simulation.
+The audit follows the E7 AURA-ML path from startup no-op to candidate generation, ML impact prediction, detectability-adjusted base scoring, bounded objective-aware and counter-defense-aware selection, cadence gating, event budget, and closed-loop attack feedback. It also checks that selected attacks cover `queue_pressure`, `failover_chasing`, and `stale_cop_induction` inside the closed simulation.
 
 ## Audit ML Defense Decision Path
 

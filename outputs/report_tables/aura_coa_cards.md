@@ -262,9 +262,9 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Expected stale data ratio: 0.46
 - Expected priority inversion rate: 0.371232
 - Detectability score: 0.5
-- Attack score: 0.761848
+- Attack score: 0.841848
 - Candidate rank: 1
-- Runner-up: critical_window_degradation on LTE (score=0.712009, impact=0.854509)
+- Runner-up: queue_pressure on LTE (score=0.740504, impact=0.763004)
 - Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -284,9 +284,9 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Expected stale data ratio: 0.71
 - Expected priority inversion rate: 0.31759
 - Detectability score: 0.3
-- Attack score: 0.737403
+- Attack score: 0.817403
 - Candidate rank: 1
-- Runner-up: queue_pressure on MESH (score=0.652203, impact=0.714703)
+- Runner-up: queue_pressure on MESH (score=0.692203, impact=0.714703)
 - Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -306,9 +306,9 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Expected stale data ratio: 0.676667
 - Expected priority inversion rate: 0.500637
 - Detectability score: 0.15
-- Attack score: 0.739372
+- Attack score: 0.779372
 - Candidate rank: 1
-- Runner-up: bandwidth_limit on MESH (score=0.609497, impact=0.631997)
+- Runner-up: failover_chasing on MESH (score=0.614297, impact=0.659297)
 - Selection reason: ML impact predictor selected queue_pressure
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 

@@ -1122,7 +1122,7 @@ AURA-ML은 공격 event를 만드는 코드만으로는 부족하다. 대회 방
 - attack decision 시점에는 후보를 생성하고 각 후보에 ML impact prediction, analytic effect estimate, detectability estimate를 적용한다.
 - selected attack은 top-score candidate와 attack event log가 일치한다.
 - base score는 `predicted_mission_impact - 0.15 * detectability_score` 공식을 따른다.
-- selection score는 base score에 제한된 objective bonus와 repeated tactic penalty를 반영한다.
+- selection score는 base score에 제한된 objective bonus, counter-defense bonus, repeated tactic penalty를 반영한다.
 - cooldown과 max-event budget으로 연속 공격을 제한한다.
 - selected attacks는 `queue_pressure`, `failover_chasing`, `stale_cop_induction`을 포함하고 scorecard에서 complete response와 positive reduction까지 연결된다.
 

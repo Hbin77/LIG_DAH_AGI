@@ -489,7 +489,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 ### E7_ml_aura_ml_tsra_r aura-ml-trace-00012 ml-atk-00002
 
 - Agent: AURA-ML policy=ml_impact_predictor
-- Decision: score=0.761848; expected_mission_impact=0.836848; target=LTE; reason=ML impact predictor selected failover_chasing
+- Decision: score=0.841848; expected_mission_impact=0.836848; target=LTE; reason=ML impact predictor selected failover_chasing
 - Event link: linked
 - Metrics: before=0.114622@t=110; peak=0.137802; after=0.133684@t=180; delta=0.0190628; peak_latency=1.3; peak_trusted_stale=0.125; peak_priority_inversion=0.109827
 - Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.025868
@@ -555,7 +555,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 ### E7_ml_aura_ml_tsra_r aura-ml-trace-00017 ml-atk-00003
 
 - Agent: AURA-ML policy=ml_impact_predictor
-- Decision: score=0.737403; expected_mission_impact=0.822403; target=MESH; reason=ML impact predictor selected failover_chasing
+- Decision: score=0.817403; expected_mission_impact=0.822403; target=MESH; reason=ML impact predictor selected failover_chasing
 - Event link: linked
 - Metrics: before=0.137802@t=160; peak=0.13899; after=0.100118@t=230; delta=-0.037684; peak_latency=2; peak_trusted_stale=0.125; peak_priority_inversion=0.058104
 - Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.00132496
@@ -610,7 +610,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 ### E7_ml_aura_ml_tsra_r aura-ml-trace-00022 ml-atk-00004
 
 - Agent: AURA-ML policy=ml_impact_predictor
-- Decision: score=0.739372; expected_mission_impact=0.801872; target=MESH; reason=ML impact predictor selected queue_pressure
+- Decision: score=0.779372; expected_mission_impact=0.801872; target=MESH; reason=ML impact predictor selected queue_pressure
 - Event link: linked
 - Metrics: before=0.136148@t=210; peak=0.14835; after=0.147139@t=290; delta=0.0109912; peak_latency=2; peak_trusted_stale=0.125; peak_priority_inversion=0.0421286
 - Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.0375459

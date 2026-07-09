@@ -190,7 +190,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_decision_feedback_audit.csv", 60),
             RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_memory_influence_audit.csv", 6),
-            RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 6),
+            RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 7),
             RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 33),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
             RowCountCheck("outputs/report_tables/agent_capability_matrix.csv", 10),
@@ -269,6 +269,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "attack_handoffs=10/10"),
             ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "selected_attack_with_defense_context=9"),
+            ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "selected_counter_defense_bonus_traces="),
             ContentCheck("outputs/report_tables/agent_coordination_latency_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_stress_scenario_audit.csv", "stress_air_defense_queue_saturation"),
             ContentCheck("outputs/report_tables/agent_stress_scenario_audit.csv", "stress_pace_failover_pressure"),
@@ -286,7 +287,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/defense_effectiveness_ledger.csv", 50),
             RowCountCheck("outputs/report_tables/defense_action_attribution_audit.csv", 5),
             RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 13),
-            RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 6),
+            RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 7),
             RowCountCheck("outputs/report_tables/agent_coordination_latency_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_stress_scenario_audit.csv", 6),
             RowCountCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", 5),
@@ -303,7 +304,7 @@ ALIGNMENT_SPECS = [
             "from anomaly probability; ML contribution audit ties model quality, tool invocation, E6/E7 "
             "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together; "
             "ML attack decision-path audit follows E7 from startup no-op to candidate generation, "
-            "ML impact prediction, detectability-adjusted base scoring, objective-aware selection, cadence gating, and "
+            "ML impact prediction, detectability-adjusted base scoring, objective-aware and counter-defense-aware selection, cadence gating, and "
             "closed-loop attack feedback; "
             "ML defense decision-path audit follows E7 from probability threshold to defense window, "
             "alert cooldown, core action fanout, memory continuity, and coordination effect; "

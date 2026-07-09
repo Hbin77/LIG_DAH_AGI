@@ -2534,7 +2534,7 @@ positive_reductions: 5
 
 해석:
 
-- AURA-ML은 공격 후보를 임의로 고르지 않고, ML impact prediction, detectability-adjusted base score, objective-aware selection score로 선택한다.
+- AURA-ML은 공격 후보를 임의로 고르지 않고, ML impact prediction, detectability-adjusted base score, objective/counter-defense-aware selection score로 선택한다.
 - no-op, cooldown, max-event gate가 있어 무조건 공격하지 않는 에이전트 구조를 유지한다.
 - repeated tactic penalty와 stale COP objective bonus가 DecisionTrace에 남아 전술 커버리지 선택 근거를 재현할 수 있다.
 - 선택된 attack event는 closed-loop defense response와 metric feedback까지 연결된다.
@@ -2772,13 +2772,14 @@ docs/agents/AURA_ATTACK_AGENT.md
 
 ```text
 base_attack_score = predicted_mission_impact - 0.15 * detectability_score
-selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
+selection_score = base_attack_score + objective_bonus + counter_defense_bonus - repeated_tactic_penalty
 ```
 
 - `repeated_tactic_penalty`는 같은 attack type을 반복 선택할수록 최대 0.12까지 붙는다.
 - `stale_cop_objective_bonus`는 마지막 attack budget 구간에서 아직 `stale_cop_induction`을 쓰지 않았고 stale data risk가 남아 있을 때만 붙는다.
-- AgentMemory에는 `attack_type_counts`, `last_objective_bonus`가 남는다.
-- DecisionTrace의 후보와 selected action에는 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`이 남는다.
+- `counter_defense_bonus`는 TSRA-R의 active/recent defense context가 특정 counter tactic과 맞물릴 때만 붙는다.
+- AgentMemory에는 `attack_type_counts`, `last_objective_bonus`, `defense_context`, `counter_defense_context_seen`이 남는다.
+- DecisionTrace의 후보와 selected action에는 `base_attack_score`, `objective_bonus`, `counter_defense_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`, `counter_defense_reason`이 남는다.
 
 검증:
 
@@ -2804,7 +2805,10 @@ candidate_total: 26
 score_formula_matches: 26
 selection_score_formula_matches: 26
 objective_bonus_candidates: 1
+counter_defense_bonus_candidates: 7
 selected_objective_bonus_count: 1
+selected_counter_defense_bonus_count: 3
+selected_counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_pressure
 attack_types: failover_chasing, queue_pressure, stale_cop_induction
 complete_responses: 5
 positive_reductions: 5
@@ -2818,7 +2822,7 @@ E7 resilience gain: 0.824367
 해석:
 
 - AURA-ML은 이제 단순히 예측값이 가장 큰 전술을 반복하는 모델 wrapper가 아니다.
-- ML 예측, 탐지 가능성, 반복 전술 memory, mission objective coverage가 selection score로 합쳐진다.
+- ML 예측, 탐지 가능성, 반복 전술 memory, mission objective coverage, TSRA-R 방어 context 대응이 selection score로 합쳐진다.
 - stale COP 전술은 마지막 예산 구간에서 objective bonus가 trace에 남은 상태로 선택되므로, 사후 표기용이 아니라 decision loop의 실제 결과다.
 - 이 변경은 closed simulation 안의 공격 효과 선택 정책과 감사 기준만 바꾸며 RF, exploit, live network action은 추가하지 않는다.
 
@@ -2933,7 +2937,7 @@ python3 scripts/verify_submission_state.py
 현재 검증 결과:
 
 ```text
-cross_agent_context_audit rows: 6 pass
+cross_agent_context_audit rows: 7 pass
 aura_observation_context: 62/62
 tsra_observation_context: 122/122
 summarize_attack_context: 122
@@ -2948,6 +2952,9 @@ defense_context_seen_traces: 51
 related_context_events: 52/52
 active_related_events: 50
 missing_related_context: 0
+counter_defense_bonus_candidates: 7
+selected_counter_defense_bonus_traces: 3
+counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_pressure
 agent_tool_usage_audit rows: 33 pass
 reproduction_order_audit rows: 15 pass
 submission_readiness_audit rows: 10 pass

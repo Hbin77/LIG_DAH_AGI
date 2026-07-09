@@ -141,8 +141,9 @@ def score_formula_ok(candidate: dict[str, Any]) -> bool:
 def selection_score_formula_ok(candidate: dict[str, Any]) -> bool:
     base_score = as_float(candidate.get("base_attack_score", candidate.get("score")))
     objective_bonus = as_float(candidate.get("objective_bonus"))
+    counter_bonus = as_float(candidate.get("counter_defense_bonus"))
     repeated_penalty = as_float(candidate.get("repeated_tactic_penalty"))
-    return abs(as_float(candidate.get("score")) - (base_score + objective_bonus - repeated_penalty)) <= 1e-5
+    return abs(as_float(candidate.get("score")) - (base_score + objective_bonus + counter_bonus - repeated_penalty)) <= 1e-5
 
 
 def row(
@@ -242,10 +243,25 @@ def build_rows() -> list[dict[str, str]]:
     objective_bonus_candidates = sum(
         1 for candidate in all_candidates if as_float(candidate.get("objective_bonus")) > 0.0
     )
+    counter_bonus_candidates = sum(
+        1 for candidate in all_candidates if as_float(candidate.get("counter_defense_bonus")) > 0.0
+    )
     selected_objective_bonus_count = sum(
         1
         for trace in attack_traces
         if as_float(best_candidate(trace).get("objective_bonus")) > 0.0
+    )
+    selected_counter_bonus_count = sum(
+        1
+        for trace in attack_traces
+        if as_float(best_candidate(trace).get("counter_defense_bonus")) > 0.0
+    )
+    selected_counter_reasons = sorted(
+        {
+            str(best_candidate(trace).get("counter_defense_reason", ""))
+            for trace in attack_traces
+            if as_float(best_candidate(trace).get("counter_defense_bonus")) > 0.0
+        }
     )
     selected_detectability = [
         as_float(best_candidate(trace).get("detectability_score"))
@@ -363,13 +379,19 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="MAP04",
             area="Detectability-adjusted score",
-            requirement="Candidate base score must equal predicted mission impact minus detectability penalty, and selection score must include bounded objective adjustment.",
+            requirement=(
+                "Candidate base score must equal predicted mission impact minus detectability penalty, "
+                "and selection score must include bounded objective and counter-defense adjustments."
+            ),
             evidence=[TRACE_PATH, "src/shared/metrics.py"],
             observed=(
                 f"candidate_total={candidate_total}; score_formula_matches={formula_matches}; "
                 f"selection_score_formula_matches={selection_formula_matches}; "
                 f"objective_bonus_candidates={objective_bonus_candidates}; "
+                f"counter_defense_bonus_candidates={counter_bonus_candidates}; "
                 f"selected_objective_bonus_count={selected_objective_bonus_count}; "
+                f"selected_counter_defense_bonus_count={selected_counter_bonus_count}; "
+                f"selected_counter_defense_reasons={','.join(selected_counter_reasons) if selected_counter_reasons else 'none'}; "
                 f"selected_detectability_min={fmt(min(selected_detectability) if selected_detectability else None)}; "
                 f"selected_detectability_max={fmt(max(selected_detectability) if selected_detectability else None)}"
             ),
@@ -378,12 +400,14 @@ def build_rows() -> list[dict[str, str]]:
                 and formula_matches == candidate_total
                 and selection_formula_matches == candidate_total
                 and selected_objective_bonus_count >= 1
+                and selected_counter_bonus_count >= 1
                 and bool(selected_detectability)
                 and max(selected_detectability) <= 0.6
             ),
             interpretation=(
                 "AURA-ML keeps the detectability-adjusted base score explicit, then applies a "
-                "bounded objective adjustment so tactical coverage is visible rather than hidden."
+                "bounded objective and counter-defense adjustment so tactical coverage and defender "
+                "context are visible rather than hidden."
             ),
         ),
         row(

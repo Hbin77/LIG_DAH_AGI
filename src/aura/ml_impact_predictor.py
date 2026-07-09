@@ -22,6 +22,7 @@ class MLAURA:
         max_events: int = 5,
         min_start_sec: float = 60.0,
         stale_cop_objective_bonus: float = 0.20,
+        counter_defense_bonus: float = 0.08,
         repeated_tactic_penalty: float = 0.04,
     ) -> None:
         self.attack_threshold = attack_threshold
@@ -29,6 +30,7 @@ class MLAURA:
         self.max_events = max_events
         self.min_start_sec = min_start_sec
         self.stale_cop_objective_bonus = stale_cop_objective_bonus
+        self.counter_defense_bonus = counter_defense_bonus
         self.repeated_tactic_penalty = repeated_tactic_penalty
         self.last_attack_time = -10_000.0
         self.event_count = 0
@@ -152,14 +154,21 @@ class MLAURA:
                 state=state,
                 attack_type=candidate.attack_type,
             )
-            score = base_score + objective_bonus - repeated_penalty
+            counter_bonus, counter_reason = self._counter_defense_adjustment(
+                state=state,
+                attack_type=candidate.attack_type,
+                defense_context=defense_context,
+            )
+            score = base_score + objective_bonus + counter_bonus - repeated_penalty
             predicted["mission_impact"] = predicted_impact
             predicted["detectability_score"] = detectability
             predicted["base_attack_score"] = base_score
             predicted["objective_bonus"] = objective_bonus
+            predicted["counter_defense_bonus"] = counter_bonus
             predicted["repeated_tactic_penalty"] = repeated_penalty
             predicted["selection_score"] = score
             predicted["objective_reason"] = objective_reason
+            predicted["counter_defense_reason"] = counter_reason
             scored.append((score, candidate, predicted))
             candidate_actions.append(
                 {
@@ -168,11 +177,13 @@ class MLAURA:
                     "score": round(score, 6),
                     "base_attack_score": round(base_score, 6),
                     "objective_bonus": round(objective_bonus, 6),
+                    "counter_defense_bonus": round(counter_bonus, 6),
                     "repeated_tactic_penalty": round(repeated_penalty, 6),
                     "selection_score": round(score, 6),
                     "predicted_mission_impact": round(predicted_impact, 6),
                     "detectability_score": round(detectability, 6),
                     "objective_reason": objective_reason,
+                    "counter_defense_reason": counter_reason,
                     "cross_agent_defense_context": defense_context,
                     "cross_agent_defense_context_used": self._defense_context_used(defense_context),
                     "reason": candidate.reason,
@@ -242,11 +253,13 @@ class MLAURA:
                 "score": round(best_score, 6),
                 "base_attack_score": round(best_prediction.get("base_attack_score", best_score), 6),
                 "objective_bonus": round(best_prediction.get("objective_bonus", 0.0), 6),
+                "counter_defense_bonus": round(best_prediction.get("counter_defense_bonus", 0.0), 6),
                 "repeated_tactic_penalty": round(
                     best_prediction.get("repeated_tactic_penalty", 0.0),
                     6,
                 ),
                 "objective_reason": best_prediction.get("objective_reason", "base_score"),
+                "counter_defense_reason": best_prediction.get("counter_defense_reason", "no_counter_defense_adjustment"),
             },
             reason=f"ML impact predictor selected {best_candidate.attack_type}",
             feedback={
@@ -256,6 +269,7 @@ class MLAURA:
                 "attack_type_counts": dict(self.attack_type_counts),
                 "selected_base_attack_score": round(best_prediction.get("base_attack_score", best_score), 6),
                 "selected_objective_bonus": round(best_prediction.get("objective_bonus", 0.0), 6),
+                "selected_counter_defense_bonus": round(best_prediction.get("counter_defense_bonus", 0.0), 6),
                 "selected_repeated_tactic_penalty": round(
                     best_prediction.get("repeated_tactic_penalty", 0.0),
                     6,
@@ -287,6 +301,34 @@ class MLAURA:
             objective_bonus = self.stale_cop_objective_bonus
             reasons.append("uncovered_stale_cop_objective")
         return objective_bonus, repeated_penalty, "+".join(reasons) if reasons else "base_score"
+
+    def _counter_defense_adjustment(
+        self,
+        *,
+        state: MissionState,
+        attack_type: str,
+        defense_context: dict,
+    ) -> tuple[float, str]:
+        active_actions = set(defense_context.get("active_defense_actions") or [])
+        recent_actions = set(defense_context.get("recent_defense_actions") or [])
+        actions = active_actions | recent_actions
+        defense_mode = str(defense_context.get("defense_mode") or state.defense_mode)
+
+        if not defense_context.get("counter_defense_context_seen"):
+            return 0.0, "no_counter_defense_context"
+        if (
+            attack_type == "failover_chasing"
+            and state.active_link != "SATCOM"
+            and ("pace_switch" in actions or defense_mode == "pace_switch")
+        ):
+            return self.counter_defense_bonus, "counter_pace_failover_chasing"
+        if (
+            attack_type == "queue_pressure"
+            and actions.intersection({"priority_reroute", "video_throttle"})
+            and state.video_queue_kb > 500.0
+        ):
+            return min(self.counter_defense_bonus * 0.5, 0.04), "counter_priority_video_pressure"
+        return 0.0, "defense_context_observed_no_score_change"
 
     def _predict_candidate_impact(self, state: MissionState, candidate) -> float:
         features = candidate_features(state, candidate)

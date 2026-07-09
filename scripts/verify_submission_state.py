@@ -786,8 +786,8 @@ def check_csv_outputs() -> list[str]:
 
     cross_agent_rows = read_csv("outputs/report_tables/cross_agent_context_audit.csv")
     require(
-        len(cross_agent_rows) == 6,
-        f"expected 6 cross-agent context audit rows, got {len(cross_agent_rows)}",
+        len(cross_agent_rows) == 7,
+        f"expected 7 cross-agent context audit rows, got {len(cross_agent_rows)}",
     )
     failed_cross_agent_rows = [
         f"{row['check_id']}:{row['area']}"
@@ -807,6 +807,7 @@ def check_csv_outputs() -> list[str]:
             "AURA defense-context tool path",
             "Defense-to-attack handoff",
             "Event-level context consistency",
+            "Context-to-policy score effect",
         },
         "cross-agent context audit has unexpected areas",
     )
@@ -869,10 +870,20 @@ def check_csv_outputs() -> list[str]:
         "cross-agent audit missing event-level context evidence",
     )
     require(
+        any(
+            observed_int(row, "counter_defense_bonus_candidates") > 0
+            and observed_int(row, "selected_counter_defense_bonus_traces") > 0
+            and "counter_" in row["observed"]
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG07"
+        ),
+        "cross-agent audit missing context-to-policy score evidence",
+    )
+    require(
         all("closed simulation" in row["safety_boundary"] for row in cross_agent_rows),
         "cross-agent context audit missing safety boundary",
     )
-    checks.append("cross_agent_context_audit rows=6 pass")
+    checks.append("cross_agent_context_audit rows=7 pass")
 
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
     require(len(tool_rows) == 33, f"expected 33 agent tool audit rows, got {len(tool_rows)}")
@@ -1267,10 +1278,11 @@ def check_csv_outputs() -> list[str]:
             and observed_int(row, "score_formula_matches") == observed_int(row, "candidate_total")
             and observed_int(row, "selection_score_formula_matches") == observed_int(row, "candidate_total")
             and observed_int(row, "selected_objective_bonus_count") >= 1
+            and observed_int(row, "selected_counter_defense_bonus_count") >= 1
             for row in ml_attack_path_rows
             if row["check_id"] == "MAP04"
         ),
-        "ML attack path audit missing objective-aware score evidence",
+        "ML attack path audit missing objective/counter-defense-aware score evidence",
     )
     require(
         any(

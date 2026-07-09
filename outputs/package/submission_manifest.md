@@ -23,11 +23,11 @@
 ## 패키지 요약
 
 - payload_file_count: 227
-- total_payload_bytes: 4415842
+- total_payload_bytes: 4426753
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
 - zip_file_count: 228
-- zip_bytes: 1947127
-- zip_sha256: `9e536fd653c26f504c637cc2e3e82b971c2a238129c65733a3d4e73b1390bd30`
+- zip_bytes: 1949224
+- zip_sha256: `13d9628e375058cd73ecb8607a698a2bb3cac34fcd29e2335b18402430a31f65`
 
 ## 포함 파일
 

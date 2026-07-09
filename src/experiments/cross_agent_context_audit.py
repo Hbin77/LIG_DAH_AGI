@@ -295,6 +295,31 @@ def build_rows() -> list[dict[str, str]]:
         if as_float(event_related_context(event).get("active_attack_count")) > 0.0
     )
     missing_related_context = len(defenses) - related_context_events
+    aura_counter_candidates = [
+        candidate
+        for trace in aura_traces
+        for candidate in trace.get("candidate_actions") or []
+        if as_float(candidate.get("counter_defense_bonus")) > 0.0
+    ]
+    selected_counter_traces = [
+        trace
+        for trace in aura_traces
+        if selected_type(trace) == "attack_event"
+        and as_float(
+            max(
+                trace.get("candidate_actions") or [{}],
+                key=lambda candidate: as_float(candidate.get("score")),
+            ).get("counter_defense_bonus")
+        )
+        > 0.0
+    ]
+    counter_reasons = sorted(
+        {
+            str(candidate.get("counter_defense_reason", ""))
+            for candidate in aura_counter_candidates
+            if candidate.get("counter_defense_reason")
+        }
+    )
 
     return [
         row(
@@ -420,6 +445,23 @@ def build_rows() -> list[dict[str, str]]:
                 and missing_related_context == 0
             ),
             interpretation="Selected defense events retain the attack context that was visible during the decision.",
+        ),
+        row(
+            check_id="XAG07",
+            area="Context-to-policy score effect",
+            requirement="AURA-ML should convert defender context into bounded counter-defense score adjustments.",
+            evidence=["outputs/experiments/*/aura_decision_traces.jsonl"],
+            observed=(
+                f"counter_defense_bonus_candidates={len(aura_counter_candidates)}; "
+                f"selected_counter_defense_bonus_traces={len(selected_counter_traces)}; "
+                f"counter_defense_reasons={','.join(counter_reasons) if counter_reasons else 'none'}"
+            ),
+            ok=(
+                len(aura_counter_candidates) > 0
+                and len(selected_counter_traces) > 0
+                and bool(counter_reasons)
+            ),
+            interpretation="AURA-ML does not merely log TSRA-R state; it uses that context as a bounded selection-score term.",
         ),
     ]
 

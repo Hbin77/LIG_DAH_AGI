@@ -11,6 +11,7 @@ Safety boundary: closed simulation cross-agent context audit only; no RF, exploi
 | XAG04 | AURA defense-context tool path | pass | aura_traces=62; summarize_defense_context=62; feedback_defense_context=62; memory_defense_context=62; candidate_defense_context=51/51; candidate_defense_context_used=47; selected_attack_with_defense_context=9 | AURA records the defender state that explains counter-defense choices such as failover chasing. |
 | XAG05 | Defense-to-attack handoff | pass | experiments_with_post_defense_context=2/2; defense_context_seen_traces=51; selected_attack_with_defense_context=9 | The attack agent can see that TSRA-R has changed the battlefield before later attack selections. |
 | XAG06 | Event-level context consistency | pass | defense_events=52; related_context_events=52; active_related_events=50; missing_related_context=0 | Selected defense events retain the attack context that was visible during the decision. |
+| XAG07 | Context-to-policy score effect | pass | counter_defense_bonus_candidates=7; selected_counter_defense_bonus_traces=3; counter_defense_reasons=counter_pace_failover_chasing,counter_priority_video_pressure | AURA-ML does not merely log TSRA-R state; it uses that context as a bounded selection-score term. |
 
 ## Detail
 
@@ -66,4 +67,13 @@ Safety boundary: closed simulation cross-agent context audit only; no RF, exploi
 - Observed: defense_events=52; related_context_events=52; active_related_events=50; missing_related_context=0
 - Status: pass
 - Interpretation: Selected defense events retain the attack context that was visible during the decision.
+- Safety boundary: closed simulation cross-agent context audit only; no RF, exploit, or live network action
+
+### XAG07 Context-to-policy score effect
+
+- Requirement: AURA-ML should convert defender context into bounded counter-defense score adjustments.
+- Evidence: outputs/experiments/*/aura_decision_traces.jsonl
+- Observed: counter_defense_bonus_candidates=7; selected_counter_defense_bonus_traces=3; counter_defense_reasons=counter_pace_failover_chasing,counter_priority_video_pressure
+- Status: pass
+- Interpretation: AURA-ML does not merely log TSRA-R state; it uses that context as a bounded selection-score term.
 - Safety boundary: closed simulation cross-agent context audit only; no RF, exploit, or live network action

@@ -81,6 +81,8 @@ adaptive_defense_decision_path_audit rows: 6 pass
 metric_gate_summary rows: 12 pass
 ml_contribution_audit rows: 7 pass
 ml_attack_decision_path_audit rows: 6 pass
+ml_attack_decision_path_audit counter_defense_bonus_candidates: 7
+ml_attack_decision_path_audit selected_counter_defense_bonus_count: 3
 ml_defense_decision_path_audit rows: 6 pass
 ml_red_blue_interaction_audit rows: 5 pass
 agent_stress_scenario_audit rows: 6 seeds: 5 pass
@@ -98,7 +100,8 @@ agent_goal_alignment_audit rows: 399 pass
 agent_decision_feedback_audit rows: 62 pass
 agent_memory_belief_audit rows: 9 pass
 agent_memory_influence_audit rows: 6 pass
-cross_agent_context_audit rows: 6 pass
+cross_agent_context_audit rows: 7 pass
+cross_agent_context_audit selected_counter_defense_bonus_traces: 3
 agent_tool_usage_audit rows: 33 pass
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10
