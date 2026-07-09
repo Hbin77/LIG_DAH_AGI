@@ -1153,6 +1153,44 @@ self_transition: 0
 - recovery instability tradeoff를 숨기지 않고 각 row에 남긴다.
 - `verify_submission_state.py`와 `competition_alignment.py`에 연결해 PACE 전환 근거가 빠지면 최종 검증에서 실패하게 만들었다.
 
+### 32. Mission Impact Decomposition을 추가한 이유
+
+`Mission Impact`는 최종 판단에는 유용하지만 하나의 숫자라서, 어느 성분이 공격/방어 결과를 만들었는지 바로 보이지 않는다.
+
+특히 TSRA-R은 raw stale COP 객체를 즉시 없애는 것이 아니라, stale badge로 지휘소가 오래된 정보를 최신으로 믿는 위험을 줄인다. 따라서 분해 시 raw `stale_data_ratio`가 아니라 `trusted_stale_exposure`를 사용해야 실제 방어 효과와 맞는다.
+
+구현:
+
+```text
+src/experiments/mission_impact_decomposition.py
+outputs/report_tables/mission_impact_decomposition.csv
+outputs/report_tables/mission_impact_decomposition.md
+```
+
+분해 성분:
+
+```text
+critical_latency
+trusted_stale_exposure
+priority_inversion
+kill_chain_delay
+recovery_instability
+```
+
+검증 결과:
+
+```text
+mission_impact_decomposition.csv: 35 rows
+experiments: 7
+components: 5
+```
+
+해석:
+
+- E3 공격 단독은 critical latency, trusted stale exposure, priority inversion, kill-chain delay가 모두 큰 상태다.
+- E5/E7은 priority inversion과 trusted stale exposure를 낮추지만, PACE 전환 비용이 recovery instability로 남는다.
+- 이 표는 TSRA-R이 왜 raw stale 제거기가 아니라 COP 신뢰 위험 완화와 critical traffic 보호 에이전트인지 설명한다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

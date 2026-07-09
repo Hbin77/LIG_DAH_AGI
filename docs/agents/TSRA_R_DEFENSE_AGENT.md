@@ -180,6 +180,37 @@ no_video_throttle:        0.141  delta -0.017
 no_pace_switch:           0.107  delta -0.051
 ```
 
+## 10. Mission Impact Decomposition
+
+`Mission Impact`는 아래 5개 성분으로 해석한다.
+
+```text
+critical latency
+trusted stale exposure
+priority inversion
+kill-chain delay
+recovery instability
+```
+
+중요한 점:
+
+- TSRA-R은 raw stale data를 항상 제거하지 않는다.
+- 대신 `stale_badge`로 오래된 COP 객체가 최신 정보처럼 신뢰되는 위험을 줄인다.
+- 따라서 stale 성분은 raw `stale_data_ratio`가 아니라 `trusted_stale_exposure`로 본다.
+
+실행:
+
+```bash
+python3 -m src.experiments.mission_impact_decomposition
+```
+
+산출물:
+
+```text
+outputs/report_tables/mission_impact_decomposition.csv
+outputs/report_tables/mission_impact_decomposition.md
+```
+
 해석:
 
 - `priority_reroute`를 제거하면 priority inversion이 크게 증가한다. 이 액션은 critical traffic 보호의 핵심이다.

@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 130
-- total_payload_bytes: 2429656
+- payload_file_count: 133
+- total_payload_bytes: 2459702
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 131
-- zip_bytes: 1598525
-- zip_sha256: `06657a528abc6757a9988a160a0d9343b42221f3a021074d428f573cf07c992f`
+- zip_file_count: 134
+- zip_bytes: 1606204
+- zip_sha256: `0770c811a74c2b97ae0b50b862db99f79f9844f3675f695132290a0463501c66`
 
 ## 포함 파일
 
@@ -106,6 +106,8 @@
 - `outputs/report_tables/incident_summary.md`
 - `outputs/report_tables/metric_gate_summary.csv`
 - `outputs/report_tables/metric_gate_summary.md`
+- `outputs/report_tables/mission_impact_decomposition.csv`
+- `outputs/report_tables/mission_impact_decomposition.md`
 - `outputs/report_tables/ml_model_comparison.csv`
 - `outputs/report_tables/ml_model_comparison.md`
 - `outputs/report_tables/pace_transition_audit.csv`
@@ -136,6 +138,7 @@
 - `src/experiments/competition_alignment.py`
 - `src/experiments/incident_summary.py`
 - `src/experiments/metric_gate.py`
+- `src/experiments/mission_impact_decomposition.py`
 - `src/experiments/pace_transition_audit.py`
 - `src/experiments/report_assets.py`
 - `src/experiments/run_adaptive_memory.py`

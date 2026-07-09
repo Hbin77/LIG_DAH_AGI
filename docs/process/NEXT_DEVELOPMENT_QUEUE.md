@@ -918,7 +918,59 @@ self_transition: 0
 - PACE 전환은 단순 이벤트가 아니라 공격 context, target link, recovery instability tradeoff와 함께 해석된다.
 - 방어 담당이 PACE threshold를 조정할 때 이 표를 기준으로 과한 전환과 필요한 전환을 구분할 수 있다.
 
-## P18. 제출 직전 브랜치/패키지 동결
+## P18. Mission Impact Decomposition
+
+상태: 완료
+
+문제:
+
+- `mission_impact_mean`은 하나의 스칼라라서 어떤 임무 성분이 점수를 만들었는지 바로 보이지 않는다.
+- TSRA-R은 raw stale data를 즉시 없애기보다 `stale_badge`로 신뢰 위험을 낮추므로, raw `stale_data_ratio`만 보면 방어 효과가 과소평가된다.
+- PACE 전환은 recovery instability를 키울 수 있으므로, 방어 효과와 복구 전환 비용을 같은 테이블에서 볼 필요가 있다.
+
+구현:
+
+```text
+src/experiments/mission_impact_decomposition.py
+outputs/report_tables/mission_impact_decomposition.csv
+outputs/report_tables/mission_impact_decomposition.md
+```
+
+구현 방식:
+
+- `outputs/batch/repeated_experiment_summary.csv`를 읽는다.
+- `compute_full_mission_impact`의 5개 성분을 같은 가중치로 재구성한다.
+- stale 성분은 raw `stale_data_ratio`가 아니라 `trusted_stale_exposure`를 사용한다.
+- 각 row에 safety boundary를 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.mission_impact_decomposition` 명령으로 재생성 가능하다.
+- 완료. E1~E7 7개 실험과 5개 성분, 총 35개 row가 생성된다.
+- 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.mission_impact_decomposition
+```
+
+검증 결과:
+
+```text
+mission_impact_decomposition.csv: 35 rows
+experiments: 7
+components: critical_latency, trusted_stale_exposure, priority_inversion,
+            kill_chain_delay, recovery_instability
+```
+
+해석:
+
+- E3 공격 단독은 critical latency, trusted stale exposure, priority inversion, kill-chain delay가 모두 큰 상태다.
+- E5/E7 방어 조건에서는 trusted stale exposure와 priority inversion은 낮아졌지만, PACE 복구 전환 비용이 recovery instability 성분으로 남는다.
+- 따라서 TSRA-R의 가치는 단순히 raw stale을 없애는 것이 아니라, 지휘소가 stale COP를 최신으로 믿는 위험을 줄이고 critical traffic을 보호하는 데 있다.
+
+## P19. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

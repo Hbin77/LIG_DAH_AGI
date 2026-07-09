@@ -75,10 +75,10 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 ### A07 Repeatable evidence
 
 - Goal: Avoid single-seed claims by keeping repeated experiments and resilience metrics.
-- Mechanism: E1-E7 experiments are run as 30-seed batches with mission impact, latency, stale exposure, priority inversion, and resilience gain summaries.
-- Evidence: src/experiments/run_all.py | src/experiments/run_batch.py | src/experiments/metric_gate.py | outputs/batch/repeated_experiment_summary.csv | outputs/batch/resilience_gain_summary.csv | outputs/report_tables/metric_gate_summary.csv
+- Mechanism: E1-E7 experiments are run as 30-seed batches with mission impact, latency, stale exposure, priority inversion, resilience gain summaries, and component-level mission impact decomposition.
+- Evidence: src/experiments/run_all.py | src/experiments/run_batch.py | src/experiments/metric_gate.py | src/experiments/mission_impact_decomposition.py | outputs/batch/repeated_experiment_summary.csv | outputs/batch/resilience_gain_summary.csv | outputs/report_tables/mission_impact_decomposition.csv | outputs/report_tables/metric_gate_summary.csv
 - Status: verified
-- Notes: outputs/batch/repeated_experiment_summary.csv rows=7; outputs/batch/resilience_gain_summary.csv rows=4; outputs/report_tables/metric_gate_summary.csv rows=11
+- Notes: outputs/batch/repeated_experiment_summary.csv rows=7; outputs/batch/resilience_gain_summary.csv rows=4; outputs/report_tables/mission_impact_decomposition.csv rows=35; outputs/report_tables/metric_gate_summary.csv rows=11
 - Next gate: Metric claims must pass metric_gate_summary and point to batch or dedicated experiments.
 
 ### A08 Adaptive defense

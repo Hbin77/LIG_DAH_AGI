@@ -211,21 +211,24 @@ ALIGNMENT_SPECS = [
         competition_goal="Avoid single-seed claims by keeping repeated experiments and resilience metrics.",
         implemented_mechanism=(
             "E1-E7 experiments are run as 30-seed batches with mission impact, latency, stale exposure, "
-            "priority inversion, and resilience gain summaries."
+            "priority inversion, resilience gain summaries, and component-level mission impact decomposition."
         ),
         agent_or_component="Experiment runners",
         evidence_files=[
             "src/experiments/run_all.py",
             "src/experiments/run_batch.py",
             "src/experiments/metric_gate.py",
+            "src/experiments/mission_impact_decomposition.py",
             "outputs/batch/repeated_experiment_summary.csv",
             "outputs/batch/resilience_gain_summary.csv",
+            "outputs/report_tables/mission_impact_decomposition.csv",
             "outputs/report_tables/metric_gate_summary.csv",
         ],
         next_gate="Metric claims must pass metric_gate_summary and point to batch or dedicated experiments.",
         row_checks=[
             RowCountCheck("outputs/batch/repeated_experiment_summary.csv", 7),
             RowCountCheck("outputs/batch/resilience_gain_summary.csv", 4),
+            RowCountCheck("outputs/report_tables/mission_impact_decomposition.csv", 35),
             RowCountCheck("outputs/report_tables/metric_gate_summary.csv", 11),
         ],
     ),

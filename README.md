@@ -304,6 +304,19 @@ This writes:
 
 The PACE audit explains each TSRA-R `pace_switch` event with inferred source/target links, active or near-future attacks, metric snapshot context, and residual risk.
 
+## Decompose Mission Impact
+
+```bash
+python3 -m src.experiments.mission_impact_decomposition
+```
+
+This writes:
+
+- `outputs/report_tables/mission_impact_decomposition.csv`
+- `outputs/report_tables/mission_impact_decomposition.md`
+
+The decomposition breaks repeated-run Mission Impact into critical latency, trusted stale exposure, priority inversion, kill-chain delay, and recovery instability. It uses `trusted_stale_exposure` for the stale component because TSRA-R may reduce operator trust risk without removing every stale COP object.
+
 ## Generate Competition Alignment Matrix
 
 ```bash
@@ -426,6 +439,7 @@ python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.pace_transition_audit
+python3 -m src.experiments.mission_impact_decomposition
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py

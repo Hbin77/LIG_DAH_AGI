@@ -27,6 +27,7 @@ python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.pace_transition_audit
+python3 -m src.experiments.mission_impact_decomposition
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py
@@ -54,6 +55,7 @@ agent_capability_matrix rows: 10
 attack_defense_coverage rows: 4 covered
 attack_defense_response_audit rows: 10 no missed required
 pace_transition_audit rows: 6 status=2 initial/4 fallback
+mission_impact_decomposition rows: 35 components=5
 aura_coa_cards rows: 15
 battle_timeline rows: 49
 incident_summary rows: 10
@@ -63,7 +65,7 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 131
+package_zip entries: 134
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

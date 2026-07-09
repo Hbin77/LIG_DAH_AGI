@@ -37,6 +37,7 @@ REQUIRED_FILES = [
     "src/experiments/attack_defense_coverage.py",
     "src/experiments/attack_defense_response_audit.py",
     "src/experiments/pace_transition_audit.py",
+    "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -65,6 +66,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/attack_defense_response_audit.md",
     "outputs/report_tables/pace_transition_audit.csv",
     "outputs/report_tables/pace_transition_audit.md",
+    "outputs/report_tables/mission_impact_decomposition.csv",
+    "outputs/report_tables/mission_impact_decomposition.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -361,6 +364,52 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("pace_transition_audit rows=6 status=2 initial/4 fallback")
 
+    decomposition_rows = read_csv("outputs/report_tables/mission_impact_decomposition.csv")
+    require(
+        len(decomposition_rows) == 35,
+        f"expected 35 mission impact decomposition rows, got {len(decomposition_rows)}",
+    )
+    decomposition_experiments = {row["experiment"] for row in decomposition_rows}
+    require(
+        decomposition_experiments
+        == {
+            "E1_baseline",
+            "E2_fixed_attack",
+            "E3_rule_aura",
+            "E4_rule_aura_basic_defense",
+            "E5_rule_aura_tsra_r",
+            "E6_ml_aura_tsra_r",
+            "E7_ml_aura_ml_tsra_r",
+        },
+        f"unexpected decomposition experiments: {sorted(decomposition_experiments)}",
+    )
+    decomposition_components = {row["component"] for row in decomposition_rows}
+    require(
+        decomposition_components
+        == {
+            "critical_latency",
+            "trusted_stale_exposure",
+            "priority_inversion",
+            "kill_chain_delay",
+            "recovery_instability",
+        },
+        f"unexpected decomposition components: {sorted(decomposition_components)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in decomposition_rows),
+        "mission impact decomposition missing safety boundary",
+    )
+    require(
+        any(
+            row["experiment"] == "E5_rule_aura_tsra_r"
+            and row["component"] == "recovery_instability"
+            and float(row["weighted_contribution"]) > 0.0
+            for row in decomposition_rows
+        ),
+        "mission impact decomposition missing E5 recovery contribution",
+    )
+    checks.append("mission_impact_decomposition rows=35 components=5")
+
     metric_gate_rows = read_csv("outputs/report_tables/metric_gate_summary.csv")
     require(len(metric_gate_rows) == 11, f"expected 11 metric gate rows, got {len(metric_gate_rows)}")
     failed_metric_gates = [
@@ -518,6 +567,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/pace_transition_audit.md" in manifest_text,
         "manifest missing PACE transition audit",
+    )
+    require(
+        "outputs/report_tables/mission_impact_decomposition.md" in manifest_text,
+        "manifest missing mission impact decomposition",
     )
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,
