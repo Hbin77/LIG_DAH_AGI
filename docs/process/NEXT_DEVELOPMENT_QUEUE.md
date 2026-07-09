@@ -210,9 +210,9 @@ python3 -m src.experiments.run_adaptive_memory
 adaptive_memory_summary.csv: 2 conditions
 adaptive_memory_raw.csv: 60 rows
 conditions: full_tsra_r, adaptive_tsra_r
-full_tsra_r mission impact: 0.123928
+full_tsra_r mission impact: 0.157423
 adaptive_tsra_r mission impact: 0.109489
-priority inversion: 0.047238 -> 0.027455
+priority inversion: 0.050609 -> 0.027455
 video throttle count: 6.4 -> 3.1
 adaptive trace rows with feedback.adaptive_policy: 61
 ```
@@ -353,9 +353,9 @@ repeated_experiment_summary rows: 7
 resilience_gain_summary rows: 4
 agent_decision_trace_summary rows: 215
 aura_coa_cards rows: 15
-battle_timeline rows: 46
+battle_timeline rows: 49
 incident_summary rows: 10
-package_zip entries: 101
+package_zip entries: 128
 package exclusions: passed
 branch: hbin
 origin main/hbin refs: present
@@ -846,7 +846,7 @@ outputs/report_tables/attack_defense_response_audit.md
 - 완료. `python3 -m src.experiments.attack_defense_response_audit` 명령으로 재생성 가능하다.
 - 완료. E5/E7 공격 이벤트 10개가 감사된다.
 - 완료. required defense missed row는 없다.
-- 완료. support partial row는 숨기지 않고 residual risk로 남긴다.
+- 완료. support partial row가 있으면 숨기지 않고 residual risk로 남긴다.
 
 검증:
 
@@ -859,7 +859,7 @@ python3 -m src.experiments.attack_defense_response_audit
 ```text
 attack_defense_response_audit.csv: 10 rows
 missed_required: 0
-required_covered_support_partial: 1
+required_covered_support_partial: 0
 ```
 
 해석:

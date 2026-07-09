@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from src.agents.runtime import AgentRuntime
 from src.agents.schema import ToolCallRecord
@@ -146,7 +147,7 @@ class RuleTSRAR:
                 "enabled": self._enabled("pace_switch"),
                 "eligible": conditions["pace_switch_needed"],
                 "ready": conditions["pace_switch_ready"],
-                "reason": "SATCOM degraded beyond mission threshold",
+                "reason": conditions["pace_switch_reason"],
             }
         )
         if (
@@ -168,7 +169,7 @@ class RuleTSRAR:
                             "target_link": target,
                             "until_sec": now + 100,
                             "move_critical": True,
-                            "reason": "SATCOM degraded beyond mission threshold",
+                            "reason": conditions["pace_switch_reason"],
                         },
                     )
                 )
@@ -190,16 +191,27 @@ class RuleTSRAR:
     ) -> dict:
         return {}
 
-    def _evaluate_conditions(self, state: MissionState) -> dict[str, bool]:
+    def _evaluate_conditions(self, state: MissionState) -> dict[str, Any]:
         now = state.time_sec
         active = state.links[state.active_link]
-        satcom_bad = (
-            state.active_link == "SATCOM"
+        active_link_bad = (
+            active.base_latency_ms > 1100
+            or active.loss_rate > 0.055
+            or state.total_queue_kb > 4500
+        )
+        fallback_link_bad = (
+            state.active_link != "SATCOM"
             and (
-                active.base_latency_ms > 1100
-                or active.loss_rate > 0.055
-                or state.total_queue_kb > 4500
+                active.base_latency_ms > 550
+                or active.loss_rate > 0.04
+                or state.total_queue_kb > 6500
             )
+        )
+        pace_switch_needed = active_link_bad or fallback_link_bad
+        pace_switch_reason = (
+            "fallback link degraded beyond mission threshold"
+            if fallback_link_bad
+            else "SATCOM degraded beyond mission threshold"
         )
         return {
             "priority_reroute_needed": state.critical_pending > 0 and state.video_queue_kb > 500,
@@ -208,8 +220,9 @@ class RuleTSRAR:
             "video_throttle_ready": self._ready("video_throttle", now, 35),
             "stale_badge_needed": state.stale_data_ratio > 0.25,
             "stale_badge_ready": self._ready("stale_badge", now, 30),
-            "pace_switch_needed": satcom_bad,
+            "pace_switch_needed": pace_switch_needed,
             "pace_switch_ready": self._ready("pace_switch", now, 80),
+            "pace_switch_reason": pace_switch_reason,
         }
 
     def _record_decision(
@@ -266,7 +279,7 @@ class RuleTSRAR:
     def _best_fallback_link(state: MissionState) -> str | None:
         candidates = []
         for name, link in state.links.items():
-            if name == "SATCOM" or not link.available:
+            if name in {"SATCOM", state.active_link} or not link.available:
                 continue
             score = link.bandwidth_mbps / max(link.base_latency_ms / 1000.0, 0.1)
             score -= 5.0 * link.loss_rate

@@ -40,9 +40,9 @@ E1_baseline: impact=0.455, p95=3.00s, stale=0.50, trusted_stale=0.50, inv=0.32
 E2_fixed_attack: impact=0.665, p95=28.50s, stale=0.50, trusted_stale=0.50, inv=0.57
 E3_rule_aura: impact=0.950, p95=168.00s, stale=0.50, trusted_stale=0.50, inv=0.83
 E4_rule_aura_basic_defense: impact=0.093, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.02
-E5_rule_aura_tsra_r: impact=0.104, p95=1.30s, stale=0.50, trusted_stale=0.12, inv=0.02
-E6_ml_aura_tsra_r: impact=0.114, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.03
-E7_ml_aura_ml_tsra_r: impact=0.124, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.05
+E5_rule_aura_tsra_r: impact=0.133, p95=1.00s, stale=0.50, trusted_stale=0.12, inv=0.02
+E6_ml_aura_tsra_r: impact=0.147, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.03
+E7_ml_aura_ml_tsra_r: impact=0.155, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.05
 ```
 
 해석:
@@ -62,17 +62,17 @@ E7_ml_aura_ml_tsra_r: impact=0.124, p95=2.00s, stale=0.50, trusted_stale=0.12, i
 | E2 Fixed Attack | 0.695 | 0.077 |
 | E3 Rule AURA | 0.914 | 0.056 |
 | E4 Rule AURA + Basic Defense | 0.107 | 0.016 |
-| E5 Rule AURA + TSRA-R | 0.124 | 0.019 |
-| E6 ML AURA + TSRA-R | 0.120 | 0.016 |
-| E7 ML AURA + ML TSRA-R | 0.135 | 0.013 |
+| E5 Rule AURA + TSRA-R | 0.157 | 0.029 |
+| E6 ML AURA + TSRA-R | 0.149 | 0.013 |
+| E7 ML AURA + ML TSRA-R | 0.166 | 0.012 |
 
 Resilience Gain:
 
 ```text
-E4 Basic Defense: 86.8% +- 3.9%
-E5 TSRA-R:        86.4% +- 2.0%
-E6 ML AURA/TSRA:  86.9% +- 1.6%
-E7 ML/ML:         85.2% +- 1.8%
+E4 Basic Defense: 88.3% +- 1.8%
+E5 TSRA-R:        82.7% +- 3.6%
+E6 ML AURA/TSRA:  83.6% +- 1.5%
+E7 ML/ML:         81.8% +- 1.8%
 ```
 
 계산식:
@@ -83,7 +83,7 @@ Resilience Gain = (E3 AURA Attack Impact - Defended Impact) / E3 AURA Attack Imp
 
 보고서 문장:
 
-> 30개 seed 반복 실험에서 AURA는 Mission Impact를 평균 0.914까지 증가시켰고, TSRA-R 적용 시 Mission Impact는 평균 0.124로 감소했다. 이는 AURA 공격 대비 약 86.4%의 Resilience Gain에 해당한다.
+> 30개 seed 반복 실험에서 AURA는 Mission Impact를 평균 0.914까지 증가시켰고, TSRA-R 적용 시 Mission Impact는 평균 0.157로 감소했다. 이는 AURA 공격 대비 약 82.7%의 Resilience Gain에 해당한다.
 
 ## ML 성능
 

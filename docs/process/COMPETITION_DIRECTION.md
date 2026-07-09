@@ -214,9 +214,9 @@ outputs/figures/adaptive_memory_comparison.png
 검증 결과:
 
 ```text
-full TSRA-R impact:      0.123928
+full TSRA-R impact:      0.157423
 adaptive TSRA-R impact:  0.109489
-priority inversion:      0.047238 -> 0.027455
+priority inversion:      0.050609 -> 0.027455
 video throttle count:    6.4 -> 3.1
 E1-E7 baseline:          unchanged in run_all
 ```
@@ -563,7 +563,7 @@ outputs/report_tables/attack_defense_response_audit.md
 ```text
 attack_defense_response_audit rows: 10
 missed required defenses: 0
-support partial residual risk: 1 row
+support partial residual risk: 0 rows
 ```
 
 ## 최종 판단 기준

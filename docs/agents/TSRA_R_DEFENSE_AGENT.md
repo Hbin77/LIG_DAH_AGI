@@ -71,7 +71,7 @@ TSRA-R은 `DefenseEvent`를 출력한다.
 | `priority_reroute` | critical traffic을 영상보다 먼저 처리 |
 | `video_throttle` | 영상 트래픽 크기 축소 |
 | `stale_badge` | 오래된 COP 객체를 신뢰 낮은 정보로 표시 |
-| `pace_switch` | SATCOM 저하 시 LTE/Tactical Radio/Mesh 중 fallback 선택 |
+| `pace_switch` | SATCOM 또는 현재 fallback link 저하 시 다른 PACE link 선택 |
 
 ## 6. 핵심 지표
 
@@ -142,15 +142,15 @@ RandomForest를 배포 모델로 둔 이유:
 
 ```text
 E3 AURA Attack:           impact 0.914 +- 0.056
-E5 AURA + TSRA-R Defense: impact 0.124 +- 0.019
-E7 ML AURA + ML TSRA-R Defense: impact 0.135 +- 0.013
+E5 AURA + TSRA-R Defense: impact 0.157 +- 0.029
+E7 ML AURA + ML TSRA-R Defense: impact 0.166 +- 0.012
 ```
 
 Resilience Gain:
 
 ```text
-약 86.4% +- 2.0%
-ML/ML reactive defense: 약 85.2% +- 1.8%
+약 82.7% +- 3.6%
+ML/ML reactive defense: 약 81.8% +- 1.8%
 ```
 
 ## 9. Action Ablation
@@ -173,18 +173,19 @@ outputs/figures/tsra_action_ablation.png
 핵심 결과:
 
 ```text
-full impact:              0.124
-no_priority_reroute:      0.332  delta +0.208
-no_stale_badge:           0.329  delta +0.205
-no_video_throttle:        0.111  delta -0.013
-no_pace_switch:           0.107  delta -0.017
+full impact:              0.157
+no_priority_reroute:      0.343  delta +0.185
+no_stale_badge:           0.363  delta +0.206
+no_video_throttle:        0.141  delta -0.017
+no_pace_switch:           0.107  delta -0.051
 ```
 
 해석:
 
 - `priority_reroute`를 제거하면 priority inversion이 크게 증가한다. 이 액션은 critical traffic 보호의 핵심이다.
 - `stale_badge`를 제거하면 trusted stale exposure가 크게 증가한다. 이 액션은 지휘소가 오래된 COP 정보를 최신 정보로 믿는 위험을 낮추는 핵심이다.
-- `video_throttle`과 `pace_switch`는 현재 scalar mission impact만 보면 항상 이득으로 나타나지 않는다. 따라서 이 둘은 단일 점수 최소화가 아니라 운용형 방어 기능으로 분리해서 해석한다.
+- `pace_switch`는 fallback chasing 대응성을 높이지만 전환 횟수가 recovery instability 성분을 키울 수 있다. 따라서 단일 점수 최소화가 아니라 PACE 운용 복원력으로 분리해서 해석한다.
+- `video_throttle`은 현재 scalar mission impact만 보면 항상 이득으로 나타나지 않지만, critical traffic capacity 보호용 운용 기능으로 유지한다.
 
 ## 10. Adaptive Memory TSRA-R
 
@@ -207,9 +208,9 @@ src/experiments/run_adaptive_memory.py
 30-seed 비교 결과:
 
 ```text
-full TSRA-R impact:      0.123928
+full TSRA-R impact:      0.157423
 adaptive TSRA-R impact:  0.109489
-priority inversion:      0.047238 -> 0.027455
+priority inversion:      0.050609 -> 0.027455
 video throttle count:    6.4 -> 3.1
 ```
 

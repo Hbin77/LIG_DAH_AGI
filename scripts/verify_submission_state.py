@@ -317,8 +317,11 @@ def check_csv_outputs() -> list[str]:
     ]
     require(not missed_required, f"attack-defense response audit missed required responses: {missed_required[:8]}")
     require(
-        any(row["response_status"] == "required_covered_support_partial" for row in response_audit_rows),
-        "response audit should expose at least one support-partial residual risk",
+        all(
+            row["response_status"] in {"complete", "required_covered_support_partial"}
+            for row in response_audit_rows
+        ),
+        "attack-defense response audit has unexpected response status",
     )
     require(
         all("closed simulation" in row["safety_boundary"] for row in response_audit_rows),

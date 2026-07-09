@@ -46,7 +46,7 @@ Safety boundary: closed simulation agent-interface manifest only; no RF, exploit
 - Event outputs: defense_events.jsonl: pace_switch, priority_reroute, stale_badge, video_throttle
 - Evidence experiments: E5_rule_aura_tsra_r
 - Trace count: 61
-- Non-no-op decisions: 19
+- Non-no-op decisions: 18
 - Safety boundary: closed simulation agent-interface manifest only; no RF, exploit, or live network action
 
 ## TSRA-R-ML (defense)
@@ -61,5 +61,5 @@ Safety boundary: closed simulation agent-interface manifest only; no RF, exploit
 - Event outputs: defense_events.jsonl: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 - Evidence experiments: E7_ml_aura_ml_tsra_r
 - Trace count: 61
-- Non-no-op decisions: 19
+- Non-no-op decisions: 23
 - Safety boundary: closed simulation agent-interface manifest only; no RF, exploit, or live network action

@@ -355,11 +355,11 @@ python3 -m src.experiments.run_tsra_ablation
 결과:
 
 ```text
-full impact:             0.124
-no_priority_reroute:     0.332  delta +0.208
-no_stale_badge:          0.329  delta +0.205
-no_video_throttle:       0.111  delta -0.013
-no_pace_switch:          0.107  delta -0.017
+full impact:             0.157
+no_priority_reroute:     0.343  delta +0.185
+no_stale_badge:          0.363  delta +0.206
+no_video_throttle:       0.141  delta -0.017
+no_pace_switch:          0.107  delta -0.051
 ```
 
 해석:
@@ -399,13 +399,13 @@ python3 -m src.experiments.run_adaptive_memory
 결과:
 
 ```text
-full TSRA-R mission impact:      0.123928
+full TSRA-R mission impact:      0.157423
 adaptive TSRA-R mission impact:  0.109489
-delta mission impact:           -0.014439
-trusted stale exposure:         0.129167 -> 0.125000
-priority inversion:             0.047238 -> 0.027455
+delta mission impact:           -0.047934
+trusted stale exposure:         0.127083 -> 0.125000
+priority inversion:             0.050609 -> 0.027455
 video throttle count:           6.4 -> 3.1
-pace switch count:              1.0 -> 1.0
+pace switch count:              3.0 -> 1.0
 adaptive trace feedback rows:   61
 ```
 
@@ -573,7 +573,7 @@ repeated_experiment_summary rows: 7
 resilience_gain_summary rows: 4
 agent_decision_trace_summary rows: 215
 aura_coa_cards rows: 15
-battle_timeline rows: 46
+battle_timeline rows: 49
 package exclusions: passed
 branch: hbin
 origin main/hbin refs: present
@@ -865,9 +865,9 @@ python3 -m src.experiments.metric_gate --fail-on-error
 metric_gate_summary.csv: 11 gates
 status: all pass
 E3-E1 impact delta: 0.456259
-E5 resilience gain: 0.864293
-E5/E3 impact ratio: 0.135523
-E6/E7 impact separation: 0.0151044
+E5 resilience gain: 0.826993
+E5/E3 impact ratio: 0.172152
+E6/E7 impact separation: 0.0167761
 ```
 
 해석:
@@ -1042,15 +1042,46 @@ timely response:
 ```text
 audited attack events: 10
 missed required defenses: 0
-support partial residual risk: 1
+support partial residual risk: 0
 ```
 
 해석:
 
 - E5/E7의 모든 공격 이벤트는 required defense를 active 또는 timely response로 받았다.
-- E7 `failover_chasing` 한 행은 `ml_attack_alert` required defense는 커버됐지만 `pace_switch` support가 만료되어 partial로 남는다.
-- 이 partial은 실패로 숨기지 않고 잔여 위험으로 기록한다. 다음 고도화에서는 late failover window에서 PACE support 재활성화 조건을 다듬을 수 있다.
+- E7 `failover_chasing`도 `ml_attack_alert`와 PACE support를 모두 받는다.
+- support partial row가 생기면 실패로 숨기지 않고 residual risk로 기록한다.
 - `verify_submission_state.py`와 `competition_alignment.py`에 연결해 required response가 누락되면 최종 검증에서 실패하게 만들었다.
+
+### 29. Fallback PACE 재선택을 추가한 이유
+
+Response Audit에서 late `failover_chasing` 구간의 PACE support가 partial로 남을 수 있음을 확인했다. 원인은 기존 `RuleTSRAR`가 SATCOM이 나빠질 때만 `pace_switch`를 고려하고, 이미 LTE/MESH 같은 fallback link로 넘어간 뒤에는 fallback 자체가 공격받아도 다시 PACE 링크를 고르지 않는 구조였기 때문이다.
+
+수정:
+
+```text
+src/tsra_r/rule_defender.py
+```
+
+변경 내용:
+
+- active link가 SATCOM이 아니어도 fallback link가 latency/loss/queue 기준을 넘으면 `pace_switch_needed`가 켜진다.
+- fallback 후보 선택 시 현재 active link를 제외한다.
+- 방어 이벤트 reason을 `fallback link degraded beyond mission threshold`로 남긴다.
+
+검증 결과:
+
+```text
+attack_defense_response_audit.csv: 10 rows
+missed required defenses: 0
+required_covered_support_partial: 0
+metric gates: 11 pass
+```
+
+tradeoff:
+
+- fallback 재선택으로 late failover 대응성은 좋아졌다.
+- 대신 PACE 전환 횟수가 늘어 scalar Mission Impact의 recovery instability 성분은 증가했다.
+- 그래도 E5 resilience 0.827, E5/E3 impact ratio 0.172로 metric gate는 통과한다.
 
 ## 최신 핵심 결과
 
@@ -1060,16 +1091,16 @@ support partial residual risk: 1
 E1 Baseline:              impact 0.458 +- 0.014
 E2 Fixed Attack:          impact 0.695 +- 0.077
 E3 AURA Attack:           impact 0.914 +- 0.056
-E5 AURA + TSRA-R Defense: impact 0.124 +- 0.019
-E7 ML AURA + ML TSRA-R Defense: impact 0.135 +- 0.013
+E5 AURA + TSRA-R Defense: impact 0.157 +- 0.029
+E7 ML AURA + ML TSRA-R Defense: impact 0.166 +- 0.012
 ```
 
 Resilience Gain:
 
 ```text
-TSRA-R: 약 86.4% +- 2.0%
-ML AURA + TSRA-R: 약 86.9% +- 1.6%
-ML AURA + ML TSRA-R: 약 85.2% +- 1.8%
+TSRA-R: 약 82.7% +- 3.6%
+ML AURA + TSRA-R: 약 83.6% +- 1.5%
+ML AURA + ML TSRA-R: 약 81.8% +- 1.8%
 ```
 
 ## 2026-07-09 검증 반영
@@ -1088,8 +1119,8 @@ ML AURA + ML TSRA-R: 약 85.2% +- 1.8%
 결과:
 
 ```text
-E6 ML AURA + TSRA-R:     impact 0.120 +- 0.016
-E7 ML AURA + ML TSRA-R:  impact 0.135 +- 0.013
+E6 ML AURA + TSRA-R:     impact 0.149 +- 0.013
+E7 ML AURA + ML TSRA-R:  impact 0.166 +- 0.012
 ```
 
 E7은 E6보다 약간 높은 impact를 보이지만, 이는 항상 방어하는 E6와 달리 ML detector가 공격성 저하를 탐지한 구간에서만 방어를 여는 설계 때문이다. 따라서 E7은 "최소 impact"가 아니라 "탐지 기반 reactive defense"의 근거로 사용한다.

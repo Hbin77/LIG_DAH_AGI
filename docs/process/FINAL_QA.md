@@ -53,7 +53,7 @@ agent_capability_matrix rows: 10
 attack_defense_coverage rows: 4 covered
 attack_defense_response_audit rows: 10 no missed required
 aura_coa_cards rows: 15
-battle_timeline rows: 46
+battle_timeline rows: 49
 incident_summary rows: 10
 competition_alignment_matrix rows: 10 verified
 ```
