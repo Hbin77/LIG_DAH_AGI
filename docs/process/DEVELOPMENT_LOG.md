@@ -1083,6 +1083,36 @@ tradeoff:
 - 대신 PACE 전환 횟수가 늘어 scalar Mission Impact의 recovery instability 성분은 증가했다.
 - 그래도 E5 resilience 0.827, E5/E3 impact ratio 0.172로 metric gate는 통과한다.
 
+### 30. PACE 조건을 SATCOM/fallback으로 분리한 이유
+
+Fallback PACE 재선택을 추가한 뒤, `pace_switch_needed` 조건을 다시 확인했다. 최초 구현은 active link 공통 조건과 fallback 조건을 함께 사용했기 때문에, fallback link에서도 `total_queue_kb > 4500` 같은 SATCOM용 기준이 먼저 걸릴 수 있었다.
+
+수정:
+
+```text
+src/tsra_r/rule_defender.py
+```
+
+변경 내용:
+
+- `satcom_link_bad`: active link가 SATCOM일 때만 SATCOM 저하 기준을 적용한다.
+- `fallback_link_bad`: active link가 SATCOM이 아닐 때만 fallback 저하 기준을 적용한다.
+- `pace_switch_needed = satcom_link_bad or fallback_link_bad`로 명시했다.
+
+검증 결과:
+
+```text
+run_all: passed
+attack_defense_response_audit.csv: 10 rows, all complete
+metric gates: 11 pass
+30-seed core metrics: unchanged from fallback PACE response run
+```
+
+해석:
+
+- 이 변경은 수치 개선보다 방어 정책의 의미적 정확도를 높이는 수정이다.
+- SATCOM과 fallback link의 임계값을 분리했기 때문에 이후 PACE tuning을 더 안전하게 할 수 있다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

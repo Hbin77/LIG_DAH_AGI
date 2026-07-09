@@ -194,10 +194,13 @@ class RuleTSRAR:
     def _evaluate_conditions(self, state: MissionState) -> dict[str, Any]:
         now = state.time_sec
         active = state.links[state.active_link]
-        active_link_bad = (
-            active.base_latency_ms > 1100
-            or active.loss_rate > 0.055
-            or state.total_queue_kb > 4500
+        satcom_link_bad = (
+            state.active_link == "SATCOM"
+            and (
+                active.base_latency_ms > 1100
+                or active.loss_rate > 0.055
+                or state.total_queue_kb > 4500
+            )
         )
         fallback_link_bad = (
             state.active_link != "SATCOM"
@@ -207,7 +210,7 @@ class RuleTSRAR:
                 or state.total_queue_kb > 6500
             )
         )
-        pace_switch_needed = active_link_bad or fallback_link_bad
+        pace_switch_needed = satcom_link_bad or fallback_link_bad
         pace_switch_reason = (
             "fallback link degraded beyond mission threshold"
             if fallback_link_bad
