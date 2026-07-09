@@ -80,7 +80,7 @@ ml_contribution_audit rows: 7 pass
 ml_attack_decision_path_audit rows: 6 pass
 ml_defense_decision_path_audit rows: 6 pass
 ml_red_blue_interaction_audit rows: 5 pass
-agent_stress_scenario_audit rows: 6 pass
+agent_stress_scenario_audit rows: 6 seeds: 5 pass
 reactive_defense_tradeoff_audit rows: 7 pass
 ml_threshold_sweep_summary rows: 5
 tsra_detector_calibration_audit rows: 6 pass

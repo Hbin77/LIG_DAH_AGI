@@ -776,7 +776,7 @@ Outputs:
 - `outputs/report_tables/agent_stress_scenario_audit.csv`
 - `outputs/report_tables/agent_stress_scenario_audit.md`
 
-This runs closed-simulation air-defense, stale-COP, and PACE pressure stress fixtures, then compares TSRA-R and TSRA-R-ML outcomes against attack-only outcomes.
+This runs closed-simulation air-defense, stale-COP, and PACE pressure stress fixtures across five seeds, then compares TSRA-R and TSRA-R-ML aggregate outcomes against attack-only outcomes.
 
 ## Verify External Package Link
 

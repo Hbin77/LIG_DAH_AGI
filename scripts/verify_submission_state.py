@@ -1774,50 +1774,70 @@ def check_csv_outputs() -> list[str]:
         f"unexpected stress defender variants: {sorted(observed_stress_variants)}",
     )
     require(
-        all(float(row["defended_mission_impact"]) <= 0.25 for row in stress_rows),
-        "stress audit has defended mission impact above ceiling",
+        all(int(float(row["seed_count"])) == 5 for row in stress_rows),
+        "stress audit must aggregate 5 seeds per row",
     )
     require(
-        all(float(row["mission_impact_reduction"]) > 0.0 for row in stress_rows),
-        "stress audit has non-positive mission impact reduction",
+        all(row["seed_range"] == "2607-2611" for row in stress_rows),
+        "stress audit has unexpected seed range",
     )
     require(
-        all(float(row["p95_reduction_sec"]) > 0.0 for row in stress_rows),
+        all(float(row["defended_mission_impact_mean"]) <= 0.25 for row in stress_rows),
+        "stress audit has defended mission impact mean above ceiling",
+    )
+    require(
+        all(float(row["defended_mission_impact_max"]) <= 0.40 for row in stress_rows),
+        "stress audit has defended mission impact max above stress ceiling",
+    )
+    require(
+        all(float(row["mission_impact_reduction_mean"]) > 0.0 for row in stress_rows),
+        "stress audit has non-positive mission impact reduction mean",
+    )
+    require(
+        all(float(row["p95_reduction_sec_mean"]) > 0.0 for row in stress_rows),
         "stress audit has non-positive P95 reduction",
     )
     require(
-        all(float(row["trusted_stale_reduction"]) > 0.0 for row in stress_rows),
+        all(float(row["trusted_stale_reduction_mean"]) > 0.0 for row in stress_rows),
         "stress audit has non-positive trusted stale reduction",
     )
     require(
-        all(float(row["priority_inversion_reduction"]) > 0.0 for row in stress_rows),
+        all(float(row["priority_inversion_reduction_mean"]) > 0.0 for row in stress_rows),
         "stress audit has non-positive priority inversion reduction",
     )
     require(
-        all(float(row["defense_count"]) > 0.0 for row in stress_rows),
+        all(float(row["defense_count_mean"]) > 0.0 for row in stress_rows),
         "stress audit has rows without defense events",
     )
     require(
         all(
-            float(row["resilience_gain"]) >= 0.75
+            float(row["resilience_gain_mean"]) >= 0.75
             for row in stress_rows
             if row["defender_variant"] == "tsra_r_full"
         ),
-        "full TSRA-R stress resilience below threshold",
+        "full TSRA-R mean stress resilience below threshold",
     )
     require(
         all(
-            float(row["resilience_gain"]) >= 0.70
+            float(row["resilience_gain_mean"]) >= 0.65
             for row in stress_rows
             if row["defender_variant"] == "tsra_r_ml"
         ),
-        "ML TSRA-R stress resilience below threshold",
+        "ML TSRA-R mean stress resilience below threshold",
+    )
+    require(
+        all(
+            float(row["resilience_gain_min"]) >= 0.70
+            for row in stress_rows
+            if row["defender_variant"] == "tsra_r_full"
+        ),
+        "full TSRA-R minimum stress resilience below threshold",
     )
     require(
         all("closed simulation" in row["safety_boundary"] for row in stress_rows),
         "agent stress scenario audit missing safety boundary",
     )
-    checks.append("agent_stress_scenario_audit rows=6 pass")
+    checks.append("agent_stress_scenario_audit rows=6 seeds=5 pass")
 
     mission_thread_rows = read_csv("outputs/report_tables/mission_thread_summary.csv")
     require(

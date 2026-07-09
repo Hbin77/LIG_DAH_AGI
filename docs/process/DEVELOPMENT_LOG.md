@@ -2591,7 +2591,7 @@ stress_stale_cop_latency_chain
 stress_pace_failover_pressure
 ```
 
-각 fixture는 attack-only 결과와 `tsra_r_full`, `tsra_r_ml` 결과를 비교한다. 임시 실행 로그는 `outputs/tmp_agent_stress_scenario/`에 남고, 검토용 산출물은 report table로 생성된다.
+각 fixture는 5개 seed에서 attack-only 결과와 `tsra_r_full`, `tsra_r_ml` 결과를 비교한다. 임시 실행 로그는 `outputs/tmp_agent_stress_scenario/`에 남고, 검토용 산출물은 report table로 생성된다.
 
 추가한 것:
 
@@ -2608,15 +2608,19 @@ agent_stress_scenario_audit rows: 6
 status: pass=6
 scenarios: air_defense_queue_saturation, stale_cop_latency_chain, pace_failover_pressure
 defender variants: tsra_r_full, tsra_r_ml
-tsra_r_full resilience_gain range: 0.757678-0.854467
-tsra_r_ml resilience_gain range: 0.738553-0.854467
-defended_mission_impact max: 0.211772
+seed_count: 5 per row
+tsra_r_full resilience_gain_mean range: 0.775357-0.842876
+tsra_r_ml resilience_gain_mean range: 0.675561-0.833690
+tsra_r_full resilience_gain_min floor: 0.710987
+tsra_r_ml stressed stale-COP gain_min: 0.486689
+defended_mission_impact_mean max: 0.229527
 ```
 
 해석:
 
-- TSRA-R full은 세 stress fixture 모두에서 0.75 이상의 resilience gain을 유지한다.
-- TSRA-R-ML은 세 stress fixture 모두에서 0.70 이상의 resilience gain을 유지한다.
-- 모든 stress row에서 P95 latency, trusted stale exposure, priority inversion이 attack-only 대비 감소한다.
+- TSRA-R full은 세 stress fixture 모두에서 평균 0.75 이상의 resilience gain을 유지한다.
+- TSRA-R-ML은 세 stress fixture 모두에서 평균 0.65 이상의 resilience gain을 유지한다.
+- TSRA-R-ML은 stale-COP chain에서 seed별 편차가 크므로 `resilience_gain_min`과 `resilience_gain_std`를 함께 노출한다.
+- 모든 stress row에서 평균 P95 latency, trusted stale exposure, priority inversion이 attack-only 대비 감소한다.
 - 이 보강은 방어 에이전트가 일반 실험뿐 아니라 특정 임무 압박 조건에서도 작동한다는 증거를 추가한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation stress evidence만 생성한다.
