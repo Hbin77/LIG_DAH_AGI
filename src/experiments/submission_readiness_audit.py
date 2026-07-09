@@ -135,6 +135,7 @@ def build_rows() -> list[dict[str, str]]:
         "alerts": count_csv_rows("outputs/report_tables/operator_alerts.csv"),
         "ledger": count_csv_rows("outputs/report_tables/defense_effectiveness_ledger.csv"),
         "episode": count_csv_rows("outputs/report_tables/closed_loop_episode_replay.csv"),
+        "scorecard": count_csv_rows("outputs/report_tables/agent_engagement_scorecard.csv"),
     }
     metric_counts = {
         "repeated": count_csv_rows("outputs/batch/repeated_experiment_summary.csv"),
@@ -281,6 +282,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/operator_alerts.csv",
                 "outputs/report_tables/defense_effectiveness_ledger.csv",
                 "outputs/report_tables/closed_loop_episode_replay.csv",
+                "outputs/report_tables/agent_engagement_scorecard.csv",
                 "src/experiments/agent_collaboration_graph.py",
             ],
             observed=", ".join(f"{key}={value}" for key, value in closed_loop_counts.items()),
@@ -290,6 +292,7 @@ def build_rows() -> list[dict[str, str]]:
                 and closed_loop_counts["alerts"] == 56
                 and closed_loop_counts["ledger"] == 56
                 and closed_loop_counts["episode"] == 10
+                and closed_loop_counts["scorecard"] == 10
                 and path_exists("src/experiments/agent_collaboration_graph.py")
             ),
             handoff_value="The red/blue loop can be reviewed as episodes, actions, alerts, and metric movement.",

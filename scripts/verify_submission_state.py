@@ -37,6 +37,7 @@ REQUIRED_FILES = [
     "src/experiments/operator_alerts.py",
     "src/experiments/defense_effectiveness_ledger.py",
     "src/experiments/closed_loop_episode_replay.py",
+    "src/experiments/agent_engagement_scorecard.py",
     "src/experiments/agent_collaboration_graph.py",
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
@@ -69,6 +70,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/defense_effectiveness_ledger.md",
     "outputs/report_tables/closed_loop_episode_replay.csv",
     "outputs/report_tables/closed_loop_episode_replay.md",
+    "outputs/report_tables/agent_engagement_scorecard.csv",
+    "outputs/report_tables/agent_engagement_scorecard.md",
     "outputs/report_tables/agent_collaboration_graph.csv",
     "outputs/report_tables/agent_collaboration_graph.md",
     "outputs/report_tables/agent_collaboration_graph.mmd",
@@ -844,6 +847,42 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("closed_loop_episode_replay rows=10 complete")
 
+    engagement_rows = read_csv("outputs/report_tables/agent_engagement_scorecard.csv")
+    require(
+        len(engagement_rows) == 10,
+        f"expected 10 agent engagement scorecard rows, got {len(engagement_rows)}",
+    )
+    engagement_experiments = {row["experiment"] for row in engagement_rows}
+    require(
+        engagement_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"unexpected engagement scorecard experiments: {sorted(engagement_experiments)}",
+    )
+    require(
+        all(row["scorecard_status"] == "pass" for row in engagement_rows),
+        "agent engagement scorecard has non-pass rows",
+    )
+    require(
+        all(row["attack_selection_margin"] for row in engagement_rows),
+        "agent engagement scorecard missing attack selection margins",
+    )
+    require(
+        all(row["attack_threshold_margin"] for row in engagement_rows),
+        "agent engagement scorecard missing attack threshold margins",
+    )
+    require(
+        all(int(float(row["defense_event_count_in_window"])) > 0 for row in engagement_rows),
+        "agent engagement scorecard has rows without defense events",
+    )
+    require(
+        all(row["impact_reduction_from_peak"] for row in engagement_rows),
+        "agent engagement scorecard missing impact reduction values",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in engagement_rows),
+        "agent engagement scorecard missing safety boundary",
+    )
+    checks.append("agent_engagement_scorecard rows=10 pass")
+
     collaboration_rows = read_csv("outputs/report_tables/agent_collaboration_graph.csv")
     require(
         len(collaboration_rows) == 17,
@@ -1045,6 +1084,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/closed_loop_episode_replay.md" in manifest_text,
         "manifest missing closed-loop episode replay",
+    )
+    require(
+        "outputs/report_tables/agent_engagement_scorecard.md" in manifest_text,
+        "manifest missing agent engagement scorecard",
     )
     require(
         "outputs/report_tables/agent_collaboration_graph.md" in manifest_text,

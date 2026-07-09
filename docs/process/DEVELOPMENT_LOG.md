@@ -1891,3 +1891,37 @@ agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 - 이제 DecisionTrace는 "무엇을 골랐다"뿐 아니라 "얼마나 확실하게 골랐다"를 보여준다.
 - no-op도 무행동이 아니라 threshold, cooldown, active window, eligible/ready 조건에 의해 설명된다.
 - 실제 공격 도구나 live network action은 추가하지 않고 closed simulation evidence만 강화했다.
+
+### 47. Agent Engagement Scorecard를 추가한 이유
+
+공격 선택 근거, 방어 대응, metric 효과가 각각 다른 산출물에 나뉘어 있으면 심사자가 공방 1건의 흐름을 따라가려면 여러 파일을 오가야 한다. 이번 변경은 공방 1건을 한 행으로 묶어 AURA 선택 margin, TSRA-R 대응, mission impact movement를 같이 보게 한다.
+
+추가한 것:
+
+```text
+src/experiments/agent_engagement_scorecard.py
+outputs/report_tables/agent_engagement_scorecard.csv
+outputs/report_tables/agent_engagement_scorecard.md
+```
+
+입력으로 결합한 산출물:
+
+```text
+outputs/report_tables/closed_loop_episode_replay.csv
+outputs/report_tables/agent_decision_margin_audit.csv
+outputs/report_tables/defense_effectiveness_ledger.csv
+```
+
+검증 결과:
+
+```text
+agent_engagement_scorecard rows: 10
+scorecard_status: pass=10
+experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+```
+
+해석:
+
+- 공격 이벤트 10건 모두 공격 선택 margin, 방어 이벤트 수, response status, peak 대비 impact reduction으로 연결된다.
+- E7의 AURA-ML trace와 attack event agent 표기 차이는 AURA 계열 agent로 조인되게 처리했다.
+- closed simulation evidence만 결합하며 실제 공격 기능은 추가하지 않았다.

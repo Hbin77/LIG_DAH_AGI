@@ -183,16 +183,18 @@ ALIGNMENT_SPECS = [
             "whether required defenses are active or emitted within the response window; the collaboration "
             "graph summarizes the closed-loop agent cooperation evidence; episode replay joins attack, "
             "defense, alert, and metric movement per attack event; the defense effectiveness ledger "
-            "adds event-level response-to-metric movement evidence."
+            "adds event-level response-to-metric movement evidence; engagement scorecard joins attack "
+            "decision margin, defense response, and mission-impact movement per attack."
         ),
         agent_or_component=(
             "Battle timeline / Incident summary / Coverage / Response audit / "
-            "Episode replay / Collaboration graph"
+            "Episode replay / Engagement scorecard / Collaboration graph"
         ),
         evidence_files=[
             "src/experiments/battle_timeline.py",
             "src/experiments/incident_summary.py",
             "src/experiments/closed_loop_episode_replay.py",
+            "src/experiments/agent_engagement_scorecard.py",
             "src/experiments/defense_effectiveness_ledger.py",
             "src/experiments/agent_collaboration_graph.py",
             "src/experiments/attack_defense_coverage.py",
@@ -200,6 +202,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/battle_timeline.csv",
             "outputs/report_tables/incident_summary.csv",
             "outputs/report_tables/closed_loop_episode_replay.csv",
+            "outputs/report_tables/agent_engagement_scorecard.csv",
             "outputs/report_tables/defense_effectiveness_ledger.csv",
             "outputs/report_tables/agent_collaboration_graph.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
@@ -213,6 +216,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/battle_timeline.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/incident_summary.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/closed_loop_episode_replay.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/agent_engagement_scorecard.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/defense_effectiveness_ledger.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_coverage.csv", "closed simulation"),
@@ -222,6 +226,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/battle_timeline.csv", 40),
             RowCountCheck("outputs/report_tables/incident_summary.csv", 10),
             RowCountCheck("outputs/report_tables/closed_loop_episode_replay.csv", 10),
+            RowCountCheck("outputs/report_tables/agent_engagement_scorecard.csv", 10),
             RowCountCheck("outputs/report_tables/defense_effectiveness_ledger.csv", 56),
             RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 13),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),

@@ -382,6 +382,19 @@ This writes:
 
 The replay joins each defended attack event to response coverage, defense chains, operator alerts, and mission metric movement. Run it after `attack_defense_response_audit`, `operator_alerts`, and `defense_effectiveness_ledger` have been generated.
 
+## Build Agent Engagement Scorecard
+
+```bash
+python3 -m src.experiments.agent_engagement_scorecard
+```
+
+This writes:
+
+- `outputs/report_tables/agent_engagement_scorecard.csv`
+- `outputs/report_tables/agent_engagement_scorecard.md`
+
+The scorecard links each AURA attack decision margin to the TSRA-R response chain and mission-impact movement for the defended E5/E7 episodes.
+
 ## Audit PACE Transitions
 
 ```bash
@@ -601,6 +614,7 @@ python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
+python3 -m src.experiments.agent_engagement_scorecard
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
 python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete

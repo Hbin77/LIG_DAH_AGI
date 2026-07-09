@@ -33,6 +33,7 @@ python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
+python3 -m src.experiments.agent_engagement_scorecard
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
 python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
@@ -79,6 +80,7 @@ incident_summary rows: 10
 operator_alerts rows: 56 actions=5
 defense_effectiveness_ledger rows: 56 actions=5
 closed_loop_episode_replay rows: 10 complete
+agent_engagement_scorecard rows: 10 pass
 agent_collaboration_graph edges: 17 verified
 competition_alignment_matrix rows: 10 verified
 ```
@@ -86,7 +88,7 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 165
+package_zip entries: 168
 package_manifest_integrity: passed
 package_zip_metadata: deterministic
 release_handoff: repo-only/current

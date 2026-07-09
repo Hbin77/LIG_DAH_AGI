@@ -11,7 +11,7 @@ Safety boundary: closed simulation readiness audit only; no RF, exploit, or live
 | R03 | Agent runtime structure | pass | runtime_files_present=True; interface_rows=4 | The agent claim is backed by code modules and generated interface evidence. |
 | R04 | Attack and defense separation | pass | agent_files_present=True; capability_rows=10; coverage_rows=4; response_rows=10 | Attack-side and defense-side work can be assigned separately without losing interface coverage. |
 | R05 | Decision evidence | pass | trace=215, contract=49, quality=9, loop=8, causality=399, margin=399, memory=9, tool=23 | Agent decisions remain explainable by generated evidence, not only by source code. |
-| R06 | Closed-loop evidence | pass | battle=49, incident=10, alerts=56, ledger=56, episode=10 | The red/blue loop can be reviewed as episodes, actions, alerts, and metric movement. |
+| R06 | Closed-loop evidence | pass | battle=49, incident=10, alerts=56, ledger=56, episode=10, scorecard=10 | The red/blue loop can be reviewed as episodes, actions, alerts, and metric movement. |
 | R07 | Metric and ML evidence | pass | repeated=7, resilience=4, ablation=5, adaptive=2, decomposition=35, gates=11; model_metric_files=3 | Quantitative claims are backed by batch, ablation, adaptive, gate, and model metric artifacts. |
 | R08 | Package inputs | pass | package_inputs_present=True; manifest_has_zip_sha256=True; zip_ignored=True | The source ZIP can be regenerated locally without committing the binary ZIP file. |
 | R09 | Safety boundary | pass | readme_sim_boundary=True; coa_no_rf=True; coa_no_exploit=True; incident_closed_sim=True; graph_closed_sim=True | The project remains a simulated mission-impact prototype, not operational offensive tooling. |
@@ -72,8 +72,8 @@ Safety boundary: closed simulation readiness audit only; no RF, exploit, or live
 ### R06 Closed-loop evidence
 
 - Requirement: Attack, defense, alerts, effectiveness, replay, and collaboration evidence must be present.
-- Evidence: outputs/report_tables/battle_timeline.csv | outputs/report_tables/incident_summary.csv | outputs/report_tables/operator_alerts.csv | outputs/report_tables/defense_effectiveness_ledger.csv | outputs/report_tables/closed_loop_episode_replay.csv | src/experiments/agent_collaboration_graph.py
-- Observed: battle=49, incident=10, alerts=56, ledger=56, episode=10
+- Evidence: outputs/report_tables/battle_timeline.csv | outputs/report_tables/incident_summary.csv | outputs/report_tables/operator_alerts.csv | outputs/report_tables/defense_effectiveness_ledger.csv | outputs/report_tables/closed_loop_episode_replay.csv | outputs/report_tables/agent_engagement_scorecard.csv | src/experiments/agent_collaboration_graph.py
+- Observed: battle=49, incident=10, alerts=56, ledger=56, episode=10, scorecard=10
 - Status: pass
 - Handoff value: The red/blue loop can be reviewed as episodes, actions, alerts, and metric movement.
 - Next gate: New closed-loop outputs must connect attack event, defense event, and metric evidence.

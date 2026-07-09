@@ -1736,6 +1736,54 @@ safety boundary: closed simulation only
 - AgentRuntime의 DecisionTrace가 단순 로그가 아니라 선택 확신도와 no-op 근거까지 설명하는 evidence가 됐다.
 - AURA/TSRA-R 양쪽 모두 같은 audit schema에서 비교된다.
 
+## P34. Agent Engagement Scorecard
+
+상태: 완료
+
+문제:
+
+- `closed_loop_episode_replay`는 공격 사건과 방어 체인을 보여준다.
+- `agent_decision_margin_audit`은 공격/방어 선택의 margin을 보여준다.
+- `defense_effectiveness_ledger`는 방어 이벤트별 metric 변화를 보여준다.
+- 하지만 이 셋을 공격 1건 단위로 한 행에서 같이 보는 산출물이 없었다.
+
+구현:
+
+```text
+src/experiments/agent_engagement_scorecard.py
+outputs/report_tables/agent_engagement_scorecard.csv
+outputs/report_tables/agent_engagement_scorecard.md
+```
+
+검증 내용:
+
+- 공격 event id, attack type, target link
+- AURA attack selection margin
+- AURA attack threshold margin
+- TSRA-R response status와 first response latency
+- response window 안의 defense event count와 action list
+- peak 대비 mission impact reduction
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_engagement_scorecard
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_engagement_scorecard rows: 10
+scorecard_status: pass=10
+experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+```
+
+해석:
+
+- AURA가 왜 공격을 골랐는지, TSRA-R이 무엇으로 대응했는지, mission impact가 어떻게 움직였는지를 같은 row에서 볼 수 있다.
+- 공격/방어/AI 에이전트 협력 구조의 evidence가 더 직접적으로 연결됐다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

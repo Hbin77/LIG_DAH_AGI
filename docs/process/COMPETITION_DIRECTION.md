@@ -660,7 +660,7 @@ outputs/report_tables/submission_readiness_audit.md
 ```text
 submission_readiness_audit rows: 10 pass
 agent_collaboration_graph edges: 17 verified
-package_zip entries: 165
+package_zip entries: 168
 package_manifest_integrity: passed
 release_handoff: repo-only/current
 branch: hbin
@@ -791,6 +791,32 @@ outputs/report_tables/agent_decision_margin_audit.md
 agent_decision_margin_audit rows: 399
 margin_status: pass=399
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+```
+
+### P24. Agent Engagement Scorecard
+
+상태: 완료
+
+목적:
+
+- AURA의 공격 선택 근거와 TSRA-R의 방어 대응, mission impact 결과를 공격 1건 단위로 묶는다.
+- 공방 에피소드가 단순 timeline이 아니라 공격 의사결정, 방어 이벤트, metric 변화로 검증되게 한다.
+- E5 rule 공방과 E7 ML 공방을 같은 schema로 비교한다.
+
+산출물:
+
+```text
+src/experiments/agent_engagement_scorecard.py
+outputs/report_tables/agent_engagement_scorecard.csv
+outputs/report_tables/agent_engagement_scorecard.md
+```
+
+검증 결과:
+
+```text
+agent_engagement_scorecard rows: 10
+scorecard_status: pass=10
+covered experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 ```
 
 ## 최종 판단 기준

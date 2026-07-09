@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 164
-- total_payload_bytes: 3220906
+- payload_file_count: 167
+- total_payload_bytes: 3247431
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 165
-- zip_bytes: 1717506
-- zip_sha256: `00ba7f5ca40cf3f80bf72e919720729aa70e748b18ab467c48bf023f29b1105b`
+- zip_file_count: 168
+- zip_bytes: 1724154
+- zip_sha256: `6a885de8d176b2d5394f5661fb4e2e4c71c3ac8231492885bab95060362ba54b`
 
 ## 포함 파일
 
@@ -93,6 +93,8 @@
 - `outputs/report_tables/agent_decision_margin_audit.md`
 - `outputs/report_tables/agent_decision_trace_summary.csv`
 - `outputs/report_tables/agent_decision_trace_summary.md`
+- `outputs/report_tables/agent_engagement_scorecard.csv`
+- `outputs/report_tables/agent_engagement_scorecard.md`
 - `outputs/report_tables/agent_interface_manifest.csv`
 - `outputs/report_tables/agent_interface_manifest.md`
 - `outputs/report_tables/agent_loop_replay.csv`
@@ -154,6 +156,7 @@
 - `src/experiments/agent_collaboration_graph.py`
 - `src/experiments/agent_decision_causality_audit.py`
 - `src/experiments/agent_decision_margin_audit.py`
+- `src/experiments/agent_engagement_scorecard.py`
 - `src/experiments/agent_interface_manifest.py`
 - `src/experiments/agent_loop_replay.py`
 - `src/experiments/agent_memory_belief_audit.py`
