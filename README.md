@@ -489,6 +489,19 @@ This writes:
 
 The replay joins each defended attack event to response coverage, defense chains, operator alerts, and mission metric movement. Run it after `attack_defense_response_audit`, `operator_alerts`, and `defense_effectiveness_ledger` have been generated.
 
+## Generate Mission Thread Summary
+
+```bash
+python3 -m src.experiments.mission_thread_summary --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/mission_thread_summary.csv`
+- `outputs/report_tables/mission_thread_summary.md`
+
+The mission thread summary joins each attack episode to attack decision evidence, response coverage, defense-action attribution, operator alert count, metric movement, outcome, and residual risk. Run it after `closed_loop_episode_replay`, `agent_engagement_scorecard`, and `defense_action_attribution_audit` have been generated.
+
 ## Build Agent Engagement Scorecard
 
 ```bash
@@ -728,6 +741,7 @@ python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
+python3 -m src.experiments.mission_thread_summary --fail-on-error
 python3 -m src.experiments.agent_engagement_scorecard
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition

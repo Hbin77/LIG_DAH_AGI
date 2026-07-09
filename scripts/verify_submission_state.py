@@ -39,6 +39,7 @@ REQUIRED_FILES = [
     "src/experiments/defense_effectiveness_ledger.py",
     "src/experiments/defense_action_attribution_audit.py",
     "src/experiments/closed_loop_episode_replay.py",
+    "src/experiments/mission_thread_summary.py",
     "src/experiments/agent_engagement_scorecard.py",
     "src/experiments/agent_collaboration_graph.py",
     "src/experiments/competition_alignment.py",
@@ -82,6 +83,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/defense_action_attribution_audit.md",
     "outputs/report_tables/closed_loop_episode_replay.csv",
     "outputs/report_tables/closed_loop_episode_replay.md",
+    "outputs/report_tables/mission_thread_summary.csv",
+    "outputs/report_tables/mission_thread_summary.md",
     "outputs/report_tables/agent_engagement_scorecard.csv",
     "outputs/report_tables/agent_engagement_scorecard.md",
     "outputs/report_tables/agent_collaboration_graph.csv",
@@ -1294,6 +1297,48 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("closed_loop_episode_replay rows=10 complete")
 
+    mission_thread_rows = read_csv("outputs/report_tables/mission_thread_summary.csv")
+    require(
+        len(mission_thread_rows) == 10,
+        f"expected 10 mission thread rows, got {len(mission_thread_rows)}",
+    )
+    require(
+        {row["experiment"] for row in mission_thread_rows}
+        == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        "mission thread summary missing E5/E7 experiments",
+    )
+    require(
+        all(row["thread_status"] == "pass" for row in mission_thread_rows),
+        "mission thread summary has non-pass rows",
+    )
+    require(
+        {"queue_pressure", "failover_chasing"}.issubset(
+            {row["attack_type"] for row in mission_thread_rows}
+        ),
+        "mission thread summary missing attack types",
+    )
+    require(
+        all("status=complete" in row["response_signal"] for row in mission_thread_rows),
+        "mission thread summary has incomplete response signals",
+    )
+    require(
+        all("status=pass" in row["attribution_signal"] for row in mission_thread_rows),
+        "mission thread summary missing passing attribution signals",
+    )
+    require(
+        all(int(float(row["operator_signal_count"])) >= 3 for row in mission_thread_rows),
+        "mission thread summary has weak operator alert linkage",
+    )
+    require(
+        all("reduction_from_peak=" in row["metric_signal"] for row in mission_thread_rows),
+        "mission thread summary missing metric movement",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in mission_thread_rows),
+        "mission thread summary missing safety boundary",
+    )
+    checks.append("mission_thread_summary rows=10 pass")
+
     engagement_rows = read_csv("outputs/report_tables/agent_engagement_scorecard.csv")
     require(
         len(engagement_rows) == 10,
@@ -1535,6 +1580,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/closed_loop_episode_replay.md" in manifest_text,
         "manifest missing closed-loop episode replay",
+    )
+    require(
+        "outputs/report_tables/mission_thread_summary.md" in manifest_text,
+        "manifest missing mission thread summary",
     )
     require(
         "outputs/report_tables/agent_engagement_scorecard.md" in manifest_text,

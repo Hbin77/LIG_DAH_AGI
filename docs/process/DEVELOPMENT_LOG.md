@@ -2327,3 +2327,36 @@ ml_attack_alert:
 - `pace_switch`는 recovery/fallback 문맥이 있어 scalar ablation만으로 가치를 판단하면 왜곡될 수 있으므로 bounded tradeoff로 분류했다.
 - `ml_attack_alert`는 직접 metric 조작 action이 아니라 reactive defense window trigger로 attribution했다.
 - 실제 공격 기능은 추가하지 않고 closed simulation event/metric attribution만 감사한다.
+
+### 57. Mission Thread Summary를 추가한 이유
+
+`closed_loop_episode_replay`, `agent_engagement_scorecard`, `defense_action_attribution_audit`는 각각 필요한 증거를 제공하지만, 한 공격 episode를 처음부터 끝까지 검토하려면 여러 CSV를 넘나들어야 했다. 공격 판단 근거, TSRA-R 반응, defense action attribution, operator alert, metric movement, residual risk가 흩어져 있으면 협업자가 공방 루프를 빠르게 확인하기 어렵다.
+
+이번 변경은 공격 episode별 mission thread summary를 추가했다.
+
+추가한 것:
+
+```text
+src/experiments/mission_thread_summary.py
+outputs/report_tables/mission_thread_summary.csv
+outputs/report_tables/mission_thread_summary.md
+```
+
+검증 기준:
+
+```text
+input closed_loop_episode_replay rows: 10
+input agent_engagement_scorecard rows: 10
+input defense_action_attribution_audit rows: 5
+output mission_thread_summary rows: 10
+thread_status: pass=10
+experiments: E5_rule_aura_tsra_r=5, E7_ml_aura_ml_tsra_r=5
+operator_signal_count range: 3-7
+```
+
+해석:
+
+- 한 row에서 AURA attack decision, TSRA-R response coverage, defense action attribution, operator signal count, metric reduction, outcome, residual risk를 같이 볼 수 있다.
+- E5와 E7의 closed-loop episode가 같은 기준으로 비교된다.
+- 공격-방어 협력 구조를 단순 표 개수보다 mission thread 단위로 설명할 수 있다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation mission-thread summary만 생성한다.

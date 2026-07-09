@@ -994,6 +994,26 @@ stale_badge ablation delta trusted stale exposure: 0.38125
 ml_attack_alert active attack overlap: 9/9
 ```
 
+### P34. Mission Thread Summary
+
+목적:
+
+- 공격 episode별로 AURA 판단, TSRA-R 반응, 방어 action attribution, operator alert, metric movement, residual risk를 한 row에 묶는다.
+- 팀원이 E5/E7 closed-loop episode를 여러 산출물 사이에서 역추적하지 않아도 검토할 수 있게 한다.
+- 공격-방어 협력 구조를 event 나열이 아니라 mission thread 단위로 검증한다.
+
+검증 기준:
+
+```text
+mission_thread_summary rows: 10
+thread_status: pass=10
+experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+attack types: queue_pressure, failover_chasing
+operator_signal_count range: 3-7
+response_signal: status=complete
+attribution_signal: status=pass
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

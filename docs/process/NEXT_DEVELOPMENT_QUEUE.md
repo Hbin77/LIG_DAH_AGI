@@ -2211,6 +2211,56 @@ attribution classes:
 - TSRA-R 방어 에이전트의 효과 설명이 event-level ledger에서 action-level attribution으로 올라갔다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
+## P44. Mission Thread Summary
+
+상태: 완료
+
+문제:
+
+- 공격 판단, 방어 반응, 방어 action attribution, operator alert, metric movement가 여러 산출물에 분산돼 있다.
+- 한 공격 episode를 협업자가 리뷰하려면 `closed_loop_episode_replay`, `agent_engagement_scorecard`, `defense_action_attribution_audit`를 동시에 맞춰봐야 한다.
+- 공방 루프의 품질을 높이려면 episode별 end-to-end 증거 row가 필요하다.
+
+구현:
+
+```text
+src/experiments/mission_thread_summary.py
+outputs/report_tables/mission_thread_summary.csv
+outputs/report_tables/mission_thread_summary.md
+```
+
+검증 기준:
+
+- mission thread가 closed-loop episode 10개와 1:1로 매핑돼야 한다.
+- E5/E7 defended episode를 모두 포함해야 한다.
+- 모든 thread가 `thread_status=pass`여야 한다.
+- response signal은 complete, attribution signal은 pass를 포함해야 한다.
+- operator signal count는 각 thread에서 3개 이상이어야 한다.
+- metric signal은 `reduction_from_peak`를 포함해야 한다.
+- 모든 row는 closed simulation safety boundary를 포함한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.mission_thread_summary --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+mission_thread_summary rows: 10
+thread_status: pass=10
+experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+operator_signal_count range: 3-7
+```
+
+해석:
+
+- 공격-방어-AI 에이전트 공방 루프를 mission thread 단위로 검토할 수 있게 됐다.
+- 새 산출물은 기존 replay/scorecard/attribution을 대체하지 않고, 리뷰 가능한 상위 요약으로 묶는다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

@@ -195,16 +195,19 @@ ALIGNMENT_SPECS = [
             "adds event-level response-to-metric movement evidence; engagement scorecard joins attack "
             "decision margin, defense response, and mission-impact movement per attack; defense action "
             "attribution summarizes which defense actions have direct ablation support, local metric "
-            "support, reactive-window support, or bounded tradeoff behavior."
+            "support, reactive-window support, or bounded tradeoff behavior; mission thread summary "
+            "condenses attack decision evidence, response coverage, action attribution, operator alert "
+            "count, metric movement, outcome, and residual risk into one review row per attack episode."
         ),
         agent_or_component=(
             "Battle timeline / Incident summary / Coverage / Response audit / "
-            "Episode replay / Engagement scorecard / Collaboration graph"
+            "Episode replay / Mission thread summary / Engagement scorecard / Collaboration graph"
         ),
         evidence_files=[
             "src/experiments/battle_timeline.py",
             "src/experiments/incident_summary.py",
             "src/experiments/closed_loop_episode_replay.py",
+            "src/experiments/mission_thread_summary.py",
             "src/experiments/agent_engagement_scorecard.py",
             "src/experiments/defense_effectiveness_ledger.py",
             "src/experiments/defense_action_attribution_audit.py",
@@ -214,6 +217,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/battle_timeline.csv",
             "outputs/report_tables/incident_summary.csv",
             "outputs/report_tables/closed_loop_episode_replay.csv",
+            "outputs/report_tables/mission_thread_summary.csv",
             "outputs/report_tables/agent_engagement_scorecard.csv",
             "outputs/report_tables/defense_effectiveness_ledger.csv",
             "outputs/report_tables/defense_action_attribution_audit.csv",
@@ -229,6 +233,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/battle_timeline.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/incident_summary.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/closed_loop_episode_replay.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/mission_thread_summary.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_engagement_scorecard.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/defense_effectiveness_ledger.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/defense_action_attribution_audit.csv", "closed simulation"),
@@ -240,6 +245,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/battle_timeline.csv", 40),
             RowCountCheck("outputs/report_tables/incident_summary.csv", 10),
             RowCountCheck("outputs/report_tables/closed_loop_episode_replay.csv", 10),
+            RowCountCheck("outputs/report_tables/mission_thread_summary.csv", 10),
             RowCountCheck("outputs/report_tables/agent_engagement_scorecard.csv", 10),
             RowCountCheck("outputs/report_tables/defense_effectiveness_ledger.csv", 56),
             RowCountCheck("outputs/report_tables/defense_action_attribution_audit.csv", 5),
