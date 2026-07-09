@@ -8,9 +8,13 @@ The code does not attack real SATCOM, RF, or network equipment. AURA only emits 
 
 ## Branch Policy
 
-All development work is pushed to the `hbin` branch.
+This repository is prepared for team collaboration.
+
+All active development work is pushed to the `hbin` branch.
 
 Do not push directly to `main`.
+
+The `main` branch is kept as the protected/default branch. The `hbin` branch is the shared working branch for code, experiments, and documentation.
 
 See:
 
