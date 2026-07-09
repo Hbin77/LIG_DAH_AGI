@@ -7,15 +7,15 @@ Safety boundary: closed simulation readiness audit only; no RF, exploit, or live
 | check_id | area | status | observed | handoff_value |
 |---|---|---|---|---|
 | R01 | Branch policy | pass | origin/main=True; origin/hbin=True; readme_no_main_push=True; workflow_mentions_hbin=True | A teammate can clone the repo and know that active work is on hbin while main stays protected. |
-| R02 | Reproduction commands | pass | python3 -m src.ml.build_dataset=yes, python3 -m src.experiments.run_all=yes, python3 -m src.experiments.agent_runtime_invariant_audit=yes, python3 -m src.experiments.agent_decision_causality_audit=yes, python3 -m src.experiments.agent_decision_margin_audit=yes, python3 -m src.experiments.safety_boundary_audit=yes, python3 -m src.experiments.run_batch=yes, python3 scripts/build_submission_package.py=yes, python3 scripts/verify_submission_state.py=yes, python3 -m src.experiments.ml_contribution_audit --fail-on-error=yes, python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error=yes, python3 -m src.experiments.run_ml_threshold_sweep=yes, python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error=yes | The next developer can rebuild the same evidence without reverse-engineering command order. |
+| R02 | Reproduction commands | pass | python3 -m src.ml.build_dataset=yes, python3 -m src.experiments.run_all=yes, python3 -m src.experiments.agent_runtime_invariant_audit=yes, python3 -m src.experiments.agent_decision_causality_audit=yes, python3 -m src.experiments.agent_decision_margin_audit=yes, python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error=yes, python3 -m src.experiments.safety_boundary_audit=yes, python3 -m src.experiments.run_batch=yes, python3 scripts/build_submission_package.py=yes, python3 scripts/verify_submission_state.py=yes, python3 -m src.experiments.ml_contribution_audit --fail-on-error=yes, python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error=yes, python3 -m src.experiments.run_ml_threshold_sweep=yes, python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error=yes | The next developer can rebuild the same evidence without reverse-engineering command order. |
 | R03 | Agent runtime structure | pass | runtime_files_present=True; interface_rows=4; runtime_invariant_rows=9 | The agent claim is backed by code modules and generated interface evidence. |
 | R04 | Attack and defense separation | pass | agent_files_present=True; capability_rows=10; coverage_rows=4; response_rows=10 | Attack-side and defense-side work can be assigned separately without losing interface coverage. |
-| R05 | Decision evidence | pass | trace=215, contract=49, quality=9, runtime=9, loop=8, causality=399, margin=399, memory=9, tool=23 | Agent decisions remain explainable by generated evidence, not only by source code. |
+| R05 | Decision evidence | pass | trace=215, contract=49, quality=9, runtime=9, loop=8, causality=399, margin=399, goal_alignment=399, memory=9, tool=23 | Agent decisions remain explainable by generated evidence, not only by source code. |
 | R06 | Closed-loop evidence | pass | battle=49, incident=10, alerts=56, ledger=56, episode=10, scorecard=10 | The red/blue loop can be reviewed as episodes, actions, alerts, and metric movement. |
 | R07 | Metric and ML evidence | pass | repeated=7, resilience=4, ablation=5, adaptive=2, decomposition=35, gates=11, ml_contribution=7, reactive_tradeoff=7, threshold_sweep=5, detector_calibration=6; model_metric_files=3 | Quantitative and ML-agent claims are backed by batch, ablation, adaptive, gate, model metric, ML contribution, reactive tradeoff, threshold tuning, and detector calibration artifacts. |
 | R08 | Package inputs | pass | package_inputs_present=True; manifest_has_zip_sha256=True; zip_ignored=True | The source ZIP can be regenerated locally without committing the binary ZIP file. |
 | R09 | Safety boundary | pass | readme_sim_boundary=True; safety_audit_rows=5; coa_no_rf=True; coa_no_exploit=True; incident_closed_sim=True; graph_closed_sim=True | The project remains a simulated mission-impact prototype, not operational offensive tooling. |
-| R10 | Team handoff docs | pass | process_docs_present=True; next_queue_has_p36=True; forbidden_team_phrases=0 | A teammate can continue from the queue and logs without inheriting personal-only wording. |
+| R10 | Team handoff docs | pass | process_docs_present=True; next_queue_has_p42=True; forbidden_team_phrases=0 | A teammate can continue from the queue and logs without inheriting personal-only wording. |
 
 ## Detail
 
@@ -33,7 +33,7 @@ Safety boundary: closed simulation readiness audit only; no RF, exploit, or live
 
 - Requirement: README must contain the end-to-end commands needed to regenerate core evidence.
 - Evidence: README.md
-- Observed: python3 -m src.ml.build_dataset=yes, python3 -m src.experiments.run_all=yes, python3 -m src.experiments.agent_runtime_invariant_audit=yes, python3 -m src.experiments.agent_decision_causality_audit=yes, python3 -m src.experiments.agent_decision_margin_audit=yes, python3 -m src.experiments.safety_boundary_audit=yes, python3 -m src.experiments.run_batch=yes, python3 scripts/build_submission_package.py=yes, python3 scripts/verify_submission_state.py=yes, python3 -m src.experiments.ml_contribution_audit --fail-on-error=yes, python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error=yes, python3 -m src.experiments.run_ml_threshold_sweep=yes, python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error=yes
+- Observed: python3 -m src.ml.build_dataset=yes, python3 -m src.experiments.run_all=yes, python3 -m src.experiments.agent_runtime_invariant_audit=yes, python3 -m src.experiments.agent_decision_causality_audit=yes, python3 -m src.experiments.agent_decision_margin_audit=yes, python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error=yes, python3 -m src.experiments.safety_boundary_audit=yes, python3 -m src.experiments.run_batch=yes, python3 scripts/build_submission_package.py=yes, python3 scripts/verify_submission_state.py=yes, python3 -m src.experiments.ml_contribution_audit --fail-on-error=yes, python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error=yes, python3 -m src.experiments.run_ml_threshold_sweep=yes, python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error=yes
 - Status: pass
 - Handoff value: The next developer can rebuild the same evidence without reverse-engineering command order.
 - Next gate: Any new experiment generator must be added to the Full Reproduction block.
@@ -61,12 +61,12 @@ Safety boundary: closed simulation readiness audit only; no RF, exploit, or live
 
 ### R05 Decision evidence
 
-- Requirement: DecisionTrace, contract, memory, tool, and causality evidence must all be generated.
-- Evidence: outputs/report_tables/agent_decision_trace_summary.csv | outputs/report_tables/agent_contract_validation.csv | outputs/report_tables/decision_trace_quality_audit.csv | outputs/report_tables/agent_runtime_invariant_audit.csv | outputs/report_tables/agent_loop_replay.csv | outputs/report_tables/agent_decision_causality_audit.csv | outputs/report_tables/agent_decision_margin_audit.csv | outputs/report_tables/agent_memory_belief_audit.csv | outputs/report_tables/agent_tool_usage_audit.csv
-- Observed: trace=215, contract=49, quality=9, runtime=9, loop=8, causality=399, margin=399, memory=9, tool=23
+- Requirement: DecisionTrace, contract, causality, margin, goal alignment, memory, and tool evidence must all be generated.
+- Evidence: outputs/report_tables/agent_decision_trace_summary.csv | outputs/report_tables/agent_contract_validation.csv | outputs/report_tables/decision_trace_quality_audit.csv | outputs/report_tables/agent_runtime_invariant_audit.csv | outputs/report_tables/agent_loop_replay.csv | outputs/report_tables/agent_decision_causality_audit.csv | outputs/report_tables/agent_decision_margin_audit.csv | outputs/report_tables/agent_goal_alignment_audit.csv | outputs/report_tables/agent_memory_belief_audit.csv | outputs/report_tables/agent_tool_usage_audit.csv
+- Observed: trace=215, contract=49, quality=9, runtime=9, loop=8, causality=399, margin=399, goal_alignment=399, memory=9, tool=23
 - Status: pass
 - Handoff value: Agent decisions remain explainable by generated evidence, not only by source code.
-- Next gate: Policy changes must keep all decision evidence rows passing final verification.
+- Next gate: Policy changes must keep causality, margin, goal alignment, memory, and tool evidence passing final verification.
 - Safety boundary: closed simulation readiness audit only; no RF, exploit, or live network action
 
 ### R06 Closed-loop evidence
@@ -113,7 +113,7 @@ Safety boundary: closed simulation readiness audit only; no RF, exploit, or live
 
 - Requirement: Process docs must preserve the team workflow and avoid one-person framing.
 - Evidence: docs/process/GITHUB_WORKFLOW.md | docs/process/COMPETITION_DIRECTION.md | docs/process/NEXT_DEVELOPMENT_QUEUE.md | docs/process/DEVELOPMENT_LOG.md | docs/process/FINAL_QA.md | docs/process/SUBMISSION_PACKAGE.md
-- Observed: process_docs_present=True; next_queue_has_p36=True; forbidden_team_phrases=0
+- Observed: process_docs_present=True; next_queue_has_p42=True; forbidden_team_phrases=0
 - Status: pass
 - Handoff value: A teammate can continue from the queue and logs without inheriting personal-only wording.
 - Next gate: Each substantial change must update the queue, development log, verifier, and hbin branch.

@@ -127,6 +127,7 @@ def build_rows() -> list[dict[str, str]]:
         "loop": count_csv_rows("outputs/report_tables/agent_loop_replay.csv"),
         "causality": count_csv_rows("outputs/report_tables/agent_decision_causality_audit.csv"),
         "margin": count_csv_rows("outputs/report_tables/agent_decision_margin_audit.csv"),
+        "goal_alignment": count_csv_rows("outputs/report_tables/agent_goal_alignment_audit.csv"),
         "memory": count_csv_rows("outputs/report_tables/agent_memory_belief_audit.csv"),
         "tool": count_csv_rows("outputs/report_tables/agent_tool_usage_audit.csv"),
     }
@@ -172,6 +173,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.agent_runtime_invariant_audit",
         "python3 -m src.experiments.agent_decision_causality_audit",
         "python3 -m src.experiments.agent_decision_margin_audit",
+        "python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error",
         "python3 -m src.experiments.safety_boundary_audit",
         "python3 -m src.experiments.run_batch",
         "python3 scripts/build_submission_package.py",
@@ -260,7 +262,7 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R05",
             area="Decision evidence",
-            requirement="DecisionTrace, contract, memory, tool, and causality evidence must all be generated.",
+            requirement="DecisionTrace, contract, causality, margin, goal alignment, memory, and tool evidence must all be generated.",
             evidence=[
                 "outputs/report_tables/agent_decision_trace_summary.csv",
                 "outputs/report_tables/agent_contract_validation.csv",
@@ -269,6 +271,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/agent_loop_replay.csv",
                 "outputs/report_tables/agent_decision_causality_audit.csv",
                 "outputs/report_tables/agent_decision_margin_audit.csv",
+                "outputs/report_tables/agent_goal_alignment_audit.csv",
                 "outputs/report_tables/agent_memory_belief_audit.csv",
                 "outputs/report_tables/agent_tool_usage_audit.csv",
             ],
@@ -281,11 +284,12 @@ def build_rows() -> list[dict[str, str]]:
                 and decision_counts["loop"] == 8
                 and decision_counts["causality"] == 399
                 and decision_counts["margin"] == 399
+                and decision_counts["goal_alignment"] == 399
                 and decision_counts["memory"] == 9
                 and decision_counts["tool"] == 23
             ),
             handoff_value="Agent decisions remain explainable by generated evidence, not only by source code.",
-            next_gate="Policy changes must keep all decision evidence rows passing final verification.",
+            next_gate="Policy changes must keep causality, margin, goal alignment, memory, and tool evidence passing final verification.",
         ),
         row(
             check_id="R06",
@@ -404,11 +408,11 @@ def build_rows() -> list[dict[str, str]]:
             evidence=process_docs,
             observed=(
                 f"process_docs_present={all_files_present(process_docs)}; "
-                f"next_queue_has_p36={'P36' in read_text('docs/process/NEXT_DEVELOPMENT_QUEUE.md')}; "
+                f"next_queue_has_p42={'P42' in read_text('docs/process/NEXT_DEVELOPMENT_QUEUE.md')}; "
                 f"forbidden_team_phrases={sum(docs_text.count(phrase) for phrase in forbidden_team_phrases)}"
             ),
             ok=all_files_present(process_docs)
-            and "P36" in read_text("docs/process/NEXT_DEVELOPMENT_QUEUE.md")
+            and "P42" in read_text("docs/process/NEXT_DEVELOPMENT_QUEUE.md")
             and sum(docs_text.count(phrase) for phrase in forbidden_team_phrases) == 0,
             handoff_value="A teammate can continue from the queue and logs without inheriting personal-only wording.",
             next_gate="Each substantial change must update the queue, development log, verifier, and hbin branch.",

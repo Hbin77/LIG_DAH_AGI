@@ -2210,3 +2210,59 @@ negative_median_probability: 0.106435
 - 확률이 완벽히 calibrated truth라고 주장하지 않는다. 다만 고신뢰 threshold decision input으로는 충분한 근거가 있다.
 - 0.75는 false positive를 0으로 묶는 보수적 기준이며, 0.95는 recall이 0.532까지 떨어져 closed-loop sweep의 watch 결과와 일치한다.
 - 실제 공격 기능은 추가하지 않고 synthetic holdout과 closed simulation 결과만 감사한다.
+
+### 55. Agent Goal Alignment Audit를 추가한 이유
+
+AgentRuntime, Memory, Tool, DecisionTrace, causality, margin audit까지는 "에이전트가 어떤 근거로 행동을 골랐는가"를 보여준다. 하지만 한 단계 더 중요한 질문이 남아 있었다.
+
+```text
+그 행동이 각 에이전트의 목표와 실제 관측 위험에 맞는가?
+```
+
+이번 변경은 이 질문을 별도 audit로 고정했다.
+
+추가한 것:
+
+```text
+src/experiments/agent_goal_alignment_audit.py
+outputs/report_tables/agent_goal_alignment_audit.csv
+outputs/report_tables/agent_goal_alignment_audit.md
+```
+
+검증 기준:
+
+```text
+AURA attack_event
+-> selected_score >= attack_threshold
+-> selected_score == top candidate score
+-> predicted_mission_impact > 0
+
+AURA no_op
+-> min_start, cooldown, max_events, no candidate, or below-threshold reason이 있어야 한다.
+
+TSRA-R defense_events
+-> priority_reroute: critical_pending > 0 and video_queue_kb > 500
+-> video_throttle: video_queue_kb > 1500
+-> stale_badge: stale_data_ratio > 0.25
+-> pace_switch: active link degradation threshold 초과
+-> ml_attack_alert: probability >= threshold
+
+TSRA-R no_op
+-> ready defense action이 없거나 ML defense window 유지 상태여야 한다.
+```
+
+검증 결과:
+
+```text
+agent_goal_alignment_audit rows: 399
+status counts: pass=399
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+selected types: no_op=290, defense_events=84, attack_event=25
+```
+
+해석:
+
+- 공격 에이전트는 단순히 후보를 고른 것이 아니라 mission-impact goal score와 threshold를 통과한 행동을 선택한다.
+- 방어 에이전트는 단순히 룰을 실행한 것이 아니라 관측된 priority, video load, stale data, PACE degradation, ML probability 조건에 맞춰 행동한다.
+- no-op도 "아무것도 안 함"이 아니라 cadence, cooldown, threshold, active defense window 근거가 있는 판단으로 검증된다.
+- 실제 공격 기능은 추가하지 않고 closed simulation trace audit만 추가했다.

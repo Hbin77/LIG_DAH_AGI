@@ -47,6 +47,7 @@ REQUIRED_FILES = [
     "src/experiments/agent_loop_replay.py",
     "src/experiments/agent_decision_causality_audit.py",
     "src/experiments/agent_decision_margin_audit.py",
+    "src/experiments/agent_goal_alignment_audit.py",
     "src/experiments/agent_memory_belief_audit.py",
     "src/experiments/agent_tool_usage_audit.py",
     "src/experiments/agent_interface_manifest.py",
@@ -97,6 +98,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_decision_causality_audit.md",
     "outputs/report_tables/agent_decision_margin_audit.csv",
     "outputs/report_tables/agent_decision_margin_audit.md",
+    "outputs/report_tables/agent_goal_alignment_audit.csv",
+    "outputs/report_tables/agent_goal_alignment_audit.md",
     "outputs/report_tables/agent_memory_belief_audit.csv",
     "outputs/report_tables/agent_memory_belief_audit.md",
     "outputs/report_tables/agent_tool_usage_audit.csv",
@@ -444,6 +447,43 @@ def check_csv_outputs() -> list[str]:
         "decision margin audit missing safety boundary",
     )
     checks.append("agent_decision_margin_audit rows=399 pass")
+
+    goal_rows = read_csv("outputs/report_tables/agent_goal_alignment_audit.csv")
+    require(
+        len(goal_rows) == 399,
+        f"expected 399 goal alignment rows, got {len(goal_rows)}",
+    )
+    failed_goal_rows = [
+        f"{row['experiment']}:{row['trace_id']}:{row['agent']}"
+        for row in goal_rows
+        if row.get("goal_alignment_status") != "pass"
+    ]
+    require(not failed_goal_rows, f"failed goal alignment rows: {failed_goal_rows[:8]}")
+    require(
+        {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"}.issubset({row["agent"] for row in goal_rows}),
+        "goal alignment audit missing attack/defense agent variants",
+    )
+    require(
+        {"no_op", "attack_event", "defense_events"}.issubset({row["selected_type"] for row in goal_rows}),
+        "goal alignment audit missing selected action types",
+    )
+    require(
+        any("predicted_mission_impact=" in row["goal_signal"] for row in goal_rows),
+        "goal alignment audit missing AURA mission-impact signal",
+    )
+    require(
+        any("probability=" in row["goal_signal"] and "threshold=" in row["goal_signal"] for row in goal_rows),
+        "goal alignment audit missing TSRA-R-ML probability/threshold signal",
+    )
+    require(
+        any("critical_pending=" in row["goal_signal"] for row in goal_rows),
+        "goal alignment audit missing TSRA-R observation-risk signal",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in goal_rows),
+        "goal alignment audit missing safety boundary",
+    )
+    checks.append("agent_goal_alignment_audit rows=399 pass")
 
     memory_rows = read_csv("outputs/report_tables/agent_memory_belief_audit.csv")
     require(
@@ -1478,6 +1518,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_decision_margin_audit.md" in manifest_text,
         "manifest missing agent decision margin audit",
+    )
+    require(
+        "outputs/report_tables/agent_goal_alignment_audit.md" in manifest_text,
+        "manifest missing agent goal alignment audit",
     )
     require(
         "outputs/report_tables/agent_memory_belief_audit.md" in manifest_text,

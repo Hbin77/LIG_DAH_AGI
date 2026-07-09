@@ -2110,6 +2110,54 @@ threshold 0.75 false_positive_rate: 0.0
 - 하지만 closed simulation thresholding 용도로는 Brier/ECE와 class separation이 충분하다.
 - 0.75 threshold는 false positive를 줄이는 보수적 방어창 개방 기준이다.
 
+## P42. Agent Goal Alignment Audit
+
+상태: 완료
+
+문제:
+
+- 기존 causality audit은 선택 행동이 candidate/tool/score 근거에서 나왔는지 확인한다.
+- 하지만 선택 행동이 각 에이전트의 목표와 관측 위험에 맞는지는 별도 증거가 부족했다.
+- 특히 no-op이 많은 구조에서는 no-op도 목표에 맞는 판단인지 설명할 필요가 있다.
+
+구현:
+
+```text
+src/experiments/agent_goal_alignment_audit.py
+outputs/report_tables/agent_goal_alignment_audit.csv
+outputs/report_tables/agent_goal_alignment_audit.md
+```
+
+검증 기준:
+
+- AURA attack_event는 threshold 이상이고 top mission-impact score를 가져야 한다.
+- AURA no-op은 min_start, cooldown, max_events, no candidate, below-threshold 중 하나로 설명돼야 한다.
+- TSRA-R defense action은 priority, video load, stale data, PACE degradation, ML probability 조건 중 대응 조건을 만족해야 한다.
+- TSRA-R no-op은 ready action 부재 또는 ML defense window 유지로 설명돼야 한다.
+- 모든 row는 closed simulation safety boundary를 포함한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_goal_alignment_audit rows: 399
+goal_alignment_status: pass=399
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+selected types: no_op, attack_event, defense_events
+```
+
+해석:
+
+- 에이전트 구조가 "함수 호출" 수준이 아니라 목표, 관측, 도구, 후보, 선택, no-op 근거까지 감사 가능한 decision loop가 됐다.
+- 공격과 방어 모두 자기 목적에 맞는 행동을 골랐다는 검증 산출물이 생겼다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

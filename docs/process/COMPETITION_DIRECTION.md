@@ -958,6 +958,24 @@ positive median probability: 0.956382
 negative median probability: 0.106435
 ```
 
+### P32. Agent Goal Alignment Audit
+
+목적:
+
+- AgentRuntime 구조가 단순 로깅이 아니라 목표 지향 decision loop임을 검증한다.
+- AURA의 공격 선택이 mission-impact score와 threshold에 맞는지 확인한다.
+- TSRA-R의 방어 선택이 관측된 priority, video, stale, PACE, ML threshold 위험에 맞는지 확인한다.
+- no-op도 cooldown, cadence, threshold, active defense window 같은 판단 근거가 있어야 한다.
+
+검증 기준:
+
+```text
+agent_goal_alignment_audit rows: 399
+goal_alignment_status: pass=399
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+selected types: no_op, attack_event, defense_events
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

@@ -239,6 +239,28 @@ outputs/report_tables/agent_decision_margin_audit.md
 - TSRA-R-ML anomaly probability와 threshold margin
 - no-op 판단의 근거
 
+## Goal Alignment Audit
+
+DecisionTrace의 선택이 각 에이전트의 목표와 관측 위험에 맞는지 확인한다.
+
+```bash
+python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_goal_alignment_audit.csv
+outputs/report_tables/agent_goal_alignment_audit.md
+```
+
+감사 항목:
+
+- AURA attack_event가 threshold 이상 top mission-impact score인지
+- AURA no-op이 min_start, cooldown, max_events, no candidate, below-threshold 근거를 갖는지
+- TSRA-R defense action이 priority, video, stale, PACE, ML threshold 조건과 맞는지
+- TSRA-R no-op이 ready action 부재 또는 active defense window 유지로 설명되는지
+
 ## Memory/Belief Audit
 
 AgentMemory가 단순 필드가 아니라 다음 판단에 이어지는 loop state인지 확인한다.

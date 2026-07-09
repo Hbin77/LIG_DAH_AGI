@@ -18,6 +18,7 @@ python3 -m src.experiments.agent_runtime_invariant_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
 python3 -m src.experiments.agent_decision_causality_audit
 python3 -m src.experiments.agent_decision_margin_audit
+python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
 python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest
@@ -76,6 +77,7 @@ agent_runtime_invariant_audit rows: 9 pass
 agent_loop_replay rows: 8
 agent_decision_causality_audit rows: 399 pass
 agent_decision_margin_audit rows: 399 pass
+agent_goal_alignment_audit rows: 399 pass
 agent_memory_belief_audit rows: 9 pass
 agent_tool_usage_audit rows: 23 pass
 agent_interface_manifest rows: 4

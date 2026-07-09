@@ -233,6 +233,19 @@ This writes:
 
 The audit records top-score margins, threshold margins, eligible/ready defense counts, and no-op basis so each agent action has quantitative decision support.
 
+## Audit Agent Goal Alignment
+
+```bash
+python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/agent_goal_alignment_audit.csv`
+- `outputs/report_tables/agent_goal_alignment_audit.md`
+
+The audit verifies that AURA decisions align with the mission-impact attack objective and that TSRA-R decisions align with observed priority, stale-data, video-load, PACE, or ML-threshold defense conditions.
+
 ## Audit Agent Memory Belief State
 
 ```bash
@@ -680,6 +693,7 @@ python3 -m src.experiments.agent_runtime_invariant_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
 python3 -m src.experiments.agent_decision_causality_audit
 python3 -m src.experiments.agent_decision_margin_audit
+python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
 python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest
