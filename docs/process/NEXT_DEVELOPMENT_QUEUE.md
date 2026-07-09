@@ -2585,3 +2585,44 @@ impact_reduction_from_peak > 0 for all rows
 - E7은 AURA-ML과 TSRA-R-ML이 따로 존재하는 데서 끝나지 않고, attack episode 단위로 서로 반응하는 구조를 가진다.
 - 첫 공격은 ML detection이 새로 열리는 케이스이고, 이후 공격들은 이미 열린 defense window가 유지/refresh되는 케이스다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+## P51. Reproduction Order Audit
+
+상태: 완료
+
+문제:
+
+- Full Reproduction 명령 목록은 길어졌지만, 일부 감사가 자신이 읽는 입력 산출물보다 먼저 실행될 수 있었다.
+- 이 경우 로컬에 남아 있던 이전 CSV를 읽어 통과하는 위험이 생긴다.
+- 특히 defense attribution, mission thread, ML red-blue interaction, packaging 단계는 입력 산출물 순서가 중요하다.
+
+구현:
+
+```text
+src/experiments/reproduction_order_audit.py
+outputs/report_tables/reproduction_order_audit.csv
+outputs/report_tables/reproduction_order_audit.md
+```
+
+검증:
+
+```bash
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+완료 기준:
+
+```text
+reproduction_order_audit rows: 12
+status: pass=12
+RO01-RO12 present
+order_status: pass for all rows
+output_status: pass for all rows
+```
+
+해석:
+
+- 재현 명령 자체를 검증 대상으로 승격했다.
+- 새 산출물이 추가될 때 README 순서, readiness, package, final verifier까지 같이 갱신해야 한다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

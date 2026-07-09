@@ -752,6 +752,19 @@ python3 scripts/verify_submission_state.py
 
 This checks required files, core CSV row counts, safety-boundary text, package contents, manifest ZIP SHA-256/byte-count/file-count integrity, deterministic ZIP metadata, ZIP payload parity with the current worktree, repo-only release handoff currency, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
 
+## Audit Reproduction Order
+
+```bash
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+```
+
+Outputs:
+
+- `outputs/report_tables/reproduction_order_audit.csv`
+- `outputs/report_tables/reproduction_order_audit.md`
+
+This checks that the README `Full Reproduction` block runs generated evidence in dependency order. It prevents downstream audits from silently reading stale files created by an earlier run.
+
 ## Verify External Package Link
 
 After uploading `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip` to the submission cloud, verify that the public download link serves the same ZIP recorded in `outputs/package/submission_manifest.md`:
@@ -808,28 +821,29 @@ python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.operator_alerts
 python3 -m src.experiments.defense_effectiveness_ledger
-python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
-python3 -m src.experiments.ml_contribution_audit --fail-on-error
-python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
-python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
-python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
+python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
 python3 -m src.experiments.run_ml_threshold_sweep
 python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
 python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error
-python3 -m src.experiments.mission_thread_summary --fail-on-error
 python3 -m src.experiments.agent_engagement_scorecard
+python3 -m src.experiments.mission_thread_summary --fail-on-error
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
+python3 -m src.experiments.ml_contribution_audit --fail-on-error
+python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
 python3 -m src.experiments.safety_boundary_audit --fail-on-error
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
 python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
 python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete

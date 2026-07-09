@@ -159,6 +159,7 @@ def build_rows() -> list[dict[str, str]]:
         "threshold_sweep": count_csv_rows("outputs/batch/ml_threshold_sweep_summary.csv"),
         "detector_calibration": count_csv_rows("outputs/report_tables/tsra_detector_calibration_audit.csv"),
     }
+    reproduction_order_rows = count_csv_rows("outputs/report_tables/reproduction_order_audit.csv")
 
     package_inputs = [
         "scripts/build_submission_package.py",
@@ -166,8 +167,7 @@ def build_rows() -> list[dict[str, str]]:
         "scripts/generate_release_handoff.py",
         "scripts/verify_submission_state.py",
         "scripts/verify_external_package_link.py",
-        "outputs/package/submission_manifest.md",
-        "outputs/package/release_handoff.md",
+        "src/experiments/reproduction_order_audit.py",
         ".gitignore",
     ]
     model_metrics = [
@@ -198,6 +198,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.run_ml_threshold_sweep",
         "python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error",
         "python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error",
+        "python3 -m src.experiments.reproduction_order_audit --fail-on-error",
     ]
     forbidden_team_phrases = [
         "나 " + "혼" + "자",
@@ -230,13 +231,17 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R02",
             area="Reproduction commands",
-            requirement="README must contain the end-to-end commands needed to regenerate core evidence.",
-            evidence=["README.md"],
-            observed=", ".join(
-                f"{command}={'yes' if command in readme else 'no'}"
-                for command in reproduction_commands
+            requirement="README must contain the end-to-end commands needed to regenerate core evidence, and the command order audit must pass.",
+            evidence=["README.md", "outputs/report_tables/reproduction_order_audit.csv"],
+            observed=(
+                ", ".join(
+                    f"{command}={'yes' if command in readme else 'no'}"
+                    for command in reproduction_commands
+                )
+                + f"; reproduction_order_rows={reproduction_order_rows}"
             ),
-            ok=all(command in readme for command in reproduction_commands),
+            ok=all(command in readme for command in reproduction_commands)
+            and reproduction_order_rows == 12,
             handoff_value="The next developer can rebuild the same evidence without reverse-engineering command order.",
             next_gate="Any new experiment generator must be added to the Full Reproduction block.",
         ),
@@ -394,18 +399,17 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R08",
             area="Package inputs",
-            requirement="Package builder, final verifier, manifest, and Git ignore rules must be present.",
+            requirement="Package builder, freeze script, final verifier, external-link verifier, and Git ignore rules must be present before packaging.",
             evidence=package_inputs,
             observed=(
                 f"package_inputs_present={all_files_present(package_inputs)}; "
-                f"manifest_has_zip_sha256={'zip_sha256' in manifest}; "
+                f"existing_manifest_has_zip_sha256={'zip_sha256' in manifest}; "
                 f"zip_ignored={'outputs/package/*.zip' in read_text('.gitignore')}"
             ),
             ok=all_files_present(package_inputs)
-            and "zip_sha256" in manifest
             and "outputs/package/*.zip" in read_text(".gitignore"),
             handoff_value="The source ZIP can be regenerated locally without committing the binary ZIP file.",
-            next_gate="Run build_submission_package.py after adding any source, doc, table, or figure artifact.",
+            next_gate="Run build_submission_package.py and verify_submission_state.py after adding any source, doc, table, or figure artifact.",
         ),
         row(
             check_id="R09",
@@ -440,7 +444,7 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R10",
             area="Team handoff docs",
-            requirement="Process docs must preserve the team workflow and avoid one-person framing.",
+            requirement="Process docs must preserve the team workflow and avoid personal-only wording.",
             evidence=process_docs,
             observed=(
                 f"process_docs_present={all_files_present(process_docs)}; "

@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 215
-- total_payload_bytes: 4145518
+- payload_file_count: 218
+- total_payload_bytes: 4185882
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 216
-- zip_bytes: 1884434
-- zip_sha256: `e4d748e11ce8fc3f8a9244ac82c5b1133ed082c9d154488f120673956ab76015`
+- zip_file_count: 219
+- zip_bytes: 1893400
+- zip_sha256: `e1ecf3650fd3655e44d59b43b83495fff58cd831091a58728bb6d70d22c21141`
 
 ## 포함 파일
 
@@ -159,6 +159,8 @@
 - `outputs/report_tables/pace_transition_audit.md`
 - `outputs/report_tables/reactive_defense_tradeoff_audit.csv`
 - `outputs/report_tables/reactive_defense_tradeoff_audit.md`
+- `outputs/report_tables/reproduction_order_audit.csv`
+- `outputs/report_tables/reproduction_order_audit.md`
 - `outputs/report_tables/safety_boundary_audit.csv`
 - `outputs/report_tables/safety_boundary_audit.md`
 - `outputs/report_tables/submission_readiness_audit.csv`
@@ -219,6 +221,7 @@
 - `src/experiments/pace_transition_audit.py`
 - `src/experiments/reactive_defense_tradeoff_audit.py`
 - `src/experiments/report_assets.py`
+- `src/experiments/reproduction_order_audit.py`
 - `src/experiments/run_adaptive_memory.py`
 - `src/experiments/run_all.py`
 - `src/experiments/run_batch.py`

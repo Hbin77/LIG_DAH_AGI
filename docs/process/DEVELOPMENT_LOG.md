@@ -2545,3 +2545,35 @@ impact_reduction_from_peak > 0 for all rows
 - 첫 E7 공격은 AURA-ML 선택 이후 TSRA-R-ML이 20초 뒤 probability threshold를 넘고 alert/core defense를 낸다.
 - 이후 공격들은 이미 열린 ML defense window 안에서 즉시 또는 10초 안에 core defense로 이어진다.
 - 이 산출물은 "공격 에이전트"와 "방어 에이전트"가 각각 존재한다는 수준을 넘어, 같은 closed-loop episode 안에서 서로 맞물려 작동했다는 증거다.
+
+### 64. Reproduction Order Audit를 추가한 이유
+
+기존 `Full Reproduction` 명령은 필요한 명령을 대부분 포함했지만, 일부 감사가 자신이 읽는 입력 산출물보다 먼저 실행되는 순서였다. 예를 들어 defense action attribution은 reactive defense tradeoff를 읽고, mission thread summary는 engagement scorecard를 읽으며, ML red-blue interaction audit는 ML attack/defense path와 coordination latency를 함께 읽는다. 순서가 어긋나면 로컬에 남아 있던 이전 CSV를 읽어서 겉으로는 통과하는 상태가 될 수 있다.
+
+이번 변경은 `src/experiments/reproduction_order_audit.py`를 추가해서 README `Full Reproduction` 블록의 command order를 별도로 감사한다.
+
+추가한 것:
+
+```text
+src/experiments/reproduction_order_audit.py
+outputs/report_tables/reproduction_order_audit.csv
+outputs/report_tables/reproduction_order_audit.md
+```
+
+검증 기준:
+
+```text
+reproduction_order_audit rows: 12
+RO01 defense_action_attribution_audit prerequisites pass
+RO05 mission_thread_summary prerequisites pass
+RO06/RO07/RO08 ML path and red-blue interaction prerequisites pass
+RO10 package build prerequisites pass
+RO12 final verifier after release freeze pass
+```
+
+해석:
+
+- 새 팀원이 처음부터 실행해도 downstream audit가 stale output에 기대지 않는다.
+- `submission_readiness_audit`, `competition_alignment`, `verify_submission_state`, package manifest가 모두 reproduction order evidence를 참조한다.
+- package manifest와 release handoff는 packaging 이후에 생성되는 산출물이므로, readiness audit은 그 파일을 선행 요구하지 않도록 순환 의존성을 제거했다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation reproduction-order evidence만 생성한다.

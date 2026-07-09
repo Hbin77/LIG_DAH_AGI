@@ -29,28 +29,29 @@ python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.operator_alerts
 python3 -m src.experiments.defense_effectiveness_ledger
-python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
-python3 -m src.experiments.ml_contribution_audit --fail-on-error
-python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
-python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
-python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
+python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
 python3 -m src.experiments.run_ml_threshold_sweep
 python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
 python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error
-python3 -m src.experiments.mission_thread_summary --fail-on-error
 python3 -m src.experiments.agent_engagement_scorecard
+python3 -m src.experiments.mission_thread_summary --fail-on-error
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
+python3 -m src.experiments.ml_contribution_audit --fail-on-error
+python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
 python3 -m src.experiments.safety_boundary_audit --fail-on-error
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
 python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
 python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
@@ -100,6 +101,7 @@ attack_defense_response_audit rows: 10 no missed required
 pace_transition_audit rows: 6 status=2 initial/4 fallback
 mission_impact_decomposition rows: 35 components=5
 safety_boundary_audit rows: 5 pass
+reproduction_order_audit rows: 12 pass
 submission_readiness_audit rows: 10 pass
 aura_coa_cards rows: 15
 battle_timeline rows: 49

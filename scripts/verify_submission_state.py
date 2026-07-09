@@ -69,6 +69,7 @@ REQUIRED_FILES = [
     "src/experiments/reactive_defense_tradeoff_audit.py",
     "src/experiments/tsra_detector_calibration_audit.py",
     "src/experiments/safety_boundary_audit.py",
+    "src/experiments/reproduction_order_audit.py",
     "src/experiments/submission_readiness_audit.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -153,6 +154,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/tsra_detector_calibration_bins.csv",
     "outputs/report_tables/safety_boundary_audit.csv",
     "outputs/report_tables/safety_boundary_audit.md",
+    "outputs/report_tables/reproduction_order_audit.csv",
+    "outputs/report_tables/reproduction_order_audit.md",
     "outputs/report_tables/submission_readiness_audit.csv",
     "outputs/report_tables/submission_readiness_audit.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -1412,6 +1415,57 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("safety_boundary_audit rows=5 pass")
 
+    reproduction_order_rows = read_csv("outputs/report_tables/reproduction_order_audit.csv")
+    require(
+        len(reproduction_order_rows) == 12,
+        f"expected 12 reproduction order rows, got {len(reproduction_order_rows)}",
+    )
+    failed_reproduction_order = [
+        f"{row['check_id']}:{row['order_status']}:{row['output_status']}"
+        for row in reproduction_order_rows
+        if row.get("status") != "pass"
+    ]
+    require(
+        not failed_reproduction_order,
+        f"failed reproduction order rows: {failed_reproduction_order[:8]}",
+    )
+    require(
+        {row["check_id"] for row in reproduction_order_rows}
+        == {f"RO{index:02d}" for index in range(1, 13)},
+        "reproduction order audit check ids are incomplete",
+    )
+    require(
+        all(row["order_status"] == "pass" for row in reproduction_order_rows),
+        "reproduction order audit contains ordering failures",
+    )
+    require(
+        all(row["output_status"] == "pass" for row in reproduction_order_rows),
+        "reproduction order audit contains missing output failures",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in reproduction_order_rows),
+        "reproduction order audit missing safety boundary",
+    )
+    require(
+        any(
+            row["check_id"] == "RO08"
+            and "ml_attack_decision_path_audit" in row["required_before"]
+            and "ml_defense_decision_path_audit" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
+        "reproduction order audit missing ML red-blue path prerequisites",
+    )
+    require(
+        any(
+            row["check_id"] == "RO10"
+            and "submission_readiness_audit" in row["required_before"]
+            and "competition_alignment" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
+        "reproduction order audit missing package prerequisites",
+    )
+    checks.append("reproduction_order_audit rows=12 pass")
+
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(
         len(readiness_rows) == 10,
@@ -2102,6 +2156,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/safety_boundary_audit.md" in manifest_text,
         "manifest missing safety boundary audit",
+    )
+    require(
+        "outputs/report_tables/reproduction_order_audit.md" in manifest_text,
+        "manifest missing reproduction order audit",
     )
     require(
         "outputs/report_tables/submission_readiness_audit.md" in manifest_text,

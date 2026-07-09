@@ -102,8 +102,8 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 ### A10 Team handoff and reproducibility
 
 - Goal: Make the shared branch reproducible for another teammate without using main for active work.
-- Mechanism: README commands, package builder, manifest, final verifier, submission readiness audit, and process docs define the shared workflow.
-- Evidence: README.md | scripts/build_submission_package.py | scripts/verify_submission_state.py | src/experiments/submission_readiness_audit.py | docs/process/SUBMISSION_PACKAGE.md | docs/process/GITHUB_WORKFLOW.md | outputs/report_tables/submission_readiness_audit.csv
+- Mechanism: README commands, reproduction-order audit, package builder, manifest, final verifier, submission readiness audit, and process docs define the shared workflow.
+- Evidence: README.md | src/experiments/reproduction_order_audit.py | scripts/build_submission_package.py | scripts/verify_submission_state.py | src/experiments/submission_readiness_audit.py | docs/process/SUBMISSION_PACKAGE.md | docs/process/GITHUB_WORKFLOW.md | outputs/report_tables/reproduction_order_audit.csv | outputs/report_tables/submission_readiness_audit.csv
 - Status: verified
-- Notes: outputs/report_tables/submission_readiness_audit.csv rows=10
+- Notes: outputs/report_tables/reproduction_order_audit.csv rows=12; outputs/report_tables/submission_readiness_audit.csv rows=10
 - Next gate: Before handoff, rebuild the package and run verify_submission_state on branch hbin.

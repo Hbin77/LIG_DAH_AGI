@@ -120,6 +120,26 @@ Metrics
 -> hbin 브랜치에 공유
 ```
 
+## 재현 순서 기준
+
+공격-방어-AI 에이전트 증거는 파일이 존재하는 것만으로 충분하지 않다. 각 산출물이 자신이 읽는 입력보다 뒤에 생성되어야 같은 결과를 재현했다고 말할 수 있다.
+
+따라서 `Full Reproduction`은 아래 순서를 지킨다.
+
+```text
+데이터/모델 생성
+-> 기본 실험과 DecisionTrace 생성
+-> agent runtime, memory, tool, feedback 감사
+-> attack/defense event, alert, ledger, ablation 생성
+-> closed-loop episode, coordination, engagement, mission thread 생성
+-> ML attack path, ML defense path, ML red-blue interaction 감사
+-> safety boundary와 reproduction order 감사
+-> readiness, collaboration, competition alignment 생성
+-> package build, handoff, freeze, final verifier
+```
+
+이 순서를 어기면 새 팀원이 처음부터 실행했을 때 이전 산출물에 의존할 수 있으므로, `reproduction_order_audit`를 final verification gate에 포함한다.
+
 ## 개발 게이트
 
 새 기능을 넣기 전에 아래 질문에 답할 수 있어야 한다.
