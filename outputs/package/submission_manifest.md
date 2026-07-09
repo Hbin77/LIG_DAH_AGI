@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 191
-- total_payload_bytes: 3763317
+- payload_file_count: 194
+- total_payload_bytes: 3796337
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 192
-- zip_bytes: 1805336
-- zip_sha256: `d83b33c35340af7c3863ceccd61e1b10de2cfeedb3f63178232d785cc807fb64`
+- zip_file_count: 195
+- zip_bytes: 1814392
+- zip_sha256: `198697d8748675cdd410d87b9385165afaf881b72d10d9efe5ea4bdef59e8c97`
 
 ## 포함 파일
 
@@ -123,6 +123,8 @@
 - `outputs/report_tables/competition_alignment_matrix.md`
 - `outputs/report_tables/decision_trace_quality_audit.csv`
 - `outputs/report_tables/decision_trace_quality_audit.md`
+- `outputs/report_tables/defense_action_attribution_audit.csv`
+- `outputs/report_tables/defense_action_attribution_audit.md`
 - `outputs/report_tables/defense_effectiveness_ledger.csv`
 - `outputs/report_tables/defense_effectiveness_ledger.md`
 - `outputs/report_tables/incident_summary.csv`
@@ -186,6 +188,7 @@
 - `src/experiments/battle_timeline.py`
 - `src/experiments/closed_loop_episode_replay.py`
 - `src/experiments/competition_alignment.py`
+- `src/experiments/defense_action_attribution_audit.py`
 - `src/experiments/defense_effectiveness_ledger.py`
 - `src/experiments/incident_summary.py`
 - `src/experiments/metric_gate.py`

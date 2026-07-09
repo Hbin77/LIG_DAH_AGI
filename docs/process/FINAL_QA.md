@@ -27,6 +27,7 @@ python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.operator_alerts
 python3 -m src.experiments.defense_effectiveness_ledger
+python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
@@ -93,6 +94,7 @@ battle_timeline rows: 49
 incident_summary rows: 10
 operator_alerts rows: 56 actions=5
 defense_effectiveness_ledger rows: 56 actions=5
+defense_action_attribution_audit rows: 5 pass
 closed_loop_episode_replay rows: 10 complete
 agent_engagement_scorecard rows: 10 pass
 agent_collaboration_graph edges: 17 verified

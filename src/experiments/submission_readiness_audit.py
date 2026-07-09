@@ -136,6 +136,7 @@ def build_rows() -> list[dict[str, str]]:
         "incident": count_csv_rows("outputs/report_tables/incident_summary.csv"),
         "alerts": count_csv_rows("outputs/report_tables/operator_alerts.csv"),
         "ledger": count_csv_rows("outputs/report_tables/defense_effectiveness_ledger.csv"),
+        "attribution": count_csv_rows("outputs/report_tables/defense_action_attribution_audit.csv"),
         "episode": count_csv_rows("outputs/report_tables/closed_loop_episode_replay.csv"),
         "scorecard": count_csv_rows("outputs/report_tables/agent_engagement_scorecard.csv"),
     }
@@ -174,6 +175,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.agent_decision_causality_audit",
         "python3 -m src.experiments.agent_decision_margin_audit",
         "python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error",
+        "python3 -m src.experiments.defense_action_attribution_audit --fail-on-error",
         "python3 -m src.experiments.safety_boundary_audit",
         "python3 -m src.experiments.run_batch",
         "python3 scripts/build_submission_package.py",
@@ -294,12 +296,13 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R06",
             area="Closed-loop evidence",
-            requirement="Attack, defense, alerts, effectiveness, replay, and collaboration evidence must be present.",
+            requirement="Attack, defense, alerts, effectiveness, action attribution, replay, and collaboration evidence must be present.",
             evidence=[
                 "outputs/report_tables/battle_timeline.csv",
                 "outputs/report_tables/incident_summary.csv",
                 "outputs/report_tables/operator_alerts.csv",
                 "outputs/report_tables/defense_effectiveness_ledger.csv",
+                "outputs/report_tables/defense_action_attribution_audit.csv",
                 "outputs/report_tables/closed_loop_episode_replay.csv",
                 "outputs/report_tables/agent_engagement_scorecard.csv",
                 "src/experiments/agent_collaboration_graph.py",
@@ -310,11 +313,12 @@ def build_rows() -> list[dict[str, str]]:
                 and closed_loop_counts["incident"] == 10
                 and closed_loop_counts["alerts"] == 56
                 and closed_loop_counts["ledger"] == 56
+                and closed_loop_counts["attribution"] == 5
                 and closed_loop_counts["episode"] == 10
                 and closed_loop_counts["scorecard"] == 10
                 and path_exists("src/experiments/agent_collaboration_graph.py")
             ),
-            handoff_value="The red/blue loop can be reviewed as episodes, actions, alerts, and metric movement.",
+            handoff_value="The red/blue loop can be reviewed as episodes, actions, alerts, metric movement, and action-level attribution.",
             next_gate="New closed-loop outputs must connect attack event, defense event, and metric evidence.",
         ),
         row(

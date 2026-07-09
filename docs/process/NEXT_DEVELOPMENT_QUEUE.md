@@ -2158,6 +2158,59 @@ selected types: no_op, attack_event, defense_events
 - 공격과 방어 모두 자기 목적에 맞는 행동을 골랐다는 검증 산출물이 생겼다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
+## P43. Defense Action Attribution Audit
+
+상태: 완료
+
+문제:
+
+- `defense_effectiveness_ledger`는 event별 metric before/after를 보여주지만 action별 요약이 없다.
+- 방어 에이전트의 가치를 설명하려면 `priority_reroute`, `stale_badge`, `video_throttle`, `pace_switch`, `ml_attack_alert`가 각각 어떤 metric 축에서 기여했는지 분리해야 한다.
+- 특히 `video_throttle`, `pace_switch`는 mission impact 하나만으로 과장하면 안 되고 local metric 또는 bounded tradeoff로 설명해야 한다.
+
+구현:
+
+```text
+src/experiments/defense_action_attribution_audit.py
+outputs/report_tables/defense_action_attribution_audit.csv
+outputs/report_tables/defense_action_attribution_audit.md
+```
+
+검증 기준:
+
+- ledger 56개 defense event를 action별로 집계한다.
+- action 5개가 모두 존재해야 한다.
+- improved_or_held_rate가 최소 0.66 이상이어야 한다.
+- `priority_reroute`는 ablation priority inversion 증가 근거를 가져야 한다.
+- `stale_badge`는 ablation trusted stale exposure 증가 근거를 가져야 한다.
+- `ml_attack_alert`는 active attack overlap 9/9 근거를 가져야 한다.
+- 모든 row는 closed simulation safety boundary를 포함한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+defense_action_attribution_audit rows: 5
+status: pass=5
+attribution classes:
+  ablation_supported=2
+  local_metric_supported=1
+  bounded_tradeoff_supported=1
+  reactive_window_supported=1
+```
+
+해석:
+
+- 방어 action을 하나의 점수로 뭉개지 않고 action별 책임과 한계를 나눴다.
+- TSRA-R 방어 에이전트의 효과 설명이 event-level ledger에서 action-level attribution으로 올라갔다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

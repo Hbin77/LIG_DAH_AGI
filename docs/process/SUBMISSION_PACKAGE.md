@@ -33,7 +33,7 @@ outputs/package/release_handoff.md
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
-- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent goal alignment audit, agent memory belief audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, mission impact decomposition, metric gate, ML contribution audit, reactive defense tradeoff audit, ML threshold sweep, TSRA detector calibration audit, safety boundary audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
+- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent goal alignment audit, agent memory belief audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, defense action attribution audit, mission impact decomposition, metric gate, ML contribution audit, reactive defense tradeoff audit, ML threshold sweep, TSRA detector calibration audit, safety boundary audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
 - `outputs/models/*_metrics.json`
 
 ## 제외하는 것
@@ -72,6 +72,7 @@ attack_defense_response_audit: included
 pace_transition_audit: included
 operator_alerts: included
 defense_effectiveness_ledger: included
+defense_action_attribution_audit: included
 closed_loop_episode_replay: included
 agent_engagement_scorecard: included
 agent_collaboration_graph: included

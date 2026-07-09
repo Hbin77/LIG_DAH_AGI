@@ -976,6 +976,24 @@ agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 selected types: no_op, attack_event, defense_events
 ```
 
+### P33. Defense Action Attribution Audit
+
+목적:
+
+- TSRA-R 방어 action이 어떤 metric 축에서 기여했는지 action별로 분해한다.
+- event-level effectiveness ledger를 action-level attribution으로 요약한다.
+- scalar mission impact만으로 `video_throttle`, `pace_switch` 가치를 과장하지 않고 local metric/bounded tradeoff로 분리한다.
+
+검증 기준:
+
+```text
+defense_action_attribution_audit rows: 5
+attribution_status: pass=5
+priority_reroute ablation delta priority inversion: 0.410888
+stale_badge ablation delta trusted stale exposure: 0.38125
+ml_attack_alert active attack overlap: 9/9
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

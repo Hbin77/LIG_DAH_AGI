@@ -2266,3 +2266,64 @@ selected types: no_op=290, defense_events=84, attack_event=25
 - 방어 에이전트는 단순히 룰을 실행한 것이 아니라 관측된 priority, video load, stale data, PACE degradation, ML probability 조건에 맞춰 행동한다.
 - no-op도 "아무것도 안 함"이 아니라 cadence, cooldown, threshold, active defense window 근거가 있는 판단으로 검증된다.
 - 실제 공격 기능은 추가하지 않고 closed simulation trace audit만 추가했다.
+
+### 56. Defense Action Attribution Audit를 추가한 이유
+
+`defense_effectiveness_ledger`는 각 DefenseEvent 전후 metric 변화를 보여준다. 하지만 event row가 56개라서, 심사나 팀 리뷰에서 "그래서 priority_reroute, stale_badge, video_throttle, pace_switch, ml_attack_alert 각각은 어떤 근거로 가치가 있나?"를 바로 보기 어렵다.
+
+이번 변경은 방어 action별 attribution audit를 추가했다.
+
+추가한 것:
+
+```text
+src/experiments/defense_action_attribution_audit.py
+outputs/report_tables/defense_action_attribution_audit.csv
+outputs/report_tables/defense_action_attribution_audit.md
+```
+
+검증 기준:
+
+```text
+input ledger rows: 56
+output attribution rows: 5
+actions: priority_reroute, video_throttle, stale_badge, pace_switch, ml_attack_alert
+status: pass=5
+```
+
+핵심 결과:
+
+```text
+priority_reroute:
+  improved_or_held_rate: 0.818182
+  mean_delta_priority_inversion_rate: -0.0347756
+  ablation_delta_priority_inversion_rate_mean: 0.410888
+
+stale_badge:
+  improved_or_held_rate: 0.875
+  mean_delta_trusted_stale_exposure: -0.00390625
+  ablation_delta_trusted_stale_exposure_mean: 0.38125
+
+video_throttle:
+  improved_or_held_rate: 0.785714
+  mean_delta_p95_critical_latency_sec: -0.567857
+  attribution_class: local_metric_supported
+
+pace_switch:
+  improved_or_held_rate: 0.666667
+  mean_delta_mission_impact: -0.0232876
+  mean_delta_p95_critical_latency_sec: -1.06667
+  attribution_class: bounded_tradeoff_supported
+
+ml_attack_alert:
+  improved_or_held_rate: 0.888889
+  active_attack_overlap: 9/9
+  attribution_class: reactive_window_supported
+```
+
+해석:
+
+- `priority_reroute`와 `stale_badge`는 ablation으로 직접 가치가 강하게 보인다.
+- `video_throttle`은 scalar mission impact 하나로 팔면 약하지만, local latency/priority relief로 보면 의미가 있다.
+- `pace_switch`는 recovery/fallback 문맥이 있어 scalar ablation만으로 가치를 판단하면 왜곡될 수 있으므로 bounded tradeoff로 분류했다.
+- `ml_attack_alert`는 직접 metric 조작 action이 아니라 reactive defense window trigger로 attribution했다.
+- 실제 공격 기능은 추가하지 않고 closed simulation event/metric attribution만 감사한다.

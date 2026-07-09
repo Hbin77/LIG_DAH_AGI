@@ -37,6 +37,7 @@ REQUIRED_FILES = [
     "src/experiments/incident_summary.py",
     "src/experiments/operator_alerts.py",
     "src/experiments/defense_effectiveness_ledger.py",
+    "src/experiments/defense_action_attribution_audit.py",
     "src/experiments/closed_loop_episode_replay.py",
     "src/experiments/agent_engagement_scorecard.py",
     "src/experiments/agent_collaboration_graph.py",
@@ -77,6 +78,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/operator_alerts.md",
     "outputs/report_tables/defense_effectiveness_ledger.csv",
     "outputs/report_tables/defense_effectiveness_ledger.md",
+    "outputs/report_tables/defense_action_attribution_audit.csv",
+    "outputs/report_tables/defense_action_attribution_audit.md",
     "outputs/report_tables/closed_loop_episode_replay.csv",
     "outputs/report_tables/closed_loop_episode_replay.md",
     "outputs/report_tables/agent_engagement_scorecard.csv",
@@ -1207,6 +1210,56 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("defense_effectiveness_ledger rows=56 actions=5")
 
+    attribution_rows = read_csv("outputs/report_tables/defense_action_attribution_audit.csv")
+    require(
+        len(attribution_rows) == 5,
+        f"expected 5 defense action attribution rows, got {len(attribution_rows)}",
+    )
+    attribution_actions = {row["action"] for row in attribution_rows}
+    require(
+        attribution_actions == required_alert_actions,
+        f"defense action attribution missing actions: {sorted(required_alert_actions - attribution_actions)}",
+    )
+    failed_attribution = [
+        row["action"]
+        for row in attribution_rows
+        if row.get("attribution_status") != "pass"
+    ]
+    require(not failed_attribution, f"failed defense action attribution rows: {failed_attribution}")
+    required_attribution_classes = {
+        "ablation_supported",
+        "bounded_tradeoff_supported",
+        "local_metric_supported",
+        "reactive_window_supported",
+    }
+    observed_attribution_classes = {row["attribution_class"] for row in attribution_rows}
+    require(
+        required_attribution_classes.issubset(observed_attribution_classes),
+        f"defense action attribution missing classes: {sorted(required_attribution_classes - observed_attribution_classes)}",
+    )
+    by_action = {row["action"]: row for row in attribution_rows}
+    require(
+        float(by_action["priority_reroute"]["ablation_delta_value"]) >= 0.40,
+        "priority_reroute attribution missing ablation priority-inversion evidence",
+    )
+    require(
+        float(by_action["stale_badge"]["ablation_delta_value"]) >= 0.35,
+        "stale_badge attribution missing trusted stale ablation evidence",
+    )
+    require(
+        "active_attack_overlap=9" in by_action["ml_attack_alert"]["reactive_overlap_evidence"],
+        "ml_attack_alert attribution missing active attack overlap evidence",
+    )
+    require(
+        all(float(row["improved_or_held_rate"]) >= 0.66 for row in attribution_rows),
+        "defense action attribution has weak improved/held rate",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in attribution_rows),
+        "defense action attribution missing safety boundary",
+    )
+    checks.append("defense_action_attribution_audit rows=5 pass")
+
     episode_rows = read_csv("outputs/report_tables/closed_loop_episode_replay.csv")
     require(
         len(episode_rows) == 10,
@@ -1474,6 +1527,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/defense_effectiveness_ledger.md" in manifest_text,
         "manifest missing defense effectiveness ledger",
+    )
+    require(
+        "outputs/report_tables/defense_action_attribution_audit.md" in manifest_text,
+        "manifest missing defense action attribution audit",
     )
     require(
         "outputs/report_tables/closed_loop_episode_replay.md" in manifest_text,

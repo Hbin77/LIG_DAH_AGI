@@ -155,6 +155,19 @@ This writes:
 
 The ledger joins each TSRA-R `DefenseEvent` to local mission metric movement before and after the response window. Run it after `operator_alerts` has been generated.
 
+## Audit Defense Action Attribution
+
+```bash
+python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/defense_action_attribution_audit.csv`
+- `outputs/report_tables/defense_action_attribution_audit.md`
+
+The audit aggregates the defense effectiveness ledger by action and links local metric movement to ablation or reactive-window evidence. It separates direct ablation-supported actions from local metric and bounded-tradeoff actions instead of claiming every defense action lowers the scalar mission-impact score by itself.
+
 ## Validate Agent Event Contracts
 
 ```bash
@@ -702,6 +715,7 @@ python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.operator_alerts
 python3 -m src.experiments.defense_effectiveness_ledger
+python3 -m src.experiments.defense_action_attribution_audit --fail-on-error
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
