@@ -62,6 +62,9 @@ def evidence_counts(root: Path = Path(".")) -> dict[str, int]:
             read_csv(root / "outputs/report_tables/battle_timeline.csv")
         ),
         "operator_alerts": len(read_csv(root / "outputs/report_tables/operator_alerts.csv")),
+        "defense_ledger_rows": len(
+            read_csv(root / "outputs/report_tables/defense_effectiveness_ledger.csv")
+        ),
         "closed_loop_episodes": len(
             read_csv(root / "outputs/report_tables/closed_loop_episode_replay.csv")
         ),
@@ -196,6 +199,16 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             counts["closed_loop_episodes"] == 10,
             "Shows attack, defense, alert, and metric progression in one reviewable episode record.",
         ),
+        (
+            "E13",
+            "DefenseEvent",
+            "Defense Effectiveness Ledger",
+            "Each TSRA-R defense event is joined to local metric movement before and after response",
+            "outputs/report_tables/defense_effectiveness_ledger.csv",
+            counts["defense_ledger_rows"],
+            counts["defense_ledger_rows"] == 56,
+            "Turns defensive actions into event-level effectiveness evidence.",
+        ),
     ]
     rows = []
     for edge_id, source, target, interaction, evidence, evidence_count, ok, purpose in specs:
@@ -235,6 +248,7 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             "  Tsra[TSRA-R / TSRA-R-ML\\nDefense agents]",
             "  Metrics[Mission Metrics\\nImpact / resilience / decomposition]",
             "  Alerts[Operator Alerts\\nMission-readable defense guidance]",
+            "  Ledger[Defense Effectiveness Ledger\\nDefense action -> metric movement]",
             "  Coverage[Capability Coverage\\nAttack to defense mapping]",
             "  Replay[Closed-Loop Episode Replay\\nAttack / defense / alert / metric episode]",
             "  Verifier[Verifier / Package\\nReproducible evidence bundle]",
@@ -250,9 +264,12 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             f"  Tsra -->|{line('E10')}| Alerts",
             f"  Metrics -->|{line('E11')}| Verifier",
             f"  Sim -->|{line('E12')}| Replay",
+            f"  Tsra -->|{line('E13')}| Ledger",
+            f"  Metrics -->|local before/after| Ledger",
             f"  Tsra -->|response evidence| Replay",
             f"  Alerts -->|alert evidence| Replay",
             f"  Replay -->|episode evidence| Verifier",
+            f"  Ledger -->|effectiveness evidence| Verifier",
             f"  Alerts -->|operator evidence| Verifier",
             f"  Coverage -->|coverage evidence| Verifier",
         ]

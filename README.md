@@ -142,6 +142,19 @@ This writes:
 
 The alert table translates TSRA-R `DefenseEvent` records into closed-simulation operator alerts with severity, mission rationale, expected operator response, related attack context, and metric snapshot.
 
+## Generate Defense Effectiveness Ledger
+
+```bash
+python3 -m src.experiments.defense_effectiveness_ledger
+```
+
+This writes:
+
+- `outputs/report_tables/defense_effectiveness_ledger.csv`
+- `outputs/report_tables/defense_effectiveness_ledger.md`
+
+The ledger joins each TSRA-R `DefenseEvent` to local mission metric movement before and after the response window. Run it after `operator_alerts` has been generated.
+
 ## Validate Agent Event Contracts
 
 ```bash
@@ -315,7 +328,7 @@ This writes:
 - `outputs/report_tables/closed_loop_episode_replay.csv`
 - `outputs/report_tables/closed_loop_episode_replay.md`
 
-The replay joins each defended attack event to response coverage, defense chains, operator alerts, and mission metric movement. Run it after `attack_defense_response_audit` and `operator_alerts` have been generated.
+The replay joins each defended attack event to response coverage, defense chains, operator alerts, and mission metric movement. Run it after `attack_defense_response_audit`, `operator_alerts`, and `defense_effectiveness_ledger` have been generated.
 
 ## Audit PACE Transitions
 
@@ -355,7 +368,7 @@ This writes:
 - `outputs/report_tables/agent_collaboration_graph.md`
 - `outputs/report_tables/agent_collaboration_graph.mmd`
 
-The graph summarizes how AgentRuntime, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Mission Metrics, and the verifier/package cooperate inside the closed simulation. Run it after trace summary, COA cards, coverage, response audit, operator alerts, metric gates, and mission decomposition have been generated.
+The graph summarizes how AgentRuntime, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, and the verifier/package cooperate inside the closed simulation. Run it after trace summary, COA cards, coverage, response audit, operator alerts, defense effectiveness ledger, metric gates, and mission decomposition have been generated.
 
 ## Generate Competition Alignment Matrix
 
@@ -472,6 +485,7 @@ python3 -m src.experiments.agent_capability_matrix
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.operator_alerts
+python3 -m src.experiments.defense_effectiveness_ledger
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory

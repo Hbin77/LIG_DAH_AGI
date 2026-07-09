@@ -257,6 +257,45 @@ video_throttle
 - 실제 운용 지시가 아니라 폐쇄형 시뮬레이션 알림이다.
 - RF, exploit, live network action은 포함하지 않는다.
 
+## 12. Defense Effectiveness Ledger
+
+Operator alert는 사람이 읽는 알림이고, defense effectiveness ledger는 같은 `DefenseEvent`가 지표에 어떤 local effect를 남겼는지 확인하는 표다.
+
+실행:
+
+```bash
+python3 -m src.experiments.defense_effectiveness_ledger
+```
+
+산출물:
+
+```text
+outputs/report_tables/defense_effectiveness_ledger.csv
+outputs/report_tables/defense_effectiveness_ledger.md
+```
+
+각 row에는 다음이 들어간다.
+
+```text
+DefenseEvent
+operator_alert
+related_attack_context
+before/after mission_impact
+before/after p95_critical_latency_sec
+before/after trusted_stale_exposure
+before/after priority_inversion_rate
+observed_effect
+interpretation
+```
+
+현재 검증 기준:
+
+```text
+E5 + E7 defense ledger rows: 56
+actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
+observed_effect labels: improved, held, degraded_or_delayed
+```
+
 해석:
 
 - `priority_reroute`를 제거하면 priority inversion이 크게 증가한다. 이 액션은 critical traffic 보호의 핵심이다.

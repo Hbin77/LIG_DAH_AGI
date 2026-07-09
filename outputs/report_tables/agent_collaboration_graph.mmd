@@ -5,6 +5,7 @@ flowchart LR
   Tsra[TSRA-R / TSRA-R-ML\nDefense agents]
   Metrics[Mission Metrics\nImpact / resilience / decomposition]
   Alerts[Operator Alerts\nMission-readable defense guidance]
+  Ledger[Defense Effectiveness Ledger\nDefense action -> metric movement]
   Coverage[Capability Coverage\nAttack to defense mapping]
   Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
   Verifier[Verifier / Package\nReproducible evidence bundle]
@@ -20,8 +21,11 @@ flowchart LR
   Tsra -->|E10 56 verified| Alerts
   Metrics -->|E11 46 verified| Verifier
   Sim -->|E12 10 verified| Replay
+  Tsra -->|E13 56 verified| Ledger
+  Metrics -->|local before/after| Ledger
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier
+  Ledger -->|effectiveness evidence| Verifier
   Alerts -->|operator evidence| Verifier
   Coverage -->|coverage evidence| Verifier

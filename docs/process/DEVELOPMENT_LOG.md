@@ -1367,3 +1367,53 @@ E7은 E6보다 약간 높은 impact를 보이지만, 이는 항상 방어하는 
 2. 그 다음 방어 에이전트 TSRA-R을 같은 수준으로 다듬는다.
 3. 각 단계마다 설계 문서와 결과 요약을 커밋한다.
 4. `hbin` 브랜치에만 push한다.
+
+### 36. Defense Effectiveness Ledger를 추가한 이유
+
+TSRA-R은 `DefenseEvent`와 operator alert를 남기지만, 그것만으로는 방어 이벤트가 local mission metric에 어떤 효과를 냈는지 event 단위로 확인하기 어렵다. aggregate resilience gain은 전체 평균이고, closed-loop episode replay는 공격 1건 기준 흐름이다. 방어 에이전트 자체의 판단 품질을 보려면 방어 액션 1건마다 before/after 지표 변화가 필요하다.
+
+추가한 것:
+
+```text
+src/experiments/defense_effectiveness_ledger.py
+outputs/report_tables/defense_effectiveness_ledger.csv
+outputs/report_tables/defense_effectiveness_ledger.md
+```
+
+처리 방식:
+
+```text
+DefenseEvent
+-> operator_alerts.csv에서 alert/context join
+-> metric_snapshots.jsonl에서 event time metric 추출
+-> metric_snapshots.jsonl에서 30초 뒤 metric 추출
+-> mission impact / critical latency / trusted stale exposure / priority inversion delta 계산
+-> action별 observed_effect와 interpretation 기록
+```
+
+검증 결과:
+
+```text
+defense_effectiveness_ledger.csv: 56 rows
+E5 rows: 23
+E7 rows: 33
+actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
+observed_effect labels: improved, held, degraded_or_delayed
+```
+
+연결한 것:
+
+- README 실행 명령
+- Agent Runtime 문서
+- TSRA-R 방어 에이전트 문서
+- package builder required paths
+- final verifier row/action/effect checks
+- competition alignment matrix
+- agent collaboration graph E13 edge
+
+판단:
+
+- 이 산출물은 TSRA-R 방어 이벤트가 단순 로그가 아니라 metric movement와 연결된 판단 결과임을 보여준다.
+- `held`는 실패가 아니라 30초 local window에서 지표를 bounded 상태로 유지했다는 의미로 둔다.
+- `degraded_or_delayed`는 공격 누적 또는 metric lag가 response window 안에 남은 경우로 숨기지 않고 기록한다.
+- 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 효과만 분석한다.

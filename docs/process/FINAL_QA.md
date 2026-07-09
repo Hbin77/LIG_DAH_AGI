@@ -20,6 +20,7 @@ python3 -m src.experiments.agent_capability_matrix
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.operator_alerts
+python3 -m src.experiments.defense_effectiveness_ledger
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
@@ -63,15 +64,16 @@ aura_coa_cards rows: 15
 battle_timeline rows: 49
 incident_summary rows: 10
 operator_alerts rows: 56 actions=5
+defense_effectiveness_ledger rows: 56 actions=5
 closed_loop_episode_replay rows: 10 complete
-agent_collaboration_graph edges: 12 verified
+agent_collaboration_graph edges: 13 verified
 competition_alignment_matrix rows: 10 verified
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 144
+package_zip entries: 147
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

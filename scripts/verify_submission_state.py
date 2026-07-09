@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
     "src/experiments/operator_alerts.py",
+    "src/experiments/defense_effectiveness_ledger.py",
     "src/experiments/closed_loop_episode_replay.py",
     "src/experiments/agent_collaboration_graph.py",
     "src/experiments/competition_alignment.py",
@@ -53,6 +54,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/incident_summary.csv",
     "outputs/report_tables/operator_alerts.csv",
     "outputs/report_tables/operator_alerts.md",
+    "outputs/report_tables/defense_effectiveness_ledger.csv",
+    "outputs/report_tables/defense_effectiveness_ledger.md",
     "outputs/report_tables/closed_loop_episode_replay.csv",
     "outputs/report_tables/closed_loop_episode_replay.md",
     "outputs/report_tables/agent_collaboration_graph.csv",
@@ -516,6 +519,41 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("operator_alerts rows=56 actions=5")
 
+    ledger_rows = read_csv("outputs/report_tables/defense_effectiveness_ledger.csv")
+    require(
+        len(ledger_rows) == 56,
+        f"expected 56 defense effectiveness ledger rows, got {len(ledger_rows)}",
+    )
+    ledger_experiments = {row["experiment"] for row in ledger_rows}
+    require(
+        ledger_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"unexpected defense effectiveness ledger experiments: {sorted(ledger_experiments)}",
+    )
+    ledger_actions = {row["action"] for row in ledger_rows}
+    require(
+        required_alert_actions.issubset(ledger_actions),
+        f"defense effectiveness ledger missing actions: {sorted(required_alert_actions - ledger_actions)}",
+    )
+    allowed_effects = {"improved", "held", "degraded_or_delayed"}
+    observed_effects = {row["observed_effect"] for row in ledger_rows}
+    require(
+        observed_effects.issubset(allowed_effects) and {"improved", "held"}.issubset(observed_effects),
+        f"unexpected defense effectiveness labels: {sorted(observed_effects)}",
+    )
+    require(
+        all(row["operator_alert"] and row["related_attack_context"] for row in ledger_rows),
+        "defense effectiveness ledger missing alert or attack context",
+    )
+    require(
+        all(row["interpretation"] and row["delta_mission_impact"] for row in ledger_rows),
+        "defense effectiveness ledger missing interpretation or metric deltas",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in ledger_rows),
+        "defense effectiveness ledger missing safety boundary",
+    )
+    checks.append("defense_effectiveness_ledger rows=56 actions=5")
+
     episode_rows = read_csv("outputs/report_tables/closed_loop_episode_replay.csv")
     require(
         len(episode_rows) == 10,
@@ -552,12 +590,12 @@ def check_csv_outputs() -> list[str]:
 
     collaboration_rows = read_csv("outputs/report_tables/agent_collaboration_graph.csv")
     require(
-        len(collaboration_rows) == 12,
-        f"expected 12 collaboration graph edges, got {len(collaboration_rows)}",
+        len(collaboration_rows) == 13,
+        f"expected 13 collaboration graph edges, got {len(collaboration_rows)}",
     )
     require(
         {row["edge_id"] for row in collaboration_rows}
-        == {f"E{index:02d}" for index in range(1, 13)},
+        == {f"E{index:02d}" for index in range(1, 14)},
         "agent collaboration graph edge ids are incomplete",
     )
     require(
@@ -581,7 +619,7 @@ def check_csv_outputs() -> list[str]:
     )
     require("flowchart LR" in collaboration_mmd, "agent collaboration Mermaid graph missing flowchart")
     require("AURA" in collaboration_mmd and "TSRA-R" in collaboration_mmd, "Mermaid graph missing agents")
-    checks.append("agent_collaboration_graph edges=12 verified")
+    checks.append("agent_collaboration_graph edges=13 verified")
 
     alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
     require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
@@ -643,6 +681,10 @@ def check_zip() -> list[str]:
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
     require("outputs/report_tables/operator_alerts.md" in manifest_text, "manifest missing operator alerts")
+    require(
+        "outputs/report_tables/defense_effectiveness_ledger.md" in manifest_text,
+        "manifest missing defense effectiveness ledger",
+    )
     require(
         "outputs/report_tables/closed_loop_episode_replay.md" in manifest_text,
         "manifest missing closed-loop episode replay",

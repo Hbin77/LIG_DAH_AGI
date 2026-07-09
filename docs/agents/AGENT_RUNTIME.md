@@ -209,9 +209,26 @@ outputs/report_tables/operator_alerts.md
 
 각 alert는 방어 action, severity, mission rationale, expected operator response, related attack context, metric snapshot, trace reason을 연결한다. 이 산출물도 폐쇄형 시뮬레이션 설명이며 실제 RF, exploit, live network action은 포함하지 않는다.
 
+## Defense Effectiveness Ledger
+
+TSRA-R의 `DefenseEvent`는 local metric before/after movement와도 연결한다.
+
+```bash
+python3 -m src.experiments.defense_effectiveness_ledger
+```
+
+산출물:
+
+```text
+outputs/report_tables/defense_effectiveness_ledger.csv
+outputs/report_tables/defense_effectiveness_ledger.md
+```
+
+각 ledger row는 방어 action, operator alert, related attack context, 30초 전후 mission impact, critical latency, trusted stale exposure, priority inversion 변화량, observed effect, interpretation을 묶는다.
+
 ## Collaboration Graph
 
-공격 에이전트, 시뮬레이터, 방어 에이전트, operator alerts, metrics, verifier의 협력 구조는 별도 graph로 재구성한다.
+공격 에이전트, 시뮬레이터, 방어 에이전트, operator alerts, defense effectiveness ledger, metrics, verifier의 협력 구조는 별도 graph로 재구성한다.
 
 ```bash
 python3 -m src.experiments.agent_collaboration_graph

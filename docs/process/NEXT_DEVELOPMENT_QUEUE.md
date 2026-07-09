@@ -1046,16 +1046,16 @@ outputs/report_tables/agent_collaboration_graph.mmd
 
 구현 방식:
 
-- `agent_interface_manifest.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
-- 협력 구조를 11개 edge로 고정한다.
+- `agent_interface_manifest.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `defense_effectiveness_ledger.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
+- 협력 구조를 13개 edge로 고정한다.
 - 각 edge에 source, target, interaction, primary evidence, evidence count, validation status, safety boundary를 붙인다.
 - Markdown에는 Mermaid flowchart를 포함하고, `.mmd` 파일도 별도 생성한다.
 
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_collaboration_graph` 명령으로 재생성 가능하다.
-- 완료. 11개 협력 edge가 모두 `verified` 상태다.
-- 완료. AgentRuntime, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Mission Metrics, Verifier/Package가 그래프에 포함된다.
+- 완료. 13개 협력 edge가 모두 `verified` 상태다.
+- 완료. AgentRuntime, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, Verifier/Package가 그래프에 포함된다.
 - 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
 
 검증:
@@ -1067,7 +1067,7 @@ python3 -m src.experiments.agent_collaboration_graph
 검증 결과:
 
 ```text
-agent_collaboration_graph.csv: 11 edges
+agent_collaboration_graph.csv: 13 edges
 validation_status: all verified
 Mermaid: outputs/report_tables/agent_collaboration_graph.mmd
 ```
@@ -1133,7 +1133,66 @@ response_status: complete for all rows
 - E7 첫 episode는 ML TSRA-R이 20초 뒤 방어 window를 열고, 이후 priority reroute, stale badge, PACE switch가 함께 작동하는 흐름을 보여준다.
 - 단일 숫자나 분리된 로그가 아니라 attack -> defense -> alert -> metric movement를 한 record로 묶는다.
 
-## P22. 제출 직전 브랜치/패키지 동결
+## P22. Defense Effectiveness Ledger
+
+상태: 완료
+
+문제:
+
+- Operator alert와 closed-loop replay는 방어 이벤트가 나왔다는 사실을 보여주지만, 각 방어 액션 이후 local metric이 어떻게 움직였는지 event 단위로 보기 어렵다.
+- TSRA-R 방어 에이전트의 품질은 aggregate resilience gain만이 아니라 action별 before/after 효과로도 설명되어야 한다.
+
+구현:
+
+```text
+src/experiments/defense_effectiveness_ledger.py
+outputs/report_tables/defense_effectiveness_ledger.csv
+outputs/report_tables/defense_effectiveness_ledger.md
+```
+
+구현 방식:
+
+- E5/E7의 `defense_events.jsonl`을 읽는다.
+- `metric_snapshots.jsonl`에서 방어 이벤트 시점과 30초 뒤 metric을 찾는다.
+- `operator_alerts.csv`에서 severity, operator alert, related attack context를 붙인다.
+- mission impact, P95 critical latency, trusted stale exposure, priority inversion의 before/after/delta를 기록한다.
+- action별로 `improved`, `held`, `degraded_or_delayed`를 분류하고 해석을 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.defense_effectiveness_ledger` 명령으로 재생성 가능하다.
+- 완료. E5/E7 DefenseEvent 56건이 모두 ledger row로 나온다.
+- 완료. `ml_attack_alert`, `pace_switch`, `priority_reroute`, `stale_badge`, `video_throttle` action이 모두 포함된다.
+- 완료. README, Agent Runtime 문서, TSRA-R 문서, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.defense_effectiveness_ledger
+python3 -m src.experiments.agent_collaboration_graph
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+defense_effectiveness_ledger.csv: 56 rows
+E5 rows: 23
+E7 rows: 33
+actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
+observed_effect: improved, held, degraded_or_delayed
+```
+
+해석:
+
+- 이 산출물은 TSRA-R이 "이벤트를 냈다"에서 끝나지 않고, 방어 액션과 지표 변화가 어떻게 연결되는지 보여준다.
+- `held`는 실패가 아니라 해당 30초 local window에서 지표를 더 악화시키지 않고 bounded 상태로 유지했다는 의미다.
+- `degraded_or_delayed`는 response가 나왔지만 공격 누적 효과 또는 metric lag 때문에 같은 window 안에서 scalar impact가 아직 상승했다는 의미다.
+- 실제 운용 지시가 아니라 폐쇄형 시뮬레이션 효과 분석이다.
+
+## P23. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

@@ -12,6 +12,7 @@ flowchart LR
   Tsra[TSRA-R / TSRA-R-ML\nDefense agents]
   Metrics[Mission Metrics\nImpact / resilience / decomposition]
   Alerts[Operator Alerts\nMission-readable defense guidance]
+  Ledger[Defense Effectiveness Ledger\nDefense action -> metric movement]
   Coverage[Capability Coverage\nAttack to defense mapping]
   Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
   Verifier[Verifier / Package\nReproducible evidence bundle]
@@ -27,9 +28,12 @@ flowchart LR
   Tsra -->|E10 56 verified| Alerts
   Metrics -->|E11 46 verified| Verifier
   Sim -->|E12 10 verified| Replay
+  Tsra -->|E13 56 verified| Ledger
+  Metrics -->|local before/after| Ledger
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier
+  Ledger -->|effectiveness evidence| Verifier
   Alerts -->|operator evidence| Verifier
   Coverage -->|coverage evidence| Verifier
 ```
@@ -50,6 +54,7 @@ flowchart LR
 | E10 | DefenseEvent | Operator Alerts | 56 | verified | outputs/report_tables/operator_alerts.csv | Turns TSRA-R output into human-readable response guidance. |
 | E11 | Mission Metrics | Verifier/Package | 46 | verified | outputs/report_tables/metric_gate_summary.csv \| outputs/report_tables/mission_impact_decomposition.csv | Keeps scalar claims backed by gates and component-level evidence. |
 | E12 | Attack/Defense/Alert Evidence | Closed-Loop Episode Replay | 10 | verified | outputs/report_tables/closed_loop_episode_replay.csv | Shows attack, defense, alert, and metric progression in one reviewable episode record. |
+| E13 | DefenseEvent | Defense Effectiveness Ledger | 56 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
 
 ## Interaction Detail
 
@@ -159,4 +164,13 @@ flowchart LR
 - Evidence count: 10
 - Validation status: verified
 - Purpose: Shows attack, defense, alert, and metric progression in one reviewable episode record.
+- Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
+
+### E13 DefenseEvent -> Defense Effectiveness Ledger
+
+- Interaction: Each TSRA-R defense event is joined to local metric movement before and after response
+- Evidence: outputs/report_tables/defense_effectiveness_ledger.csv
+- Evidence count: 56
+- Validation status: verified
+- Purpose: Turns defensive actions into event-level effectiveness evidence.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

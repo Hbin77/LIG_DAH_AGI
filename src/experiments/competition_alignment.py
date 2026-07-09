@@ -94,7 +94,8 @@ ALIGNMENT_SPECS = [
             "TSRA-R selects priority reroute, stale badge, video throttle, and PACE switch actions; "
             "ablation isolates which action protects which mission metric, and PACE transition audit "
             "explains fallback switching context; operator alerts translate DefenseEvent records into "
-            "mission-readable response guidance."
+            "mission-readable response guidance; defense effectiveness ledger joins each DefenseEvent "
+            "to local before/after mission metric movement."
         ),
         agent_or_component="TSRA-R",
         evidence_files=[
@@ -103,15 +104,18 @@ ALIGNMENT_SPECS = [
             "src/tsra_r/adaptive_defender.py",
             "src/experiments/pace_transition_audit.py",
             "src/experiments/operator_alerts.py",
+            "src/experiments/defense_effectiveness_ledger.py",
             "outputs/batch/tsra_action_ablation_summary.csv",
             "outputs/report_tables/pace_transition_audit.csv",
             "outputs/report_tables/operator_alerts.csv",
+            "outputs/report_tables/defense_effectiveness_ledger.csv",
         ],
         next_gate="Defense changes must be checked against mission impact plus at least one action-specific metric.",
         row_checks=[
             RowCountCheck("outputs/batch/tsra_action_ablation_summary.csv", 5),
             RowCountCheck("outputs/report_tables/pace_transition_audit.csv", 6),
             RowCountCheck("outputs/report_tables/operator_alerts.csv", 50),
+            RowCountCheck("outputs/report_tables/defense_effectiveness_ledger.csv", 56),
         ],
     ),
     AlignmentSpec(
@@ -162,7 +166,8 @@ ALIGNMENT_SPECS = [
             "to the TSRA-R capabilities and validation gates that cover it; response audit checks "
             "whether required defenses are active or emitted within the response window; the collaboration "
             "graph summarizes the closed-loop agent cooperation evidence; episode replay joins attack, "
-            "defense, alert, and metric movement per attack event."
+            "defense, alert, and metric movement per attack event; the defense effectiveness ledger "
+            "adds event-level response-to-metric movement evidence."
         ),
         agent_or_component=(
             "Battle timeline / Incident summary / Coverage / Response audit / "
@@ -172,12 +177,14 @@ ALIGNMENT_SPECS = [
             "src/experiments/battle_timeline.py",
             "src/experiments/incident_summary.py",
             "src/experiments/closed_loop_episode_replay.py",
+            "src/experiments/defense_effectiveness_ledger.py",
             "src/experiments/agent_collaboration_graph.py",
             "src/experiments/attack_defense_coverage.py",
             "src/experiments/attack_defense_response_audit.py",
             "outputs/report_tables/battle_timeline.csv",
             "outputs/report_tables/incident_summary.csv",
             "outputs/report_tables/closed_loop_episode_replay.csv",
+            "outputs/report_tables/defense_effectiveness_ledger.csv",
             "outputs/report_tables/agent_collaboration_graph.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
             "outputs/report_tables/attack_defense_response_audit.csv",
@@ -190,6 +197,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/battle_timeline.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/incident_summary.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/closed_loop_episode_replay.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/defense_effectiveness_ledger.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_coverage.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_response_audit.csv", "closed simulation"),
@@ -198,7 +206,8 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/battle_timeline.csv", 40),
             RowCountCheck("outputs/report_tables/incident_summary.csv", 10),
             RowCountCheck("outputs/report_tables/closed_loop_episode_replay.csv", 10),
-            RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 12),
+            RowCountCheck("outputs/report_tables/defense_effectiveness_ledger.csv", 56),
+            RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 13),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
             RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
         ],
