@@ -13,6 +13,6 @@ This table checks whether the generated experiment metrics still support the int
 | G07 | Stale badge ablation | no_stale_badge delta_trusted_stale_exposure_mean | 0.375 | >= 0.25 | pass | Removing stale_badge should materially increase trusted stale exposure. |
 | G08 | Adaptive memory improvement | adaptive mission impact improvement over full TSRA-R | 0.0307717 | >= 0.005 | pass | AdaptiveTSRA-R should improve mission impact versus full TSRA-R baseline. |
 | G09 | Adaptive memory action economy | full video_throttle_count_mean - adaptive video_throttle_count_mean | 3.26667 | >= 1.0 | pass | AdaptiveTSRA-R should reduce optional video throttle actions while preserving core defenses. |
-| G10 | ML defender separation | abs(E7 mission_impact_mean - E6 mission_impact_mean) | 0.0107652 | >= 0.005 | pass | E7 should remain behaviorally distinct from E6 so ML TSRA-R is not a no-op copy. |
+| G10 | ML defender separation | abs(E7 mission_impact_mean - E6 mission_impact_mean) | 0.0135924 | >= 0.005 | pass | E7 should remain behaviorally distinct from E6 so ML TSRA-R is not a no-op copy. |
 | G11 | Repeated-run stability | max(E5/E7 mission_impact_std) | 0.0256799 | <= 0.03 | pass | Defended repeated-run mission impact should remain stable across seeds. |
 | G12 | PACE reselection discipline | full TSRA-R recovery_instability_mean | 2.06667 | <= 2.20 | pass | Full TSRA-R should avoid repeated fallback reselection unless residual mission pressure justifies the extra recovery instability. |

@@ -18,9 +18,9 @@ Safety boundary: closed simulation agent-memory audit only; no RF, exploit, or l
 | E4_rule_aura_basic_defense | TSRA-R | rule_defense_basic | 61 | 61 | action_cooldowns, event_count | 1 | pass |
 | E5_rule_aura_tsra_r | AURA | rule_attack_score | 31 | 31 | event_count, last_attack_time, last_attack_type | 1 | pass |
 | E5_rule_aura_tsra_r | TSRA-R | rule_defense_full | 61 | 61 | action_cooldowns, event_count | 1 | pass |
-| E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | 31 | 31 | event_count, last_attack_time, last_attack_type | 1 | pass |
+| E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | 31 | 31 | attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus | 1 | pass |
 | E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | 61 | 61 | action_cooldowns, event_count | 1 | pass |
-| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | 31 | 31 | event_count, last_attack_time, last_attack_type | 1 | pass |
+| E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | 31 | 31 | attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus | 1 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | 61 | 61 | active_defense_until, last_alert_time, last_early_guard_triggered, last_mission_guard_reason, last_mission_guard_score, last_probability | 1 | pass |
 
 ## Detail
@@ -95,11 +95,11 @@ Safety boundary: closed simulation agent-memory audit only; no RF, exploit, or l
 - Memory coverage: 1
 - Observation count: 1 -> 24 (true)
 - Decision count: 0 -> 24 (true)
-- Belief keys: event_count, last_attack_time, last_attack_type
-- Changing belief keys: event_count, last_attack_time, last_attack_type
-- Feedback keys: attack_threshold, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget
+- Belief keys: attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus
+- Changing belief keys: attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus
+- Feedback keys: attack_threshold, attack_type_counts, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget, selected_base_attack_score, selected_objective_bonus, selected_repeated_tactic_penalty
 - Last-selected chain: 30/30
-- Effect summary: AURA memory carries attack cadence and last attack context into later candidate decisions; changing=event_count, last_attack_time, last_attack_type; feedback=attack_threshold, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget.
+- Effect summary: AURA memory carries attack cadence and last attack context into later candidate decisions; changing=attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus; feedback=attack_threshold, attack_type_counts, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget, selected_base_attack_score, selected_objective_bonus, selected_repeated_tactic_penalty.
 - Status: pass
 - Issues: none
 
@@ -121,11 +121,11 @@ Safety boundary: closed simulation agent-memory audit only; no RF, exploit, or l
 - Memory coverage: 1
 - Observation count: 1 -> 24 (true)
 - Decision count: 0 -> 24 (true)
-- Belief keys: event_count, last_attack_time, last_attack_type
-- Changing belief keys: event_count, last_attack_time, last_attack_type
-- Feedback keys: attack_threshold, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget
+- Belief keys: attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus
+- Changing belief keys: attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus
+- Feedback keys: attack_threshold, attack_type_counts, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget, selected_base_attack_score, selected_objective_bonus, selected_repeated_tactic_penalty
 - Last-selected chain: 30/30
-- Effect summary: AURA memory carries attack cadence and last attack context into later candidate decisions; changing=event_count, last_attack_time, last_attack_type; feedback=attack_threshold, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget.
+- Effect summary: AURA memory carries attack cadence and last attack context into later candidate decisions; changing=attack_type_counts, event_count, last_attack_time, last_attack_type, last_objective_bonus; feedback=attack_threshold, attack_type_counts, cooldown_remaining_sec, cooldown_sec, event_count, remaining_event_budget, selected_base_attack_score, selected_objective_bonus, selected_repeated_tactic_penalty.
 - Status: pass
 - Issues: none
 

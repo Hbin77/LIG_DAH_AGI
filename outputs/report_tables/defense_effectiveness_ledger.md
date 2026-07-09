@@ -13,9 +13,9 @@ Safety boundary: closed simulation defense-effect ledger only; no RF, exploit, o
 
 ### E7_ml_aura_ml_tsra_r
 
-- Ledger rows: 31
-- Actions: ml_attack_alert=8, pace_switch=3, priority_reroute=7, stale_badge=7, video_throttle=6
-- Observed effects: degraded_or_delayed=6, held=16, improved=9
+- Ledger rows: 30
+- Actions: ml_attack_alert=8, pace_switch=3, priority_reroute=6, stale_badge=7, video_throttle=6
+- Observed effects: degraded_or_delayed=6, held=15, improved=9
 
 ## Ledger Table
 
@@ -61,19 +61,18 @@ Safety boundary: closed simulation defense-effect ledger only; no RF, exploit, o
 | E7_ml_aura_ml_tsra_r | 175 | def-00016 | priority_reroute | held | 0.00249154 | 1 | 0 | -0.00835025 | active; ml-atk-00002; failover_chasing; target=LTE \|\| active; ml-atk-00003; failover_chasing; target=MESH \|\| near_future; ml-atk-00004; queue_pressure; target=MESH |
 | E7_ml_aura_ml_tsra_r | 190 | def-00017 | stale_badge | improved | -0.037906 | 0 | -0.0625 | -0.00706201 | active; ml-atk-00003; failover_chasing; target=MESH \|\| near_future; ml-atk-00004; queue_pressure; target=MESH |
 | E7_ml_aura_ml_tsra_r | 205 | def-00018 | video_throttle | held | -0.00297604 | 0 | 0 | -0.00595209 | active; ml-atk-00003; failover_chasing; target=MESH \|\| near_future; ml-atk-00004; queue_pressure; target=MESH |
-| E7_ml_aura_ml_tsra_r | 220 | def-00019 | ml_attack_alert | held | -0.00248212 | 0 | 0 | -0.00496424 | active; ml-atk-00003; failover_chasing; target=MESH \|\| active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 220 | def-00020 | priority_reroute | held | -0.00248212 | 0 | 0 | -0.00496424 | active; ml-atk-00003; failover_chasing; target=MESH \|\| active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 235 | def-00021 | stale_badge | improved | -0.019764 | 0 | -0.0625 | -0.00411131 | active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 240 | def-00022 | video_throttle | degraded_or_delayed | 0.0490603 | 0 | 0.0625 | -0.00396282 | active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 245 | def-00023 | ml_attack_alert | degraded_or_delayed | 0.0491237 | 0 | 0.0625 | -0.00383595 | active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 260 | def-00024 | priority_reroute | degraded_or_delayed | 0.0326167 | 0 | 0.0625 | -0.00351665 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 260 | def-00025 | pace_switch | degraded_or_delayed | 0.0326167 | 0 | 0.0625 | -0.00351665 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 270 | def-00026 | ml_attack_alert | held | -0.00163987 | 0 | 0 | -0.00327974 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 270 | def-00027 | stale_badge | held | -0.00163987 | 0 | 0 | -0.00327974 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 275 | def-00028 | video_throttle | held | -0.0013913 | 0 | 0 | -0.00278259 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 285 | def-00029 | priority_reroute | held | -0.000738925 | 0 | 0 | -0.00147785 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 295 | def-00030 | ml_attack_alert | held | -0.000253954 | 0 | 0 | -0.000507908 | active; ml-atk-00005; failover_chasing; target=MESH |
-| E7_ml_aura_ml_tsra_r | 300 | def-00031 | stale_badge | held | 0 | 0 | 0 | 0 | active; ml-atk-00005; failover_chasing; target=MESH |
+| E7_ml_aura_ml_tsra_r | 220 | def-00019 | ml_attack_alert | held | -0.00248212 | 0 | 0 | -0.00496424 | active; ml-atk-00003; failover_chasing; target=MESH \|\| active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 220 | def-00020 | priority_reroute | held | -0.00248212 | 0 | 0 | -0.00496424 | active; ml-atk-00003; failover_chasing; target=MESH \|\| active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 235 | def-00021 | stale_badge | improved | -0.019793 | 0 | -0.0625 | -0.00416928 | active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 240 | def-00022 | video_throttle | degraded_or_delayed | 0.0490044 | 0 | 0.0625 | -0.00407462 | active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 245 | def-00023 | ml_attack_alert | degraded_or_delayed | 0.0490156 | 0 | 0.0625 | -0.00405208 | active; ml-atk-00004; queue_pressure; target=MESH \|\| near_future; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 260 | def-00024 | priority_reroute | degraded_or_delayed | 0.0324964 | 0 | 0.0625 | -0.00375716 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 260 | def-00025 | pace_switch | degraded_or_delayed | 0.0324964 | 0 | 0.0625 | -0.00375716 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 270 | def-00026 | ml_attack_alert | held | -0.00176331 | 0 | 0 | -0.00352661 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 270 | def-00027 | stale_badge | held | -0.00176331 | 0 | 0 | -0.00352661 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 275 | def-00028 | video_throttle | held | -0.00146257 | 0 | 0 | -0.00292514 | active; ml-atk-00004; queue_pressure; target=MESH \|\| active; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 295 | def-00029 | ml_attack_alert | held | -0.000270678 | 0 | 0 | -0.000541356 | active; ml-atk-00005; stale_cop_induction; target=MESH |
+| E7_ml_aura_ml_tsra_r | 300 | def-00030 | stale_badge | held | 0 | 0 | 0 | 0 | active; ml-atk-00005; stale_cop_induction; target=MESH |
 
 ## Interpretation Rule
 

@@ -292,7 +292,7 @@ ALIGNMENT_SPECS = [
             "from anomaly probability; ML contribution audit ties model quality, tool invocation, E6/E7 "
             "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together; "
             "ML attack decision-path audit follows E7 from startup no-op to candidate generation, "
-            "ML impact prediction, detectability-adjusted top-score selection, cadence gating, and "
+            "ML impact prediction, detectability-adjusted base scoring, objective-aware selection, cadence gating, and "
             "closed-loop attack feedback; "
             "ML defense decision-path audit follows E7 from probability threshold to defense window, "
             "alert cooldown, core action fanout, memory continuity, and coordination effect; "
@@ -345,6 +345,9 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "candidate_total=26"),
             ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "selected_matches_top_candidate=5"),
             ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "score_formula_matches=26"),
+            ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "selection_score_formula_matches=26"),
+            ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "selected_objective_bonus_count=1"),
+            ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "stale_cop_induction"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "pre_threshold_guard_traces=1"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "first_response_latency_sec=20"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "above_threshold_no_event_refresh_traces="),

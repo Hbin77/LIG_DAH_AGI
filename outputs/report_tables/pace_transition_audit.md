@@ -71,7 +71,7 @@ Safety boundary: closed simulation PACE audit only; no RF, exploit, or live netw
 - Inferred transition: MESH -> LTE
 - Reason: fallback link degraded beyond mission threshold
 - Move critical traffic: true
-- Active attacks at switch: ml-atk-00004:queue_pressure@210->MESH; ml-atk-00005:failover_chasing@260->MESH
+- Active attacks at switch: ml-atk-00004:queue_pressure@210->MESH; ml-atk-00005:stale_cop_induction@260->MESH
 - Near future attacks: none
 - Mission impact at switch: 0.114642
 - P95 critical latency at switch: 2

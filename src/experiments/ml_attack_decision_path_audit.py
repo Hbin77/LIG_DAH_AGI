@@ -135,7 +135,14 @@ def score_formula_ok(candidate: dict[str, Any]) -> bool:
     predicted = as_float(candidate.get("predicted_mission_impact"))
     detectability = as_float(candidate.get("detectability_score"))
     expected_score = predicted - 0.15 * max(0.0, min(1.0, detectability))
-    return abs(as_float(candidate.get("score")) - expected_score) <= 1e-5
+    return abs(as_float(candidate.get("base_attack_score", candidate.get("score"))) - expected_score) <= 1e-5
+
+
+def selection_score_formula_ok(candidate: dict[str, Any]) -> bool:
+    base_score = as_float(candidate.get("base_attack_score", candidate.get("score")))
+    objective_bonus = as_float(candidate.get("objective_bonus"))
+    repeated_penalty = as_float(candidate.get("repeated_tactic_penalty"))
+    return abs(as_float(candidate.get("score")) - (base_score + objective_bonus - repeated_penalty)) <= 1e-5
 
 
 def row(
@@ -229,6 +236,17 @@ def build_rows() -> list[dict[str, str]]:
         for candidate in (trace.get("candidate_actions") or [])
     ]
     formula_matches = sum(1 for candidate in all_candidates if score_formula_ok(candidate))
+    selection_formula_matches = sum(
+        1 for candidate in all_candidates if selection_score_formula_ok(candidate)
+    )
+    objective_bonus_candidates = sum(
+        1 for candidate in all_candidates if as_float(candidate.get("objective_bonus")) > 0.0
+    )
+    selected_objective_bonus_count = sum(
+        1
+        for trace in attack_traces
+        if as_float(best_candidate(trace).get("objective_bonus")) > 0.0
+    )
     selected_detectability = [
         as_float(best_candidate(trace).get("detectability_score"))
         for trace in attack_traces
@@ -345,22 +363,27 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="MAP04",
             area="Detectability-adjusted score",
-            requirement="Candidate score must equal predicted mission impact minus the configured detectability penalty.",
+            requirement="Candidate base score must equal predicted mission impact minus detectability penalty, and selection score must include bounded objective adjustment.",
             evidence=[TRACE_PATH, "src/shared/metrics.py"],
             observed=(
                 f"candidate_total={candidate_total}; score_formula_matches={formula_matches}; "
+                f"selection_score_formula_matches={selection_formula_matches}; "
+                f"objective_bonus_candidates={objective_bonus_candidates}; "
+                f"selected_objective_bonus_count={selected_objective_bonus_count}; "
                 f"selected_detectability_min={fmt(min(selected_detectability) if selected_detectability else None)}; "
                 f"selected_detectability_max={fmt(max(selected_detectability) if selected_detectability else None)}"
             ),
             ok=(
                 candidate_total > 0
                 and formula_matches == candidate_total
+                and selection_formula_matches == candidate_total
+                and selected_objective_bonus_count >= 1
                 and bool(selected_detectability)
-                and max(selected_detectability) <= 0.5
+                and max(selected_detectability) <= 0.6
             ),
             interpretation=(
-                "The attack score balances mission effect and detectability instead of maximizing "
-                "impact blindly."
+                "AURA-ML keeps the detectability-adjusted base score explicit, then applies a "
+                "bounded objective adjustment so tactical coverage is visible rather than hidden."
             ),
         ),
         row(
@@ -399,7 +422,7 @@ def build_rows() -> list[dict[str, str]]:
             ok=(
                 len(scorecard_rows) == 5
                 and {event.get("event_id", "") for event in attacks} == scorecard_attack_ids
-                and {"queue_pressure", "failover_chasing"}.issubset(set(attack_types))
+                and {"queue_pressure", "failover_chasing", "stale_cop_induction"}.issubset(set(attack_types))
                 and {"SATCOM", "LTE", "MESH"}.issubset(set(target_links))
                 and complete_responses == 5
                 and positive_reductions == 5

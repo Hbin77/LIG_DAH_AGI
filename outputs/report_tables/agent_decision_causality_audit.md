@@ -316,7 +316,7 @@ None.
 | E6_ml_aura_tsra_r | 250 | AURA-ML | no_op | pass | pass | pass | pass |
 | E6_ml_aura_tsra_r | 250 | TSRA-R | no_op | pass | pass | pass | pass |
 | E6_ml_aura_tsra_r | 255 | TSRA-R | no_op | pass | pass | pass | pass |
-| E6_ml_aura_tsra_r | 260 | AURA-ML | queue_pressure | pass | pass | pass | pass |
+| E6_ml_aura_tsra_r | 260 | AURA-ML | stale_cop_induction | pass | pass | pass | pass |
 | E6_ml_aura_tsra_r | 260 | TSRA-R | no_op | pass | pass | pass | pass |
 | E6_ml_aura_tsra_r | 265 | TSRA-R | stale_badge | pass | pass | pass | pass |
 | E6_ml_aura_tsra_r | 270 | AURA-ML | no_op | pass | pass | pass | pass |
@@ -329,7 +329,7 @@ None.
 | E6_ml_aura_tsra_r | 290 | TSRA-R | no_op | pass | pass | pass | pass |
 | E6_ml_aura_tsra_r | 295 | TSRA-R | stale_badge | pass | pass | pass | pass |
 | E6_ml_aura_tsra_r | 300 | AURA-ML | no_op | pass | pass | pass | pass |
-| E6_ml_aura_tsra_r | 300 | TSRA-R | priority_reroute | pass | pass | pass | pass |
+| E6_ml_aura_tsra_r | 300 | TSRA-R | priority_reroute, pace_switch | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 0 | AURA-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 0 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 5 | TSRA-R-ML | no_op | pass | pass | pass | pass |
@@ -408,7 +408,7 @@ None.
 | E7_ml_aura_ml_tsra_r | 250 | AURA-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 250 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 255 | TSRA-R-ML | no_op | pass | pass | pass | pass |
-| E7_ml_aura_ml_tsra_r | 260 | AURA-ML | failover_chasing | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 260 | AURA-ML | stale_cop_induction | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 260 | TSRA-R-ML | priority_reroute, pace_switch | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 265 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 270 | AURA-ML | no_op | pass | pass | pass | pass |
@@ -416,7 +416,7 @@ None.
 | E7_ml_aura_ml_tsra_r | 275 | TSRA-R-ML | video_throttle | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 280 | AURA-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 280 | TSRA-R-ML | no_op | pass | pass | pass | pass |
-| E7_ml_aura_ml_tsra_r | 285 | TSRA-R-ML | priority_reroute | pass | pass | pass | pass |
+| E7_ml_aura_ml_tsra_r | 285 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 290 | AURA-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 290 | TSRA-R-ML | no_op | pass | pass | pass | pass |
 | E7_ml_aura_ml_tsra_r | 295 | TSRA-R-ML | ml_attack_alert | pass | pass | pass | pass |

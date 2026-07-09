@@ -19,10 +19,10 @@ Safety boundary: closed simulation agent-engagement scorecard only; no RF, explo
 | E5_rule_aura_tsra_r | atk-00004 | queue_pressure | 0.056345 | 0.8275 | complete | 2 | 0.0395898 | pass |
 | E5_rule_aura_tsra_r | atk-00005 | queue_pressure | 0.045006 | 0.7835 | complete | 4 | 0.00214269 | pass |
 | E7_ml_aura_ml_tsra_r | ml-atk-00001 | queue_pressure | 0.072803 | 0.459505 | complete | 5 | 0.251649 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00002 | failover_chasing | 0.021344 | 0.641848 | complete | 4 | 0.025868 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00003 | failover_chasing | 0.0852 | 0.657403 | complete | 3 | 0.00132496 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00004 | queue_pressure | 0.165075 | 0.659372 | complete | 5 | 0.0375459 | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00005 | failover_chasing | 0.059203 | 0.57979 | complete | 8 | 0.00163987 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00002 | failover_chasing | 0.049839 | 0.641848 | complete | 4 | 0.025868 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00003 | failover_chasing | 0.0852 | 0.617403 | complete | 3 | 0.00132496 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00004 | queue_pressure | 0.129875 | 0.619372 | complete | 5 | 0.0375459 | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00005 | stale_cop_induction | 0.150585 | 0.659393 | complete | 7 | 0.00176331 | pass |
 
 ## Notes
 

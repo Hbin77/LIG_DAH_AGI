@@ -14,8 +14,8 @@ Safety boundary: closed simulation memory-influence audit only; no RF, exploit, 
 | --- | --- | --- | --- |
 | MI01 | AURA cadence memory | traces=93; selected_attacks=15; cooldown_noops=48; max_event_noops=12; belief_rows=75 | pass |
 | MI02 | AURA-ML cadence memory | traces=62; selected_attacks=10; cooldown_noops=32; max_event_noops=8; belief_rows=50 | pass |
-| MI03 | TSRA-R action cooldown memory | eligible_not_ready=pace_switch=4, priority_reroute=21, stale_badge=86, video_throttle=123; eligible_ready=pace_switch=3, priority_reroute=19, stale_badge=26, video_throttle=21; emitted_events=pace_switch=3, priority_reroute=19, stale_badge=26, video_throttle=21 | pass |
-| MI04 | TSRA-R-ML active defense window memory | opened_windows=38; active_window_traces=47; active_window_noops=26; below_threshold_no_window=14 | pass |
+| MI03 | TSRA-R action cooldown memory | eligible_not_ready=pace_switch=4, priority_reroute=21, stale_badge=86, video_throttle=123; eligible_ready=pace_switch=4, priority_reroute=19, stale_badge=26, video_throttle=21; emitted_events=pace_switch=4, priority_reroute=19, stale_badge=26, video_throttle=21 | pass |
+| MI04 | TSRA-R-ML active defense window memory | opened_windows=38; active_window_traces=47; active_window_noops=27; below_threshold_no_window=14 | pass |
 | MI05 | Adaptive TSRA-R memory policy | delta_mission_impact_mean=-0.0307717; delta_defense_count_mean=-3.93333; delta_video_throttle_count_mean=-3.26667; delta_pace_switch_count_mean=-1.06667 | pass |
 | MI06 | Memory chain integrity | rows=9.0; pass_rows=9.0; min_last_selected_chain_match_rate=1 | pass |
 
@@ -41,7 +41,7 @@ Safety boundary: closed simulation memory-influence audit only; no RF, exploit, 
 
 - Mechanism: TSRA-R stores action cooldowns in memory and blocks eligible actions until their cooldowns are ready.
 - Evidence: outputs/experiments/*/tsra_r_decision_traces.jsonl
-- Observed: eligible_not_ready=pace_switch=4, priority_reroute=21, stale_badge=86, video_throttle=123; eligible_ready=pace_switch=3, priority_reroute=19, stale_badge=26, video_throttle=21; emitted_events=pace_switch=3, priority_reroute=19, stale_badge=26, video_throttle=21
+- Observed: eligible_not_ready=pace_switch=4, priority_reroute=21, stale_badge=86, video_throttle=123; eligible_ready=pace_switch=4, priority_reroute=19, stale_badge=26, video_throttle=21; emitted_events=pace_switch=4, priority_reroute=19, stale_badge=26, video_throttle=21
 - Status: pass
 - Interpretation: Rule TSRA-R memory directly gates repeated defensive actions instead of emitting every eligible action every tick.
 
@@ -49,7 +49,7 @@ Safety boundary: closed simulation memory-influence audit only; no RF, exploit, 
 
 - Mechanism: TSRA-R-ML stores active_defense_until and last probability so a detector hit opens or maintains a bounded defense window.
 - Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_decision_traces.jsonl
-- Observed: opened_windows=38; active_window_traces=47; active_window_noops=26; below_threshold_no_window=14
+- Observed: opened_windows=38; active_window_traces=47; active_window_noops=27; below_threshold_no_window=14
 - Status: pass
 - Interpretation: The ML defender uses memory to maintain a reactive window and to avoid unnecessary action when probability is below threshold outside the window.
 

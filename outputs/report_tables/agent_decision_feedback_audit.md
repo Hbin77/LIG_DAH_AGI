@@ -5,10 +5,10 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 
 ## Summary
 
-- Feedback rows: 63
-- Status counts: pass=63
-- Event type counts: attack_event=10, defense_event=53
-- Feedback classes: attack_contained_by_defense=5, attack_pressure_observed=5, defense_bounded_or_lagged=7, defense_held=22, defense_improved=23, ml_window_triggered=1
+- Feedback rows: 62
+- Status counts: pass=62
+- Event type counts: attack_event=10, defense_event=52
+- Feedback classes: attack_contained_by_defense=5, attack_pressure_observed=5, defense_bounded_or_lagged=7, defense_held=26, defense_improved=17, ml_window_triggered=2
 
 ## Review Table
 
@@ -42,41 +42,40 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 | E5_rule_aura_tsra_r | tsra-r-trace-00056 | def-00021 | defense_event | video_throttle | defense_held | pass |
 | E5_rule_aura_tsra_r | tsra-r-trace-00060 | def-00022 | defense_event | stale_badge | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | aura-ml-trace-00007 | ml-atk-00001 | attack_event | queue_pressure | attack_contained_by_defense | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00001 | defense_event | priority_reroute | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00001 | defense_event | priority_reroute | defense_improved | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00002 | defense_event | video_throttle | defense_improved | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00003 | defense_event | stale_badge | defense_improved | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00004 | defense_event | pace_switch | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00017 | def-00005 | defense_event | ml_attack_alert | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00017 | def-00005 | defense_event | ml_attack_alert | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00006 | defense_event | ml_attack_alert | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00007 | defense_event | priority_reroute | defense_improved | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00008 | defense_event | video_throttle | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00009 | defense_event | stale_badge | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00009 | defense_event | stale_badge | defense_improved | pass |
 | E7_ml_aura_ml_tsra_r | aura-ml-trace-00012 | ml-atk-00002 | attack_event | failover_chasing | attack_pressure_observed | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00027 | def-00010 | defense_event | ml_attack_alert | defense_held | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00027 | def-00011 | defense_event | priority_reroute | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00029 | def-00012 | defense_event | video_throttle | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00027 | def-00011 | defense_event | priority_reroute | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00029 | def-00012 | defense_event | video_throttle | defense_bounded_or_lagged | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00031 | def-00013 | defense_event | pace_switch | defense_held | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00032 | def-00014 | defense_event | ml_attack_alert | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00032 | def-00014 | defense_event | ml_attack_alert | ml_window_triggered | pass |
 | E7_ml_aura_ml_tsra_r | aura-ml-trace-00017 | ml-atk-00003 | attack_event | failover_chasing | attack_contained_by_defense | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00033 | def-00015 | defense_event | stale_badge | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00033 | def-00015 | defense_event | stale_badge | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00036 | def-00016 | defense_event | priority_reroute | defense_held | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00039 | def-00017 | defense_event | stale_badge | defense_held | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00042 | def-00018 | defense_event | video_throttle | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00039 | def-00017 | defense_event | stale_badge | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00042 | def-00018 | defense_event | video_throttle | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | aura-ml-trace-00022 | ml-atk-00004 | attack_event | queue_pressure | attack_pressure_observed | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00045 | def-00019 | defense_event | ml_attack_alert | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00045 | def-00019 | defense_event | ml_attack_alert | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00045 | def-00020 | defense_event | priority_reroute | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00048 | def-00021 | defense_event | stale_badge | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00049 | def-00022 | defense_event | video_throttle | defense_held | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00050 | def-00023 | defense_event | ml_attack_alert | defense_held | pass |
-| E7_ml_aura_ml_tsra_r | aura-ml-trace-00027 | ml-atk-00005 | attack_event | failover_chasing | attack_pressure_observed | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00053 | def-00024 | defense_event | priority_reroute | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00049 | def-00022 | defense_event | video_throttle | defense_bounded_or_lagged | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00050 | def-00023 | defense_event | ml_attack_alert | ml_window_triggered | pass |
+| E7_ml_aura_ml_tsra_r | aura-ml-trace-00027 | ml-atk-00005 | attack_event | stale_cop_induction | attack_pressure_observed | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00053 | def-00024 | defense_event | priority_reroute | defense_bounded_or_lagged | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00053 | def-00025 | defense_event | pace_switch | defense_bounded_or_lagged | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00055 | def-00026 | defense_event | ml_attack_alert | ml_window_triggered | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00055 | def-00027 | defense_event | stale_badge | defense_bounded_or_lagged | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00056 | def-00028 | defense_event | video_throttle | defense_bounded_or_lagged | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00058 | def-00029 | defense_event | priority_reroute | defense_bounded_or_lagged | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00060 | def-00030 | defense_event | ml_attack_alert | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00061 | def-00031 | defense_event | stale_badge | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00055 | def-00026 | defense_event | ml_attack_alert | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00055 | def-00027 | defense_event | stale_badge | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00056 | def-00028 | defense_event | video_throttle | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00060 | def-00029 | defense_event | ml_attack_alert | defense_held | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00061 | def-00030 | defense_event | stale_badge | defense_held | pass |
 
 ## Detail
 
@@ -383,7 +382,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Decision: score=0.579505; expected_mission_impact=0.602005; target=SATCOM; reason=ML impact predictor selected queue_pressure
 - Event link: linked
 - Metrics: before=0.376905@t=60; peak=0.383116; after=0.0931561@t=140; delta=-0.283749; peak_latency=4.9; peak_trusted_stale=0.5; peak_priority_inversion=0.234568
-- Attribution/outcome: response=complete; outcome=contained after peak degradation; reduction_from_peak=0.205612
+- Attribution/outcome: response=complete; outcome=contained after peak degradation; reduction_from_peak=0.251649
 - Class: attack_contained_by_defense
 - Status: pass
 - Issues: none
@@ -393,9 +392,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=mission risk guard opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.322963; after=0.211596; delta=-0.111367; latency_delta=0.5; trusted_stale_delta=-0.0625; priority_delta=-0.16065
-- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
-- Class: defense_held
+- Metrics: before=0.209367; after=0.131467; delta=-0.0779006; latency_delta=1.5; trusted_stale_delta=-0.0625; priority_delta=-0.107051
+- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
+- Class: defense_improved
 - Status: pass
 - Issues: none
 
@@ -404,7 +403,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=mission risk guard opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.322963; after=0.211596; delta=-0.111367; latency_delta=0.5; trusted_stale_delta=-0.0625; priority_delta=-0.16065
+- Metrics: before=0.209367; after=0.131467; delta=-0.0779006; latency_delta=1.5; trusted_stale_delta=-0.0625; priority_delta=-0.107051
 - Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
 - Class: defense_improved
 - Status: pass
@@ -415,7 +414,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=mission risk guard opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.322963; after=0.211596; delta=-0.111367; latency_delta=0.5; trusted_stale_delta=-0.0625; priority_delta=-0.16065
+- Metrics: before=0.209367; after=0.131467; delta=-0.0779006; latency_delta=1.5; trusted_stale_delta=-0.0625; priority_delta=-0.107051
 - Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
 - Class: defense_improved
 - Status: pass
@@ -426,7 +425,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=mission risk guard opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.322963; after=0.211596; delta=-0.111367; latency_delta=0.5; trusted_stale_delta=-0.0625; priority_delta=-0.16065
+- Metrics: before=0.209367; after=0.131467; delta=-0.0779006; latency_delta=1.5; trusted_stale_delta=-0.0625; priority_delta=-0.107051
 - Attribution/outcome: observed_effect=improved; attribution_class=bounded_tradeoff_supported; attribution_status=pass; primary_metric=mission_impact
 - Class: defense_improved
 - Status: pass
@@ -437,9 +436,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: probability=0.955265; threshold=0.75; active_defense_until=150
 - Event link: linked
-- Metrics: before=0.322963; after=0.211596; delta=-0.111367; latency_delta=0.5; trusted_stale_delta=-0.0625; priority_delta=-0.16065
-- Attribution/outcome: observed_effect=improved; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
-- Class: defense_improved
+- Metrics: before=0.20656; after=0.114622; delta=-0.0919379; latency_delta=-3.3; trusted_stale_delta=-0.0625; priority_delta=-0.0711258
+- Attribution/outcome: observed_effect=held; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
+- Class: defense_held
 - Status: pass
 - Issues: none
 
@@ -448,7 +447,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: probability=0.961885; threshold=0.75; active_defense_until=175
 - Event link: linked
-- Metrics: before=0.220011; after=0.170224; delta=-0.0497869; latency_delta=-2.6; trusted_stale_delta=0; priority_delta=-0.0649071
+- Metrics: before=0.16109; after=0.0954067; delta=-0.0656828; latency_delta=-1.5; trusted_stale_delta=-0.0625; priority_delta=-0.0426156
 - Attribution/outcome: observed_effect=held; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
 - Class: defense_held
 - Status: pass
@@ -459,7 +458,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.205481; after=0.19362; delta=-0.0118609; latency_delta=-2.65; trusted_stale_delta=0.0625; priority_delta=-0.0571386
+- Metrics: before=0.16109; after=0.0954067; delta=-0.0656828; latency_delta=-1.5; trusted_stale_delta=-0.0625; priority_delta=-0.0426156
 - Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
 - Class: defense_improved
 - Status: pass
@@ -470,7 +469,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.19825; after=0.190239; delta=-0.00801011; latency_delta=-2.45; trusted_stale_delta=0.0625; priority_delta=-0.0521035
+- Metrics: before=0.16109; after=0.0954067; delta=-0.0656828; latency_delta=-1.5; trusted_stale_delta=-0.0625; priority_delta=-0.0426156
 - Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
 - Class: defense_improved
 - Status: pass
@@ -481,9 +480,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.19825; after=0.190239; delta=-0.00801011; latency_delta=-2.45; trusted_stale_delta=0.0625; priority_delta=-0.0521035
-- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
-- Class: defense_held
+- Metrics: before=0.16109; after=0.0954067; delta=-0.0656828; latency_delta=-1.5; trusted_stale_delta=-0.0625; priority_delta=-0.0426156
+- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Class: defense_improved
 - Status: pass
 - Issues: none
 
@@ -493,7 +492,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Decision: score=0.761848; expected_mission_impact=0.836848; target=LTE; reason=ML impact predictor selected failover_chasing
 - Event link: linked
 - Metrics: before=0.114622@t=110; peak=0.137802; after=0.133684@t=180; delta=0.0190628; peak_latency=1.3; peak_trusted_stale=0.125; peak_priority_inversion=0.109827
-- Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.0213565
+- Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.025868
 - Class: attack_pressure_observed
 - Status: pass
 - Issues: none
@@ -503,7 +502,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: probability=0.972249; threshold=0.75; active_defense_until=200
 - Event link: linked
-- Metrics: before=0.176793; after=0.201798; delta=0.0250046; latency_delta=-0.9; trusted_stale_delta=0.0625; priority_delta=-0.0400741
+- Metrics: before=0.132338; after=0.137802; delta=0.00546442; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.0224045
 - Attribution/outcome: observed_effect=held; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
 - Class: defense_held
 - Status: pass
@@ -514,9 +513,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.190239; after=0.159966; delta=-0.0302738; latency_delta=-4.95; trusted_stale_delta=0; priority_delta=-0.0278809
-- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
-- Class: defense_improved
+- Metrics: before=0.132338; after=0.137802; delta=0.00546442; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.0224045
+- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
+- Class: defense_held
 - Status: pass
 - Issues: none
 
@@ -525,9 +524,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.190239; after=0.159966; delta=-0.0302738; latency_delta=-4.95; trusted_stale_delta=0; priority_delta=-0.0278809
-- Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
-- Class: defense_improved
+- Metrics: before=0.0931561; after=0.135511; delta=0.0423545; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.0173744
+- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
+- Class: defense_bounded_or_lagged
 - Status: pass
 - Issues: none
 
@@ -536,7 +535,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.187877; after=0.155665; delta=-0.0322123; latency_delta=-5.4; trusted_stale_delta=0; priority_delta=-0.0257579
+- Metrics: before=0.10647; after=0.133684; delta=0.0272148; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.0143204
 - Attribution/outcome: observed_effect=held; attribution_class=bounded_tradeoff_supported; attribution_status=pass; primary_metric=mission_impact
 - Class: defense_held
 - Status: pass
@@ -547,19 +546,19 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: probability=0.966892; threshold=0.75; active_defense_until=225
 - Event link: linked
-- Metrics: before=0.201798; after=0.147949; delta=-0.053849; latency_delta=-6.3; trusted_stale_delta=0; priority_delta=-0.0236979
-- Attribution/outcome: observed_effect=improved; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
-- Class: defense_improved
+- Metrics: before=0.104824; after=0.136195; delta=0.0313713; latency_delta=0.5; trusted_stale_delta=0.0625; priority_delta=-0.0126741
+- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
+- Class: ml_window_triggered
 - Status: pass
 - Issues: none
 
 ### E7_ml_aura_ml_tsra_r aura-ml-trace-00017 ml-atk-00003
 
 - Agent: AURA-ML policy=ml_impact_predictor
-- Decision: score=0.777403; expected_mission_impact=0.822403; target=MESH; reason=ML impact predictor selected failover_chasing
+- Decision: score=0.737403; expected_mission_impact=0.822403; target=MESH; reason=ML impact predictor selected failover_chasing
 - Event link: linked
 - Metrics: before=0.137802@t=160; peak=0.13899; after=0.100118@t=230; delta=-0.037684; peak_latency=2; peak_trusted_stale=0.125; peak_priority_inversion=0.058104
-- Attribution/outcome: response=complete; outcome=contained after peak degradation; reduction_from_peak=0.05886
+- Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.00132496
 - Class: attack_contained_by_defense
 - Status: pass
 - Issues: none
@@ -569,9 +568,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.201798; after=0.147949; delta=-0.053849; latency_delta=-6.3; trusted_stale_delta=0; priority_delta=-0.0236979
-- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
-- Class: defense_improved
+- Metrics: before=0.137802; after=0.13899; delta=0.00118788; latency_delta=1; trusted_stale_delta=0; priority_delta=-0.0109576
+- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Class: defense_held
 - Status: pass
 - Issues: none
 
@@ -580,7 +579,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.159966; after=0.141337; delta=-0.0186291; latency_delta=-1.8; trusted_stale_delta=0; priority_delta=-0.0132583
+- Metrics: before=0.134565; after=0.137057; delta=0.00249154; latency_delta=1; trusted_stale_delta=0; priority_delta=-0.00835025
 - Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
 - Class: defense_held
 - Status: pass
@@ -591,9 +590,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=active defense window maintained while downstream rule actions were evaluated
 - Event link: linked
-- Metrics: before=0.159966; after=0.141337; delta=-0.0186291; latency_delta=-1.8; trusted_stale_delta=0; priority_delta=-0.0132583
-- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
-- Class: defense_held
+- Metrics: before=0.13899; after=0.101084; delta=-0.037906; latency_delta=0; trusted_stale_delta=-0.0625; priority_delta=-0.00706201
+- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Class: defense_improved
 - Status: pass
 - Issues: none
 
@@ -602,19 +601,19 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=active defense window maintained while downstream rule actions were evaluated
 - Event link: linked
-- Metrics: before=0.155665; after=0.140496; delta=-0.0151687; latency_delta=-1.35; trusted_stale_delta=0; priority_delta=-0.0123373
-- Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
-- Class: defense_improved
+- Metrics: before=0.137057; after=0.134081; delta=-0.00297604; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.00595209
+- Attribution/outcome: observed_effect=held; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
+- Class: defense_held
 - Status: pass
 - Issues: none
 
 ### E7_ml_aura_ml_tsra_r aura-ml-trace-00022 ml-atk-00004
 
 - Agent: AURA-ML policy=ml_impact_predictor
-- Decision: score=0.779372; expected_mission_impact=0.801872; target=MESH; reason=ML impact predictor selected queue_pressure
+- Decision: score=0.739372; expected_mission_impact=0.801872; target=MESH; reason=ML impact predictor selected queue_pressure
 - Event link: linked
-- Metrics: before=0.136148@t=210; peak=0.148406; after=0.147259@t=290; delta=0.0111114; peak_latency=2; peak_trusted_stale=0.125; peak_priority_inversion=0.0421286
-- Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.0206573
+- Metrics: before=0.136148@t=210; peak=0.14835; after=0.147139@t=290; delta=0.0109912; peak_latency=2; peak_trusted_stale=0.125; peak_priority_inversion=0.0421286
+- Attribution/outcome: response=complete; outcome=held near attack-time impact; reduction_from_peak=0.0375459
 - Class: attack_pressure_observed
 - Status: pass
 - Issues: none
@@ -624,9 +623,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: probability=0.88058; threshold=0.75; active_defense_until=290
 - Event link: linked
-- Metrics: before=0.147949; after=0.109026; delta=-0.0389228; latency_delta=0.15; trusted_stale_delta=-0.0625; priority_delta=-0.0110955
-- Attribution/outcome: observed_effect=improved; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
-- Class: defense_improved
+- Metrics: before=0.101084; after=0.0986017; delta=-0.00248212; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.00496424
+- Attribution/outcome: observed_effect=held; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
+- Class: defense_held
 - Status: pass
 - Issues: none
 
@@ -635,7 +634,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.142014; after=0.143536; delta=0.00152214; latency_delta=1; trusted_stale_delta=0; priority_delta=-0.0102891
+- Metrics: before=0.101084; after=0.0986017; delta=-0.00248212; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.00496424
 - Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
 - Class: defense_held
 - Status: pass
@@ -646,7 +645,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.141337; after=0.108345; delta=-0.0329911; latency_delta=1; trusted_stale_delta=-0.0625; priority_delta=-0.0105656
+- Metrics: before=0.134081; after=0.114288; delta=-0.019793; latency_delta=0; trusted_stale_delta=-0.0625; priority_delta=-0.00416928
 - Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
 - Class: defense_improved
 - Status: pass
@@ -657,9 +656,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.140496; after=0.124242; delta=-0.0162537; latency_delta=1; trusted_stale_delta=-0.0625; priority_delta=-0.0104241
-- Attribution/outcome: observed_effect=held; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
-- Class: defense_held
+- Metrics: before=0.0993461; after=0.14835; delta=0.0490044; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.00407462
+- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
+- Class: defense_bounded_or_lagged
 - Status: pass
 - Issues: none
 
@@ -668,19 +667,19 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: probability=0.936032; threshold=0.75; active_defense_until=315
 - Event link: linked
-- Metrics: before=0.109026; after=0.12364; delta=0.0146139; latency_delta=0.4; trusted_stale_delta=0; priority_delta=-0.00943882
-- Attribution/outcome: observed_effect=held; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
-- Class: defense_held
+- Metrics: before=0.0990341; after=0.14805; delta=0.0490156; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.00405208
+- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
+- Class: ml_window_triggered
 - Status: pass
 - Issues: none
 
 ### E7_ml_aura_ml_tsra_r aura-ml-trace-00027 ml-atk-00005
 
 - Agent: AURA-ML policy=ml_impact_predictor
-- Decision: score=0.69979; expected_mission_impact=0.77479; target=MESH; reason=ML impact predictor selected failover_chasing
+- Decision: score=0.779393; expected_mission_impact=0.661893; target=MESH; reason=ML impact predictor selected stale_cop_induction
 - Event link: linked
-- Metrics: before=0.114642@t=260; peak=0.148406; after=0.146766@t=300; delta=0.0321241; peak_latency=2; peak_trusted_stale=0.125; peak_priority_inversion=0.0338681
-- Attribution/outcome: response=complete; outcome=covered with residual mission impact; reduction_from_peak=0.0367162
+- Metrics: before=0.114642@t=260; peak=0.14835; after=0.146587@t=300; delta=0.0319448; peak_latency=2; peak_trusted_stale=0.125; peak_priority_inversion=0.0338681
+- Attribution/outcome: response=complete; outcome=covered with residual mission impact; reduction_from_peak=0.00176331
 - Class: attack_pressure_observed
 - Status: pass
 - Issues: none
@@ -690,9 +689,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.144298; after=0.122826; delta=-0.0214715; latency_delta=0; trusted_stale_delta=-0.0625; priority_delta=-0.00752625
-- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
-- Class: defense_held
+- Metrics: before=0.114642; after=0.147139; delta=0.0324964; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.00375716
+- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
+- Class: defense_bounded_or_lagged
 - Status: pass
 - Issues: none
 
@@ -701,7 +700,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.108345; after=0.191036; delta=0.0826905; latency_delta=0; trusted_stale_delta=0.125; priority_delta=-0.00545236
+- Metrics: before=0.114642; after=0.147139; delta=0.0324964; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.00375716
 - Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=bounded_tradeoff_supported; attribution_status=pass; primary_metric=mission_impact
 - Class: defense_bounded_or_lagged
 - Status: pass
@@ -710,11 +709,11 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 ### E7_ml_aura_ml_tsra_r tsra-r-ml-trace-00055 def-00026
 
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
-- Decision: probability=0.923455; threshold=0.75; active_defense_until=340
+- Decision: probability=0.930785; threshold=0.75; active_defense_until=340
 - Event link: linked
-- Metrics: before=0.124242; after=0.190591; delta=0.0663487; latency_delta=0; trusted_stale_delta=0.125; priority_delta=-0.00480253
-- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
-- Class: ml_window_triggered
+- Metrics: before=0.14835; after=0.146587; delta=-0.00176331; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.00352661
+- Attribution/outcome: observed_effect=held; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
+- Class: defense_held
 - Status: pass
 - Issues: none
 
@@ -723,9 +722,9 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.124242; after=0.190591; delta=0.0663487; latency_delta=0; trusted_stale_delta=0.125; priority_delta=-0.00480253
-- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
-- Class: defense_bounded_or_lagged
+- Metrics: before=0.14835; after=0.146587; delta=-0.00176331; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.00352661
+- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Class: defense_held
 - Status: pass
 - Issues: none
 
@@ -734,41 +733,30 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.123227; after=0.155475; delta=0.0322485; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.00425306
-- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
-- Class: defense_bounded_or_lagged
+- Metrics: before=0.14805; after=0.146587; delta=-0.00146257; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.00292514
+- Attribution/outcome: observed_effect=held; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
+- Class: defense_held
 - Status: pass
 - Issues: none
 
-### E7_ml_aura_ml_tsra_r tsra-r-ml-trace-00058 def-00029
+### E7_ml_aura_ml_tsra_r tsra-r-ml-trace-00060 def-00029
+
+- Agent: TSRA-R-ML policy=ml_anomaly_detector
+- Decision: probability=0.9331; threshold=0.75; active_defense_until=365
+- Event link: linked
+- Metrics: before=0.146858; after=0.146587; delta=-0.000270678; latency_delta=0; trusted_stale_delta=0; priority_delta=-0.000541356
+- Attribution/outcome: observed_effect=held; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
+- Class: defense_held
+- Status: pass
+- Issues: none
+
+### E7_ml_aura_ml_tsra_r tsra-r-ml-trace-00061 def-00030
 
 - Agent: TSRA-R-ML policy=ml_anomaly_detector
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
-- Metrics: before=0.123227; after=0.155475; delta=0.0322485; latency_delta=0; trusted_stale_delta=0.0625; priority_delta=-0.00425306
-- Attribution/outcome: observed_effect=degraded_or_delayed; attribution_class=ablation_supported; attribution_status=pass; primary_metric=priority_inversion_rate
-- Class: defense_bounded_or_lagged
-- Status: pass
-- Issues: none
-
-### E7_ml_aura_ml_tsra_r tsra-r-ml-trace-00060 def-00030
-
-- Agent: TSRA-R-ML policy=ml_anomaly_detector
-- Decision: probability=0.925769; threshold=0.75; active_defense_until=365
-- Event link: linked
-- Metrics: before=0.191036; after=0.154587; delta=-0.0364491; latency_delta=0; trusted_stale_delta=-0.0625; priority_delta=-0.00414811
-- Attribution/outcome: observed_effect=improved; attribution_class=reactive_window_supported; attribution_status=pass; primary_metric=mission_impact
-- Class: defense_improved
-- Status: pass
-- Issues: none
-
-### E7_ml_aura_ml_tsra_r tsra-r-ml-trace-00061 def-00031
-
-- Agent: TSRA-R-ML policy=ml_anomaly_detector
-- Decision: reason=detector opened or maintained defense window
-- Event link: linked
-- Metrics: before=0.190591; after=0.154587; delta=-0.0360042; latency_delta=0; trusted_stale_delta=-0.0625; priority_delta=-0.00325843
-- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
-- Class: defense_improved
+- Metrics: before=0.146587; after=0.146587; delta=0; latency_delta=0; trusted_stale_delta=0; priority_delta=0
+- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Class: defense_held
 - Status: pass
 - Issues: none

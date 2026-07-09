@@ -1080,10 +1080,12 @@ def check_csv_outputs() -> list[str]:
         any(
             observed_int(row, "candidate_total") >= 25
             and observed_int(row, "score_formula_matches") == observed_int(row, "candidate_total")
+            and observed_int(row, "selection_score_formula_matches") == observed_int(row, "candidate_total")
+            and observed_int(row, "selected_objective_bonus_count") >= 1
             for row in ml_attack_path_rows
             if row["check_id"] == "MAP04"
         ),
-        "ML attack path audit missing detectability-adjusted score evidence",
+        "ML attack path audit missing objective-aware score evidence",
     )
     require(
         any(
@@ -1094,6 +1096,18 @@ def check_csv_outputs() -> list[str]:
             if row["check_id"] == "MAP05"
         ),
         "ML attack path audit missing cadence/event budget evidence",
+    )
+    require(
+        any(
+            "queue_pressure" in row["observed"]
+            and "failover_chasing" in row["observed"]
+            and "stale_cop_induction" in row["observed"]
+            and "complete_responses=5" in row["observed"]
+            and "positive_reductions=5" in row["observed"]
+            for row in ml_attack_path_rows
+            if row["check_id"] == "MAP06"
+        ),
+        "ML attack path audit missing multi-tactic closed-loop evidence",
     )
     checks.append("ml_attack_decision_path_audit rows=6 pass")
 
@@ -1273,6 +1287,19 @@ def check_csv_outputs() -> list[str]:
             if row["check_id"] == "RDT04"
         ),
         "reactive defense tradeoff audit missing alert overlap evidence",
+    )
+    require(
+        any(
+            observed_int(row, "e7_core_defense_events") >= 20
+            and "core_action_coverage=4/4" in row["observed"]
+            and "priority_reroute:" in row["observed"]
+            and "stale_badge:" in row["observed"]
+            and "video_throttle:" in row["observed"]
+            and "pace_switch:" in row["observed"]
+            for row in tradeoff_rows
+            if row["check_id"] == "RDT05"
+        ),
+        "reactive defense tradeoff audit missing core action coverage evidence",
     )
     require(
         any(

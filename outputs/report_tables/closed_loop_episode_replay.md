@@ -28,7 +28,7 @@ Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or l
 | E7_ml_aura_ml_tsra_r | E7_ml_aura_ml_tsra_r-episode-02 | ml-atk-00002 | failover_chasing | LTE | complete | 0 | 0.132338 | 0.10647 | held near attack-time impact |
 | E7_ml_aura_ml_tsra_r | E7_ml_aura_ml_tsra_r-episode-03 | ml-atk-00003 | failover_chasing | MESH | complete | 0 | 0.13899 | 0.137665 | held near attack-time impact |
 | E7_ml_aura_ml_tsra_r | E7_ml_aura_ml_tsra_r-episode-04 | ml-atk-00004 | queue_pressure | MESH | complete | 0 | 0.136148 | 0.0986017 | held near attack-time impact |
-| E7_ml_aura_ml_tsra_r | E7_ml_aura_ml_tsra_r-episode-05 | ml-atk-00005 | failover_chasing | MESH | complete | 0 | 0.148406 | 0.146766 | covered with residual mission impact |
+| E7_ml_aura_ml_tsra_r | E7_ml_aura_ml_tsra_r-episode-05 | ml-atk-00005 | stale_cop_induction | MESH | complete | 0 | 0.14835 | 0.146587 | covered with residual mission impact |
 
 ## Episode Detail
 
@@ -187,17 +187,17 @@ Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or l
 
 ### E7_ml_aura_ml_tsra_r-episode-05
 
-- Attack: ml-atk-00005 failover_chasing target=MESH
-- Attack reason: ML impact predictor selected failover_chasing
-- Expected mission impact: 0.77479
+- Attack: ml-atk-00005 stale_cop_induction target=MESH
+- Attack reason: ML impact predictor selected stale_cop_induction
+- Expected mission impact: 0.661893
 - Response status: complete
-- Required defenses: ml_attack_alert
-- Covered required defenses: ml_attack_alert
+- Required defenses: stale_badge
+- Covered required defenses: stale_badge
 - First required response latency: 0
-- Defense chain: active=stale_badge@190-until-280; video_throttle@205-until-265; ml_attack_alert@220-until-290; priority_reroute@220-until-290; stale_badge@235-until-325; video_throttle@240-until-300; ml_attack_alert@245-until-315; priority_reroute@260-until-330; pace_switch@260-until-360 | response=ml_attack_alert@270-until-340; stale_badge@270-until-360; video_throttle@275-until-335; priority_reroute@285-until-355; ml_attack_alert@295-until-365; stale_badge@300-until-390
-- Operator alerts: t=260; def-00024; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load. || t=260; def-00025; pace_switch; severity=high; PACE switch selected target=LTE; reason=fallback link degraded beyond mission threshold. || t=270; def-00026; ml_attack_alert; severity=high; ML detector flags attack-like degradation probability=0.923455 above threshold=0.75. || t=270; def-00027; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5. || t=275; def-00028; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=285; def-00029; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load. || t=295; def-00030; ml_attack_alert; severity=high; ML detector flags attack-like degradation probability=0.925769 above threshold=0.75. || t=300; def-00031; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5.
-- Mission impact: start=0.114642, peak=0.148406, end=0.146766
+- Defense chain: active=stale_badge@190-until-280; video_throttle@205-until-265; ml_attack_alert@220-until-290; priority_reroute@220-until-290; stale_badge@235-until-325; video_throttle@240-until-300; ml_attack_alert@245-until-315; priority_reroute@260-until-330; pace_switch@260-until-360 | response=ml_attack_alert@270-until-340; stale_badge@270-until-360; video_throttle@275-until-335; ml_attack_alert@295-until-365; stale_badge@300-until-390
+- Operator alerts: t=260; def-00024; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load. || t=260; def-00025; pace_switch; severity=high; PACE switch selected target=LTE; reason=fallback link degraded beyond mission threshold. || t=270; def-00026; ml_attack_alert; severity=high; ML detector flags attack-like degradation probability=0.930785 above threshold=0.75. || t=270; def-00027; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5. || t=275; def-00028; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=295; def-00029; ml_attack_alert; severity=high; ML detector flags attack-like degradation probability=0.9331 above threshold=0.75. || t=300; def-00030; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5.
+- Mission impact: start=0.114642, peak=0.14835, end=0.146587
 - Peak latency/stale/inversion: 2 / 0.125 / 0.0338681
 - Outcome: covered with residual mission impact
-- Residual risk: Failover chasing is detected by the ML defense window; PACE support may already be active or may expire before a later attack window.
+- Residual risk: Stale badge reduces trusted stale exposure but cannot recreate missing freshness.
 - Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or live network action

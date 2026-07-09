@@ -2496,7 +2496,7 @@ threshold_window_nondecreasing: true
 
 ### 62. ML Attack Decision Path Audit를 추가한 이유
 
-방어 쪽은 `ml_defense_decision_path_audit`로 probability threshold에서 defense window까지 이어지는 흐름을 검증했다. 같은 수준으로 공격 쪽도 AURA-ML이 실제로 후보를 만들고, ML impact prediction과 detectability penalty로 top candidate를 고르고, cooldown과 event budget을 지키며, attack event와 closed-loop feedback까지 연결되는지 분해할 필요가 있었다.
+방어 쪽은 `ml_defense_decision_path_audit`로 probability threshold에서 defense window까지 이어지는 흐름을 검증했다. 같은 수준으로 공격 쪽도 AURA-ML이 실제로 후보를 만들고, ML impact prediction, detectability penalty, objective-aware selection score로 top candidate를 고르고, cooldown과 event budget을 지키며, attack event와 closed-loop feedback까지 연결되는지 분해할 필요가 있었다.
 
 그래서 `src/experiments/ml_attack_decision_path_audit.py`를 추가했다. 이 감사는 E7의 `aura_decision_traces.jsonl`, `attack_events.jsonl`, `agent_engagement_scorecard.csv`를 읽어서 AURA-ML decision path를 검증한다.
 
@@ -2506,12 +2506,15 @@ threshold_window_nondecreasing: true
 ml_attack_decision_path_audit rows: 6
 status: pass=6
 pre_start_noop_count: 6
-candidate_total: 27
-predict_candidate_impact: 27
-estimate_candidate_effect: 27
-estimate_detectability: 27
+candidate_total: 26
+predict_candidate_impact: 26
+estimate_candidate_effect: 26
+estimate_detectability: 26
 selected_matches_top_candidate: 5
-score_formula_matches: 27
+score_formula_matches: 26
+selection_score_formula_matches: 26
+selected_objective_bonus_count: 1
+attack_types: failover_chasing, queue_pressure, stale_cop_induction
 cooldown_noops: 16
 max_event_noops: 4
 min_attack_gap_sec: 50
@@ -2519,7 +2522,7 @@ complete_responses: 5
 positive_reductions: 5
 ```
 
-이 보강의 의미는 AURA-ML이 단순히 attack event 5개를 만든 것이 아니라, AgentRuntime tool path와 scoring formula, memory gate, post-action feedback을 갖춘 공격 에이전트로 검증된다는 점이다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+이 보강의 의미는 AURA-ML이 단순히 attack event 5개를 만든 것이 아니라, AgentRuntime tool path와 base scoring formula, bounded objective adjustment, memory gate, post-action feedback을 갖춘 공격 에이전트로 검증된다는 점이다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
 ### 63. ML Red-Blue Interaction Audit를 추가한 이유
 
@@ -2744,8 +2747,8 @@ early mission-pressure guard:
 ```text
 E7 single-run mission impact: 0.155 -> 0.147
 E7 30-seed mission impact mean: 0.159620 -> 0.156216
-E7 resilience gain: 0.824473 -> 0.828471
-E7-E6 mission impact gap: 0.0141698 -> 0.0107652
+E7 resilience gain: 0.824473 -> 0.824367
+E7-E6 mission impact gap: 0.0141698 -> 0.0135924
 
 ML defense path MDP01:
 pre_threshold_traces=16
@@ -2758,7 +2761,7 @@ Reactive tradeoff:
 ml_attack_alerts=8
 active_attack_overlap=8
 e7_pre_first_defense_events=0
-e7_core_defense_events=23
+e7_core_defense_events=22
 ```
 
 동반 수정:
@@ -2772,10 +2775,10 @@ e7_core_defense_events=23
 현재 산출물:
 
 ```text
-agent_decision_feedback_audit rows: 63
-battle_timeline rows: 48
-operator_alerts rows: 53
-defense_effectiveness_ledger rows: 53
+agent_decision_feedback_audit rows: 62
+battle_timeline rows: 47
+operator_alerts rows: 52
+defense_effectiveness_ledger rows: 52
 defense_action_attribution_audit rows: 5 pass
 submission_readiness_audit rows: 10 pass
 competition_alignment_matrix rows: 10 verified
@@ -2786,3 +2789,50 @@ competition_alignment_matrix rows: 10 verified
 - E7은 여전히 E6보다 낮은 impact를 주장하는 구조가 아니다.
 - 대신 ML 방어자가 threshold crossing 전 severe mission pressure를 별도 guard로 처리해 첫 공격 비용을 줄이고, alert를 남발하지 않으며, E6와 다른 reactive closed-loop behavior를 유지한다.
 - 이 변경은 closed simulation 안의 방어 에이전트 정책, 감사 기준, 산출물만 바꾸며 RF, exploit, live network action은 추가하지 않는다.
+
+### 69. AURA-ML Objective-Aware Tactical Coverage를 추가한 이유
+
+방어 에이전트의 ML path는 threshold, mission-risk guard, active defense window로 행동 차이가 분명해졌다. 반면 공격 에이전트 쪽 AURA-ML은 후보별 impact 예측은 강했지만, 실제 selected attack이 `queue_pressure`와 `failover_chasing`에 치우쳐 있었다. `stale_cop_induction` 후보는 생성되지만 선택되지 않으면, 공격 에이전트가 mission objective coverage를 스스로 관리한다는 설명이 약해진다.
+
+이번 변경은 AURA-ML의 선택 점수를 두 층으로 분리했다.
+
+```text
+base_attack_score = predicted_mission_impact - 0.15 * detectability_score
+selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
+```
+
+구현상 중요한 점은 다음과 같다.
+
+- `base_attack_score`는 기존 detectability-adjusted attack score를 그대로 보존한다.
+- `repeated_tactic_penalty`는 같은 attack type 반복 선택에 최대 0.12까지만 붙는다.
+- `stale_cop_objective_bonus`는 마지막 attack budget 구간에서 stale COP objective가 아직 선택되지 않았고 stale data risk가 남아 있을 때만 붙는다.
+- AgentMemory에는 `attack_type_counts`, `last_objective_bonus`가 남는다.
+- DecisionTrace에는 후보별 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`이 남는다.
+
+검증 결과는 다음과 같다.
+
+```text
+E7 selected attacks:
+60s  queue_pressure       SATCOM
+110s failover_chasing     LTE
+160s failover_chasing     MESH
+210s queue_pressure       MESH
+260s stale_cop_induction  MESH
+
+ml_attack_decision_path_audit rows: 6 pass
+candidate_total: 26
+score_formula_matches: 26
+selection_score_formula_matches: 26
+objective_bonus_candidates: 1
+selected_objective_bonus_count: 1
+attack_types: failover_chasing, queue_pressure, stale_cop_induction
+complete_responses: 5
+positive_reductions: 5
+
+E6 mission impact mean: 0.146320
+E7 mission impact mean: 0.159912
+E7-E6 bounded tradeoff gap: 0.013592
+E7 resilience gain: 0.824367
+```
+
+이 보강의 의미는 AURA-ML이 단순 모델 wrapper가 아니라 AgentMemory와 objective-aware score를 가진 공격 에이전트라는 점이다. 동시에 E7을 E6보다 무조건 좋다고 주장하지 않고, ML reactive 구조와 stale COP 전술 커버리지를 얻는 대신 bounded tradeoff가 남는다고 기록한다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

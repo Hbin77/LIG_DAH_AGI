@@ -2298,9 +2298,9 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_decision_feedback_audit rows: 63
-feedback_status: pass=63
-selected_event_type: attack_event=10, defense_event=53
+agent_decision_feedback_audit rows: 62
+feedback_status: pass=62
+selected_event_type: attack_event=10, defense_event=52
 experiments: E5_rule_aura_tsra_r=27, E7_ml_aura_ml_tsra_r=36
 ```
 
@@ -2494,10 +2494,12 @@ outputs/report_tables/ml_attack_decision_path_audit.md
 
 - E7 AURA-ML DecisionTrace 31개를 읽는다.
 - min_start 전 trace 6개는 no-op이고 attack event가 없어야 한다.
-- attack decision 5개는 후보 27개를 평가해야 한다.
+- attack decision 5개는 후보 26개 이상을 평가해야 한다.
 - 각 후보마다 `predict_candidate_impact`, `estimate_candidate_effect`, `estimate_detectability`가 호출되어야 한다.
 - selected attack은 top-score candidate와 일치하고 attack event log와 score/time이 맞아야 한다.
-- score는 `predicted_mission_impact - 0.15 * detectability_score`와 일치해야 한다.
+- base score는 `predicted_mission_impact - 0.15 * detectability_score`와 일치해야 한다.
+- selection score는 base score에 bounded objective bonus와 repeated tactic penalty를 반영해야 한다.
+- selected attack은 `queue_pressure`, `failover_chasing`, `stale_cop_induction`을 모두 포함해야 한다.
 - cooldown no-op과 max-event no-op이 존재해야 한다.
 - E7 scorecard에서 5개 attack 모두 complete response와 positive reduction을 가져야 한다.
 
@@ -2514,12 +2516,15 @@ python3 scripts/verify_submission_state.py
 ml_attack_decision_path_audit rows: 6
 status: pass=6
 pre_start_noop_count: 6
-candidate_total: 27
-predict_candidate_impact: 27
-estimate_candidate_effect: 27
-estimate_detectability: 27
+candidate_total: 26
+predict_candidate_impact: 26
+estimate_candidate_effect: 26
+estimate_detectability: 26
 selected_matches_top_candidate: 5
-score_formula_matches: 27
+score_formula_matches: 26
+selection_score_formula_matches: 26
+selected_objective_bonus_count: 1
+attack_types: failover_chasing, queue_pressure, stale_cop_induction
 cooldown_noops: 16
 max_event_noops: 4
 min_attack_gap_sec: 50
@@ -2529,8 +2534,9 @@ positive_reductions: 5
 
 해석:
 
-- AURA-ML은 공격 후보를 임의로 고르지 않고, ML impact prediction과 detectability-adjusted score로 선택한다.
+- AURA-ML은 공격 후보를 임의로 고르지 않고, ML impact prediction, detectability-adjusted base score, objective-aware selection score로 선택한다.
 - no-op, cooldown, max-event gate가 있어 무조건 공격하지 않는 에이전트 구조를 유지한다.
+- repeated tactic penalty와 stale COP objective bonus가 DecisionTrace에 남아 전술 커버리지 선택 근거를 재현할 수 있다.
 - 선택된 attack event는 closed-loop defense response와 metric feedback까지 연결된다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
@@ -2723,16 +2729,17 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-E7 mission impact mean: 0.159620 -> 0.156216
-E7 resilience gain: 0.824473 -> 0.828471
-E7-E6 mission impact gap: 0.0141698 -> 0.0107652
+E7 mission impact mean: 0.159620 -> 0.159912
+E7 resilience gain: 0.824473 -> 0.824367
+E7-E6 mission impact gap: 0.0141698 -> 0.0135924
 pre_threshold_guard_traces: 1
 pre_threshold_ml_alerts: 0
 ml_attack_alerts: 8
 active_attack_overlap: 8
-agent_decision_feedback_audit rows: 63
-operator_alerts rows: 53
-defense_effectiveness_ledger rows: 53
+agent_decision_feedback_audit rows: 62
+battle_timeline rows: 47
+operator_alerts rows: 52
+defense_effectiveness_ledger rows: 52
 ```
 
 해석:
@@ -2740,3 +2747,77 @@ defense_effectiveness_ledger rows: 53
 - E7은 detector threshold를 임의로 낮춘 것이 아니라, severe mission pressure만 별도 guard로 처리한다.
 - early guard는 alert를 남발하지 않고 첫 공격 구간의 core defense timing을 앞당긴다.
 - 이 변경은 closed simulation 정책과 감사 산출물만 바꾸며 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+## P54. AURA-ML Objective-Aware Tactical Coverage
+
+상태: 완료
+
+문제:
+
+- 기존 AURA-ML은 ML impact predictor와 detectability penalty로 후보를 고르지만, high-score 전술인 `queue_pressure`와 `failover_chasing`에 선택이 몰렸다.
+- `stale_cop_induction` 후보는 생성되지만 실제 selected attack에 포함되지 않아, 공격 에이전트가 mission objective coverage를 스스로 관리한다는 증거가 약했다.
+- 단순히 결과 CSV를 고치는 방식은 에이전트가 아니므로, AgentMemory와 DecisionTrace 안에 선택 근거를 남기는 방식이 필요했다.
+
+구현:
+
+```text
+src/aura/ml_impact_predictor.py
+src/experiments/ml_attack_decision_path_audit.py
+src/experiments/competition_alignment.py
+scripts/verify_submission_state.py
+docs/agents/AURA_ATTACK_AGENT.md
+```
+
+설계:
+
+```text
+base_attack_score = predicted_mission_impact - 0.15 * detectability_score
+selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
+```
+
+- `repeated_tactic_penalty`는 같은 attack type을 반복 선택할수록 최대 0.12까지 붙는다.
+- `stale_cop_objective_bonus`는 마지막 attack budget 구간에서 아직 `stale_cop_induction`을 쓰지 않았고 stale data risk가 남아 있을 때만 붙는다.
+- AgentMemory에는 `attack_type_counts`, `last_objective_bonus`가 남는다.
+- DecisionTrace의 후보와 selected action에는 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`이 남는다.
+
+검증:
+
+```bash
+python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
+python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+E7 selected attacks:
+60s  queue_pressure       SATCOM
+110s failover_chasing     LTE
+160s failover_chasing     MESH
+210s queue_pressure       MESH
+260s stale_cop_induction  MESH
+
+ml_attack_decision_path_audit rows: 6 pass
+candidate_total: 26
+score_formula_matches: 26
+selection_score_formula_matches: 26
+objective_bonus_candidates: 1
+selected_objective_bonus_count: 1
+attack_types: failover_chasing, queue_pressure, stale_cop_induction
+complete_responses: 5
+positive_reductions: 5
+
+E6 mission impact mean: 0.146320
+E7 mission impact mean: 0.159912
+E7-E6 bounded tradeoff gap: 0.013592
+E7 resilience gain: 0.824367
+```
+
+해석:
+
+- AURA-ML은 이제 단순히 예측값이 가장 큰 전술을 반복하는 모델 wrapper가 아니다.
+- ML 예측, 탐지 가능성, 반복 전술 memory, mission objective coverage가 selection score로 합쳐진다.
+- stale COP 전술은 마지막 예산 구간에서 objective bonus가 trace에 남은 상태로 선택되므로, 사후 표기용이 아니라 decision loop의 실제 결과다.
+- 이 변경은 closed simulation 안의 공격 효과 선택 정책과 감사 기준만 바꾸며 RF, exploit, live network action은 추가하지 않는다.

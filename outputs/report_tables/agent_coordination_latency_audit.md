@@ -22,7 +22,7 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 | E7_ml_aura_ml_tsra_r | ml-atk-00002 | failover_chasing | 0 | 20 | 0.025868 | prepositioned_defense | pass |
 | E7_ml_aura_ml_tsra_r | ml-atk-00003 | failover_chasing | 0 | 0 | 0.00132496 | prepositioned_defense | pass |
 | E7_ml_aura_ml_tsra_r | ml-atk-00004 | queue_pressure | 0 | 10 | 0.0375459 | prepositioned_defense | pass |
-| E7_ml_aura_ml_tsra_r | ml-atk-00005 | failover_chasing | 0 | 0 | 0.00163987 | prepositioned_defense | pass |
+| E7_ml_aura_ml_tsra_r | ml-atk-00005 | stale_cop_induction | 0 | 0 | 0.00176331 | prepositioned_defense | pass |
 
 ## Detail
 
@@ -127,11 +127,11 @@ Safety boundary: closed simulation coordination-latency audit only; no RF, explo
 
 ### E7_ml_aura_ml_tsra_r E7_ml_aura_ml_tsra_r-episode-05 ml-atk-00005
 
-- Attack: AURA failover_chasing at t=260
+- Attack: AURA stale_cop_induction at t=260
 - Response latency: required=0, first_defense=0
 - Operator alert latency: 0
 - Metric peak latency: 10
-- Impact reduction from peak: 0.00163987
+- Impact reduction from peak: 0.00176331
 - Coordination class: prepositioned_defense
 - Status: pass
-- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=0; metric_peak_latency=10; impact_reduction_from_peak=0.00163987; issues=none
+- Signal: required_response_latency=0; first_defense_latency=0; first_operator_alert_latency=0; metric_peak_latency=10; impact_reduction_from_peak=0.00176331; issues=none

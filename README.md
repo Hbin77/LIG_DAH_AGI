@@ -445,7 +445,7 @@ This writes:
 - `outputs/report_tables/ml_attack_decision_path_audit.csv`
 - `outputs/report_tables/ml_attack_decision_path_audit.md`
 
-The audit follows the E7 AURA-ML path from startup no-op to candidate generation, ML impact prediction, detectability-adjusted top-score selection, cadence gating, event budget, and closed-loop attack feedback.
+The audit follows the E7 AURA-ML path from startup no-op to candidate generation, ML impact prediction, detectability-adjusted base scoring, bounded objective-aware selection, cadence gating, event budget, and closed-loop attack feedback. It also checks that selected attacks cover `queue_pressure`, `failover_chasing`, and `stale_cop_induction` inside the closed simulation.
 
 ## Audit ML Defense Decision Path
 

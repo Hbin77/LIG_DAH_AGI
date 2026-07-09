@@ -30,7 +30,7 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 | E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | generate_attack_candidates | 5 | 0.16129 | pass |
 | E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | predict_candidate_impact | 25 | 0.16129 | pass |
 | E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | evaluate_defense_conditions | 61 | 1 | pass |
-| E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | select_fallback_link | 2 | 0.0327869 | pass |
+| E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | select_fallback_link | 3 | 0.0491803 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | estimate_candidate_effect | 26 | 0.16129 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | estimate_detectability | 26 | 0.16129 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | generate_attack_candidates | 5 | 0.16129 | pass |
@@ -100,6 +100,6 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 - Role: TSRA-R PACE fallback selection
 - Rows: 2
-- Total invocations: 3
+- Total invocations: 4
 - Status: pass=2
 - Decision link: PACE fallback selection drives TSRA-R pace_switch details

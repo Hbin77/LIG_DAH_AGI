@@ -92,7 +92,7 @@ agent_loop_replay rows: 8
 agent_decision_causality_audit rows: 399 pass
 agent_decision_margin_audit rows: 399 pass
 agent_goal_alignment_audit rows: 399 pass
-agent_decision_feedback_audit rows: 63 pass
+agent_decision_feedback_audit rows: 62 pass
 agent_memory_belief_audit rows: 9 pass
 agent_memory_influence_audit rows: 6 pass
 agent_tool_usage_audit rows: 24 pass
@@ -106,10 +106,10 @@ safety_boundary_audit rows: 5 pass
 reproduction_order_audit rows: 13 pass
 submission_readiness_audit rows: 10 pass
 aura_coa_cards rows: 15
-battle_timeline rows: 48
+battle_timeline rows: 47
 incident_summary rows: 10
-operator_alerts rows: 53 actions=5
-defense_effectiveness_ledger rows: 53 actions=5
+operator_alerts rows: 52 actions=5
+defense_effectiveness_ledger rows: 52 actions=5
 defense_action_attribution_audit rows: 5 pass
 closed_loop_episode_replay rows: 10 complete
 agent_coordination_latency_audit rows: 10 pass
@@ -122,7 +122,8 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 재생성 시 manifest 기준 확인
+package_zip entries: manifest 기준 확인
+package_hash: outputs/package/release_handoff.md에서 확인
 package_manifest_integrity: passed
 package_zip_metadata: deterministic
 release_handoff: repo-only/current

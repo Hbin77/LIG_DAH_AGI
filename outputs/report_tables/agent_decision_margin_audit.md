@@ -6,7 +6,7 @@ Safety boundary: closed simulation decision-margin audit only; no RF, exploit, o
 ## Summary
 
 - Audit rows: 399
-- Action rows: 107
+- Action rows: 106
 - Threshold rows: 86
 - Status counts: pass=399
 - Agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
@@ -290,7 +290,7 @@ None.
 | E6_ml_aura_tsra_r | 100 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E6_ml_aura_tsra_r | 100 | TSRA-R | video_throttle | selected_all_eligible_ready_defense_actions | 1 |  | pass |
 | E6_ml_aura_tsra_r | 105 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
-| E6_ml_aura_tsra_r | 110 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.012864 | 0.634678 | pass |
+| E6_ml_aura_tsra_r | 110 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.049004 | 0.634678 | pass |
 | E6_ml_aura_tsra_r | 110 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 115 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 120 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
@@ -305,7 +305,7 @@ None.
 | E6_ml_aura_tsra_r | 150 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E6_ml_aura_tsra_r | 150 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 155 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
-| E6_ml_aura_tsra_r | 160 | AURA-ML | queue_pressure | top_attack_score_minus_runner_up_and_threshold | 0.075032 | 0.753385 | pass |
+| E6_ml_aura_tsra_r | 160 | AURA-ML | queue_pressure | top_attack_score_minus_runner_up_and_threshold | 0.046517 | 0.713385 | pass |
 | E6_ml_aura_tsra_r | 160 | TSRA-R | stale_badge | selected_all_eligible_ready_defense_actions | 1 |  | pass |
 | E6_ml_aura_tsra_r | 165 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 170 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
@@ -320,7 +320,7 @@ None.
 | E6_ml_aura_tsra_r | 200 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E6_ml_aura_tsra_r | 200 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 205 | TSRA-R | video_throttle | selected_all_eligible_ready_defense_actions | 1 |  | pass |
-| E6_ml_aura_tsra_r | 210 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.02877 | 0.611039 | pass |
+| E6_ml_aura_tsra_r | 210 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.06877 | 0.571039 | pass |
 | E6_ml_aura_tsra_r | 210 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 215 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 220 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
@@ -335,7 +335,7 @@ None.
 | E6_ml_aura_tsra_r | 250 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E6_ml_aura_tsra_r | 250 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 255 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
-| E6_ml_aura_tsra_r | 260 | AURA-ML | queue_pressure | top_attack_score_minus_runner_up_and_threshold | 0.090416 | 0.696681 | pass |
+| E6_ml_aura_tsra_r | 260 | AURA-ML | stale_cop_induction | top_attack_score_minus_runner_up_and_threshold | 0.154854 | 0.771535 | pass |
 | E6_ml_aura_tsra_r | 260 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 265 | TSRA-R | stale_badge | selected_all_eligible_ready_defense_actions | 1 |  | pass |
 | E6_ml_aura_tsra_r | 270 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
@@ -348,7 +348,7 @@ None.
 | E6_ml_aura_tsra_r | 290 | TSRA-R | no_op | eligible_ready_defense_conditions |  |  | pass |
 | E6_ml_aura_tsra_r | 295 | TSRA-R | stale_badge | selected_all_eligible_ready_defense_actions | 1 |  | pass |
 | E6_ml_aura_tsra_r | 300 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
-| E6_ml_aura_tsra_r | 300 | TSRA-R | priority_reroute | selected_all_eligible_ready_defense_actions | 1 |  | pass |
+| E6_ml_aura_tsra_r | 300 | TSRA-R | priority_reroute, pace_switch | selected_all_eligible_ready_defense_actions | 2 |  | pass |
 | E7_ml_aura_ml_tsra_r | 0 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E7_ml_aura_ml_tsra_r | 0 | TSRA-R-ML | no_op | probability_below_threshold_no_window |  | -0.467141 | pass |
 | E7_ml_aura_ml_tsra_r | 5 | TSRA-R-ML | no_op | probability_below_threshold_no_window |  | -0.467141 | pass |
@@ -382,7 +382,7 @@ None.
 | E7_ml_aura_ml_tsra_r | 100 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E7_ml_aura_ml_tsra_r | 100 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.202487 | pass |
 | E7_ml_aura_ml_tsra_r | 105 | TSRA-R-ML | ml_attack_alert, priority_reroute, video_throttle, stale_badge | probability_above_threshold |  | 0.211885 | pass |
-| E7_ml_aura_ml_tsra_r | 110 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.021344 | 0.641848 | pass |
+| E7_ml_aura_ml_tsra_r | 110 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.049839 | 0.641848 | pass |
 | E7_ml_aura_ml_tsra_r | 110 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.222533 | pass |
 | E7_ml_aura_ml_tsra_r | 115 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.215304 | pass |
 | E7_ml_aura_ml_tsra_r | 120 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
@@ -397,7 +397,7 @@ None.
 | E7_ml_aura_ml_tsra_r | 150 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E7_ml_aura_ml_tsra_r | 150 | TSRA-R-ML | pace_switch | probability_above_threshold |  | 0.21828 | pass |
 | E7_ml_aura_ml_tsra_r | 155 | TSRA-R-ML | ml_attack_alert | probability_above_threshold |  | 0.216892 | pass |
-| E7_ml_aura_ml_tsra_r | 160 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.0852 | 0.657403 | pass |
+| E7_ml_aura_ml_tsra_r | 160 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.0852 | 0.617403 | pass |
 | E7_ml_aura_ml_tsra_r | 160 | TSRA-R-ML | stale_badge | probability_above_threshold |  | 0.166883 | pass |
 | E7_ml_aura_ml_tsra_r | 165 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.171799 | pass |
 | E7_ml_aura_ml_tsra_r | 170 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
@@ -412,7 +412,7 @@ None.
 | E7_ml_aura_ml_tsra_r | 200 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E7_ml_aura_ml_tsra_r | 200 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | -0.46247 | pass |
 | E7_ml_aura_ml_tsra_r | 205 | TSRA-R-ML | video_throttle | maintained_active_defense_window |  | -0.342596 | pass |
-| E7_ml_aura_ml_tsra_r | 210 | AURA-ML | queue_pressure | top_attack_score_minus_runner_up_and_threshold | 0.165075 | 0.659372 | pass |
+| E7_ml_aura_ml_tsra_r | 210 | AURA-ML | queue_pressure | top_attack_score_minus_runner_up_and_threshold | 0.129875 | 0.619372 | pass |
 | E7_ml_aura_ml_tsra_r | 210 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | -0.355892 | pass |
 | E7_ml_aura_ml_tsra_r | 215 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | -0.272581 | pass |
 | E7_ml_aura_ml_tsra_r | 220 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
@@ -427,17 +427,17 @@ None.
 | E7_ml_aura_ml_tsra_r | 250 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
 | E7_ml_aura_ml_tsra_r | 250 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.186032 | pass |
 | E7_ml_aura_ml_tsra_r | 255 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.186032 | pass |
-| E7_ml_aura_ml_tsra_r | 260 | AURA-ML | failover_chasing | top_attack_score_minus_runner_up_and_threshold | 0.059203 | 0.57979 | pass |
-| E7_ml_aura_ml_tsra_r | 260 | TSRA-R-ML | priority_reroute, pace_switch | probability_above_threshold |  | 0.170677 | pass |
-| E7_ml_aura_ml_tsra_r | 265 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.170677 | pass |
+| E7_ml_aura_ml_tsra_r | 260 | AURA-ML | stale_cop_induction | top_attack_score_minus_runner_up_and_threshold | 0.150585 | 0.659393 | pass |
+| E7_ml_aura_ml_tsra_r | 260 | TSRA-R-ML | priority_reroute, pace_switch | probability_above_threshold |  | 0.178007 | pass |
+| E7_ml_aura_ml_tsra_r | 265 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.178007 | pass |
 | E7_ml_aura_ml_tsra_r | 270 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
-| E7_ml_aura_ml_tsra_r | 270 | TSRA-R-ML | ml_attack_alert, stale_badge | probability_above_threshold |  | 0.173455 | pass |
-| E7_ml_aura_ml_tsra_r | 275 | TSRA-R-ML | video_throttle | probability_above_threshold |  | 0.171603 | pass |
+| E7_ml_aura_ml_tsra_r | 270 | TSRA-R-ML | ml_attack_alert, stale_badge | probability_above_threshold |  | 0.180785 | pass |
+| E7_ml_aura_ml_tsra_r | 275 | TSRA-R-ML | video_throttle | probability_above_threshold |  | 0.178933 | pass |
 | E7_ml_aura_ml_tsra_r | 280 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
-| E7_ml_aura_ml_tsra_r | 280 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.171603 | pass |
-| E7_ml_aura_ml_tsra_r | 285 | TSRA-R-ML | priority_reroute | probability_above_threshold |  | 0.171603 | pass |
+| E7_ml_aura_ml_tsra_r | 280 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.178933 | pass |
+| E7_ml_aura_ml_tsra_r | 285 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.178933 | pass |
 | E7_ml_aura_ml_tsra_r | 290 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
-| E7_ml_aura_ml_tsra_r | 290 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.171603 | pass |
-| E7_ml_aura_ml_tsra_r | 295 | TSRA-R-ML | ml_attack_alert | probability_above_threshold |  | 0.175769 | pass |
+| E7_ml_aura_ml_tsra_r | 290 | TSRA-R-ML | no_op | active_window_without_downstream_event |  | 0.178933 | pass |
+| E7_ml_aura_ml_tsra_r | 295 | TSRA-R-ML | ml_attack_alert | probability_above_threshold |  | 0.1831 | pass |
 | E7_ml_aura_ml_tsra_r | 300 | AURA-ML | no_op | pre_start_or_cooldown_no_candidates |  |  | pass |
-| E7_ml_aura_ml_tsra_r | 300 | TSRA-R-ML | stale_badge | probability_above_threshold |  | 0.175769 | pass |
+| E7_ml_aura_ml_tsra_r | 300 | TSRA-R-ML | stale_badge | probability_above_threshold |  | 0.1831 | pass |

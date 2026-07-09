@@ -235,6 +235,7 @@ outputs/report_tables/agent_decision_margin_audit.md
 
 - AURA selected score와 runner-up score 차이
 - AURA attack threshold 대비 margin
+- AURA-ML base score, objective bonus, repeated tactic penalty가 선택 점수에 반영됐는지
 - TSRA-R eligible/ready defense action count
 - TSRA-R-ML anomaly probability와 threshold margin
 - no-op 판단의 근거

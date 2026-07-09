@@ -125,7 +125,7 @@ AttackScore = MissionImpactScore - 0.15 * DetectabilityScore
 
 ### 6.2 ML AURA
 
-ML AURA는 후보별 impact를 `aura_impact_model.pkl`로 예측한다.
+ML AURA는 후보별 impact를 `aura_impact_model.pkl`로 예측하고, 그 예측값을 AgentRuntime의 tool call 안에서 선택 점수로 바꾼다.
 
 학습 대상:
 
@@ -142,6 +142,20 @@ MAE: 0.011
 R2: 0.988
 Top-1 action match: 0.904
 ```
+
+판단 순서:
+
+```text
+1. AgentRuntime이 MissionState를 observation으로 기록
+2. generate_attack_candidates tool로 후보 생성
+3. predict_candidate_impact tool이 후보별 MissionImpactScore 예측
+4. estimate_candidate_effect, estimate_detectability tool로 효과와 탐지 가능성 계산
+5. base_attack_score = predicted_mission_impact - 0.15 * detectability_score
+6. selection_score = base_attack_score + objective_bonus - repeated_tactic_penalty
+7. selection_score가 가장 높은 후보를 AttackEvent로 기록
+```
+
+`objective_bonus`는 임의 가산점이 아니다. AURA-ML이 앞선 공격에서 아직 `stale_cop_induction`을 쓰지 않았고, 마지막 공격 예산 구간에서 stale data risk가 남아 있을 때만 제한적으로 붙는다. 목적은 단일 high-score 전술만 반복하지 않고 mission objective 관점의 전술 커버리지를 남기는 것이다.
 
 ## 7. GPU-scale 실험
 
@@ -177,6 +191,8 @@ Throughput: 약 1,566,851 samples/sec
 - 공격 후보 생성
 - rule 기반 공격 선택
 - ML 기반 impact predictor
+- AURA-ML objective-aware selection score
+- `queue_pressure`, `failover_chasing`, `stale_cop_induction` 선택 커버리지 검증
 - GPU MPS MLP 확장 실험
 - attack event JSONL 로그
 - 30-seed 반복 실험
@@ -186,7 +202,6 @@ Throughput: 약 1,566,851 samples/sec
 - 공격 후보 설명을 COA card 형태로 자동 생성
 - attack graph 시각화
 - SPARTA/NIST TTP mapping을 후보 생성 근거에 연결
-- ML AURA가 실제 공방 결과에서 rule 대비 어떤 장점이 있는지 더 뚜렷하게 비교
 
 ## 9. 런타임 구조
 
@@ -197,7 +212,7 @@ AURA는 `src/agents/AgentRuntime` 위에서 실행된다.
 ```text
 AgentRuntime
   goal: maximize simulated mission impact while staying inside safety constraints
-  memory: last_attack_time, event_count, last_attack_type
+  memory: last_attack_time, event_count, last_attack_type, attack_type_counts, last_objective_bonus
   tools:
     - generate_attack_candidates
     - estimate_candidate_effect
@@ -219,3 +234,5 @@ outputs/experiments/<experiment>/aura_decision_traces.jsonl
 ```
 
 이제 AURA의 한 번의 판단은 단순히 `AttackEvent`만 남기지 않는다. 어떤 상태를 봤는지, 어떤 후보를 만들었는지, 각 후보 점수가 얼마였는지, 왜 no-op 또는 특정 공격 효과를 골랐는지까지 남긴다.
+
+ML AURA의 trace에는 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`이 함께 남는다. 그래서 선택 결과를 사후에 꾸민 것이 아니라, 어떤 도구 호출과 어떤 memory 상태 때문에 그 공격이 선택됐는지 재현할 수 있다.

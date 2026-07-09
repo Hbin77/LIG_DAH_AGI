@@ -21,7 +21,7 @@ Safety boundary: closed simulation coverage mapping only; no RF, exploit, or liv
 - Attack observed effect: targets=SATCOM; max_expected_impact=1; avg_attack_score=0.9475
 - Covered by defense capabilities: priority_reroute, video_throttle, pace_switch
 - Defense agents: TSRA-R, TSRA-R-ML
-- Defense evidence count: priority_reroute=13; video_throttle=13; pace_switch=4
+- Defense evidence count: priority_reroute=12; video_throttle=13; pace_switch=4
 - Coverage logic: AURA reduces link capacity; TSRA-R protects critical traffic first, throttles optional video load, and can shift traffic to a bounded PACE fallback.
 - Coverage status: covered
 - Validation gates: G01:pass; G02:pass; G03:pass; G04:pass; G06:pass; G09:pass
@@ -32,8 +32,8 @@ Safety boundary: closed simulation coverage mapping only; no RF, exploit, or liv
 ### failover_chasing
 
 - Attack agents: AURA-ML
-- Attack evidence count: 3
-- Attack observed effect: targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.746347
+- Attack evidence count: 2
+- Attack observed effect: targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.749626
 - Covered by defense capabilities: ml_attack_alert, pace_switch, adaptive_optional_action_gating
 - Defense agents: TSRA-R-ML, TSRA-R, TSRA-R-ADAPTIVE
 - Defense evidence count: ml_attack_alert=8; pace_switch=4; adaptive_optional_action_gating=30 seeds
@@ -48,10 +48,10 @@ Safety boundary: closed simulation coverage mapping only; no RF, exploit, or liv
 
 - Attack agents: AURA, AURA-ML
 - Attack evidence count: 8
-- Attack observed effect: targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.77394
+- Attack observed effect: targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.76894
 - Covered by defense capabilities: priority_reroute, video_throttle, stale_badge
 - Defense agents: TSRA-R, TSRA-R-ML
-- Defense evidence count: priority_reroute=13; video_throttle=13; stale_badge=15
+- Defense evidence count: priority_reroute=12; video_throttle=13; stale_badge=15
 - Coverage logic: AURA increases non-critical queue occupancy; TSRA-R reroutes critical messages, reduces optional video pressure, and marks stale COP data so it is not trusted as fresh.
 - Coverage status: covered
 - Validation gates: G01:pass; G02:pass; G03:pass; G04:pass; G05:pass; G06:pass; G07:pass
@@ -61,9 +61,9 @@ Safety boundary: closed simulation coverage mapping only; no RF, exploit, or liv
 
 ### stale_cop_induction
 
-- Attack agents: AURA
-- Attack evidence count: 1
-- Attack observed effect: targets=SATCOM; max_expected_impact=1; avg_attack_score=0.9175
+- Attack agents: AURA, AURA-ML
+- Attack evidence count: 2
+- Attack observed effect: targets=MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.848446
 - Covered by defense capabilities: stale_badge
 - Defense agents: TSRA-R, TSRA-R-ML
 - Defense evidence count: stale_badge=15

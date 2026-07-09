@@ -1046,9 +1046,9 @@ attribution_signal: status=pass
 검증 기준:
 
 ```text
-agent_decision_feedback_audit rows: 63
-feedback_status: pass=63
-selected_event_type: attack_event=10, defense_event=53
+agent_decision_feedback_audit rows: 62
+feedback_status: pass=62
+selected_event_type: attack_event=10, defense_event=52
 feedback classes: attack_pressure_observed, attack_contained_by_defense, defense_improved, defense_held, defense_bounded_or_lagged, ml_window_triggered
 event_link_status: linked for all rows
 ```
@@ -1114,9 +1114,10 @@ AURA-ML은 공격 event를 만드는 코드만으로는 부족하다. 대회 방
 - min_start 이전에는 no-op으로 유지한다.
 - attack decision 시점에는 후보를 생성하고 각 후보에 ML impact prediction, analytic effect estimate, detectability estimate를 적용한다.
 - selected attack은 top-score candidate와 attack event log가 일치한다.
-- score는 `predicted_mission_impact - 0.15 * detectability_score` 공식을 따른다.
+- base score는 `predicted_mission_impact - 0.15 * detectability_score` 공식을 따른다.
+- selection score는 base score에 제한된 objective bonus와 repeated tactic penalty를 반영한다.
 - cooldown과 max-event budget으로 연속 공격을 제한한다.
-- selected attacks는 scorecard에서 complete response와 positive reduction까지 연결된다.
+- selected attacks는 `queue_pressure`, `failover_chasing`, `stale_cop_induction`을 포함하고 scorecard에서 complete response와 positive reduction까지 연결된다.
 
 이 방향은 공격 에이전트를 "공격 실행기"가 아니라 mission-impact simulator 안에서 판단, 기억, 도구 호출, 사후 feedback을 갖춘 AI 에이전트로 증명하는 쪽이다. 실제 RF, exploit, live network 동작은 계속 배제한다.
 

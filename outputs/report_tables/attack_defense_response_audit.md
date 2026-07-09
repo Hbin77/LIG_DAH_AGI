@@ -16,7 +16,7 @@ Safety boundary: closed simulation response audit only; no RF, exploit, or live 
 | E7_ml_aura_ml_tsra_r | ml-atk-00002 | failover_chasing | complete | 0 | none | none |
 | E7_ml_aura_ml_tsra_r | ml-atk-00003 | failover_chasing | complete | 0 | none | none |
 | E7_ml_aura_ml_tsra_r | ml-atk-00004 | queue_pressure | complete | 0 | none | none |
-| E7_ml_aura_ml_tsra_r | ml-atk-00005 | failover_chasing | complete | 0 | none | none |
+| E7_ml_aura_ml_tsra_r | ml-atk-00005 | stale_cop_induction | complete | 0 | none | none |
 
 ## Detail
 
@@ -194,18 +194,18 @@ Safety boundary: closed simulation response audit only; no RF, exploit, or live 
 ### E7_ml_aura_ml_tsra_r ml-atk-00005
 
 - Attack time: 260
-- Attack capability: failover_chasing
+- Attack capability: stale_cop_induction
 - Attack agent: AURA
 - Target link: MESH
-- Required runtime defenses: ml_attack_alert
-- Support defenses: pace_switch, priority_reroute
+- Required runtime defenses: stale_badge
+- Support defenses: none
 - Active defenses at attack: stale_badge@190-until-280; video_throttle@205-until-265; ml_attack_alert@220-until-290; priority_reroute@220-until-290; stale_badge@235-until-325; video_throttle@240-until-300; ml_attack_alert@245-until-315; priority_reroute@260-until-330; pace_switch@260-until-360
-- Response defenses after attack: ml_attack_alert@270-until-340; stale_badge@270-until-360; video_throttle@275-until-335; priority_reroute@285-until-355; ml_attack_alert@295-until-365; stale_badge@300-until-390
-- Covered required defenses: ml_attack_alert
+- Response defenses after attack: ml_attack_alert@270-until-340; stale_badge@270-until-360; video_throttle@275-until-335; ml_attack_alert@295-until-365; stale_badge@300-until-390
+- Covered required defenses: stale_badge
 - Missing required defenses: none
 - Missing support defenses: none
 - First required response latency sec: 0
 - Response status: complete
 - Audit basis: defense is counted if active at attack time through details.until_sec or emitted within the response window
-- Residual risk: Failover chasing is detected by the ML defense window; PACE support may already be active or may expire before a later attack window.
+- Residual risk: Stale badge reduces trusted stale exposure but cannot recreate missing freshness.
 - Safety boundary: closed simulation response audit only; no RF, exploit, or live network action

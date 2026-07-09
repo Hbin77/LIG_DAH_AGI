@@ -264,7 +264,7 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Detectability score: 0.5
 - Attack score: 0.761848
 - Candidate rank: 1
-- Runner-up: queue_pressure on LTE (score=0.740504, impact=0.763004)
+- Runner-up: critical_window_degradation on LTE (score=0.712009, impact=0.854509)
 - Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -284,9 +284,9 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Expected stale data ratio: 0.71
 - Expected priority inversion rate: 0.31759
 - Detectability score: 0.3
-- Attack score: 0.777403
+- Attack score: 0.737403
 - Candidate rank: 1
-- Runner-up: queue_pressure on MESH (score=0.692203, impact=0.714703)
+- Runner-up: queue_pressure on MESH (score=0.652203, impact=0.714703)
 - Selection reason: ML impact predictor selected failover_chasing
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -306,9 +306,9 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Expected stale data ratio: 0.676667
 - Expected priority inversion rate: 0.500637
 - Detectability score: 0.15
-- Attack score: 0.779372
+- Attack score: 0.739372
 - Candidate rank: 1
-- Runner-up: failover_chasing on MESH (score=0.614297, impact=0.659297)
+- Runner-up: bandwidth_limit on MESH (score=0.609497, impact=0.631997)
 - Selection reason: ML impact predictor selected queue_pressure
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.
 
@@ -318,18 +318,18 @@ Safety boundary: Simulated effect only: no RF transmission, no exploit, no real 
 - Time: 260 sec
 - Mission phase: normal_patrol
 - Active link at decision: MESH
-- Attack type: `failover_chasing`
+- Attack type: `stale_cop_induction`
 - Target link: `MESH`
-- Target traffic classes: all
+- Target traffic classes: telemetry, coordinate
 - Duration: 70 sec
-- Simulated effects: latency +600ms; jitter +120ms; loss +0.03; bandwidth cap 0.45Mbps
-- Expected mission impact: 0.77479
-- Expected p95 critical latency: 205.933 sec
-- Expected stale data ratio: 0.46
+- Simulated effects: latency +800ms; jitter +160ms; loss +0.04; bandwidth cap 1Mbps
+- Expected mission impact: 0.661893
+- Expected p95 critical latency: 95.3297 sec
+- Expected stale data ratio: 0.656667
 - Expected priority inversion rate: 0.293886
-- Detectability score: 0.5
-- Attack score: 0.69979
+- Detectability score: 0.55
+- Attack score: 0.779393
 - Candidate rank: 1
-- Runner-up: queue_pressure on MESH (score=0.640587, impact=0.693087)
-- Selection reason: ML impact predictor selected failover_chasing
+- Runner-up: critical_window_degradation on MESH (score=0.628808, impact=0.771308)
+- Selection reason: ML impact predictor selected stale_cop_induction
 - Safety boundary: Simulated effect only: no RF transmission, no exploit, no real packet generation, no operational SATCOM parameters.

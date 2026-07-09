@@ -21,13 +21,18 @@ class MLAURA:
         cooldown_sec: float = 45.0,
         max_events: int = 5,
         min_start_sec: float = 60.0,
+        stale_cop_objective_bonus: float = 0.20,
+        repeated_tactic_penalty: float = 0.04,
     ) -> None:
         self.attack_threshold = attack_threshold
         self.cooldown_sec = cooldown_sec
         self.max_events = max_events
         self.min_start_sec = min_start_sec
+        self.stale_cop_objective_bonus = stale_cop_objective_bonus
+        self.repeated_tactic_penalty = repeated_tactic_penalty
         self.last_attack_time = -10_000.0
         self.event_count = 0
+        self.attack_type_counts: dict[str, int] = {}
         if not model_path.exists():
             self.model = None
             self.fallback = RuleAURA(attack_threshold, cooldown_sec, max_events, min_start_sec)
@@ -128,17 +133,32 @@ class MLAURA:
                 candidate=candidate,
                 predicted=predicted,
             )
-            score = compute_attack_score(predicted_impact, detectability)
+            base_score = compute_attack_score(predicted_impact, detectability)
+            objective_bonus, repeated_penalty, objective_reason = self._objective_adjustment(
+                state=state,
+                attack_type=candidate.attack_type,
+            )
+            score = base_score + objective_bonus - repeated_penalty
             predicted["mission_impact"] = predicted_impact
             predicted["detectability_score"] = detectability
+            predicted["base_attack_score"] = base_score
+            predicted["objective_bonus"] = objective_bonus
+            predicted["repeated_tactic_penalty"] = repeated_penalty
+            predicted["selection_score"] = score
+            predicted["objective_reason"] = objective_reason
             scored.append((score, candidate, predicted))
             candidate_actions.append(
                 {
                     "action": candidate.attack_type,
                     "target_link": candidate.target_link,
                     "score": round(score, 6),
+                    "base_attack_score": round(base_score, 6),
+                    "objective_bonus": round(objective_bonus, 6),
+                    "repeated_tactic_penalty": round(repeated_penalty, 6),
+                    "selection_score": round(score, 6),
                     "predicted_mission_impact": round(predicted_impact, 6),
                     "detectability_score": round(detectability, 6),
+                    "objective_reason": objective_reason,
                     "reason": candidate.reason,
                 }
             )
@@ -171,6 +191,9 @@ class MLAURA:
 
         self.last_attack_time = state.time_sec
         self.event_count += 1
+        self.attack_type_counts[best_candidate.attack_type] = (
+            self.attack_type_counts.get(best_candidate.attack_type, 0) + 1
+        )
         event = AttackEvent(
             event_id=f"ml-atk-{self.event_count:05d}",
             selected_at=state.time_sec,
@@ -182,6 +205,11 @@ class MLAURA:
         self.runtime.memory.update_belief("last_attack_time", self.last_attack_time)
         self.runtime.memory.update_belief("event_count", self.event_count)
         self.runtime.memory.update_belief("last_attack_type", best_candidate.attack_type)
+        self.runtime.memory.update_belief("attack_type_counts", dict(self.attack_type_counts))
+        self.runtime.memory.update_belief(
+            "last_objective_bonus",
+            best_prediction.get("objective_bonus", 0.0),
+        )
         self.runtime.record_decision(
             time_sec=state.time_sec,
             policy="ml_impact_predictor",
@@ -194,15 +222,52 @@ class MLAURA:
                 "attack_type": best_candidate.attack_type,
                 "target_link": best_candidate.target_link,
                 "score": round(best_score, 6),
+                "base_attack_score": round(best_prediction.get("base_attack_score", best_score), 6),
+                "objective_bonus": round(best_prediction.get("objective_bonus", 0.0), 6),
+                "repeated_tactic_penalty": round(
+                    best_prediction.get("repeated_tactic_penalty", 0.0),
+                    6,
+                ),
+                "objective_reason": best_prediction.get("objective_reason", "base_score"),
             },
             reason=f"ML impact predictor selected {best_candidate.attack_type}",
             feedback={
                 "attack_threshold": self.attack_threshold,
                 "cooldown_sec": self.cooldown_sec,
                 "remaining_event_budget": self.max_events - self.event_count,
+                "attack_type_counts": dict(self.attack_type_counts),
+                "selected_base_attack_score": round(best_prediction.get("base_attack_score", best_score), 6),
+                "selected_objective_bonus": round(best_prediction.get("objective_bonus", 0.0), 6),
+                "selected_repeated_tactic_penalty": round(
+                    best_prediction.get("repeated_tactic_penalty", 0.0),
+                    6,
+                ),
             },
         )
         return event
+
+    def _objective_adjustment(
+        self,
+        *,
+        state: MissionState,
+        attack_type: str,
+    ) -> tuple[float, float, str]:
+        objective_bonus = 0.0
+        repeated_penalty = 0.0
+        reasons: list[str] = []
+        prior_count = self.attack_type_counts.get(attack_type, 0)
+        if prior_count:
+            repeated_penalty = min(self.repeated_tactic_penalty * prior_count, 0.12)
+            reasons.append(f"repeat_penalty_count={prior_count}")
+        if (
+            attack_type == "stale_cop_induction"
+            and self.event_count >= self.max_events - 1
+            and prior_count == 0
+            and state.stale_data_ratio > 0.20
+        ):
+            objective_bonus = self.stale_cop_objective_bonus
+            reasons.append("uncovered_stale_cop_objective")
+        return objective_bonus, repeated_penalty, "+".join(reasons) if reasons else "base_score"
 
     def _predict_candidate_impact(self, state: MissionState, candidate) -> float:
         features = candidate_features(state, candidate)
