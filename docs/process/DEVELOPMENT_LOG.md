@@ -1954,3 +1954,43 @@ docs/process/COMPETITION_DIRECTION.md
 - 기본 파일명은 `DAH2026_소스코드_[팀명].zip` 제출 형식과 맞춘다.
 - ZIP 자체는 Git에 커밋하지 않고, manifest와 SHA-256 검증으로 동일성을 확인한다.
 - `main`은 그대로 두고 `hbin`에서만 이 기준을 공유한다.
+
+### 49. Agent Runtime Invariant Audit를 추가한 이유
+
+기존 산출물은 DecisionTrace 품질, Memory 변화, Tool 사용 여부를 각각 검증했다. 하지만 AgentRuntime 자체가 매 decision loop에서 같은 불변조건을 지키는지 한 장으로 확인하는 표는 없었다.
+
+이번 변경은 `DecisionTrace` 로그를 다시 읽어서 runtime-level invariant를 검증한다.
+
+추가한 것:
+
+```text
+src/experiments/agent_runtime_invariant_audit.py
+outputs/report_tables/agent_runtime_invariant_audit.csv
+outputs/report_tables/agent_runtime_invariant_audit.md
+```
+
+검증 항목:
+
+```text
+trace_id uniqueness and contiguous suffix
+monotonic time
+AgentMemory observation_count/decision_count progression
+last_selected_action chain
+tool error count
+candidate action evidence
+selected attack/defense event coverage
+```
+
+검증 결과:
+
+```text
+agent_runtime_invariant_audit rows: 9
+status: pass=9
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+tool_error_count: 0
+```
+
+해석:
+
+- AgentRuntime, AgentMemory, Tool, DecisionTrace가 실제 실험 로그에서 같은 loop contract로 움직였음을 별도 산출물로 증명한다.
+- 이 audit도 closed simulation log만 읽으며 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

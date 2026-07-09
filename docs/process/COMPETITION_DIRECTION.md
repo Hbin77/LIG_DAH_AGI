@@ -660,7 +660,7 @@ outputs/report_tables/submission_readiness_audit.md
 ```text
 submission_readiness_audit rows: 10 pass
 agent_collaboration_graph edges: 17 verified
-package_zip entries: 168
+package_zip entries: manifest 기준 확인
 package_manifest_integrity: passed
 release_handoff: repo-only/current
 branch: hbin
@@ -833,6 +833,25 @@ covered experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 package zip: outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip
 branch: hbin
 main: preserve
+```
+
+### P26. Agent Runtime Invariant Audit
+
+목적:
+
+- AgentRuntime, AgentMemory, Tool, DecisionTrace를 별도 구조로 구현했다는 주장을 실행 로그의 불변조건으로 검증한다.
+- 공격/방어 에이전트가 같은 runtime loop contract를 따르는지 확인한다.
+- trace 품질, memory audit, tool audit을 보완하는 runtime-level gate를 추가한다.
+
+검증 기준:
+
+```text
+agent_runtime_invariant_audit rows: 9 pass
+trace id sequence: true
+memory count progression: true
+last selected chain: 1.0
+tool errors: 0
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 ```
 
 ## 최종 판단 기준

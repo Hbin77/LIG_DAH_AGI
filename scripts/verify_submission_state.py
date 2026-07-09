@@ -42,6 +42,7 @@ REQUIRED_FILES = [
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
+    "src/experiments/agent_runtime_invariant_audit.py",
     "src/experiments/agent_loop_replay.py",
     "src/experiments/agent_decision_causality_audit.py",
     "src/experiments/agent_decision_margin_audit.py",
@@ -81,6 +82,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_contract_validation.md",
     "outputs/report_tables/decision_trace_quality_audit.csv",
     "outputs/report_tables/decision_trace_quality_audit.md",
+    "outputs/report_tables/agent_runtime_invariant_audit.csv",
+    "outputs/report_tables/agent_runtime_invariant_audit.md",
     "outputs/report_tables/agent_loop_replay.csv",
     "outputs/report_tables/agent_loop_replay.md",
     "outputs/report_tables/agent_decision_causality_audit.csv",
@@ -272,6 +275,60 @@ def check_csv_outputs() -> list[str]:
         "trace quality audit has incomplete reason coverage",
     )
     checks.append("decision_trace_quality_audit rows=9 pass")
+
+    runtime_rows = read_csv("outputs/report_tables/agent_runtime_invariant_audit.csv")
+    require(
+        len(runtime_rows) == 9,
+        f"expected 9 runtime invariant audit rows, got {len(runtime_rows)}",
+    )
+    failed_runtime_rows = [
+        f"{row['experiment']}:{row['agent']}:{row['policy']}"
+        for row in runtime_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_runtime_rows, f"failed runtime invariant rows: {failed_runtime_rows[:8]}")
+    runtime_agents = {row["agent"] for row in runtime_rows}
+    require(
+        {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"}.issubset(runtime_agents),
+        f"runtime invariant audit missing agents: {sorted({'AURA', 'AURA-ML', 'TSRA-R', 'TSRA-R-ML'} - runtime_agents)}",
+    )
+    require(
+        all(row["trace_id_unique"] == "true" for row in runtime_rows),
+        "runtime invariant audit has duplicate trace ids",
+    )
+    require(
+        all(row["trace_id_sequence_ok"] == "true" for row in runtime_rows),
+        "runtime invariant audit has non-contiguous trace ids",
+    )
+    require(
+        all(row["time_monotonic"] == "true" for row in runtime_rows),
+        "runtime invariant audit has non-monotonic time",
+    )
+    require(
+        all(row["observation_count_expected"] == "true" for row in runtime_rows),
+        "runtime invariant audit has unexpected observation_count",
+    )
+    require(
+        all(row["decision_count_expected"] == "true" for row in runtime_rows),
+        "runtime invariant audit has unexpected decision_count",
+    )
+    require(
+        all(float(row["last_selected_chain_match_rate"]) == 1.0 for row in runtime_rows),
+        "runtime invariant audit has broken last-selected chain",
+    )
+    require(
+        all(int(float(row["tool_error_count"])) == 0 for row in runtime_rows),
+        "runtime invariant audit contains tool errors",
+    )
+    require(
+        all(int(float(row["selected_event_count"])) > 0 for row in runtime_rows),
+        "runtime invariant audit has rows without selected events",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in runtime_rows),
+        "runtime invariant audit missing safety boundary",
+    )
+    checks.append("agent_runtime_invariant_audit rows=9 pass")
 
     replay_rows = read_csv("outputs/report_tables/agent_loop_replay.csv")
     require(len(replay_rows) == 8, f"expected 8 agent loop replay rows, got {len(replay_rows)}")
@@ -1108,6 +1165,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/decision_trace_quality_audit.md" in manifest_text,
         "manifest missing decision trace quality audit",
+    )
+    require(
+        "outputs/report_tables/agent_runtime_invariant_audit.md" in manifest_text,
+        "manifest missing agent runtime invariant audit",
     )
     require(
         "outputs/report_tables/agent_loop_replay.md" in manifest_text,

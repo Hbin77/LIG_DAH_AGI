@@ -1813,6 +1813,52 @@ docs/process/SUBMISSION_PACKAGE.md
 - 제출 직전 수동 rename을 없애고, 생성된 파일 그대로 업로드할 수 있게 했다.
 - ZIP 파일은 여전히 Git에 올리지 않고, manifest와 검증 스크립트만 추적한다.
 
+## P36. Agent Runtime Invariant Audit
+
+상태: 완료
+
+문제:
+
+- 기존 trace quality, memory audit, tool audit은 각각의 관점에서 에이전트 증거를 확인한다.
+- 하지만 AgentRuntime의 loop invariant를 한 파일에서 확인하지 않으면 Runtime/Memory/Tool/DecisionTrace 구조가 흩어진 증거로만 보인다.
+
+구현:
+
+```text
+src/experiments/agent_runtime_invariant_audit.py
+outputs/report_tables/agent_runtime_invariant_audit.csv
+outputs/report_tables/agent_runtime_invariant_audit.md
+```
+
+검증 기준:
+
+- trace id가 중복 없이 순차 증가한다.
+- trace time이 단조 증가한다.
+- AgentMemory의 `observation_count`, `decision_count`가 runtime sequence와 일치한다.
+- 현재 trace의 `memory.last_selected_action`이 직전 trace의 `selected_action`과 일치한다.
+- Tool call error가 0이다.
+- 각 agent group에 candidate evidence와 selected event evidence가 있다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_runtime_invariant_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_runtime_invariant_audit rows: 9
+status: pass=9
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+```
+
+해석:
+
+- 에이전트가 단순 Python 함수 묶음이 아니라 runtime loop, memory, tool, trace contract를 유지한다는 증거를 추가했다.
+- 실제 공격 기능은 추가하지 않고 closed simulation trace audit만 수행한다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

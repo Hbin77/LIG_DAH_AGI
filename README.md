@@ -181,6 +181,19 @@ This writes:
 
 The audit checks whether each active AURA/TSRA-R policy has complete reason, observation, memory, feedback, selected action, tool/candidate evaluation, and non-no-op event evidence.
 
+## Audit Agent Runtime Invariants
+
+```bash
+python3 -m src.experiments.agent_runtime_invariant_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/agent_runtime_invariant_audit.csv`
+- `outputs/report_tables/agent_runtime_invariant_audit.md`
+
+The audit checks runtime-level invariants across `DecisionTrace` logs: trace id sequence, monotonic time, memory count progression, previous-action chaining, tool error count, candidate evidence, and selected event coverage.
+
 ## Generate Agent Loop Replay
 
 ```bash
@@ -595,6 +608,7 @@ python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
+python3 -m src.experiments.agent_runtime_invariant_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
 python3 -m src.experiments.agent_decision_causality_audit
 python3 -m src.experiments.agent_decision_margin_audit

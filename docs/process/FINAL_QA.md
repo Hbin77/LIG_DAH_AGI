@@ -14,6 +14,7 @@ python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
+python3 -m src.experiments.agent_runtime_invariant_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
 python3 -m src.experiments.agent_decision_causality_audit
 python3 -m src.experiments.agent_decision_margin_audit
@@ -62,6 +63,7 @@ metric_gate_summary rows: 11 pass
 agent_decision_trace_summary rows: 215
 agent_contract_validation rows: 49 pass
 decision_trace_quality_audit rows: 9 pass
+agent_runtime_invariant_audit rows: 9 pass
 agent_loop_replay rows: 8
 agent_decision_causality_audit rows: 399 pass
 agent_decision_margin_audit rows: 399 pass
@@ -88,7 +90,7 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 168
+package_zip entries: 재생성 시 manifest 기준 확인
 package_manifest_integrity: passed
 package_zip_metadata: deterministic
 release_handoff: repo-only/current

@@ -123,6 +123,7 @@ def build_rows() -> list[dict[str, str]]:
         "trace": count_csv_rows("outputs/report_tables/agent_decision_trace_summary.csv"),
         "contract": count_csv_rows("outputs/report_tables/agent_contract_validation.csv"),
         "quality": count_csv_rows("outputs/report_tables/decision_trace_quality_audit.csv"),
+        "runtime": count_csv_rows("outputs/report_tables/agent_runtime_invariant_audit.csv"),
         "loop": count_csv_rows("outputs/report_tables/agent_loop_replay.csv"),
         "causality": count_csv_rows("outputs/report_tables/agent_decision_causality_audit.csv"),
         "margin": count_csv_rows("outputs/report_tables/agent_decision_margin_audit.csv"),
@@ -164,6 +165,7 @@ def build_rows() -> list[dict[str, str]]:
     reproduction_commands = [
         "python3 -m src.ml.build_dataset",
         "python3 -m src.experiments.run_all",
+        "python3 -m src.experiments.agent_runtime_invariant_audit",
         "python3 -m src.experiments.agent_decision_causality_audit",
         "python3 -m src.experiments.agent_decision_margin_audit",
         "python3 -m src.experiments.run_batch",
@@ -214,12 +216,14 @@ def build_rows() -> list[dict[str, str]]:
             evidence=[*runtime_files, "outputs/report_tables/agent_interface_manifest.csv"],
             observed=(
                 f"runtime_files_present={all_files_present(runtime_files)}; "
-                f"interface_rows={count_csv_rows('outputs/report_tables/agent_interface_manifest.csv')}"
+                f"interface_rows={count_csv_rows('outputs/report_tables/agent_interface_manifest.csv')}; "
+                f"runtime_invariant_rows={decision_counts['runtime']}"
             ),
             ok=all_files_present(runtime_files)
-            and count_csv_rows("outputs/report_tables/agent_interface_manifest.csv") == 4,
+            and count_csv_rows("outputs/report_tables/agent_interface_manifest.csv") == 4
+            and decision_counts["runtime"] == 9,
             handoff_value="The agent claim is backed by code modules and generated interface evidence.",
-            next_gate="Runtime changes must regenerate interface, memory, tool, and causality audits.",
+            next_gate="Runtime changes must regenerate runtime invariant, interface, memory, tool, and causality audits.",
         ),
         row(
             check_id="R04",
@@ -252,6 +256,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/agent_decision_trace_summary.csv",
                 "outputs/report_tables/agent_contract_validation.csv",
                 "outputs/report_tables/decision_trace_quality_audit.csv",
+                "outputs/report_tables/agent_runtime_invariant_audit.csv",
                 "outputs/report_tables/agent_loop_replay.csv",
                 "outputs/report_tables/agent_decision_causality_audit.csv",
                 "outputs/report_tables/agent_decision_margin_audit.csv",
@@ -263,6 +268,7 @@ def build_rows() -> list[dict[str, str]]:
                 decision_counts["trace"] >= 200
                 and decision_counts["contract"] == 49
                 and decision_counts["quality"] == 9
+                and decision_counts["runtime"] == 9
                 and decision_counts["loop"] == 8
                 and decision_counts["causality"] == 399
                 and decision_counts["margin"] == 399
@@ -377,11 +383,11 @@ def build_rows() -> list[dict[str, str]]:
             evidence=process_docs,
             observed=(
                 f"process_docs_present={all_files_present(process_docs)}; "
-                f"next_queue_has_p26={'P26' in read_text('docs/process/NEXT_DEVELOPMENT_QUEUE.md')}; "
+                f"next_queue_has_p36={'P36' in read_text('docs/process/NEXT_DEVELOPMENT_QUEUE.md')}; "
                 f"forbidden_team_phrases={sum(docs_text.count(phrase) for phrase in forbidden_team_phrases)}"
             ),
             ok=all_files_present(process_docs)
-            and "P26" in read_text("docs/process/NEXT_DEVELOPMENT_QUEUE.md")
+            and "P36" in read_text("docs/process/NEXT_DEVELOPMENT_QUEUE.md")
             and sum(docs_text.count(phrase) for phrase in forbidden_team_phrases) == 0,
             handoff_value="A teammate can continue from the queue and logs without inheriting personal-only wording.",
             next_gate="Each substantial change must update the queue, development log, verifier, and hbin branch.",
