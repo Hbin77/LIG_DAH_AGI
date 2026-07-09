@@ -1014,6 +1014,24 @@ response_signal: status=complete
 attribution_signal: status=pass
 ```
 
+### P35. Agent Decision Feedback Audit
+
+목적:
+
+- DecisionTrace가 후보 선택 증거에서 끝나지 않고 실제 event log와 metric feedback으로 닫히는지 확인한다.
+- E5/E7 closed-loop에서 selected attack/defense events를 post-action feedback row로 만든다.
+- 공격 압박, 방어 containment, improved/held/bounded attribution, ML defense window trigger를 분리해서 과장 없이 설명한다.
+
+검증 기준:
+
+```text
+agent_decision_feedback_audit rows: 66
+feedback_status: pass=66
+selected_event_type: attack_event=10, defense_event=56
+feedback classes: attack_pressure_observed, attack_contained_by_defense, defense_improved, defense_held, defense_bounded_or_lagged, ml_window_triggered
+event_link_status: linked for all rows
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

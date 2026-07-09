@@ -2360,3 +2360,41 @@ operator_signal_count range: 3-7
 - E5와 E7의 closed-loop episode가 같은 기준으로 비교된다.
 - 공격-방어 협력 구조를 단순 표 개수보다 mission thread 단위로 설명할 수 있다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation mission-thread summary만 생성한다.
+
+### 58. Agent Decision Feedback Audit를 추가한 이유
+
+`agent_decision_margin_audit`와 `agent_goal_alignment_audit`는 선택 시점의 후보, 점수, threshold, 목표 정렬을 검증한다. 하지만 그것만으로는 "선택 이후 실제 시뮬레이션 feedback까지 연결됐는가"를 바로 증명하지 못한다.
+
+이번 변경은 E5/E7 closed-loop run에서 선택된 attack/defense event를 DecisionTrace에서 뽑아 실제 event log, metric snapshot, closed-loop outcome, defense ledger, action attribution과 연결했다.
+
+추가한 것:
+
+```text
+src/experiments/agent_decision_feedback_audit.py
+outputs/report_tables/agent_decision_feedback_audit.csv
+outputs/report_tables/agent_decision_feedback_audit.md
+```
+
+검증 기준:
+
+```text
+agent_decision_feedback_audit rows: 66
+feedback_status: pass=66
+experiments: E5_rule_aura_tsra_r=28, E7_ml_aura_ml_tsra_r=38
+selected_event_type: attack_event=10, defense_event=56
+feedback_class:
+  attack_contained_by_defense=5
+  attack_pressure_observed=5
+  defense_bounded_or_lagged=9
+  defense_held=27
+  defense_improved=19
+  ml_window_triggered=1
+```
+
+해석:
+
+- 에이전트가 선택한 action이 실제 event log에 존재하는지 확인한다.
+- 선택 전후 mission metric feedback window를 붙인다.
+- 공격 선택은 pressure observed 또는 defense containment로 분류한다.
+- 방어 선택은 improved/held/bounded attribution/ML window trigger로 분류한다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation decision-feedback audit만 생성한다.

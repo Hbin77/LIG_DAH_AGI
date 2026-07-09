@@ -261,6 +261,28 @@ outputs/report_tables/agent_goal_alignment_audit.md
 - TSRA-R defense action이 priority, video, stale, PACE, ML threshold 조건과 맞는지
 - TSRA-R no-op이 ready action 부재 또는 active defense window 유지로 설명되는지
 
+## Decision Feedback Audit
+
+DecisionTrace의 선택이 실제 event log와 metric feedback으로 이어졌는지 확인한다.
+
+```bash
+python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_decision_feedback_audit.csv
+outputs/report_tables/agent_decision_feedback_audit.md
+```
+
+감사 항목:
+
+- E5/E7 selected attack/defense event가 event log에 존재하는지
+- selected event 주변 metric feedback window가 있는지
+- attack_event가 pressure observed 또는 defense containment로 설명되는지
+- defense_event가 improved, held, bounded attribution, 또는 ML defense window trigger로 설명되는지
+
 ## Memory/Belief Audit
 
 AgentMemory가 단순 필드가 아니라 다음 판단에 이어지는 loop state인지 확인한다.

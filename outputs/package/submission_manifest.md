@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 197
-- total_payload_bytes: 3847045
+- payload_file_count: 200
+- total_payload_bytes: 3959784
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 198
-- zip_bytes: 1823378
-- zip_sha256: `032e25eec3cd30d52c5ee27d26d7959c0165c28587a737db1396977091cc0675`
+- zip_file_count: 201
+- zip_bytes: 1838538
+- zip_sha256: `b52d916e223a78ad272a93c6e0c0633570528b0e50d9e5ea7d11c1bbe18c4da7`
 
 ## 포함 파일
 
@@ -91,6 +91,8 @@
 - `outputs/report_tables/agent_contract_validation.md`
 - `outputs/report_tables/agent_decision_causality_audit.csv`
 - `outputs/report_tables/agent_decision_causality_audit.md`
+- `outputs/report_tables/agent_decision_feedback_audit.csv`
+- `outputs/report_tables/agent_decision_feedback_audit.md`
 - `outputs/report_tables/agent_decision_margin_audit.csv`
 - `outputs/report_tables/agent_decision_margin_audit.md`
 - `outputs/report_tables/agent_decision_trace_summary.csv`
@@ -176,6 +178,7 @@
 - `src/experiments/agent_capability_matrix.py`
 - `src/experiments/agent_collaboration_graph.py`
 - `src/experiments/agent_decision_causality_audit.py`
+- `src/experiments/agent_decision_feedback_audit.py`
 - `src/experiments/agent_decision_margin_audit.py`
 - `src/experiments/agent_engagement_scorecard.py`
 - `src/experiments/agent_goal_alignment_audit.py`

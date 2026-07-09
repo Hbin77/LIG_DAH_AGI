@@ -50,6 +50,7 @@ REQUIRED_FILES = [
     "src/experiments/agent_decision_causality_audit.py",
     "src/experiments/agent_decision_margin_audit.py",
     "src/experiments/agent_goal_alignment_audit.py",
+    "src/experiments/agent_decision_feedback_audit.py",
     "src/experiments/agent_memory_belief_audit.py",
     "src/experiments/agent_tool_usage_audit.py",
     "src/experiments/agent_interface_manifest.py",
@@ -106,6 +107,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_decision_margin_audit.md",
     "outputs/report_tables/agent_goal_alignment_audit.csv",
     "outputs/report_tables/agent_goal_alignment_audit.md",
+    "outputs/report_tables/agent_decision_feedback_audit.csv",
+    "outputs/report_tables/agent_decision_feedback_audit.md",
     "outputs/report_tables/agent_memory_belief_audit.csv",
     "outputs/report_tables/agent_memory_belief_audit.md",
     "outputs/report_tables/agent_tool_usage_audit.csv",
@@ -490,6 +493,58 @@ def check_csv_outputs() -> list[str]:
         "goal alignment audit missing safety boundary",
     )
     checks.append("agent_goal_alignment_audit rows=399 pass")
+
+    feedback_rows = read_csv("outputs/report_tables/agent_decision_feedback_audit.csv")
+    require(
+        len(feedback_rows) == 66,
+        f"expected 66 decision feedback rows, got {len(feedback_rows)}",
+    )
+    failed_feedback_rows = [
+        f"{row['experiment']}:{row['selected_event_id']}:{row['action']}"
+        for row in feedback_rows
+        if row.get("feedback_status") != "pass"
+    ]
+    require(not failed_feedback_rows, f"failed decision feedback rows: {failed_feedback_rows[:8]}")
+    feedback_experiments = {row["experiment"] for row in feedback_rows}
+    require(
+        feedback_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"decision feedback audit has unexpected experiments: {sorted(feedback_experiments)}",
+    )
+    feedback_types = {row["selected_event_type"] for row in feedback_rows}
+    require(
+        feedback_types == {"attack_event", "defense_event"},
+        f"decision feedback audit missing attack/defense event types: {sorted(feedback_types)}",
+    )
+    require(
+        sum(1 for row in feedback_rows if row["selected_event_type"] == "attack_event") == 10,
+        "decision feedback audit must include 10 selected attack events",
+    )
+    require(
+        sum(1 for row in feedback_rows if row["selected_event_type"] == "defense_event") == 56,
+        "decision feedback audit must include 56 selected defense events",
+    )
+    required_feedback_classes = {
+        "attack_contained_by_defense",
+        "attack_pressure_observed",
+        "defense_bounded_or_lagged",
+        "defense_held",
+        "defense_improved",
+        "ml_window_triggered",
+    }
+    observed_feedback_classes = {row["feedback_class"] for row in feedback_rows}
+    require(
+        required_feedback_classes.issubset(observed_feedback_classes),
+        f"decision feedback audit missing feedback classes: {sorted(required_feedback_classes - observed_feedback_classes)}",
+    )
+    require(
+        all(row["event_link_status"] == "linked" for row in feedback_rows),
+        "decision feedback audit has unlinked selected events",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in feedback_rows),
+        "decision feedback audit missing safety boundary",
+    )
+    checks.append("agent_decision_feedback_audit rows=66 pass")
 
     memory_rows = read_csv("outputs/report_tables/agent_memory_belief_audit.csv")
     require(
@@ -1628,6 +1683,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_goal_alignment_audit.md" in manifest_text,
         "manifest missing agent goal alignment audit",
+    )
+    require(
+        "outputs/report_tables/agent_decision_feedback_audit.md" in manifest_text,
+        "manifest missing agent decision feedback audit",
     )
     require(
         "outputs/report_tables/agent_memory_belief_audit.md" in manifest_text,

@@ -2261,6 +2261,54 @@ operator_signal_count range: 3-7
 - 새 산출물은 기존 replay/scorecard/attribution을 대체하지 않고, 리뷰 가능한 상위 요약으로 묶는다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
+## P45. Agent Decision Feedback Audit
+
+상태: 완료
+
+문제:
+
+- 기존 decision audit는 선택 당시의 후보/점수/goal alignment를 검증한다.
+- 하지만 선택된 attack/defense event가 실제 event log와 metric feedback으로 이어졌는지는 별도 추적이 필요했다.
+- 에이전트 구조의 설득력을 높이려면 DecisionTrace가 post-action feedback까지 닫힌 루프여야 한다.
+
+구현:
+
+```text
+src/experiments/agent_decision_feedback_audit.py
+outputs/report_tables/agent_decision_feedback_audit.csv
+outputs/report_tables/agent_decision_feedback_audit.md
+```
+
+검증 기준:
+
+- E5/E7 closed-loop run만 대상으로 한다.
+- selected attack event 10개와 selected defense event 56개를 모두 포함해야 한다.
+- 모든 row가 실제 event log와 연결돼야 한다.
+- 모든 row가 metric feedback 또는 ledger/action attribution으로 설명돼야 한다.
+- 모든 row는 closed simulation safety boundary를 포함한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_decision_feedback_audit rows: 66
+feedback_status: pass=66
+selected_event_type: attack_event=10, defense_event=56
+experiments: E5_rule_aura_tsra_r=28, E7_ml_aura_ml_tsra_r=38
+```
+
+해석:
+
+- 에이전트 의사결정 증거가 "선택했다"에서 끝나지 않고 "선택 이후 어떤 metric/outcome feedback을 받았는지"까지 이어진다.
+- 공격과 방어를 같은 feedback audit 형식으로 비교할 수 있다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

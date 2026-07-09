@@ -134,7 +134,9 @@ ALIGNMENT_SPECS = [
             "tool invocations with input and output summaries; causality audit verifies selected "
             "actions against candidate, tool, and score/threshold evidence; margin audit records "
             "top-score, threshold, eligible-ready, and no-op decision support; goal-alignment audit "
-            "checks that attack and defense decisions match their stated objectives and observed risks."
+            "checks that attack and defense decisions match their stated objectives and observed risks; "
+            "decision feedback audit links selected E5/E7 events to event logs, metric feedback, "
+            "closed-loop outcomes, and defense action attribution."
         ),
         agent_or_component="AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace",
         evidence_files=[
@@ -148,6 +150,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/agent_decision_causality_audit.py",
             "src/experiments/agent_decision_margin_audit.py",
             "src/experiments/agent_goal_alignment_audit.py",
+            "src/experiments/agent_decision_feedback_audit.py",
             "src/experiments/agent_memory_belief_audit.py",
             "src/experiments/agent_tool_usage_audit.py",
             "src/experiments/agent_interface_manifest.py",
@@ -159,6 +162,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/agent_decision_causality_audit.csv",
             "outputs/report_tables/agent_decision_margin_audit.csv",
             "outputs/report_tables/agent_goal_alignment_audit.csv",
+            "outputs/report_tables/agent_decision_feedback_audit.csv",
             "outputs/report_tables/agent_memory_belief_audit.csv",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             "outputs/report_tables/agent_interface_manifest.csv",
@@ -175,6 +179,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_decision_causality_audit.csv", 399),
             RowCountCheck("outputs/report_tables/agent_decision_margin_audit.csv", 399),
             RowCountCheck("outputs/report_tables/agent_goal_alignment_audit.csv", 399),
+            RowCountCheck("outputs/report_tables/agent_decision_feedback_audit.csv", 66),
             RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 23),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
