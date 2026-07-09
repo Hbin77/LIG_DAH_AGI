@@ -683,11 +683,28 @@ outputs/report_tables/pace_transition_audit.md
 
 ## 현재 한계
 
+- Agent core regression은 빠른 코드 불변식 검증이고, 전체 실험 audit를 대체하지 않는다.
 - Memory는 최근 관측/판단과 belief state를 저장하는 경량 메모리다.
 - AdaptiveTSRA-R에서는 이 Memory가 optional defense action gating에 직접 사용된다.
 - 장기 학습 또는 온라인 policy update는 아직 없다.
 - Tool은 시뮬레이터 내부 함수만 호출한다.
 - 외부 네트워크, 실제 RF, 실제 공격 도구는 호출하지 않는다.
+
+## Agent Core Regression Gate
+
+빠른 코드 레벨 회귀 테스트는 다음 명령으로 실행한다.
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+검증 범위:
+
+- AgentRuntime: tool call record, trace id sequence, memory summary, previous selected action chain
+- AURA-ML: persisted `AttackEvent.agent=AURA-ML`, selected top-score candidate, selection score formula, cooldown no-op
+- TSRA-R: defense priority score ordering, candidate score와 emitted event detail 일치, cooldown no-op
+
+`scripts/verify_submission_state.py`는 이 unittest를 직접 실행한다. `.github/workflows/quality.yml`도 `hbin` push에서 compile, regression test, package rebuild, final verifier를 실행한다.
 
 ## 다음 개선
 

@@ -17,6 +17,7 @@ ROOT_FILES = [
     "requirements.txt",
     "requirements-gpu.txt",
     ".gitignore",
+    ".github/workflows/quality.yml",
 ]
 
 REQUIRED_PATHS = [
@@ -27,6 +28,8 @@ REQUIRED_PATHS = [
     "scripts/generate_release_handoff.py",
     "scripts/verify_submission_state.py",
     "scripts/verify_external_package_link.py",
+    ".github/workflows/quality.yml",
+    "tests/test_agent_regression.py",
     "src/agents/runtime.py",
     "src/aura/rule_decision_engine.py",
     "src/tsra_r/rule_defender.py",
@@ -187,7 +190,7 @@ def collect_files() -> list[Path]:
         if path.exists() and not is_excluded(path):
             files.add(path)
 
-    for folder in ["src", "docs", "scripts"]:
+    for folder in ["src", "docs", "scripts", "tests", ".github"]:
         root = ROOT / folder
         if not root.exists():
             continue
@@ -240,7 +243,9 @@ def write_manifest(files: list[Path], zip_path: Path | None = None) -> Path:
         "## 포함 기준",
         "",
         "- `README.md`, `requirements*.txt`",
+        "- `.github/workflows/quality.yml`: hbin branch quality gate",
         "- `src/`: 공격/방어 에이전트, 시뮬레이터, ML, 실험 코드",
+        "- `tests/`: agent runtime, AURA-ML, TSRA-R regression tests",
         "- `docs/`: 시나리오, 에이전트, 개발 판단 근거",
         "- `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약",
         "- `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림",

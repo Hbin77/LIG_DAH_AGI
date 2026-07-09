@@ -861,12 +861,21 @@ Outputs:
 
 This checks branch policy, reproduction commands, agent evidence, closed-loop evidence, package inputs, safety-boundary text, and team handoff docs before the package is rebuilt.
 
+## Agent Regression Tests
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+The regression tests are fast code-level checks for the agent core. They lock the AgentRuntime memory/tool/DecisionTrace chain, the AURA-ML attack event identity and selection-score formula, and the TSRA-R defense priority ordering plus cooldown no-op gate. GitHub Actions runs the same gate on `hbin` pushes through `.github/workflows/quality.yml`.
+
 ## Full Reproduction
 
 ```bash
 python3 -m src.ml.build_dataset --rows 3000
 python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
+python3 -m unittest discover -s tests
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error

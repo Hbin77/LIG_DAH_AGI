@@ -5,7 +5,9 @@
 ## 포함 기준
 
 - `README.md`, `requirements*.txt`
+- `.github/workflows/quality.yml`: hbin branch quality gate
 - `src/`: 공격/방어 에이전트, 시뮬레이터, ML, 실험 코드
+- `tests/`: agent runtime, AURA-ML, TSRA-R regression tests
 - `docs/`: 시나리오, 에이전트, 개발 판단 근거
 - `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약
 - `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림
@@ -22,15 +24,16 @@
 
 ## 패키지 요약
 
-- payload_file_count: 233
-- total_payload_bytes: 4543358
+- payload_file_count: 235
+- total_payload_bytes: 4564260
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 234
-- zip_bytes: 1974823
-- zip_sha256: `8bb95427643690087c3c8adae8d87facc5f8b7b94cc32295513526d6cbd51993`
+- zip_file_count: 236
+- zip_bytes: 1981322
+- zip_sha256: `30002c0f450dc79cb1d555c2006db8c92ccdf05906cc3a69376c0209dcbfb087`
 
 ## 포함 파일
 
+- `.github/workflows/quality.yml`
 - `.gitignore`
 - `README.md`
 - `docs/1-DAH 예선_안내서_260615_123033.pdf`
@@ -264,3 +267,4 @@
 - `src/tsra_r/adaptive_defender.py`
 - `src/tsra_r/ml_defender.py`
 - `src/tsra_r/rule_defender.py`
+- `tests/test_agent_regression.py`

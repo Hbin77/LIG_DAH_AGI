@@ -3081,3 +3081,43 @@ counter_defense_bonus_candidates: 15
 - `docs/agents/AURA_ATTACK_AGENT.md`와 `docs/agents/AGENT_RUNTIME.md`에 감사 목적과 현재 결과를 추가했다.
 
 이 보강의 의미는 AURA/AURA-ML이 단순히 공격 이벤트를 생성하는 코드가 아니라, AgentRuntime tool path, 점수 공식, cadence gate, event payload, defense-context score evidence가 연결된 공격 에이전트로 검증된다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace와 감사 체계만 강화한다.
+
+### 74. Agent Core Regression Gate를 추가한 이유
+
+지금까지의 검증은 대부분 실험 산출물과 trace audit 중심이었다. 이 구조는 최종 evidence를 강하게 만들지만, 협업자가 핵심 에이전트 코드를 수정했을 때 작은 불변식이 깨지는 문제를 빠르게 잡는 용도에는 무겁다. 예를 들어 `AURA-ML` event identity가 다시 `AURA`로 돌아가거나, TSRA-R priority ordering이 깨지거나, AgentRuntime memory chain이 끊겨도 전체 실험을 돌린 뒤에야 알 수 있다.
+
+이번 변경은 표준 `unittest` 기반 회귀 테스트를 추가했다. 새 의존성은 넣지 않았다.
+
+추가한 파일:
+
+```text
+tests/test_agent_regression.py
+.github/workflows/quality.yml
+```
+
+테스트 범위:
+
+- `AgentRuntimeRegressionTests`: tool call record, trace id sequence, memory summary, previous selected action chain
+- `AuraMLRegressionTests`: dummy impact model 기반 AURA-ML decision path, `AttackEvent.agent=AURA-ML`, selected top-score candidate, selection score formula, cooldown no-op gate
+- `TsraRRegressionTests`: high-pressure MissionState 기반 TSRA-R priority event ordering, candidate score와 event detail 일치, cooldown no-op gate
+
+동반 수정:
+
+- `README.md`와 `FINAL_QA.md`에 `python3 -m unittest discover -s tests`를 추가했다.
+- `scripts/verify_submission_state.py`가 unittest를 직접 실행하고 3개 이상 통과해야 final verification을 통과하게 했다.
+- `scripts/build_submission_package.py`가 `tests/`와 `.github/workflows/quality.yml`을 제출 패키지에 포함한다.
+- `docs/process/SUBMISSION_PACKAGE.md`와 `NEXT_DEVELOPMENT_QUEUE.md`에 회귀 테스트와 `hbin` 품질 게이트 기준을 기록했다.
+- GitHub Actions는 `hbin` push에서 compile, unit regression, package rebuild, final verifier를 실행한다. `main` 브랜치에는 푸시하지 않는다.
+
+검증 결과:
+
+```text
+python3 -m unittest discover -s tests
+Ran 3 tests in 0.001s
+OK
+
+python3 -m compileall -q src scripts tests
+pass
+```
+
+이 보강의 의미는 전체 실험 audit 전에 코드 레벨 불변식을 빠르게 잠그는 것이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation agent code의 품질 게이트만 강화한다.

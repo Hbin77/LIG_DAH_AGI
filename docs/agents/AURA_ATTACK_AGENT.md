@@ -235,6 +235,7 @@ Throughput: 약 1,566,851 samples/sec
 - ML 기반 impact predictor
 - AURA-ML objective/counter-defense-aware selection score
 - AURA Attack Decision Path 감사
+- Agent core regression test에서 AURA-ML event identity, score formula, cooldown gate 검증
 - `queue_pressure`, `failover_chasing`, `stale_cop_induction` 선택 커버리지 검증
 - GPU MPS MLP 확장 실험
 - attack event JSONL 로그
@@ -282,3 +283,11 @@ outputs/experiments/<experiment>/aura_decision_traces.jsonl
 이제 AURA의 한 번의 판단은 단순히 `AttackEvent`만 남기지 않는다. 어떤 상태를 봤는지, 어떤 후보를 만들었는지, 각 후보 점수가 얼마였는지, 왜 no-op 또는 특정 공격 효과를 골랐는지까지 남긴다.
 
 ML AURA의 trace에는 `base_attack_score`, `objective_bonus`, `repeated_tactic_penalty`, `selection_score`, `objective_reason`, `cross_agent_defense_context`가 함께 남는다. 그래서 선택 결과를 사후에 꾸민 것이 아니라, 어떤 도구 호출과 어떤 memory 상태 때문에 그 공격이 선택됐는지 재현할 수 있다.
+
+빠른 회귀 테스트:
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+이 테스트는 dummy impact model로 AURA-ML을 직접 실행해 persisted `AttackEvent.agent`, selected top-score candidate, selection score formula, cooldown no-op gate가 유지되는지 확인한다.

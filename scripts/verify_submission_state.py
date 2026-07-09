@@ -23,6 +23,8 @@ REQUIRED_FILES = [
     "scripts/generate_release_handoff.py",
     "scripts/verify_submission_state.py",
     "scripts/verify_external_package_link.py",
+    ".github/workflows/quality.yml",
+    "tests/test_agent_regression.py",
     "docs/process/COMPETITION_DIRECTION.md",
     "docs/process/NEXT_DEVELOPMENT_QUEUE.md",
     "docs/process/DEVELOPMENT_LOG.md",
@@ -269,6 +271,31 @@ def check_required_files() -> list[str]:
         require(path.stat().st_size > 0, f"empty required file: {rel}")
         checked.append(rel)
     return checked
+
+
+def check_regression_tests() -> list[str]:
+    result = subprocess.run(
+        ["python3", "-m", "unittest", "discover", "-s", "tests"],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    require(
+        result.returncode == 0,
+        "agent regression tests failed: "
+        + (result.stdout.strip() or result.stderr.strip() or "no output"),
+    )
+    output = "\n".join(
+        part for part in [result.stdout.strip(), result.stderr.strip()] if part
+    )
+    match = re.search(r"Ran\s+(\d+)\s+tests?", output)
+    test_count = int(match.group(1)) if match else 0
+    require(
+        test_count >= 3,
+        f"expected at least 3 agent regression tests, got {test_count}",
+    )
+    return [f"agent_regression_tests={test_count} pass"]
 
 
 def check_csv_outputs() -> list[str]:
@@ -2621,6 +2648,8 @@ def check_zip() -> list[str]:
         not stale_payload_files,
         f"package ZIP payload differs from worktree files: {stale_payload_files[:8]}",
     )
+    require("tests/test_agent_regression.py" in manifest_text, "manifest missing agent regression tests")
+    require(".github/workflows/quality.yml" in manifest_text, "manifest missing hbin quality workflow")
     require("outputs/report_tables/battle_timeline.md" in manifest_text, "manifest missing battle timeline")
     require("outputs/report_tables/incident_summary.md" in manifest_text, "manifest missing incident summary")
     require("outputs/report_tables/operator_alerts.md" in manifest_text, "manifest missing operator alerts")
@@ -2842,6 +2871,7 @@ def main() -> None:
     args = parse_args()
     checks = []
     checks.extend(check_required_files())
+    checks.extend(check_regression_tests())
     checks.extend(check_csv_outputs())
     checks.extend(check_zip())
     checks.extend(check_git_state(require_clean=args.require_clean))

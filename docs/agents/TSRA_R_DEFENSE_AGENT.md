@@ -427,6 +427,7 @@ emission_gate_violations: 0
 - AURA attack context 기반 defense priority score
 - defense priority score 기반 core event ordering
 - Defense Priority Decision Path 감사
+- Agent core regression test에서 priority ordering, event detail match, cooldown no-op 검증
 - Adaptive Memory 기반 optional action gating
 - Adaptive Defense Decision Path 감사
 - defense event JSONL 로그
@@ -509,6 +510,14 @@ outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
 ```
 
 이제 TSRA-R의 한 번의 판단은 `DefenseEvent`만 남기지 않는다. 탐지 확률, 방어 조건, cooldown 상태, AURA attack context, 어떤 액션이 가능했는지, 왜 no-op 또는 특정 방어 액션을 실행했는지까지 남긴다. emitted `DefenseEvent.details.related_attack_context`에도 같은 공격 context 요약이 남는다.
+
+빠른 회귀 테스트:
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+이 테스트는 high-pressure MissionState로 TSRA-R을 직접 실행해 defense priority score ordering, 후보 score와 emitted event detail 일치, cooldown no-op gate가 유지되는지 확인한다.
 
 추가로 Rule TSRA-R은 후보별 방어 우선순위 점수를 남긴다.
 

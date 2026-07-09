@@ -27,6 +27,8 @@ outputs/package/release_handoff.md
 ## 포함하는 것
 
 - `README.md`, `requirements.txt`, `requirements-gpu.txt`
+- `.github/workflows/quality.yml`: `hbin` 브랜치 push 품질 게이트
+- `tests/`: AgentRuntime, AURA-ML, TSRA-R 회귀 테스트
 - `scripts/`: 패키지 생성, release handoff 생성, release freeze 자동화, 최종 상태 검증, 외부 링크 검증 도구
 - `src/`: AURA, TSRA-R, Agent Runtime, 시뮬레이터, ML, 실험 코드
 - `docs/`: 시나리오, 에이전트 구조, 개발 판단 근거
@@ -100,6 +102,8 @@ safety_boundary_audit: included
 reproduction_order_audit: included
 submission_readiness_audit: included
 competition_alignment_matrix: included
+agent_regression_tests: included
+hbin_quality_workflow: included
 ```
 
 ZIP 내부 제외 항목 검증:

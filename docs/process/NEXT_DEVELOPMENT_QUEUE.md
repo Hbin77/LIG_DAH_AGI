@@ -3124,3 +3124,54 @@ counter_defense_bonus_candidates: 15
 - AURA/AURA-ML은 후보를 임의로 고르는 함수가 아니라 tool call, score formula, gate, event payload가 이어지는 공격 에이전트로 검증된다.
 - AURA-ML 이벤트는 trace와 persisted event 양쪽에서 `AURA-ML`로 식별된다.
 - 이 변경은 closed simulation 안의 agent identity와 감사 체계를 강화하며 RF, exploit, live network action은 추가하지 않는다.
+
+## P59. Agent Core Regression Gate
+
+상태: 완료
+
+문제:
+
+- 기존 감사 산출물은 실험 실행 뒤 결과와 trace를 강하게 검증하지만, 핵심 코드가 수정될 때 즉시 잡히는 빠른 회귀 테스트층은 약했다.
+- 협업자가 AURA, TSRA-R, AgentRuntime을 따로 수정하면 `AttackEvent.agent`, score formula, priority ordering, memory chain 같은 작은 불변식이 다시 깨질 수 있다.
+- 전체 실험을 매번 돌리기 전에 수 초 안에 실패를 알려주는 코드 레벨 품질 게이트가 필요했다.
+
+구현:
+
+```text
+tests/test_agent_regression.py
+.github/workflows/quality.yml
+scripts/verify_submission_state.py
+scripts/build_submission_package.py
+```
+
+설계:
+
+- 표준 `unittest`만 사용해서 새 의존성을 추가하지 않는다.
+- `AgentRuntimeRegressionTests`는 tool call, memory summary, previous selected action chain, trace id sequence를 확인한다.
+- `AuraMLRegressionTests`는 dummy impact model로 AURA-ML decision path를 직접 실행해 `AttackEvent.agent=AURA-ML`, selected top-score candidate, selection score formula, cooldown no-op gate를 확인한다.
+- `TsraRRegressionTests`는 high-pressure MissionState를 직접 만들어 TSRA-R core defense event ordering, candidate score/event detail match, cooldown no-op gate를 확인한다.
+- `.github/workflows/quality.yml`은 `hbin` push에서 compile, unit regression, package rebuild, final verifier를 실행한다.
+- `verify_submission_state.py`는 `python3 -m unittest discover -s tests`를 직접 실행하고 3개 이상 테스트가 통과해야 한다.
+
+검증:
+
+```bash
+python3 -m unittest discover -s tests
+python3 -m compileall -q src scripts tests
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+agent_regression_tests: 3 pass
+covered paths: AgentRuntime memory/tool/DecisionTrace, AURA-ML attack identity/scoring, TSRA-R priority/cooldown
+quality workflow: .github/workflows/quality.yml
+package inclusion: tests/test_agent_regression.py and hbin quality workflow required
+```
+
+해석:
+
+- 산출물 감사는 그대로 유지하되, 코드 수정 직후 빠르게 깨지는 회귀를 먼저 잡을 수 있게 됐다.
+- AURA-ML의 persisted event identity, TSRA-R defense priority ordering, AgentRuntime memory chain 같은 핵심 불변식이 테스트로 고정됐다.
+- 이 변경은 closed simulation agent code의 품질 게이트만 추가하며 RF, exploit, live network action은 추가하지 않는다.
