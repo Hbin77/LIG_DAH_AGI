@@ -4,7 +4,7 @@
 
 ## P0. DecisionTrace 요약기
 
-상태: 대기
+상태: 완료
 
 문제:
 
@@ -36,9 +36,9 @@ outputs/report_tables/agent_decision_trace_summary.md
 
 완료 기준:
 
-- 시간, agent, policy, selected_action, reason, top candidate, probability/score가 표로 나온다.
-- E5와 E7의 AURA/TSRA-R 판단이 한 파일에서 비교된다.
-- `python3 -m src.experiments.trace_summary` 명령으로 재생성 가능하다.
+- 완료. 시간, agent, policy, selected_action, reason, top candidate, probability/score가 표로 나온다.
+- 완료. E3, E5, E7의 AURA/TSRA-R 판단이 한 파일에서 비교된다.
+- 완료. `python3 -m src.experiments.trace_summary` 명령으로 재생성 가능하다.
 
 검증:
 
@@ -46,6 +46,14 @@ outputs/report_tables/agent_decision_trace_summary.md
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m compileall src
+```
+
+검증 결과:
+
+```text
+agent_decision_trace_summary.csv: 215 rows
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+experiments: E3_rule_aura, E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
 ```
 
 ## P1. AURA COA Card

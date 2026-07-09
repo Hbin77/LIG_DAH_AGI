@@ -188,6 +188,62 @@ docs/process/COMPETITION_DIRECTION.md
 
 이 순서가 현재 프로젝트의 진행 방향이다.
 
+### 11. DecisionTrace 요약기를 추가한 이유
+
+Agent Runtime을 추가하면서 AURA와 TSRA-R은 각 판단 주기마다 `DecisionTrace`를 남긴다. 하지만 JSONL 원본은 상세해서 사람이 바로 흐름을 읽기 어렵다. 따라서 P0 작업으로 trace 요약기를 추가했다.
+
+구현:
+
+```text
+src/experiments/trace_summary.py
+```
+
+입력:
+
+```text
+outputs/experiments/*/aura_decision_traces.jsonl
+outputs/experiments/*/tsra_r_decision_traces.jsonl
+```
+
+출력:
+
+```text
+outputs/report_tables/agent_decision_trace_summary.csv
+outputs/report_tables/agent_decision_trace_summary.md
+```
+
+요약 필드:
+
+- experiment
+- time_sec
+- agent
+- policy
+- selected_action
+- score
+- probability
+- top_candidate
+- top_candidate_signal
+- reason
+- tool_calls
+
+검증:
+
+```text
+python3 -m compileall src
+python3 -m src.experiments.run_all
+python3 -m src.experiments.trace_summary
+```
+
+결과:
+
+```text
+agent_decision_trace_summary.csv: 215 rows
+experiments: E3_rule_aura, E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+```
+
+이 변경으로 AURA가 왜 특정 공격 효과를 골랐는지, TSRA-R이 왜 특정 방어 액션 또는 no-op을 선택했는지 같은 시간축에서 확인할 수 있다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

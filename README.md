@@ -88,6 +88,19 @@ This writes:
 - `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.md`
 - `outputs/report_tables/ml_model_comparison.md`
 
+## Summarize Agent Decision Traces
+
+```bash
+python3 -m src.experiments.trace_summary
+```
+
+This writes:
+
+- `outputs/report_tables/agent_decision_trace_summary.csv`
+- `outputs/report_tables/agent_decision_trace_summary.md`
+
+The summary combines AURA and TSRA-R `DecisionTrace` logs into one time-ordered table with selected action, top candidate, score/probability, tool calls, and reason.
+
 ## Run 30-Seed Repeated Experiments
 
 ```bash
@@ -177,5 +190,6 @@ python3 -m src.ml.build_dataset --rows 3000
 python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
+python3 -m src.experiments.trace_summary
 python3 -m src.experiments.run_batch
 ```
