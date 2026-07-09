@@ -3,6 +3,22 @@ from __future__ import annotations
 from src.shared.schemas import AttackCandidate, MissionState
 
 
+def candidate_trace_payload(candidate: AttackCandidate) -> dict:
+    return {
+        "action": candidate.attack_type,
+        "target_link": candidate.target_link,
+        "target_traffic_classes": list(candidate.target_traffic_classes),
+        "start_time": candidate.start_time,
+        "duration_sec": candidate.duration_sec,
+        "latency_ms_add": candidate.latency_ms_add,
+        "jitter_ms_add": candidate.jitter_ms_add,
+        "packet_loss_add": candidate.packet_loss_add,
+        "bandwidth_limit_mbps": candidate.bandwidth_limit_mbps,
+        "queue_pressure": candidate.queue_pressure,
+        "reason": candidate.reason,
+    }
+
+
 def generate_candidates(state: MissionState) -> list[AttackCandidate]:
     start = state.time_sec
     target = state.active_link or "SATCOM"
@@ -88,4 +104,3 @@ def generate_candidates(state: MissionState) -> list[AttackCandidate]:
             )
         )
     return candidates
-

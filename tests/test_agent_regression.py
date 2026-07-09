@@ -242,6 +242,43 @@ class AuraMLRegressionTests(unittest.TestCase):
             self.assertTrue(row["cross_agent_defense_context_used"])
 
         tool_names = [call.tool_name for call in trace.tool_calls]
+        generator_calls = [
+            call for call in trace.tool_calls
+            if call.tool_name == "generate_attack_candidates"
+        ]
+        self.assertEqual(len(generator_calls), 1)
+        generated_candidate_payloads = [
+            (
+                row["attack_type"],
+                row["target_link"],
+                tuple(row["target_traffic_classes"]),
+                row["start_time"],
+                row["duration_sec"],
+                row["latency_ms_add"],
+                row["jitter_ms_add"],
+                row["packet_loss_add"],
+                row["bandwidth_limit_mbps"],
+                row["queue_pressure"],
+            )
+            for row in generator_calls[0].output_summary
+        ]
+        evaluated_candidate_payloads = [
+            (
+                row["action"],
+                row["target_link"],
+                tuple(row["target_traffic_classes"]),
+                row["start_time"],
+                row["duration_sec"],
+                row["latency_ms_add"],
+                row["jitter_ms_add"],
+                row["packet_loss_add"],
+                row["bandwidth_limit_mbps"],
+                row["queue_pressure"],
+            )
+            for row in trace.candidate_actions
+        ]
+        self.assertEqual(evaluated_candidate_payloads, generated_candidate_payloads)
+
         self.assertEqual(tool_names.count("predict_candidate_impact"), len(trace.candidate_actions))
         self.assertEqual(tool_names.count("estimate_candidate_effect"), len(trace.candidate_actions))
         self.assertEqual(tool_names.count("estimate_detectability"), len(trace.candidate_actions))

@@ -157,6 +157,8 @@ Top-1 action match: 0.904
 9. selection_score가 가장 높은 후보를 AttackEvent로 기록
 ```
 
+`candidate_actions`는 단순 점수표가 아니라 `generate_attack_candidates` tool output의 후보 페이로드를 그대로 보존한다. 따라서 attack type, target link, traffic class, start/duration, latency/jitter/loss, bandwidth limit, queue pressure가 생성 후보와 평가 후보 사이에서 일치하는지 검증할 수 있다.
+
 `objective_bonus`는 임의 가산점이 아니다. AURA-ML이 앞선 공격에서 아직 `stale_cop_induction`을 쓰지 않았고, 마지막 공격 예산 구간에서 stale data risk가 남아 있을 때만 제한적으로 붙는다. 목적은 단일 high-score 전술만 반복하지 않고 mission objective 관점의 전술 커버리지를 남기는 것이다.
 
 `counter_defense_bonus`도 임의 가산점이 아니다. AURA-ML이 TSRA-R의 active/recent defense context를 보고, PACE 전환 뒤 `failover_chasing`을 시도하거나 priority/video 방어 뒤 queue pressure를 재평가하는 경우에만 제한적으로 붙는다. 이 값과 `counter_defense_reason`은 후보 row, selected action, feedback에 남으므로 방어 맥락이 단순 로그가 아니라 공격 에이전트의 선택 점수에 들어갔는지 추적할 수 있다.

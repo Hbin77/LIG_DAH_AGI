@@ -3316,3 +3316,41 @@ outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl
 - `rule_tool_event_pairs == delegate_rule_event_pairs`
 
 이 보강의 의미는 TSRA-R-ML의 상위 ML 판단과 하위 rule-policy 판단을 모두 trace로 검증할 수 있다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation trace evidence만 강화한다.
+
+### 80. AURA-ML Generated Candidate Payload Parity를 추가한 이유
+
+AURA-ML은 `generate_attack_candidates` tool로 후보를 만든 뒤, 각 후보에 대해 ML impact, analytic effect, detectability를 계산하고 selection score가 가장 높은 후보를 고른다. 이전 감사는 tool 호출 수와 selected event payload parity는 강하게 봤지만, 생성 tool output의 후보 payload가 실제 `candidate_actions` 평가 row에 그대로 들어갔는지는 별도 identity 비교로 보지 않았다.
+
+이번 변경은 공격 에이전트의 후보 생성과 후보 평가 사이를 더 강하게 묶었다.
+
+변경한 파일:
+
+```text
+src/aura/candidate_generator.py
+src/aura/rule_decision_engine.py
+src/aura/ml_impact_predictor.py
+src/experiments/ml_attack_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+tests/test_agent_regression.py
+docs/agents/AGENT_RUNTIME.md
+docs/agents/AURA_ATTACK_AGENT.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+핵심 설계:
+
+- `candidate_trace_payload(candidate)`가 AttackCandidate의 구조적 payload를 candidate row로 변환한다.
+- AURA와 AURA-ML 모두 `candidate_actions`에 attack type, target link, target traffic classes, start/duration, latency/jitter/loss, bandwidth limit, queue pressure를 남긴다.
+- `ml_attack_decision_path_audit` MAP02는 `generate_attack_candidates` tool output identity와 `candidate_actions` identity가 trace별로 일치하는지 검사한다.
+- final verifier는 `generated_candidate_payload_matches=5`, `generated_candidate_payload_mismatches=0`을 요구한다.
+
+검증 의미:
+
+```text
+ml_attack_decision_path_audit MAP02 generated_candidate_payload_matches: 5
+ml_attack_decision_path_audit MAP02 generated_candidate_payload_mismatches: 0
+agent_regression_tests: 4 pass
+```
+
+이 보강의 의미는 AURA-ML이 생성한 후보와 실제 평가한 후보가 같은 객체적 의미를 갖는다는 점을 trace에서 증명한다는 것이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.

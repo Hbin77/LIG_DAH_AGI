@@ -86,6 +86,8 @@ adaptive_defense_decision_path_audit rows: 6 pass
 metric_gate_summary rows: 12 pass
 ml_contribution_audit rows: 7 pass
 ml_attack_decision_path_audit rows: 6 pass
+ml_attack_decision_path_audit generated_candidate_payload_matches: 5
+ml_attack_decision_path_audit generated_candidate_payload_mismatches: 0
 ml_attack_decision_path_audit payload_selected_matches: 5
 ml_attack_decision_path_audit counter_defense_bonus_candidates: 7
 ml_attack_decision_path_audit selected_counter_defense_bonus_count: 3

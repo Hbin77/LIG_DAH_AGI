@@ -394,6 +394,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_candidate_impact_invocations"),
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_attack_probability_invocations"),
             ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "candidate_total=26"),
+            ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "generated_candidate_payload_matches=5"),
+            ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "generated_candidate_payload_mismatches=0"),
             ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "selected_matches_top_candidate=5"),
             ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "payload_selected_matches=5"),
             ContentCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", "score_formula_matches=26"),

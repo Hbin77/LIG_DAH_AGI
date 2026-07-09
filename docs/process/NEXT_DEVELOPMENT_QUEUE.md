@@ -3443,3 +3443,56 @@ MDP05 rule_tool_delegate_event_mismatches: 0
 - TSRA-R-ML은 ML 판단 trace와 하위 rule-policy trace를 분리해 남긴다.
 - 상위 에이전트의 tool delegation과 하위 정책의 selected action이 같은 이벤트를 가리키므로, 방어 에이전트 구조가 더 검증 가능해진다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation trace evidence만 강화한다.
+
+## P65. AURA-ML Generated Candidate Payload Parity
+
+상태: 완료
+
+문제:
+
+- AURA-ML의 `MAP02`는 후보 생성, ML impact 예측, analytic effect 추정, detectability 추정 tool 호출 수를 검증했다.
+- 하지만 `generate_attack_candidates` tool output으로 나온 후보 페이로드가 실제 `candidate_actions` 평가 row에 그대로 들어갔는지는 개수 중심으로만 확인했다.
+- 방어 쪽은 tool output과 selected event parity까지 닫았으므로, 공격 쪽도 생성 후보와 평가 후보의 identity parity를 명시적으로 닫아야 한다.
+
+구현:
+
+```text
+src/aura/candidate_generator.py
+src/aura/rule_decision_engine.py
+src/aura/ml_impact_predictor.py
+src/experiments/ml_attack_decision_path_audit.py
+scripts/verify_submission_state.py
+tests/test_agent_regression.py
+docs/agents/AURA_ATTACK_AGENT.md
+docs/agents/AGENT_RUNTIME.md
+```
+
+설계:
+
+- `candidate_trace_payload(candidate)`를 추가해 AURA/AURA-ML candidate row에 생성 후보의 구조적 payload를 보존한다.
+- 보존 필드는 attack type, target link, traffic classes, start/duration, latency/jitter/loss, bandwidth limit, queue pressure, reason이다.
+- `ml_attack_decision_path_audit` MAP02가 각 attack trace에서 `generate_attack_candidates` tool output identity와 `candidate_actions` identity를 비교한다.
+- final verifier와 competition alignment가 `generated_candidate_payload_matches=5`, `generated_candidate_payload_mismatches=0`을 요구한다.
+
+검증:
+
+```bash
+python3 -m unittest discover -s tests
+python3 -m src.experiments.run_all
+python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+ml_attack_decision_path_audit rows: 6 pass
+MAP02 generated_candidate_payload_matches: 5
+MAP02 generated_candidate_payload_mismatches: 0
+```
+
+해석:
+
+- AURA-ML은 생성한 후보와 평가한 후보가 같은 payload인지 trace에서 증명한다.
+- 이 변경은 공격 에이전트의 observe-tool-candidate-score-selected_action 연결성을 강화한다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.

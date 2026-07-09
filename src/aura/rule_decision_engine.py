@@ -4,7 +4,7 @@ from pathlib import Path
 
 from src.agents.runtime import AgentRuntime
 from src.agents.schema import AgentObservation, ToolCallRecord
-from src.aura.candidate_generator import generate_candidates
+from src.aura.candidate_generator import candidate_trace_payload, generate_candidates
 from src.aura.impact_estimator import estimate_candidate_effect, estimate_detectability
 from src.shared.metrics import compute_attack_score
 from src.shared.schemas import AttackEvent, MissionState
@@ -120,14 +120,12 @@ class RuleAURA:
             scored.append((score, candidate, predicted, detectability))
             candidate_actions.append(
                 {
-                    "action": candidate.attack_type,
-                    "target_link": candidate.target_link,
+                    **candidate_trace_payload(candidate),
                     "score": round(score, 6),
                     "predicted_mission_impact": round(impact, 6),
                     "detectability_score": round(detectability, 6),
                     "cross_agent_defense_context": defense_context,
                     "cross_agent_defense_context_used": self._defense_context_used(defense_context),
-                    "reason": candidate.reason,
                 }
             )
 

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from src.agents.runtime import AgentRuntime
 from src.agents.schema import AgentObservation, ToolCallRecord
-from src.aura.candidate_generator import generate_candidates
+from src.aura.candidate_generator import candidate_trace_payload, generate_candidates
 from src.aura.impact_estimator import estimate_candidate_effect, estimate_detectability
 from src.aura.rule_decision_engine import RuleAURA
 from src.shared.features import candidate_features
@@ -172,8 +172,7 @@ class MLAURA:
             scored.append((score, candidate, predicted))
             candidate_actions.append(
                 {
-                    "action": candidate.attack_type,
-                    "target_link": candidate.target_link,
+                    **candidate_trace_payload(candidate),
                     "score": round(score, 6),
                     "base_attack_score": round(base_score, 6),
                     "objective_bonus": round(objective_bonus, 6),
@@ -186,7 +185,6 @@ class MLAURA:
                     "counter_defense_reason": counter_reason,
                     "cross_agent_defense_context": defense_context,
                     "cross_agent_defense_context_used": self._defense_context_used(defense_context),
-                    "reason": candidate.reason,
                 }
             )
 

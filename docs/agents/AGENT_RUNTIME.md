@@ -92,6 +92,8 @@ predict_candidate_impact
 summarize_defense_context
 ```
 
+AURA/AURA-ML의 `candidate_actions`는 `generate_attack_candidates` tool output에서 나온 후보 페이로드를 보존한다. `action`, `target_link`, traffic class, start/duration, latency/jitter/loss, bandwidth limit, queue pressure가 trace에 남기 때문에 후보 생성 tool output과 실제 평가 후보가 같은지 감사할 수 있다.
+
 TSRA-R 도구:
 
 ```text
