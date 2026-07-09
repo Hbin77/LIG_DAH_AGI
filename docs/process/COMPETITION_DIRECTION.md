@@ -135,9 +135,10 @@ Metrics
 6. 에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 인터페이스를 manifest로 명시한다.
 7. 에이전트 capability를 runtime action, observed effect, validation gate에 연결한다.
 8. 공격 capability가 어떤 TSRA-R 방어 capability로 커버되는지 coverage matrix로 검증한다.
-9. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
-10. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-11. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+9. 실제 E5/E7 로그에서 required defense가 active 또는 response window 안에 나오는지 감사한다.
+10. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
+11. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+12. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -537,6 +538,32 @@ outputs/report_tables/attack_defense_coverage.md
 attack_defense_coverage rows: 4
 coverage_status: all covered
 covered attacks: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_induction
+```
+
+### P16. Attack-Defense Response Audit
+
+상태: 완료
+
+목적:
+
+- coverage matrix가 정적 매핑에 그치지 않게 실제 E5/E7 event log에서 방어 반응을 확인한다.
+- 공격 시점에 이미 active인 방어와 공격 후 response window 안에 새로 나온 방어를 함께 계산한다.
+- required defense 누락과 support defense partial을 구분해 잔여 위험을 숨기지 않는다.
+
+산출물:
+
+```text
+src/experiments/attack_defense_response_audit.py
+outputs/report_tables/attack_defense_response_audit.csv
+outputs/report_tables/attack_defense_response_audit.md
+```
+
+검증 결과:
+
+```text
+attack_defense_response_audit rows: 10
+missed required defenses: 0
+support partial residual risk: 1 row
 ```
 
 ## 최종 판단 기준

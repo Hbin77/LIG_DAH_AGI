@@ -243,6 +243,23 @@ outputs/report_tables/attack_defense_coverage.md
 
 이 coverage table은 `bandwidth_limit`, `failover_chasing`, `queue_pressure`, `stale_cop_induction`을 각각 대응 방어 capability, validation gate, residual risk에 연결한다. 공격/방어 에이전트를 따로 개발해도 이 표가 공방 연결성 기준이 된다.
 
+## Response Audit
+
+정적 coverage가 실제 이벤트 로그에서 지켜지는지는 다음 명령으로 감사한다.
+
+```bash
+python3 -m src.experiments.attack_defense_response_audit
+```
+
+산출물:
+
+```text
+outputs/report_tables/attack_defense_response_audit.csv
+outputs/report_tables/attack_defense_response_audit.md
+```
+
+이 audit는 E5/E7의 공격 이벤트마다 required defense가 공격 시점에 이미 active였는지, 또는 40초 response window 안에 나왔는지 확인한다. required defense가 누락되면 실패로 보고, support defense 누락은 residual risk로 남긴다.
+
 예시:
 
 ```json

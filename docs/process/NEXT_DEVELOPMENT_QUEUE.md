@@ -817,7 +817,57 @@ mapped attacks: bandwidth_limit, failover_chasing, queue_pressure, stale_cop_ind
 - 이 산출물은 공격 담당과 방어 담당이 서로 다른 파일을 개발하더라도 capability 단위 연결성을 유지하게 하는 기준표다.
 - 새 공격 capability를 추가하면 반드시 대응 방어 capability와 validation gate를 같이 추가해야 한다.
 
-## P16. 제출 직전 브랜치/패키지 동결
+## P16. Attack-Defense Response Audit
+
+상태: 완료
+
+문제:
+
+- Attack-Defense Coverage는 정적 매핑이므로 실제 로그에서 방어가 시간 안에 반응했는지는 별도 확인이 필요하다.
+- 방어가 이미 active인 상태와 공격 이후 새로 발생한 방어 이벤트를 구분하지 않으면 실제 공방 루프 해석이 흐려진다.
+
+구현:
+
+```text
+src/experiments/attack_defense_response_audit.py
+outputs/report_tables/attack_defense_response_audit.csv
+outputs/report_tables/attack_defense_response_audit.md
+```
+
+구현 방식:
+
+- E5/E7의 `attack_events.jsonl`과 `defense_events.jsonl`을 읽는다.
+- 공격 시점에 `details.until_sec` 기준으로 active인 방어 이벤트를 계산한다.
+- 공격 후 40초 안에 나온 방어 이벤트를 response로 계산한다.
+- required defense 누락은 실패로 보고, support defense 누락은 residual risk로 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.attack_defense_response_audit` 명령으로 재생성 가능하다.
+- 완료. E5/E7 공격 이벤트 10개가 감사된다.
+- 완료. required defense missed row는 없다.
+- 완료. support partial row는 숨기지 않고 residual risk로 남긴다.
+
+검증:
+
+```bash
+python3 -m src.experiments.attack_defense_response_audit
+```
+
+검증 결과:
+
+```text
+attack_defense_response_audit.csv: 10 rows
+missed_required: 0
+required_covered_support_partial: 1
+```
+
+해석:
+
+- 이 산출물은 정적 coverage와 실제 event timeline 사이를 연결한다.
+- 공격/방어 에이전트를 따로 개발해도 required response timing이 깨지면 final verifier에서 잡히게 된다.
+
+## P17. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "src/experiments/agent_interface_manifest.py",
     "src/experiments/agent_capability_matrix.py",
     "src/experiments/attack_defense_coverage.py",
+    "src/experiments/attack_defense_response_audit.py",
     "src/experiments/metric_gate.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -59,6 +60,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_capability_matrix.md",
     "outputs/report_tables/attack_defense_coverage.csv",
     "outputs/report_tables/attack_defense_coverage.md",
+    "outputs/report_tables/attack_defense_response_audit.csv",
+    "outputs/report_tables/attack_defense_response_audit.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -296,6 +299,33 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("attack_defense_coverage rows=4 covered")
 
+    response_audit_rows = read_csv("outputs/report_tables/attack_defense_response_audit.csv")
+    require(
+        len(response_audit_rows) == 10,
+        f"expected 10 attack-defense response audit rows, got {len(response_audit_rows)}",
+    )
+    response_experiments = {row["experiment"] for row in response_audit_rows}
+    require(
+        response_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"unexpected response audit experiments: {sorted(response_experiments)}",
+    )
+    missed_required = [
+        row["attack_event_id"]
+        for row in response_audit_rows
+        if row.get("response_status") == "missed_required"
+        or row.get("missing_required_defenses") not in {"", "none"}
+    ]
+    require(not missed_required, f"attack-defense response audit missed required responses: {missed_required[:8]}")
+    require(
+        any(row["response_status"] == "required_covered_support_partial" for row in response_audit_rows),
+        "response audit should expose at least one support-partial residual risk",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in response_audit_rows),
+        "attack-defense response audit missing safety boundary",
+    )
+    checks.append("attack_defense_response_audit rows=10 no missed required")
+
     metric_gate_rows = read_csv("outputs/report_tables/metric_gate_summary.csv")
     require(len(metric_gate_rows) == 11, f"expected 11 metric gate rows, got {len(metric_gate_rows)}")
     failed_metric_gates = [
@@ -445,6 +475,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/attack_defense_coverage.md" in manifest_text,
         "manifest missing attack-defense coverage",
+    )
+    require(
+        "outputs/report_tables/attack_defense_response_audit.md" in manifest_text,
+        "manifest missing attack-defense response audit",
     )
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,

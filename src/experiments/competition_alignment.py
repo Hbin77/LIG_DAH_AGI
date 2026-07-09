@@ -149,30 +149,35 @@ ALIGNMENT_SPECS = [
         implemented_mechanism=(
             "Battle timeline and incident summary merge AURA events, TSRA-R events, trace reasons, "
             "and metric movement for E5 and E7; attack-defense coverage maps each AURA capability "
-            "to the TSRA-R capabilities and validation gates that cover it."
+            "to the TSRA-R capabilities and validation gates that cover it; response audit checks "
+            "whether required defenses are active or emitted within the response window."
         ),
-        agent_or_component="Battle timeline / Incident summary / Attack-defense coverage",
+        agent_or_component="Battle timeline / Incident summary / Coverage / Response audit",
         evidence_files=[
             "src/experiments/battle_timeline.py",
             "src/experiments/incident_summary.py",
             "src/experiments/attack_defense_coverage.py",
+            "src/experiments/attack_defense_response_audit.py",
             "outputs/report_tables/battle_timeline.csv",
             "outputs/report_tables/incident_summary.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
+            "outputs/report_tables/attack_defense_response_audit.csv",
         ],
         next_gate=(
             "New experiments must preserve attack events, defense events, trace reasons, metric snapshots, "
-            "and attack-to-defense capability coverage."
+            "attack-to-defense capability coverage, and required response timing."
         ),
         content_checks=[
             ContentCheck("outputs/report_tables/battle_timeline.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/incident_summary.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_coverage.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/attack_defense_response_audit.csv", "closed simulation"),
         ],
         row_checks=[
             RowCountCheck("outputs/report_tables/battle_timeline.csv", 40),
             RowCountCheck("outputs/report_tables/incident_summary.csv", 10),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
+            RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
         ],
     ),
     AlignmentSpec(

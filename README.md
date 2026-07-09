@@ -278,6 +278,19 @@ This writes:
 
 The coverage table maps each AURA attack capability to the TSRA-R defense capabilities and validation gates that cover it. Run it after `agent_capability_matrix` and `metric_gate_summary` have been generated.
 
+## Audit Attack-Defense Responses
+
+```bash
+python3 -m src.experiments.attack_defense_response_audit
+```
+
+This writes:
+
+- `outputs/report_tables/attack_defense_response_audit.csv`
+- `outputs/report_tables/attack_defense_response_audit.md`
+
+The response audit checks E5/E7 attack events against active or timely TSRA-R defenses. It distinguishes missed required defenses from support-partial residual risk.
+
 ## Generate Competition Alignment Matrix
 
 ```bash
@@ -398,6 +411,7 @@ python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
+python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py

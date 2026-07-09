@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 124
-- total_payload_bytes: 2356068
+- payload_file_count: 127
+- total_payload_bytes: 2397546
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 125
-- zip_bytes: 1584490
-- zip_sha256: `7015b6e4b350ee50f3d3a430ebb20c0618924fd676700414d51029dcaad4992e`
+- zip_file_count: 128
+- zip_bytes: 1592575
+- zip_sha256: `b0e6ebbc966f6cba44011df80d93b4d5411c1e9d31e2498960753877131be510`
 
 ## 포함 파일
 
@@ -92,6 +92,8 @@
 - `outputs/report_tables/agent_loop_replay.md`
 - `outputs/report_tables/attack_defense_coverage.csv`
 - `outputs/report_tables/attack_defense_coverage.md`
+- `outputs/report_tables/attack_defense_response_audit.csv`
+- `outputs/report_tables/attack_defense_response_audit.md`
 - `outputs/report_tables/aura_coa_cards.csv`
 - `outputs/report_tables/aura_coa_cards.md`
 - `outputs/report_tables/battle_timeline.csv`
@@ -126,6 +128,7 @@
 - `src/experiments/agent_interface_manifest.py`
 - `src/experiments/agent_loop_replay.py`
 - `src/experiments/attack_defense_coverage.py`
+- `src/experiments/attack_defense_response_audit.py`
 - `src/experiments/aura_coa_cards.py`
 - `src/experiments/battle_timeline.py`
 - `src/experiments/competition_alignment.py`

@@ -1013,6 +1013,45 @@ validation_gates: all pass
 - 새 공격 capability는 반드시 대응 방어 capability, validation gate, residual risk와 함께 추가해야 한다.
 - `verify_submission_state.py`와 `competition_alignment.py`에 연결해 최종 산출물의 필수 게이트로 만들었다.
 
+### 28. Attack-Defense Response Audit를 추가한 이유
+
+Attack-Defense Coverage는 공격 capability와 방어 capability의 정적 연결을 보여준다. 하지만 실제 공방 루프에서는 방어가 공격 시점에 이미 active인지, 아니면 공격 뒤 response window 안에 나왔는지가 중요하다.
+
+그래서 E5/E7 실제 event log를 읽는 response audit를 추가했다.
+
+구현:
+
+```text
+src/experiments/attack_defense_response_audit.py
+outputs/report_tables/attack_defense_response_audit.csv
+outputs/report_tables/attack_defense_response_audit.md
+```
+
+감사 기준:
+
+```text
+active defense:
+  defense_event.time_sec <= attack_time <= defense_event.details.until_sec
+
+timely response:
+  attack_time < defense_event.time_sec <= attack_time + 40 sec
+```
+
+결과:
+
+```text
+audited attack events: 10
+missed required defenses: 0
+support partial residual risk: 1
+```
+
+해석:
+
+- E5/E7의 모든 공격 이벤트는 required defense를 active 또는 timely response로 받았다.
+- E7 `failover_chasing` 한 행은 `ml_attack_alert` required defense는 커버됐지만 `pace_switch` support가 만료되어 partial로 남는다.
+- 이 partial은 실패로 숨기지 않고 잔여 위험으로 기록한다. 다음 고도화에서는 late failover window에서 PACE support 재활성화 조건을 다듬을 수 있다.
+- `verify_submission_state.py`와 `competition_alignment.py`에 연결해 required response가 누락되면 최종 검증에서 실패하게 만들었다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:
