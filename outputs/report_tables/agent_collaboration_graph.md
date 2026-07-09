@@ -9,6 +9,7 @@ flowchart LR
   Runtime[AgentRuntime\nMemory / Tools / DecisionTrace]
   Memory[AgentMemory\nBelief state / previous action]
   Tools[AgentTool / ToolRegistry\nInput and output summaries]
+  Trace[DecisionTrace\nCandidates / tools / selected action]
   Aura[AURA / AURA-ML\nAttack agents]
   Sim[MissionSimulator\nC4ISR / SATCOM environment]
   Tsra[TSRA-R / TSRA-R-ML\nDefense agents]
@@ -21,6 +22,7 @@ flowchart LR
   Runtime -->|E01 4 verified| Aura
   Runtime -->|memory state| Memory
   Runtime -->|tool registry| Tools
+  Runtime -->|decision records| Trace
   Aura -->|E02 15 verified| Sim
   Sim -->|E03 122 verified| Tsra
   Tsra -->|E04 56 verified| Sim
@@ -36,6 +38,7 @@ flowchart LR
   Metrics -->|local before/after| Ledger
   Memory -->|E14 9 verified| Verifier
   Tools -->|E15 23 verified| Verifier
+  Trace -->|E16 399 verified| Verifier
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier
@@ -63,6 +66,7 @@ flowchart LR
 | E13 | DefenseEvent | Defense Effectiveness Ledger | 56 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
 | E14 | AgentMemory | Verifier/Package | 9 | verified | outputs/report_tables/agent_memory_belief_audit.csv | Proves memory is active loop state, not just a static trace field. |
 | E15 | AgentTool | Verifier/Package | 23 | verified | outputs/report_tables/agent_tool_usage_audit.csv | Proves tools are invoked inside agent decision loops. |
+| E16 | DecisionTrace | Verifier/Package | 399 | verified | outputs/report_tables/agent_decision_causality_audit.csv | Proves selected actions are grounded in recorded decision evidence. |
 
 ## Interaction Detail
 
@@ -199,4 +203,13 @@ flowchart LR
 - Evidence count: 23
 - Validation status: verified
 - Purpose: Proves tools are invoked inside agent decision loops.
+- Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
+
+### E16 DecisionTrace -> Verifier/Package
+
+- Interaction: Decision causality audit verifies selected actions against candidates, tools, and score evidence
+- Evidence: outputs/report_tables/agent_decision_causality_audit.csv
+- Evidence count: 399
+- Validation status: verified
+- Purpose: Proves selected actions are grounded in recorded decision evidence.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

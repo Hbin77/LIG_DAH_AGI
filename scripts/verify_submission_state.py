@@ -36,6 +36,7 @@ REQUIRED_FILES = [
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
     "src/experiments/agent_loop_replay.py",
+    "src/experiments/agent_decision_causality_audit.py",
     "src/experiments/agent_memory_belief_audit.py",
     "src/experiments/agent_tool_usage_audit.py",
     "src/experiments/agent_interface_manifest.py",
@@ -71,6 +72,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/decision_trace_quality_audit.md",
     "outputs/report_tables/agent_loop_replay.csv",
     "outputs/report_tables/agent_loop_replay.md",
+    "outputs/report_tables/agent_decision_causality_audit.csv",
+    "outputs/report_tables/agent_decision_causality_audit.md",
     "outputs/report_tables/agent_memory_belief_audit.csv",
     "outputs/report_tables/agent_memory_belief_audit.md",
     "outputs/report_tables/agent_tool_usage_audit.csv",
@@ -239,6 +242,43 @@ def check_csv_outputs() -> list[str]:
         "agent loop replay has incomplete loop summaries",
     )
     checks.append("agent_loop_replay rows=8 agents/cases=complete")
+
+    causality_rows = read_csv("outputs/report_tables/agent_decision_causality_audit.csv")
+    require(
+        len(causality_rows) == 399,
+        f"expected 399 decision causality rows, got {len(causality_rows)}",
+    )
+    failed_causality = [
+        f"{row['experiment']}:{row['trace_id']}:{row['agent']}"
+        for row in causality_rows
+        if row.get("causal_status") != "pass"
+    ]
+    require(not failed_causality, f"failed decision causality rows: {failed_causality[:8]}")
+    require(
+        {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"}.issubset({row["agent"] for row in causality_rows}),
+        "decision causality audit missing attack/defense agent variants",
+    )
+    require(
+        {"no_op", "attack_event", "defense_events"}.issubset({row["selected_type"] for row in causality_rows}),
+        "decision causality audit missing selected action types",
+    )
+    require(
+        all(row["candidate_support"] == "pass" for row in causality_rows),
+        "decision causality audit has candidate support failures",
+    )
+    require(
+        all(row["tool_support"] == "pass" for row in causality_rows),
+        "decision causality audit has tool support failures",
+    )
+    require(
+        all(row["score_or_threshold_support"] == "pass" for row in causality_rows),
+        "decision causality audit has score/threshold support failures",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in causality_rows),
+        "decision causality audit missing safety boundary",
+    )
+    checks.append("agent_decision_causality_audit rows=399 pass")
 
     memory_rows = read_csv("outputs/report_tables/agent_memory_belief_audit.csv")
     require(
@@ -686,12 +726,12 @@ def check_csv_outputs() -> list[str]:
 
     collaboration_rows = read_csv("outputs/report_tables/agent_collaboration_graph.csv")
     require(
-        len(collaboration_rows) == 15,
-        f"expected 15 collaboration graph edges, got {len(collaboration_rows)}",
+        len(collaboration_rows) == 16,
+        f"expected 16 collaboration graph edges, got {len(collaboration_rows)}",
     )
     require(
         {row["edge_id"] for row in collaboration_rows}
-        == {f"E{index:02d}" for index in range(1, 16)},
+        == {f"E{index:02d}" for index in range(1, 17)},
         "agent collaboration graph edge ids are incomplete",
     )
     require(
@@ -715,7 +755,7 @@ def check_csv_outputs() -> list[str]:
     )
     require("flowchart LR" in collaboration_mmd, "agent collaboration Mermaid graph missing flowchart")
     require("AURA" in collaboration_mmd and "TSRA-R" in collaboration_mmd, "Mermaid graph missing agents")
-    checks.append("agent_collaboration_graph edges=15 verified")
+    checks.append("agent_collaboration_graph edges=16 verified")
 
     alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
     require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
@@ -808,6 +848,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_loop_replay.md" in manifest_text,
         "manifest missing agent loop replay",
+    )
+    require(
+        "outputs/report_tables/agent_decision_causality_audit.md" in manifest_text,
+        "manifest missing agent decision causality audit",
     )
     require(
         "outputs/report_tables/agent_memory_belief_audit.md" in manifest_text,

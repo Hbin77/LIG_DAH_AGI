@@ -192,6 +192,30 @@ Replay는 각 active agent/policy에서 `no_op` 판단과 실제 action 판단�
 observe -> memory -> tools -> candidates -> selected_action -> feedback -> reason
 ```
 
+## Decision Causality Audit
+
+DecisionTrace의 `selected_action`이 후보, 도구 호출, 점수 또는 threshold 근거와 맞는지 확인한다.
+
+```bash
+python3 -m src.experiments.agent_decision_causality_audit
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_decision_causality_audit.csv
+outputs/report_tables/agent_decision_causality_audit.md
+```
+
+감사 항목:
+
+- selected action과 candidate action 매칭
+- required tool presence
+- AURA score top-candidate support
+- TSRA-R eligible/ready support
+- TSRA-R-ML probability threshold support
+- no-op 선택 근거
+
 ## Memory/Belief Audit
 
 AgentMemory가 단순 필드가 아니라 다음 판단에 이어지는 loop state인지 확인한다.

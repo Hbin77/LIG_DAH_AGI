@@ -194,6 +194,19 @@ This writes:
 
 The replay reconstructs representative observe-memory-tool-candidate-decision-feedback loops for AURA, AURA-ML, TSRA-R, and TSRA-R-ML.
 
+## Audit Agent Decision Causality
+
+```bash
+python3 -m src.experiments.agent_decision_causality_audit
+```
+
+This writes:
+
+- `outputs/report_tables/agent_decision_causality_audit.csv`
+- `outputs/report_tables/agent_decision_causality_audit.md`
+
+The audit verifies that selected actions are supported by candidate actions, tool calls, and score or threshold evidence inside `DecisionTrace` records.
+
 ## Audit Agent Memory Belief State
 
 ```bash
@@ -506,6 +519,7 @@ python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
+python3 -m src.experiments.agent_decision_causality_audit
 python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest

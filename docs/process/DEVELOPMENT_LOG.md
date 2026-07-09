@@ -1522,3 +1522,55 @@ tools:
 - final verifier row/status/tool/input-output coverage checks
 - competition alignment matrix
 - agent collaboration graph E15 edge
+
+### 39. Agent Decision Causality Audit를 추가한 이유
+
+DecisionTrace에는 observation, memory, tool_calls, candidate_actions, selected_action, feedback이 들어간다. 하지만 이 필드들이 모두 있다는 것과, selected_action이 실제 candidate/tool/score 근거에서 나온 것인지는 별개의 문제다. AI 에이전트 구조를 더 강하게 보이려면 "선택의 인과성"을 검증해야 한다.
+
+추가한 것:
+
+```text
+src/experiments/agent_decision_causality_audit.py
+outputs/report_tables/agent_decision_causality_audit.csv
+outputs/report_tables/agent_decision_causality_audit.md
+```
+
+감사 방식:
+
+```text
+DecisionTrace
+-> selected action 추출
+-> candidate_actions와 매칭
+-> required tool presence 확인
+-> AURA score top-candidate support 확인
+-> TSRA-R eligible/ready support 확인
+-> TSRA-R-ML probability threshold/window support 확인
+-> no-op 근거 확인
+```
+
+검증 결과:
+
+```text
+agent_decision_causality_audit.csv: 399 rows
+causal_status: pass=399
+candidate_support: pass=399
+tool_support: pass=399
+score_or_threshold_support: pass=399
+```
+
+해석:
+
+- AURA의 selected attack event는 candidate score와 일치한다.
+- TSRA-R의 selected defense event는 eligible/ready candidate와 일치한다.
+- TSRA-R-ML의 reactive defense는 probability threshold와 active defense window 근거와 일치한다.
+- no-op도 candidate 부재, threshold/window, 또는 event 미발생 근거로 설명된다.
+- 이 산출물은 DecisionTrace가 단순 로그가 아니라 선택 근거를 검증할 수 있는 감사 trail이라는 점을 보여준다.
+
+연결한 것:
+
+- README 실행 명령
+- Agent Runtime 문서
+- package builder required paths
+- final verifier row/status/support checks
+- competition alignment matrix
+- agent collaboration graph E16 edge

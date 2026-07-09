@@ -1046,16 +1046,16 @@ outputs/report_tables/agent_collaboration_graph.mmd
 
 구현 방식:
 
-- `agent_interface_manifest.csv`, `agent_memory_belief_audit.csv`, `agent_tool_usage_audit.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `defense_effectiveness_ledger.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
-- 협력 구조를 15개 edge로 고정한다.
+- `agent_interface_manifest.csv`, `agent_decision_causality_audit.csv`, `agent_memory_belief_audit.csv`, `agent_tool_usage_audit.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `defense_effectiveness_ledger.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
+- 협력 구조를 16개 edge로 고정한다.
 - 각 edge에 source, target, interaction, primary evidence, evidence count, validation status, safety boundary를 붙인다.
 - Markdown에는 Mermaid flowchart를 포함하고, `.mmd` 파일도 별도 생성한다.
 
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_collaboration_graph` 명령으로 재생성 가능하다.
-- 완료. 15개 협력 edge가 모두 `verified` 상태다.
-- 완료. AgentRuntime, AgentMemory, AgentTool, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, Verifier/Package가 그래프에 포함된다.
+- 완료. 16개 협력 edge가 모두 `verified` 상태다.
+- 완료. AgentRuntime, AgentMemory, AgentTool, DecisionTrace, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, Verifier/Package가 그래프에 포함된다.
 - 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
 
 검증:
@@ -1067,7 +1067,7 @@ python3 -m src.experiments.agent_collaboration_graph
 검증 결과:
 
 ```text
-agent_collaboration_graph.csv: 15 edges
+agent_collaboration_graph.csv: 16 edges
 validation_status: all verified
 Mermaid: outputs/report_tables/agent_collaboration_graph.mmd
 ```
@@ -1312,7 +1312,70 @@ tools: estimate_candidate_effect, estimate_detectability, evaluate_defense_condi
 - TSRA-R-ML은 anomaly probability prediction tool을 호출한다.
 - 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 trace만 감사한다.
 
-## P25. 제출 직전 브랜치/패키지 동결
+## P25. Agent Decision Causality Audit
+
+상태: 완료
+
+문제:
+
+- DecisionTrace에는 candidates, tool calls, selected action이 모두 들어가지만, 선택된 action이 실제 후보와 tool/score 근거에서 나온 것인지 별도 검증표가 없었다.
+- AI 에이전트 구조를 더 강하게 보이려면 "결과가 trace에 있다"를 넘어 "선택이 trace 근거와 일치한다"를 검증해야 한다.
+
+구현:
+
+```text
+src/experiments/agent_decision_causality_audit.py
+outputs/report_tables/agent_decision_causality_audit.csv
+outputs/report_tables/agent_decision_causality_audit.md
+```
+
+구현 방식:
+
+- 모든 DecisionTrace를 trace 단위로 읽는다.
+- selected action과 candidate action이 매칭되는지 확인한다.
+- selected action에 필요한 tool이 실제로 호출됐는지 확인한다.
+- AURA는 selected score가 top candidate score와 맞는지 확인한다.
+- TSRA-R은 selected defense action이 eligible/ready candidate인지 확인한다.
+- TSRA-R-ML은 probability threshold와 active defense window 근거를 확인한다.
+- no-op도 후보 부재, threshold/window, 또는 event 미발생 근거로 검증한다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.agent_decision_causality_audit` 명령으로 재생성 가능하다.
+- 완료. 399개 trace row가 모두 `pass`다.
+- 완료. AURA, AURA-ML, TSRA-R, TSRA-R-ML이 모두 포함된다.
+- 완료. selected type `no_op`, `attack_event`, `defense_events`가 모두 포함된다.
+- 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_decision_causality_audit
+python3 -m src.experiments.agent_collaboration_graph
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_decision_causality_audit.csv: 399 rows
+causal_status: pass=399
+candidate_support: pass=399
+tool_support: pass=399
+score_or_threshold_support: pass=399
+```
+
+해석:
+
+- 이 산출물은 selected action이 arbitrary output이 아니라 candidate, tool, score/threshold evidence에서 나온 결과임을 보여준다.
+- AURA 공격 선택은 top score 후보와 일치한다.
+- TSRA-R 방어 선택은 eligible/ready condition과 일치한다.
+- TSRA-R-ML 선택은 anomaly probability threshold와 reactive defense window 근거와 일치한다.
+- 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 trace만 감사한다.
+
+## P26. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 
