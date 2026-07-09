@@ -125,6 +125,8 @@ aura_attack_decision_path_audit no_op_threshold_violations: 0
 defense_priority_decision_path_audit rows: 6 pass
 defense_priority_decision_path_audit formula_matches: 671
 defense_priority_decision_path_audit attack_context_bonus_events: 51
+defense_priority_decision_path_audit condition_candidate_matches: 671
+defense_priority_decision_path_audit condition_candidate_mismatches: 0
 defense_priority_decision_path_audit ordered_core_defense_traces: 12/12
 defense_priority_decision_path_audit no_op_ready_violations: 0
 agent_tool_usage_audit rows: 34 pass

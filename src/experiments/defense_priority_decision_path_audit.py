@@ -121,6 +121,28 @@ def ready_candidates(trace: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+def condition_summary(trace: dict[str, Any]) -> dict[str, Any]:
+    calls = [
+        call
+        for call in trace.get("tool_calls") or []
+        if call.get("tool_name") == "evaluate_defense_conditions"
+    ]
+    if len(calls) != 1:
+        return {}
+    output = calls[0].get("output_summary")
+    return output if isinstance(output, dict) else {}
+
+
+def candidate_matches_conditions(candidate: dict[str, Any], conditions: dict[str, Any]) -> bool:
+    action = str(candidate.get("action", ""))
+    if action not in CORE_ACTIONS:
+        return True
+    return (
+        bool(candidate.get("eligible")) == bool(conditions.get(f"{action}_needed"))
+        and bool(candidate.get("ready")) == bool(conditions.get(f"{action}_ready"))
+    )
+
+
 def row(
     *,
     check_id: str,
@@ -232,9 +254,36 @@ def build_rows() -> list[dict[str, str]]:
     defense_event_traces = 0
     unselected_ready_actions = 0
     selected_without_ready = 0
+    condition_trace_count = 0
+    missing_condition_tool_traces = 0
+    condition_candidate_checks = 0
+    condition_candidate_matches = 0
+    condition_candidate_mismatches = 0
+    pace_reason_matches = 0
+    pace_reason_mismatches = 0
     for _, trace in rows:
         if not any("defense_base_score" in candidate for candidate in trace.get("candidate_actions") or []):
             continue
+        conditions = condition_summary(trace)
+        if conditions:
+            condition_trace_count += 1
+        else:
+            missing_condition_tool_traces += 1
+        for candidate in trace.get("candidate_actions") or []:
+            if candidate.get("action") not in CORE_ACTIONS or "defense_base_score" not in candidate:
+                continue
+            if not conditions:
+                continue
+            condition_candidate_checks += 1
+            if candidate_matches_conditions(candidate, conditions):
+                condition_candidate_matches += 1
+            else:
+                condition_candidate_mismatches += 1
+            if candidate.get("action") == "pace_switch":
+                if str(candidate.get("reason", "")) == str(conditions.get("pace_switch_reason", "")):
+                    pace_reason_matches += 1
+                else:
+                    pace_reason_mismatches += 1
         ready = {str(candidate.get("action")) for candidate in ready_candidates(trace)}
         selected = {
             str(event.get("action"))
@@ -331,7 +380,14 @@ def build_rows() -> list[dict[str, str]]:
                 f"no_op_traces={no_op_traces}; no_op_ready_violations={no_op_ready_violations}; "
                 f"defense_event_traces={defense_event_traces}; "
                 f"unselected_ready_actions={unselected_ready_actions}; "
-                f"selected_without_ready={selected_without_ready}"
+                f"selected_without_ready={selected_without_ready}; "
+                f"condition_trace_count={condition_trace_count}; "
+                f"missing_condition_tool_traces={missing_condition_tool_traces}; "
+                f"condition_candidate_checks={condition_candidate_checks}; "
+                f"condition_candidate_matches={condition_candidate_matches}; "
+                f"condition_candidate_mismatches={condition_candidate_mismatches}; "
+                f"pace_reason_matches={pace_reason_matches}; "
+                f"pace_reason_mismatches={pace_reason_mismatches}"
             ),
             ok=(
                 no_op_traces > 0
@@ -339,8 +395,18 @@ def build_rows() -> list[dict[str, str]]:
                 and no_op_ready_violations == 0
                 and unselected_ready_actions == 0
                 and selected_without_ready == 0
+                and condition_trace_count > 0
+                and missing_condition_tool_traces == 0
+                and condition_candidate_checks == len(candidates)
+                and condition_candidate_matches == condition_candidate_checks
+                and condition_candidate_mismatches == 0
+                and pace_reason_matches > 0
+                and pace_reason_mismatches == 0
             ),
-            interpretation="Priority scoring refines defense ordering without weakening the existing eligibility and cooldown gates.",
+            interpretation=(
+                "Priority scoring refines defense ordering without weakening the existing eligibility "
+                "and cooldown gates, and candidate ready/eligible fields match the condition tool output."
+            ),
         ),
     ]
 

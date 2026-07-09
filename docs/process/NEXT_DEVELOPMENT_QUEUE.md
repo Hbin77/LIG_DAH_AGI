@@ -3544,3 +3544,54 @@ AAP02 generated_candidate_payload_mismatches: 0
 - AURA/AURA-ML 전체 공격 경로에서 생성 후보와 실제 평가 후보가 같은 payload임을 검증한다.
 - 이 변경은 특정 ML path만이 아니라 공통 공격 에이전트 계약을 강화한다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.
+
+## P67. TSRA-R Condition-to-Candidate Parity
+
+상태: 완료
+
+문제:
+
+- `defense_priority_decision_path_audit`는 후보 score 공식, selected event detail, ready/no-op consistency를 검증했다.
+- 하지만 `evaluate_defense_conditions` tool output의 `*_needed`, `*_ready` 값과 `candidate_actions`의 `eligible`, `ready` 값이 같은지는 직접 비교하지 않았다.
+- 방어 에이전트의 tool chain을 설명하려면 condition tool output이 후보 row와 일치한다는 증거가 필요하다.
+
+구현:
+
+```text
+src/experiments/defense_priority_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+docs/process/FINAL_QA.md
+```
+
+설계:
+
+- DPR06 `No-op and ready-action consistency`가 각 scored defense candidate의 `eligible/ready`를 `evaluate_defense_conditions` output과 비교한다.
+- 비교 대상 action은 `priority_reroute`, `video_throttle`, `stale_badge`, `pace_switch`다.
+- `pace_switch`는 후보 reason과 `pace_switch_reason`도 같이 비교한다.
+- final verifier는 condition mismatch 0과 pace reason mismatch 0을 요구한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+condition_candidate_checks: 671
+condition_candidate_matches: 671
+condition_candidate_mismatches: 0
+missing_condition_tool_traces: 0
+pace_reason_mismatches: 0
+```
+
+해석:
+
+- TSRA-R의 방어 후보는 condition tool output과 같은 needed/ready 판단을 보존한다.
+- 이 변경은 방어 에이전트의 observe-tool-candidate-selected_event 연결성을 강화한다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense-condition evidence만 강화한다.

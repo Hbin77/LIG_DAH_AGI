@@ -309,6 +309,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "generated_candidate_payload_matches=25"),
             ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "selected_with_defense_context=19"),
             ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "formula_matches="),
+            ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "condition_candidate_matches=671"),
+            ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "condition_candidate_mismatches=0"),
             ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "ordered_core_defense_traces=12/12"),
             ContentCheck("outputs/report_tables/agent_coordination_latency_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_stress_scenario_audit.csv", "stress_air_defense_queue_saturation"),

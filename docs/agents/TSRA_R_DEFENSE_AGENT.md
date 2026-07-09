@@ -563,6 +563,8 @@ scored_candidates: 671
 formula_matches: 671
 attack_context_bonus_candidates: 177
 attack_context_bonus_events: 51
+condition_candidate_matches: 671
+condition_candidate_mismatches: 0
 checked_event_matches: 70
 event_match_failures: 0
 ordered_core_defense_traces: 12/12
@@ -572,6 +574,7 @@ no_op_ready_violations: 0
 해석:
 
 - 후보 row의 `score`와 emitted `DefenseEvent.details.defense_priority_score`가 같은 공식으로 이어진다.
+- `evaluate_defense_conditions` tool output의 needed/ready 값과 후보 row의 `eligible/ready` 값이 일치한다.
 - attack context bonus는 관련 방어 action에만 붙고, 상한 안에서 유지된다.
 - 같은 tick에 여러 core defense event가 나오면 priority score가 높은 순서로 정렬된다.
 - no-op 판단은 ready candidate가 없을 때만 통과한다.

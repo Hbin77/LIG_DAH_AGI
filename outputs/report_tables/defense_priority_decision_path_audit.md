@@ -10,7 +10,7 @@ Safety boundary: closed simulation defense-priority decision-path audit only; no
 | DPR03 | Attack-context priority bonus | pass | attack_context_bonus_candidates=177; attack_context_bonus_events=51; bonus_reasons=counter_link_or_failover_attack,counter_queue_pressure_priority_reroute,counter_stale_cop_induction,counter_video_queue_pressure | The defense agent uses attack context in its scoring path, not only in logs. |
 | DPR04 | Selected event score consistency | pass | checked_event_matches=70; event_match_failures=0; no_candidate_for_event=0 | DefenseEvent details preserve the same priority evidence used in the decision trace. |
 | DPR05 | Core defense event ordering | pass | ordered_core_defense_traces=12/12 | The simulator receives same-tick core defenses in the order selected by the agent score. |
-| DPR06 | No-op and ready-action consistency | pass | no_op_traces=122; no_op_ready_violations=0; defense_event_traces=61; unselected_ready_actions=0; selected_without_ready=0 | Priority scoring refines defense ordering without weakening the existing eligibility and cooldown gates. |
+| DPR06 | No-op and ready-action consistency | pass | no_op_traces=122; no_op_ready_violations=0; defense_event_traces=61; unselected_ready_actions=0; selected_without_ready=0; condition_trace_count=183; missing_condition_tool_traces=0; condition_candidate_checks=671; condition_candidate_matches=671; condition_candidate_mismatches=0; pace_reason_matches=122; pace_reason_mismatches=0 | Priority scoring refines defense ordering without weakening the existing eligibility and cooldown gates, and candidate ready/eligible fields match the condition tool output. |
 
 ## Detail
 
@@ -63,7 +63,7 @@ Safety boundary: closed simulation defense-priority decision-path audit only; no
 
 - Requirement: No-op traces should have no ready scored defense action, and selected events should not omit ready actions.
 - Evidence: outputs/experiments/*/tsra_r_decision_traces.jsonl
-- Observed: no_op_traces=122; no_op_ready_violations=0; defense_event_traces=61; unselected_ready_actions=0; selected_without_ready=0
+- Observed: no_op_traces=122; no_op_ready_violations=0; defense_event_traces=61; unselected_ready_actions=0; selected_without_ready=0; condition_trace_count=183; missing_condition_tool_traces=0; condition_candidate_checks=671; condition_candidate_matches=671; condition_candidate_mismatches=0; pace_reason_matches=122; pace_reason_mismatches=0
 - Status: pass
-- Interpretation: Priority scoring refines defense ordering without weakening the existing eligibility and cooldown gates.
+- Interpretation: Priority scoring refines defense ordering without weakening the existing eligibility and cooldown gates, and candidate ready/eligible fields match the condition tool output.
 - Safety boundary: closed simulation defense-priority decision-path audit only; no RF, exploit, or live network action

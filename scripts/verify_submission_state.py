@@ -1198,6 +1198,11 @@ def check_csv_outputs() -> list[str]:
             observed_int(row, "no_op_ready_violations") == 0
             and observed_int(row, "unselected_ready_actions") == 0
             and observed_int(row, "selected_without_ready") == 0
+            and observed_int(row, "missing_condition_tool_traces") == 0
+            and observed_int(row, "condition_candidate_checks") == observed_int(row, "condition_candidate_matches")
+            and observed_int(row, "condition_candidate_mismatches") == 0
+            and observed_int(row, "pace_reason_matches") > 0
+            and observed_int(row, "pace_reason_mismatches") == 0
             for row in defense_priority_rows
             if row["check_id"] == "DPR06"
         ),

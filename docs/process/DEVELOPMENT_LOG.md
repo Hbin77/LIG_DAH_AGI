@@ -3387,3 +3387,39 @@ aura_attack_decision_path_audit AAP02 generated_candidate_payload_mismatches: 0
 ```
 
 이 보강의 의미는 AURA/AURA-ML 전체 공격 경로에서 생성 후보와 실제 평가 후보가 같은 payload임을 증명한다는 것이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.
+
+### 82. TSRA-R Condition-to-Candidate Parity를 추가한 이유
+
+TSRA-R은 `evaluate_defense_conditions` tool로 각 방어 action의 필요 여부와 cooldown ready 여부를 계산하고, 그 결과를 바탕으로 `candidate_actions`를 만든다. 기존 감사는 후보 score 공식과 selected event detail parity는 강하게 봤지만, condition tool output과 후보 row의 `eligible/ready`가 같은지는 별도로 비교하지 않았다.
+
+이번 변경은 방어 에이전트의 조건 평가와 후보 평가 사이를 직접 묶었다.
+
+변경한 파일:
+
+```text
+src/experiments/defense_priority_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+docs/process/FINAL_QA.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- scored defense candidate가 있는 모든 trace에 `evaluate_defense_conditions` tool output이 있어야 한다.
+- `priority_reroute`, `video_throttle`, `stale_badge`, `pace_switch` 후보의 `eligible`은 condition output의 `*_needed`와 일치해야 한다.
+- 후보의 `ready`는 condition output의 `*_ready`와 일치해야 한다.
+- `pace_switch` 후보 reason은 condition output의 `pace_switch_reason`과 일치해야 한다.
+- final verifier는 `condition_candidate_mismatches=0`, `pace_reason_mismatches=0`을 요구한다.
+
+검증 의미:
+
+```text
+defense_priority_decision_path_audit DPR06 condition_candidate_checks: 671
+defense_priority_decision_path_audit DPR06 condition_candidate_matches: 671
+defense_priority_decision_path_audit DPR06 condition_candidate_mismatches: 0
+defense_priority_decision_path_audit DPR06 pace_reason_mismatches: 0
+```
+
+이 보강의 의미는 TSRA-R이 condition tool output을 숨은 내부 상태로 소비하는 것이 아니라, 후보 row와 selected event로 이어지는 검증 가능한 방어 에이전트 루프를 갖는다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense-condition evidence만 강화한다.
