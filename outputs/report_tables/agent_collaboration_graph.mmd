@@ -1,5 +1,6 @@
 flowchart LR
   Runtime[AgentRuntime\nMemory / Tools / DecisionTrace]
+  Memory[AgentMemory\nBelief state / previous action]
   Aura[AURA / AURA-ML\nAttack agents]
   Sim[MissionSimulator\nC4ISR / SATCOM environment]
   Tsra[TSRA-R / TSRA-R-ML\nDefense agents]
@@ -10,6 +11,7 @@ flowchart LR
   Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
   Verifier[Verifier / Package\nReproducible evidence bundle]
   Runtime -->|E01 4 verified| Aura
+  Runtime -->|memory state| Memory
   Aura -->|E02 15 verified| Sim
   Sim -->|E03 122 verified| Tsra
   Tsra -->|E04 56 verified| Sim
@@ -23,6 +25,7 @@ flowchart LR
   Sim -->|E12 10 verified| Replay
   Tsra -->|E13 56 verified| Ledger
   Metrics -->|local before/after| Ledger
+  Memory -->|E14 9 verified| Verifier
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier

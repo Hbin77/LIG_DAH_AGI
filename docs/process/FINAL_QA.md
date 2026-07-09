@@ -15,6 +15,7 @@ python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
+python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix
 python3 -m src.experiments.battle_timeline
@@ -54,6 +55,7 @@ agent_decision_trace_summary rows: 215
 agent_contract_validation rows: 49 pass
 decision_trace_quality_audit rows: 9 pass
 agent_loop_replay rows: 8
+agent_memory_belief_audit rows: 9 pass
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10
 attack_defense_coverage rows: 4 covered
@@ -66,14 +68,14 @@ incident_summary rows: 10
 operator_alerts rows: 56 actions=5
 defense_effectiveness_ledger rows: 56 actions=5
 closed_loop_episode_replay rows: 10 complete
-agent_collaboration_graph edges: 13 verified
+agent_collaboration_graph edges: 14 verified
 competition_alignment_matrix rows: 10 verified
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 147
+package_zip entries: 150
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

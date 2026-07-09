@@ -1031,7 +1031,7 @@ severity: high, medium
 
 문제:
 
-- 개별 산출물은 많지만, AURA, MissionSimulator, TSRA-R, Operator Alerts, Metrics, Verifier가 어떻게 협력하는지 한눈에 보여주는 구조가 필요하다.
+- 개별 산출물은 많지만, AgentMemory, AURA, MissionSimulator, TSRA-R, Operator Alerts, Metrics, Verifier가 어떻게 협력하는지 한눈에 보여주는 구조가 필요하다.
 - AI 에이전트 협력 구조는 대회 핵심 배점과 연결되므로, 말로만 설명하지 않고 evidence row count가 붙은 그래프로 남겨야 한다.
 - 공격/방어 담당이 따로 개발해도 어떤 edge가 깨지면 협력 구조가 약해지는지 확인할 기준이 필요하다.
 
@@ -1046,16 +1046,16 @@ outputs/report_tables/agent_collaboration_graph.mmd
 
 구현 방식:
 
-- `agent_interface_manifest.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `defense_effectiveness_ledger.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
-- 협력 구조를 13개 edge로 고정한다.
+- `agent_interface_manifest.csv`, `agent_memory_belief_audit.csv`, `agent_decision_trace_summary.csv`, `aura_coa_cards.csv`, `attack_defense_coverage.csv`, `attack_defense_response_audit.csv`, `operator_alerts.csv`, `defense_effectiveness_ledger.csv`, `battle_timeline.csv`, `metric_gate_summary.csv`, `mission_impact_decomposition.csv`를 읽는다.
+- 협력 구조를 14개 edge로 고정한다.
 - 각 edge에 source, target, interaction, primary evidence, evidence count, validation status, safety boundary를 붙인다.
 - Markdown에는 Mermaid flowchart를 포함하고, `.mmd` 파일도 별도 생성한다.
 
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_collaboration_graph` 명령으로 재생성 가능하다.
-- 완료. 13개 협력 edge가 모두 `verified` 상태다.
-- 완료. AgentRuntime, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, Verifier/Package가 그래프에 포함된다.
+- 완료. 14개 협력 edge가 모두 `verified` 상태다.
+- 완료. AgentRuntime, AgentMemory, AURA/AURA-ML, MissionSimulator, TSRA-R/TSRA-R-ML, Operator Alerts, Defense Effectiveness Ledger, Mission Metrics, Verifier/Package가 그래프에 포함된다.
 - 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
 
 검증:
@@ -1067,7 +1067,7 @@ python3 -m src.experiments.agent_collaboration_graph
 검증 결과:
 
 ```text
-agent_collaboration_graph.csv: 13 edges
+agent_collaboration_graph.csv: 14 edges
 validation_status: all verified
 Mermaid: outputs/report_tables/agent_collaboration_graph.mmd
 ```
@@ -1192,7 +1192,68 @@ observed_effect: improved, held, degraded_or_delayed
 - `degraded_or_delayed`는 response가 나왔지만 공격 누적 효과 또는 metric lag 때문에 같은 window 안에서 scalar impact가 아직 상승했다는 의미다.
 - 실제 운용 지시가 아니라 폐쇄형 시뮬레이션 효과 분석이다.
 
-## P23. 제출 직전 브랜치/패키지 동결
+## P23. Agent Memory/Belief Audit
+
+상태: 완료
+
+문제:
+
+- AgentRuntime, Tool, DecisionTrace는 이미 산출물로 보이지만, AgentMemory가 실제로 다음 판단에 이어지는 loop state인지 별도 표로 확인하기 어렵다.
+- AI 에이전트 구조를 더 강하게 보이려면 memory coverage, belief 변화, previous-action carryover가 검증되어야 한다.
+
+구현:
+
+```text
+src/experiments/agent_memory_belief_audit.py
+outputs/report_tables/agent_memory_belief_audit.csv
+outputs/report_tables/agent_memory_belief_audit.md
+```
+
+구현 방식:
+
+- `aura_decision_traces.jsonl`, `tsra_r_decision_traces.jsonl`을 agent/policy별로 읽는다.
+- memory coverage를 확인한다.
+- observation_count와 decision_count가 nondecreasing인지 확인한다.
+- belief key와 changing belief key를 추출한다.
+- feedback key를 추출한다.
+- 이전 trace의 selected action이 다음 trace memory의 `last_selected_action`으로 들어가는지 검사한다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.agent_memory_belief_audit` 명령으로 재생성 가능하다.
+- 완료. 9개 agent/policy row가 모두 `pass`다.
+- 완료. AURA, AURA-ML, TSRA-R, TSRA-R-ML이 모두 포함된다.
+- 완료. last selected action chain match rate가 모두 1.0이다.
+- 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_memory_belief_audit
+python3 -m src.experiments.agent_collaboration_graph
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_memory_belief_audit.csv: 9 rows
+status: pass=9
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+last_selected_chain_match_rate: 1.0 for all rows
+```
+
+해석:
+
+- 이 산출물은 memory가 static field가 아니라 다음 의사결정에 이어지는 상태라는 점을 보여준다.
+- AURA는 attack cadence와 last attack context를 기억한다.
+- TSRA-R은 cooldown, enabled action, event count를 기억한다.
+- ML TSRA-R은 anomaly probability와 active defense window를 기억한다.
+- 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 trace만 감사한다.
+
+## P24. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

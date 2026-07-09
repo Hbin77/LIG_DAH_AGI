@@ -1417,3 +1417,51 @@ observed_effect labels: improved, held, degraded_or_delayed
 - `held`는 실패가 아니라 30초 local window에서 지표를 bounded 상태로 유지했다는 의미로 둔다.
 - `degraded_or_delayed`는 공격 누적 또는 metric lag가 response window 안에 남은 경우로 숨기지 않고 기록한다.
 - 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 효과만 분석한다.
+
+### 37. Agent Memory/Belief Audit를 추가한 이유
+
+사용자가 요구한 에이전트 구조는 단순 Python 함수가 아니라 `Agent Runtime`, `Memory`, `Tool`, `DecisionTrace`를 가진 구조다. Runtime, Tool, DecisionTrace는 기존 trace quality audit과 loop replay로 어느 정도 보이지만, `Memory`가 실제로 다음 판단에 이어지는 상태인지 별도 산출물로 확인하기 어려웠다.
+
+추가한 것:
+
+```text
+src/experiments/agent_memory_belief_audit.py
+outputs/report_tables/agent_memory_belief_audit.csv
+outputs/report_tables/agent_memory_belief_audit.md
+```
+
+감사 방식:
+
+```text
+DecisionTrace
+-> memory coverage 확인
+-> observation_count / decision_count nondecreasing 확인
+-> belief key와 changing belief key 추출
+-> feedback key 추출
+-> 이전 selected_action이 다음 memory.last_selected_action으로 이어지는지 확인
+```
+
+검증 결과:
+
+```text
+agent_memory_belief_audit.csv: 9 rows
+status: pass=9
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+last_selected_chain_match_rate: 1.0 for all rows
+```
+
+해석:
+
+- AURA memory는 attack cadence와 last attack context를 다음 후보 선택에 들고 간다.
+- TSRA-R memory는 cooldown, enabled action, event count를 다음 방어 판단에 들고 간다.
+- ML TSRA-R memory는 last anomaly probability와 active defense window를 reactive defense 판단에 들고 간다.
+- 이 산출물은 `Memory`가 정적 JSON 필드가 아니라 closed-loop decision state라는 점을 검증한다.
+
+연결한 것:
+
+- README 실행 명령
+- Agent Runtime 문서
+- package builder required paths
+- final verifier row/status/chain checks
+- competition alignment matrix
+- agent collaboration graph E14 edge

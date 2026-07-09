@@ -36,6 +36,7 @@ REQUIRED_FILES = [
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
     "src/experiments/agent_loop_replay.py",
+    "src/experiments/agent_memory_belief_audit.py",
     "src/experiments/agent_interface_manifest.py",
     "src/experiments/agent_capability_matrix.py",
     "src/experiments/attack_defense_coverage.py",
@@ -69,6 +70,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/decision_trace_quality_audit.md",
     "outputs/report_tables/agent_loop_replay.csv",
     "outputs/report_tables/agent_loop_replay.md",
+    "outputs/report_tables/agent_memory_belief_audit.csv",
+    "outputs/report_tables/agent_memory_belief_audit.md",
     "outputs/report_tables/agent_interface_manifest.csv",
     "outputs/report_tables/agent_interface_manifest.md",
     "outputs/report_tables/agent_capability_matrix.csv",
@@ -233,6 +236,48 @@ def check_csv_outputs() -> list[str]:
         "agent loop replay has incomplete loop summaries",
     )
     checks.append("agent_loop_replay rows=8 agents/cases=complete")
+
+    memory_rows = read_csv("outputs/report_tables/agent_memory_belief_audit.csv")
+    require(
+        len(memory_rows) == 9,
+        f"expected 9 agent memory audit rows, got {len(memory_rows)}",
+    )
+    failed_memory_rows = [
+        f"{row['experiment']}:{row['agent']}:{row['policy']}"
+        for row in memory_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_memory_rows, f"failed agent memory audit rows: {failed_memory_rows[:8]}")
+    memory_agents = {row["agent"] for row in memory_rows}
+    require(
+        {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"}.issubset(memory_agents),
+        f"agent memory audit missing agents: {sorted({'AURA', 'AURA-ML', 'TSRA-R', 'TSRA-R-ML'} - memory_agents)}",
+    )
+    require(
+        all(float(row["memory_coverage"]) == 1.0 for row in memory_rows),
+        "agent memory audit has incomplete memory coverage",
+    )
+    require(
+        all(row["observation_count_nondecreasing"] == "true" for row in memory_rows),
+        "agent memory audit has non-monotonic observation_count",
+    )
+    require(
+        all(row["decision_count_nondecreasing"] == "true" for row in memory_rows),
+        "agent memory audit has non-monotonic decision_count",
+    )
+    require(
+        all(float(row["last_selected_chain_match_rate"]) == 1.0 for row in memory_rows),
+        "agent memory audit has broken last-selected chain",
+    )
+    require(
+        all(row["changing_belief_keys"] != "none" for row in memory_rows),
+        "agent memory audit has static belief state",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in memory_rows),
+        "agent memory audit missing safety boundary",
+    )
+    checks.append("agent_memory_belief_audit rows=9 pass")
 
     interface_rows = read_csv("outputs/report_tables/agent_interface_manifest.csv")
     require(len(interface_rows) == 4, f"expected 4 agent interface rows, got {len(interface_rows)}")
@@ -590,12 +635,12 @@ def check_csv_outputs() -> list[str]:
 
     collaboration_rows = read_csv("outputs/report_tables/agent_collaboration_graph.csv")
     require(
-        len(collaboration_rows) == 13,
-        f"expected 13 collaboration graph edges, got {len(collaboration_rows)}",
+        len(collaboration_rows) == 14,
+        f"expected 14 collaboration graph edges, got {len(collaboration_rows)}",
     )
     require(
         {row["edge_id"] for row in collaboration_rows}
-        == {f"E{index:02d}" for index in range(1, 14)},
+        == {f"E{index:02d}" for index in range(1, 15)},
         "agent collaboration graph edge ids are incomplete",
     )
     require(
@@ -619,7 +664,7 @@ def check_csv_outputs() -> list[str]:
     )
     require("flowchart LR" in collaboration_mmd, "agent collaboration Mermaid graph missing flowchart")
     require("AURA" in collaboration_mmd and "TSRA-R" in collaboration_mmd, "Mermaid graph missing agents")
-    checks.append("agent_collaboration_graph edges=13 verified")
+    checks.append("agent_collaboration_graph edges=14 verified")
 
     alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
     require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
@@ -712,6 +757,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_loop_replay.md" in manifest_text,
         "manifest missing agent loop replay",
+    )
+    require(
+        "outputs/report_tables/agent_memory_belief_audit.md" in manifest_text,
+        "manifest missing agent memory belief audit",
     )
     require(
         "outputs/report_tables/agent_interface_manifest.md" in manifest_text,

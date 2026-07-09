@@ -115,7 +115,7 @@ Metrics
 대회 목표 확인
 -> 공격/방어/AI 중 어느 축을 강화하는지 명시
 -> 폐쇄형 시뮬레이션으로 구현
--> DecisionTrace와 metric으로 증명
+-> DecisionTrace, Memory audit, metric으로 증명
 -> 검증 스크립트와 패키지에 포함
 -> hbin 브랜치에 공유
 ```
@@ -179,7 +179,8 @@ Metrics
 14. 공격-시뮬레이터-방어-알림-지표-verifier 협력 구조는 graph edge로 검증한다.
 15. 공격 1건 단위의 closed-loop episode replay로 순차 흐름을 검증한다.
 16. TSRA-R 방어 이벤트는 local before/after metric movement ledger로 효과를 확인한다.
-17. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+17. AgentMemory는 belief 변화와 previous-action carryover audit로 검증한다.
+18. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 

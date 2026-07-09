@@ -192,6 +192,29 @@ Replay는 각 active agent/policy에서 `no_op` 판단과 실제 action 판단�
 observe -> memory -> tools -> candidates -> selected_action -> feedback -> reason
 ```
 
+## Memory/Belief Audit
+
+AgentMemory가 단순 필드가 아니라 다음 판단에 이어지는 loop state인지 확인한다.
+
+```bash
+python3 -m src.experiments.agent_memory_belief_audit
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_memory_belief_audit.csv
+outputs/report_tables/agent_memory_belief_audit.md
+```
+
+감사 항목:
+
+- memory coverage
+- observation/decision count nondecreasing 여부
+- belief key와 changing belief key
+- feedback key
+- 이전 selected action이 다음 memory의 `last_selected_action`으로 들어가는지
+
 ## Operator Alerts
 
 TSRA-R의 `DefenseEvent`와 `DecisionTrace`는 operator-facing alert로도 재구성한다.

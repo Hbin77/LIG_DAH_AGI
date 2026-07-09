@@ -7,6 +7,7 @@ Safety boundary: closed simulation collaboration graph only; no RF, exploit, or 
 ```mermaid
 flowchart LR
   Runtime[AgentRuntime\nMemory / Tools / DecisionTrace]
+  Memory[AgentMemory\nBelief state / previous action]
   Aura[AURA / AURA-ML\nAttack agents]
   Sim[MissionSimulator\nC4ISR / SATCOM environment]
   Tsra[TSRA-R / TSRA-R-ML\nDefense agents]
@@ -17,6 +18,7 @@ flowchart LR
   Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
   Verifier[Verifier / Package\nReproducible evidence bundle]
   Runtime -->|E01 4 verified| Aura
+  Runtime -->|memory state| Memory
   Aura -->|E02 15 verified| Sim
   Sim -->|E03 122 verified| Tsra
   Tsra -->|E04 56 verified| Sim
@@ -30,6 +32,7 @@ flowchart LR
   Sim -->|E12 10 verified| Replay
   Tsra -->|E13 56 verified| Ledger
   Metrics -->|local before/after| Ledger
+  Memory -->|E14 9 verified| Verifier
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier
@@ -55,6 +58,7 @@ flowchart LR
 | E11 | Mission Metrics | Verifier/Package | 46 | verified | outputs/report_tables/metric_gate_summary.csv \| outputs/report_tables/mission_impact_decomposition.csv | Keeps scalar claims backed by gates and component-level evidence. |
 | E12 | Attack/Defense/Alert Evidence | Closed-Loop Episode Replay | 10 | verified | outputs/report_tables/closed_loop_episode_replay.csv | Shows attack, defense, alert, and metric progression in one reviewable episode record. |
 | E13 | DefenseEvent | Defense Effectiveness Ledger | 56 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
+| E14 | AgentMemory | Verifier/Package | 9 | verified | outputs/report_tables/agent_memory_belief_audit.csv | Proves memory is active loop state, not just a static trace field. |
 
 ## Interaction Detail
 
@@ -173,4 +177,13 @@ flowchart LR
 - Evidence count: 56
 - Validation status: verified
 - Purpose: Turns defensive actions into event-level effectiveness evidence.
+- Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
+
+### E14 AgentMemory -> Verifier/Package
+
+- Interaction: Memory and belief-state audit verifies evolving memory plus previous-action carryover
+- Evidence: outputs/report_tables/agent_memory_belief_audit.csv
+- Evidence count: 9
+- Validation status: verified
+- Purpose: Proves memory is active loop state, not just a static trace field.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

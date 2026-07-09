@@ -124,7 +124,8 @@ ALIGNMENT_SPECS = [
         competition_goal="Show agent structure beyond direct Python policy calls.",
         implemented_mechanism=(
             "AgentRuntime wraps observe, memory summary, tool calls, candidate scoring, selected action, "
-            "DecisionTrace, and feedback updates."
+            "DecisionTrace, and feedback updates; memory belief audit verifies evolving belief state "
+            "and previous-action carryover across decision loops."
         ),
         agent_or_component="AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace",
         evidence_files=[
@@ -135,12 +136,14 @@ ALIGNMENT_SPECS = [
             "src/experiments/validate_event_contracts.py",
             "src/experiments/trace_quality_audit.py",
             "src/experiments/agent_loop_replay.py",
+            "src/experiments/agent_memory_belief_audit.py",
             "src/experiments/agent_interface_manifest.py",
             "src/experiments/agent_capability_matrix.py",
             "outputs/report_tables/agent_decision_trace_summary.csv",
             "outputs/report_tables/agent_contract_validation.csv",
             "outputs/report_tables/decision_trace_quality_audit.csv",
             "outputs/report_tables/agent_loop_replay.csv",
+            "outputs/report_tables/agent_memory_belief_audit.csv",
             "outputs/report_tables/agent_interface_manifest.csv",
             "outputs/report_tables/agent_capability_matrix.csv",
         ],
@@ -152,6 +155,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 49),
             RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
+            RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
             RowCountCheck("outputs/report_tables/agent_capability_matrix.csv", 10),
         ],

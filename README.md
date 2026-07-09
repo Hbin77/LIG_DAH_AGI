@@ -194,6 +194,19 @@ This writes:
 
 The replay reconstructs representative observe-memory-tool-candidate-decision-feedback loops for AURA, AURA-ML, TSRA-R, and TSRA-R-ML.
 
+## Audit Agent Memory Belief State
+
+```bash
+python3 -m src.experiments.agent_memory_belief_audit
+```
+
+This writes:
+
+- `outputs/report_tables/agent_memory_belief_audit.csv`
+- `outputs/report_tables/agent_memory_belief_audit.md`
+
+The audit verifies that AgentMemory is populated, changes across decisions, carries belief-state keys, and passes the previous selected action into the next decision loop.
+
 ## Generate Agent Interface Manifest
 
 ```bash
@@ -480,6 +493,7 @@ python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
+python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix
 python3 -m src.experiments.battle_timeline
