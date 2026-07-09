@@ -14,7 +14,7 @@ AURA는 폐쇄형 C4ISR/SATCOM 시뮬레이터 안에서 공격 효과를 선택
 
 쉽게 말하면:
 
-> AURA는 현재 작전 상황을 보고, 어떤 통신 병목을 만들면 지휘소 판단이 가장 늦어지는지 고르는 공격 효과 선택기다.
+> AURA는 현재 작전 상황을 관측하고, 등록된 도구로 공격 후보를 만들고, rule 또는 ML 정책으로 선택 이유를 남기는 공격 효과 에이전트다.
 
 ## 2. 공격 경계
 
@@ -114,7 +114,7 @@ AURA는 `AttackEvent`를 출력한다.
 3. 후보별 예상 Mission Impact 계산
 4. DetectabilityScore 차감
 5. AttackScore가 가장 높은 후보 선택
-6. AttackEvent 기록
+6. DecisionTrace와 AttackEvent 기록
 ```
 
 공식:
@@ -170,6 +170,10 @@ Throughput: 약 1,566,851 samples/sec
 
 완료:
 
+- AgentRuntime 연결
+- AgentMemory belief state 유지
+- ToolRegistry 기반 후보 생성/평가 도구 호출
+- DecisionTrace JSONL 로그
 - 공격 후보 생성
 - rule 기반 공격 선택
 - ML 기반 impact predictor
@@ -184,8 +188,34 @@ Throughput: 약 1,566,851 samples/sec
 - SPARTA/NIST TTP mapping을 후보 생성 근거에 연결
 - ML AURA가 실제 공방 결과에서 rule 대비 어떤 장점이 있는지 더 뚜렷하게 비교
 
-## 9. 보고서에서의 주장
+## 9. 런타임 구조
 
-보고서에서는 이렇게 주장한다.
+AURA는 `src/agents/AgentRuntime` 위에서 실행된다.
 
-> AURA는 실제 위성통신 침해를 수행하지 않고, 폐쇄형 C4ISR/SATCOM 시뮬레이터 내에서 공격 효과를 생성한다. AURA는 작전 단계, 링크 상태, 메시지 큐, COP freshness를 관측해 공격 후보를 만들고, MissionImpactScore가 가장 높은 공격 효과를 선택한다.
+구성:
+
+```text
+AgentRuntime
+  goal: maximize simulated mission impact while staying inside safety constraints
+  memory: last_attack_time, event_count, last_attack_type
+  tools:
+    - generate_attack_candidates
+    - estimate_candidate_effect
+    - estimate_detectability
+    - predict_candidate_impact
+  trace:
+    - observation
+    - candidate_actions
+    - tool_calls
+    - selected_action
+    - reason
+    - feedback
+```
+
+생성 로그:
+
+```text
+outputs/experiments/<experiment>/aura_decision_traces.jsonl
+```
+
+이제 AURA의 한 번의 판단은 단순히 `AttackEvent`만 남기지 않는다. 어떤 상태를 봤는지, 어떤 후보를 만들었는지, 각 후보 점수가 얼마였는지, 왜 no-op 또는 특정 공격 효과를 골랐는지까지 남긴다.

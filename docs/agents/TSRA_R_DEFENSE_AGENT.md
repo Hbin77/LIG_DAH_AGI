@@ -12,7 +12,7 @@ TSRA-R은 AURA가 만든 통신 저하 효과를 관측하고, mission impact를
 
 쉽게 말하면:
 
-> TSRA-R은 중요한 메시지를 먼저 살리고, 오래된 정보가 최신처럼 보이지 않게 만들고, SATCOM이 나빠지면 대체 링크로 바꾸는 방어 에이전트다.
+> TSRA-R은 현재 통신 상태를 관측하고, 등록된 방어 도구로 조건을 평가한 뒤, 필요한 방어 액션과 선택 이유를 trace로 남기는 방어 에이전트다.
 
 ## 2. 방어 목표
 
@@ -157,6 +157,10 @@ ML/ML reactive defense: 약 85.2% +- 1.8%
 
 완료:
 
+- AgentRuntime 연결
+- AgentMemory belief state 유지
+- ToolRegistry 기반 방어 조건 평가/탐지 도구 호출
+- DecisionTrace JSONL 로그
 - rule 기반 priority reroute
 - rule 기반 video throttle
 - stale badge
@@ -173,8 +177,47 @@ ML/ML reactive defense: 약 85.2% +- 1.8%
 - operator alert 문구 자동 생성
 - incident report 자동 생성
 
-## 10. 보고서에서의 주장
+## 10. 런타임 구조
 
-보고서에서는 이렇게 주장한다.
+TSRA-R은 `src/agents/AgentRuntime` 위에서 실행된다.
 
-> TSRA-R은 AURA와 동일한 시뮬레이터 상태를 관측해 priority reroute, video throttle, stale badge, PACE switch를 수행한다. TSRA-R은 raw stale data를 즉시 제거하지는 못하지만, trusted stale exposure를 낮춰 지휘소가 오래된 정보를 최신 정보로 오인하는 위험을 줄인다.
+Rule TSRA-R:
+
+```text
+AgentRuntime
+  goal: minimize mission impact with bounded defensive response actions
+  memory: mode, action_cooldowns, event_count
+  tools:
+    - evaluate_defense_conditions
+    - select_fallback_link
+  trace:
+    - observation
+    - candidate_actions
+    - tool_calls
+    - selected_action
+    - reason
+    - feedback
+```
+
+ML TSRA-R:
+
+```text
+AgentRuntime
+  goal: open reactive defense windows when anomaly probability exceeds threshold
+  memory: active_defense_until, last_probability, last_alert_time
+  tools:
+    - predict_attack_probability
+  trace:
+    - detector probability
+    - threshold decision
+    - opened defense window
+    - emitted defense events
+```
+
+생성 로그:
+
+```text
+outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
+```
+
+이제 TSRA-R의 한 번의 판단은 `DefenseEvent`만 남기지 않는다. 탐지 확률, 방어 조건, cooldown 상태, 어떤 액션이 가능했는지, 왜 no-op 또는 특정 방어 액션을 실행했는지까지 남긴다.

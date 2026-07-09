@@ -25,6 +25,7 @@ See:
 
 The attack and defense agents are documented separately.
 
+- Agent runtime: `docs/agents/AGENT_RUNTIME.md`
 - Attack agent: `docs/agents/AURA_ATTACK_AGENT.md`
 - Defense agent: `docs/agents/TSRA_R_DEFENSE_AGENT.md`
 
@@ -33,14 +34,16 @@ Read order:
 ```text
 1. docs/Requirements.md
 2. docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md
-3. docs/agents/AURA_ATTACK_AGENT.md
-4. docs/agents/TSRA_R_DEFENSE_AGENT.md
-5. docs/Implementation_Report.md
-6. docs/Report_Ready_Summary.md
+3. docs/agents/AGENT_RUNTIME.md
+4. docs/agents/AURA_ATTACK_AGENT.md
+5. docs/agents/TSRA_R_DEFENSE_AGENT.md
+6. docs/Implementation_Report.md
+7. docs/Report_Ready_Summary.md
 ```
 
 ## Components
 
+- `src/agents/`: shared Agent Runtime, Memory, Tool Registry, and DecisionTrace schemas
 - `src/simulator/`: C4ISR/SATCOM message, queue, link, and COP freshness simulator
 - `src/aura/`: AURA red-team attack-effect selection agent
 - `src/tsra_r/`: TSRA-R blue-team defense agent
@@ -67,6 +70,8 @@ This writes:
 - `outputs/experiments/*/mission_events.jsonl`
 - `outputs/experiments/*/attack_events.jsonl`
 - `outputs/experiments/*/defense_events.jsonl`
+- `outputs/experiments/*/aura_decision_traces.jsonl`
+- `outputs/experiments/*/tsra_r_decision_traces.jsonl`
 - `outputs/figures/mission_impact.png`
 - `outputs/figures/critical_latency.png`
 - `outputs/figures/priority_inversion.png`

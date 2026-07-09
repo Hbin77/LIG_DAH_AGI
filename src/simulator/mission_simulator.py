@@ -83,6 +83,9 @@ class MissionSimulator:
         defender: Any | None = None,
         fixed_attacks: list[AttackEvent] | None = None,
     ) -> dict[str, float]:
+        self._bind_agent_runtime(aura, "aura_decision_traces.jsonl")
+        self._bind_agent_runtime(defender, "tsra_r_decision_traces.jsonl")
+
         if fixed_attacks:
             for event in fixed_attacks:
                 self._register_attack(event)
@@ -112,6 +115,13 @@ class MissionSimulator:
         summary = self.summary()
         self._write_summary_csv(summary)
         return summary
+
+    def _bind_agent_runtime(self, agent: Any | None, filename: str) -> None:
+        if agent is None:
+            return
+        bind_runtime = getattr(agent, "bind_runtime", None)
+        if callable(bind_runtime):
+            bind_runtime(self.output_dir / filename)
 
     def snapshot_state(self) -> MissionState:
         effective_links = {

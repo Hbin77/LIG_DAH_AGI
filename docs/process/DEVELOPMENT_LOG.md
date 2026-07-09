@@ -2,7 +2,7 @@
 
 ## 현재 목표
 
-DAH 2026 예선 보고서에 넣을 수 있는 팀 단위 공방형 AI 에이전트 프로토타입을 만든다.
+DAH 2026 예선 제출 산출물에 사용할 팀 단위 공방형 AI 에이전트 프로토타입을 만든다.
 
 핵심 요구:
 
@@ -16,7 +16,7 @@ DAH 2026 예선 보고서에 넣을 수 있는 팀 단위 공방형 AI 에이전
 
 ### 1. 실제 공격 구현을 하지 않기로 한 이유
 
-실제 RF 재밍, 장비 침투, exploit code, 운용 가능한 SATCOM 파라미터는 대회 보고서와 공개 repo에 넣으면 위험하다.
+실제 RF 재밍, 장비 침투, exploit code, 운용 가능한 SATCOM 파라미터는 공개 repo와 제출 산출물에 넣으면 위험하다.
 
 따라서 공격은 다음으로 제한했다.
 
@@ -58,7 +58,7 @@ trusted_stale_exposure = 지휘소가 stale 정보를 최신으로 신뢰할 위
 
 ### 4. 30-seed 반복 실험을 추가한 이유
 
-단일 seed 결과는 우연일 수 있다. 보고서에서는 평균과 표준편차가 필요하다.
+단일 seed 결과는 우연일 수 있다. 반복 실험 평균과 표준편차가 있어야 결과를 안정적으로 해석할 수 있다.
 
 따라서 `run_batch.py`로 30개 seed 반복 실험을 추가했다.
 
@@ -93,7 +93,7 @@ GPU MPS MLP는 최종 정책의 기본값이 아니라 대규모 synthetic 후�
 - `main` 브랜치를 새로 만들었다.
 - `main`에는 개발 산출물을 올리지 않고 보호용 README만 두었다.
 - GitHub 기본 브랜치를 `main`으로 되돌렸다.
-- 이후 코드, 실험 결과, 보고서 문서는 계속 `hbin`에만 커밋한다.
+- 이후 코드, 실험 결과, 공유 문서는 계속 `hbin`에만 커밋한다.
 
 의도:
 
@@ -106,13 +106,62 @@ hbin = 실제 대회 개발 브랜치
 
 ### 8. 팀 협업 전제로 문서 표현을 정리한 이유
 
-팀원이 추가될 예정이므로, 개발 문서와 보고서 초안에서 개인 중심 작업처럼 읽히는 표현을 피해야 한다. 예선 보고서에는 팀 구성과 역할 분배가 평가 항목으로 들어가므로, 지금부터 문서의 주체를 `팀`, `개발팀`, `공격 담당`, `방어 담당`, `실험/보고서 담당`처럼 확장 가능한 표현으로 유지한다.
+팀원이 추가될 예정이므로, 개발 문서와 공유 산출물에서 개인 중심 작업처럼 읽히는 표현을 피해야 한다. 지금부터 문서의 주체를 `팀`, `개발팀`, `공격 담당`, `방어 담당`, `실험 담당`처럼 확장 가능한 표현으로 유지한다.
 
 운영 기준:
 
 - 개인 중심 작업처럼 보이는 표현은 쓰지 않는다.
-- 역할 분배가 확정되면 보고서의 팀 구성 섹션에 이름과 담당 영역을 연결한다.
+- 역할 분배가 확정되면 팀 구성 문서에 이름과 담당 영역을 연결한다.
 - 개발 이력은 계속 `hbin` 브랜치와 Markdown 로그에 남긴다.
+
+### 9. Agent Runtime을 추가한 이유
+
+기존 AURA와 TSRA-R은 `decide(state)`가 바로 이벤트를 반환하는 정책 객체에 가까웠다. Python으로 구현했다는 사실만으로 AI 에이전트라고 보기에는 구조적 근거가 약했다.
+
+그래서 공통 에이전트 런타임을 추가했다.
+
+```text
+src/agents/schema.py
+src/agents/memory.py
+src/agents/tools.py
+src/agents/runtime.py
+```
+
+추가된 구조:
+
+- `AgentRuntime`: observe, tool call, decision trace 기록 담당
+- `AgentMemory`: 최근 관측/판단과 belief state 유지
+- `ToolRegistry`: 에이전트별 도구 등록 및 호출
+- `DecisionTrace`: 후보, 도구 호출, 선택 행동, 이유, 피드백 기록
+
+AURA에 연결한 도구:
+
+- `generate_attack_candidates`
+- `estimate_candidate_effect`
+- `estimate_detectability`
+- `predict_candidate_impact`
+
+TSRA-R에 연결한 도구:
+
+- `evaluate_defense_conditions`
+- `select_fallback_link`
+- `predict_attack_probability`
+
+생성 로그:
+
+```text
+outputs/experiments/<experiment>/aura_decision_traces.jsonl
+outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
+```
+
+검증:
+
+```text
+python3 -m compileall src
+python3 -m src.experiments.run_all
+```
+
+단일 실행 결과는 기존과 동일하게 유지됐다. 30-seed 배치에서는 ML TSRA-R의 `active_defense_until=0` 경계 조건을 바로잡으면서 E7 평균만 `0.13487`에서 `0.13515`로 미세하게 바뀌었다. 핵심 변경은 정책 고도화가 아니라 에이전트 구조와 판단 근거 기록 강화다.
 
 ## 최신 핵심 결과
 

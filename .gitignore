@@ -9,6 +9,7 @@ outputs/experiments/*/mission_events.jsonl
 outputs/experiments/*/attack_events.jsonl
 outputs/experiments/*/defense_events.jsonl
 outputs/experiments/*/metric_snapshots.jsonl
+outputs/experiments/*/*decision_traces.jsonl
 outputs/experiments/*/summary.csv
 outputs/datasets/
 outputs/models/*.pkl
