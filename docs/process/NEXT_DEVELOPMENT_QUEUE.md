@@ -564,7 +564,58 @@ TSRA-R/TSRA-R-ML: tool/candidate coverage 1.0
 - 이 산출물은 "Python 함수가 아니라 에이전트 판단 루프"라는 구조적 근거를 강화한다.
 - 이후 에이전트 정책을 바꿔도 reason, memory, tool, candidate, selected action 증거가 사라지면 검증에서 잡힌다.
 
-## P11. 제출 직전 브랜치/패키지 동결
+## P11. Agent Loop Replay
+
+상태: 완료
+
+문제:
+
+- trace summary와 quality audit은 표 형태라서 판단 루프 전체를 한눈에 읽기 어렵다.
+- 팀원이 AURA/TSRA-R을 따로 개발하려면 "한 주기에서 무엇을 관측하고, 어떤 메모리를 보고, 어떤 도구와 후보를 거쳐 행동했는지"를 빠르게 이해해야 한다.
+- 에이전트 구조를 설명할 때 no-op 판단과 실제 action 판단을 함께 보여주는 대표 replay가 필요하다.
+
+구현:
+
+```text
+src/experiments/agent_loop_replay.py
+outputs/report_tables/agent_loop_replay.csv
+outputs/report_tables/agent_loop_replay.md
+```
+
+구현 방식:
+
+- E5 rule 공방과 E7 ML 공방을 기본 대상으로 둔다.
+- agent/policy별로 대표 `no_op` trace 1개와 실제 action trace 1개를 뽑는다.
+- 각 row에 observe, memory, tools, candidates, selected_action, feedback, reason을 순서대로 요약한다.
+- safety boundary를 각 replay row에 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.agent_loop_replay` 명령으로 재생성 가능하다.
+- 완료. AURA, AURA-ML, TSRA-R, TSRA-R-ML의 `no_op`/`action` replay 8개가 생성된다.
+- 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_loop_replay
+```
+
+검증 결과:
+
+```text
+agent_loop_replay.csv: 8 replay rows
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+cases: no_op, action
+missing loop fields: 0
+```
+
+해석:
+
+- 이 산출물은 에이전트 구조를 사람이 바로 읽을 수 있는 단위로 압축한다.
+- 새 정책을 넣더라도 observe-memory-tool-candidate-decision-feedback 흐름이 유지되는지 확인할 기준으로 쓴다.
+
+## P12. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

@@ -130,8 +130,9 @@ Metrics
 2. 공격, 방어, AI 에이전트 판단 루프 중 어디를 강화하는지 명시한다.
 3. AURA/TSRA-R/MissionSimulator 사이의 event contract가 깨지지 않는지 검증한다.
 4. DecisionTrace가 reason, memory, tool, candidate, selected action을 충분히 남기는지 검증한다.
-5. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-6. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+5. 대표 agent loop replay로 observe-memory-tool-candidate-decision-feedback 흐름을 확인한다.
+6. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+7. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -400,6 +401,32 @@ outputs/report_tables/decision_trace_quality_audit.md
 decision_trace_quality_audit rows: 9
 status: all pass
 checked: AURA, AURA-ML, TSRA-R, TSRA-R-ML active policies
+```
+
+### P11. Agent Loop Replay
+
+상태: 완료
+
+목적:
+
+- AURA와 TSRA-R의 판단 주기를 사람이 바로 읽을 수 있는 replay로 만든다.
+- no-op 판단과 실제 action 판단을 모두 보여줘 에이전트가 무조건 행동하는 것이 아니라 조건부로 판단함을 남긴다.
+- observe, memory, tools, candidates, selected action, feedback, reason을 한 행에 연결한다.
+
+산출물:
+
+```text
+src/experiments/agent_loop_replay.py
+outputs/report_tables/agent_loop_replay.csv
+outputs/report_tables/agent_loop_replay.md
+```
+
+검증 결과:
+
+```text
+agent_loop_replay rows: 8
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+cases: no_op, action
 ```
 
 ## 최종 판단 기준

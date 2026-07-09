@@ -171,6 +171,27 @@ outputs/report_tables/decision_trace_quality_audit.md
 - non-no-op selected action count
 - selected attack/defense event count
 
+## 루프 리플레이
+
+대표 판단 루프는 다음 명령으로 사람이 읽을 수 있는 replay로 재구성한다.
+
+```bash
+python3 -m src.experiments.agent_loop_replay
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_loop_replay.csv
+outputs/report_tables/agent_loop_replay.md
+```
+
+Replay는 각 active agent/policy에서 `no_op` 판단과 실제 action 판단을 뽑아 아래 흐름으로 보여준다.
+
+```text
+observe -> memory -> tools -> candidates -> selected_action -> feedback -> reason
+```
+
 예시:
 
 ```json

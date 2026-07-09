@@ -31,6 +31,7 @@ REQUIRED_FILES = [
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
+    "src/experiments/agent_loop_replay.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
@@ -46,6 +47,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_contract_validation.md",
     "outputs/report_tables/decision_trace_quality_audit.csv",
     "outputs/report_tables/decision_trace_quality_audit.md",
+    "outputs/report_tables/agent_loop_replay.csv",
+    "outputs/report_tables/agent_loop_replay.md",
     "outputs/figures/aura_tsra_architecture.png",
     "outputs/figures/batch_resilience_gain.png",
     "outputs/figures/tsra_action_ablation.png",
@@ -175,6 +178,28 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("decision_trace_quality_audit rows=9 pass")
 
+    replay_rows = read_csv("outputs/report_tables/agent_loop_replay.csv")
+    require(len(replay_rows) == 8, f"expected 8 agent loop replay rows, got {len(replay_rows)}")
+    replay_agents = {row["agent"] for row in replay_rows}
+    require(
+        {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"}.issubset(replay_agents),
+        f"agent loop replay missing agents: {sorted({'AURA', 'AURA-ML', 'TSRA-R', 'TSRA-R-ML'} - replay_agents)}",
+    )
+    replay_cases = {row["loop_case"] for row in replay_rows}
+    require(
+        replay_cases == {"no_op", "action"},
+        f"agent loop replay missing no_op/action cases: {sorted(replay_cases)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in replay_rows),
+        "agent loop replay missing safety boundary",
+    )
+    require(
+        all(row["observe"] and row["memory"] and row["selected_action"] and row["reason"] for row in replay_rows),
+        "agent loop replay has incomplete loop summaries",
+    )
+    checks.append("agent_loop_replay rows=8 agents/cases=complete")
+
     coa_rows = read_csv("outputs/report_tables/aura_coa_cards.csv")
     require(len(coa_rows) >= 10, f"COA cards too small: {len(coa_rows)} rows")
     require(
@@ -286,6 +311,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/decision_trace_quality_audit.md" in manifest_text,
         "manifest missing decision trace quality audit",
+    )
+    require(
+        "outputs/report_tables/agent_loop_replay.md" in manifest_text,
+        "manifest missing agent loop replay",
     )
     return [f"package_zip entries={len(names)}", "package exclusions=passed"]
 

@@ -155,6 +155,19 @@ This writes:
 
 The audit checks whether each active AURA/TSRA-R policy has complete reason, observation, memory, feedback, selected action, tool/candidate evaluation, and non-no-op event evidence.
 
+## Generate Agent Loop Replay
+
+```bash
+python3 -m src.experiments.agent_loop_replay
+```
+
+This writes:
+
+- `outputs/report_tables/agent_loop_replay.csv`
+- `outputs/report_tables/agent_loop_replay.md`
+
+The replay reconstructs representative observe-memory-tool-candidate-decision-feedback loops for AURA, AURA-ML, TSRA-R, and TSRA-R-ML.
+
 ## Generate AURA COA Cards
 
 ```bash
@@ -322,6 +335,7 @@ python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
+python3 -m src.experiments.agent_loop_replay
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards

@@ -778,6 +778,53 @@ TSRA-R/TSRA-R-ML tool_call_coverage: 1.0
 - 이 산출물은 "에이전트"라는 주장을 말이 아니라 trace 품질로 검증한다.
 - 이후 공격/방어 정책을 수정해도 DecisionTrace 품질이 낮아지면 final verifier에서 실패한다.
 
+### 22. Agent Loop Replay를 추가한 이유
+
+DecisionTrace summary와 quality audit은 유용하지만, 한 판단 주기의 흐름을 그대로 읽기에는 여전히 표가 넓다. 에이전트 구조를 이해하려면 한 row에서 관측, 메모리, 도구, 후보, 선택 행동, 피드백, 이유가 연결돼야 한다.
+
+그래서 representative loop replay를 추가했다.
+
+구현:
+
+```text
+src/experiments/agent_loop_replay.py
+outputs/report_tables/agent_loop_replay.csv
+outputs/report_tables/agent_loop_replay.md
+```
+
+Replay 구성:
+
+```text
+observe -> memory -> tools -> candidates -> selected_action -> feedback -> reason
+```
+
+선정 방식:
+
+- E5 rule 공방과 E7 ML 공방을 기본 대상으로 둔다.
+- AURA, AURA-ML, TSRA-R, TSRA-R-ML 각각에서 `no_op` trace 1개와 실제 action trace 1개를 뽑는다.
+- 총 8개 replay row를 생성한다.
+
+검증:
+
+```text
+python3 -m src.experiments.agent_loop_replay
+```
+
+결과:
+
+```text
+agent_loop_replay.csv: 8 rows
+agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
+cases: no_op, action
+missing fields: 0
+```
+
+해석:
+
+- 이 산출물은 에이전트가 무조건 행동하는 것이 아니라, no-op과 action을 조건부로 선택한다는 점을 보여준다.
+- AURA의 공격 후보 평가와 TSRA-R의 방어 후보 평가를 같은 형식으로 비교할 수 있다.
+- `verify_submission_state.py`와 `competition_alignment.py`에 연결해 필수 산출물로 만들었다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:
