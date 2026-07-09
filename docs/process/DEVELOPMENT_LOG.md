@@ -2917,7 +2917,7 @@ AURA/AURA-ML은 `summarize_defense_context` tool을 호출하고, 그 결과를 
 검증 결과는 다음과 같다.
 
 ```text
-cross_agent_context_audit rows: 7 pass
+cross_agent_context_audit rows: 8 pass
 aura_observation_context: 62/62
 tsra_observation_context: 122/122
 summarize_attack_context: 122
@@ -2933,6 +2933,11 @@ missing_related_context: 0
 counter_defense_bonus_candidates: 7
 selected_counter_defense_bonus_traces: 3
 counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_pressure
+attack_context_bonus_candidates: 61
+attack_context_bonus_events: 25
+selected_defense_bonus_traces: 22
+ordered_core_defense_traces: 6/6
+defense_counter_reasons: counter_queue_pressure_priority_reroute, counter_video_queue_pressure
 agent_tool_usage_audit rows: 33 pass
 reproduction_order_audit rows: 15 pass
 ```
@@ -2945,5 +2950,6 @@ reproduction_order_audit rows: 15 pass
 - `submission_readiness_audit`, `reproduction_order_audit`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
 - `docs/agents/AGENT_RUNTIME.md`, `AURA_ATTACK_AGENT.md`, `TSRA_R_DEFENSE_AGENT.md`에 cross-agent context memory/tool/trace contract를 추가했다.
 - AURA-ML은 defense context를 `counter_defense_bonus`와 `counter_defense_reason`으로 바꿔 selection score와 selected action trace에 남긴다.
+- TSRA-R은 attack context를 `attack_context_bonus`, `attack_context_score_reason`, `defense_priority_score`로 바꿔 후보와 emitted defense event detail에 남기고, 같은 tick의 core defense event를 점수 순서로 생성한다.
 
 이 보강의 의미는 공격/방어 에이전트가 단순히 같은 simulator를 공유하는 수준을 넘어, 상대 에이전트의 최근 행동 context를 다음 판단 루프와 정책 점수 안에서 수용한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation context, trace, audit만 강화한다.

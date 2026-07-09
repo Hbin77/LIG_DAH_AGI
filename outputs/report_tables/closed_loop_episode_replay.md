@@ -75,8 +75,8 @@ Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or l
 - Required defenses: priority_reroute, stale_badge
 - Covered required defenses: priority_reroute, stale_badge
 - First required response latency: 0
-- Defense chain: active=pace_switch@75-until-175; stale_badge@80-until-170; video_throttle@100-until-160; priority_reroute@125-until-195; video_throttle@135-until-195; stale_badge@140-until-230 | response=video_throttle@170-until-230; stale_badge@170-until-260; priority_reroute@175-until-245; priority_reroute@200-until-270; stale_badge@200-until-290
-- Operator alerts: t=170; def-00011; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=170; def-00012; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5. || t=175; def-00013; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load. || t=200; def-00014; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load. || t=200; def-00015; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5.
+- Defense chain: active=pace_switch@75-until-175; stale_badge@80-until-170; video_throttle@100-until-160; priority_reroute@125-until-195; video_throttle@135-until-195; stale_badge@140-until-230 | response=stale_badge@170-until-260; video_throttle@170-until-230; priority_reroute@175-until-245; priority_reroute@200-until-270; stale_badge@200-until-290
+- Operator alerts: t=170; def-00011; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5. || t=170; def-00012; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=175; def-00013; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load. || t=200; def-00014; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load. || t=200; def-00015; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5.
 - Mission impact: start=0.110655, peak=0.115123, end=0.112973
 - Peak latency/stale/inversion: 2 / 0.125 / 0.0371429
 - Outcome: held near attack-time impact
@@ -92,7 +92,7 @@ Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or l
 - Required defenses: priority_reroute, stale_badge
 - Covered required defenses: priority_reroute, stale_badge
 - First required response latency: 0
-- Defense chain: active=stale_badge@140-until-230; video_throttle@170-until-230; stale_badge@170-until-260; priority_reroute@175-until-245; priority_reroute@200-until-270; stale_badge@200-until-290; video_throttle@205-until-265 | response=video_throttle@240-until-300; priority_reroute@245-until-315
+- Defense chain: active=stale_badge@140-until-230; stale_badge@170-until-260; video_throttle@170-until-230; priority_reroute@175-until-245; priority_reroute@200-until-270; stale_badge@200-until-290; video_throttle@205-until-265 | response=video_throttle@240-until-300; priority_reroute@245-until-315
 - Operator alerts: t=240; def-00017; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=245; def-00018; priority_reroute; severity=medium; Critical traffic is waiting behind lower-priority load.
 - Mission impact: start=0.112348, peak=0.112348, end=0.0727585
 - Peak latency/stale/inversion: 2 / 0.125 / 0.0271967
@@ -126,8 +126,8 @@ Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or l
 - Required defenses: priority_reroute, stale_badge
 - Covered required defenses: priority_reroute, stale_badge
 - First required response latency: 10
-- Defense chain: response=priority_reroute@70-until-140; video_throttle@70-until-130; stale_badge@70-until-160; pace_switch@70-until-170; ml_attack_alert@80-until-150
-- Operator alerts: t=70; def-00001; priority_reroute; severity=high; Critical traffic is waiting behind lower-priority load. || t=70; def-00002; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=70; def-00003; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5. || t=70; def-00004; pace_switch; severity=high; PACE switch selected target=LTE; reason=SATCOM degraded beyond mission threshold. || t=80; def-00005; ml_attack_alert; severity=high; ML detector flags attack-like degradation probability=0.955265 above threshold=0.75.
+- Defense chain: response=priority_reroute@70-until-140; stale_badge@70-until-160; pace_switch@70-until-170; video_throttle@70-until-130; ml_attack_alert@80-until-150
+- Operator alerts: t=70; def-00001; priority_reroute; severity=high; Critical traffic is waiting behind lower-priority load. || t=70; def-00002; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5. || t=70; def-00003; pace_switch; severity=high; PACE switch selected target=LTE; reason=SATCOM degraded beyond mission threshold. || t=70; def-00004; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=80; def-00005; ml_attack_alert; severity=high; ML detector flags attack-like degradation probability=0.955265 above threshold=0.75.
 - Mission impact: start=0.376905, peak=0.383116, end=0.131467
 - Peak latency/stale/inversion: 4.9 / 0.5 / 0.234568
 - Outcome: contained after peak degradation
@@ -143,7 +143,7 @@ Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or l
 - Required defenses: ml_attack_alert
 - Covered required defenses: ml_attack_alert
 - First required response latency: 0
-- Defense chain: active=priority_reroute@70-until-140; video_throttle@70-until-130; stale_badge@70-until-160; pace_switch@70-until-170; ml_attack_alert@80-until-150; ml_attack_alert@105-until-175; priority_reroute@105-until-175; video_throttle@105-until-165; stale_badge@105-until-195 | response=ml_attack_alert@130-until-200; priority_reroute@130-until-200; video_throttle@140-until-200; pace_switch@150-until-250
+- Defense chain: active=priority_reroute@70-until-140; stale_badge@70-until-160; pace_switch@70-until-170; video_throttle@70-until-130; ml_attack_alert@80-until-150; ml_attack_alert@105-until-175; priority_reroute@105-until-175; stale_badge@105-until-195; video_throttle@105-until-165 | response=ml_attack_alert@130-until-200; priority_reroute@130-until-200; video_throttle@140-until-200; pace_switch@150-until-250
 - Operator alerts: t=130; def-00010; ml_attack_alert; severity=high; ML detector flags attack-like degradation probability=0.972249 above threshold=0.75. || t=130; def-00011; priority_reroute; severity=high; Critical traffic is waiting behind lower-priority load. || t=140; def-00012; video_throttle; severity=medium; Video traffic is being reduced to protect critical capacity. || t=150; def-00013; pace_switch; severity=high; PACE switch selected target=MESH; reason=fallback link degraded beyond mission threshold.
 - Mission impact: start=0.114622, peak=0.132338, end=0.10647
 - Peak latency/stale/inversion: 1.3 / 0.125 / 0.109827
@@ -160,7 +160,7 @@ Safety boundary: closed simulation closed-loop replay only; no RF, exploit, or l
 - Required defenses: ml_attack_alert
 - Covered required defenses: ml_attack_alert
 - First required response latency: 0
-- Defense chain: active=stale_badge@70-until-160; pace_switch@70-until-170; ml_attack_alert@105-until-175; priority_reroute@105-until-175; video_throttle@105-until-165; stale_badge@105-until-195; ml_attack_alert@130-until-200; priority_reroute@130-until-200; video_throttle@140-until-200; pace_switch@150-until-250; ml_attack_alert@155-until-225; stale_badge@160-until-250 | response=priority_reroute@175-until-245; stale_badge@190-until-280
+- Defense chain: active=stale_badge@70-until-160; pace_switch@70-until-170; ml_attack_alert@105-until-175; priority_reroute@105-until-175; stale_badge@105-until-195; video_throttle@105-until-165; ml_attack_alert@130-until-200; priority_reroute@130-until-200; video_throttle@140-until-200; pace_switch@150-until-250; ml_attack_alert@155-until-225; stale_badge@160-until-250 | response=priority_reroute@175-until-245; stale_badge@190-until-280
 - Operator alerts: t=160; def-00015; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5. || t=175; def-00016; priority_reroute; severity=high; Critical traffic is waiting behind lower-priority load. || t=190; def-00017; stale_badge; severity=medium; COP stale confidence badge active; stale_ratio=0.5.
 - Mission impact: start=0.137802, peak=0.13899, end=0.137665
 - Peak latency/stale/inversion: 2 / 0.125 / 0.058104

@@ -334,7 +334,7 @@ interpretation
 현재 검증 기준:
 
 ```text
-E5 + E7 defense ledger rows: 53
+E5 + E7 defense ledger rows: 52
 actions: ml_attack_alert, pace_switch, priority_reroute, stale_badge, video_throttle
 observed_effect labels: improved, held, degraded_or_delayed
 ```
@@ -424,6 +424,8 @@ emission_gate_violations: 0
 - PACE switch
 - ML anomaly detector
 - ML detector 기반 reactive defense window
+- AURA attack context 기반 defense priority score
+- defense priority score 기반 core event ordering
 - Adaptive Memory 기반 optional action gating
 - Adaptive Defense Decision Path 감사
 - defense event JSONL 로그
@@ -449,13 +451,16 @@ AgentRuntime
     - summarize_attack_context
     - evaluate_defense_conditions
     - select_fallback_link
-  trace:
-    - observation
-    - cross_agent_attack_context
-    - candidate_actions
-    - tool_calls
-    - selected_action
-    - reason
+	  trace:
+	    - observation
+	    - cross_agent_attack_context
+	    - candidate_actions
+	    - defense_base_score
+	    - attack_context_bonus
+	    - attack_context_score_reason
+	    - tool_calls
+	    - selected_action
+	    - reason
     - feedback
 ```
 
@@ -503,3 +508,24 @@ outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
 ```
 
 이제 TSRA-R의 한 번의 판단은 `DefenseEvent`만 남기지 않는다. 탐지 확률, 방어 조건, cooldown 상태, AURA attack context, 어떤 액션이 가능했는지, 왜 no-op 또는 특정 방어 액션을 실행했는지까지 남긴다. emitted `DefenseEvent.details.related_attack_context`에도 같은 공격 context 요약이 남는다.
+
+추가로 Rule TSRA-R은 후보별 방어 우선순위 점수를 남긴다.
+
+```text
+score = defense_base_score + attack_context_bonus
+```
+
+- `defense_base_score`: action별 기본 임무 보호 우선순위다.
+- `attack_context_bonus`: active/recent AURA attack type이 해당 방어 action과 직접 관련될 때만 붙는 제한된 가산점이다.
+- `attack_context_score_reason`: `counter_queue_pressure_priority_reroute`, `counter_video_queue_pressure` 같은 점수 이유를 남긴다.
+- 같은 tick에서 여러 core defense event가 나오면 `defense_priority_score` 내림차순으로 생성되어 시뮬레이터에 적용된다.
+
+Cross-agent 감사 결과:
+
+```text
+cross_agent_context_audit rows: 8 pass
+attack_context_bonus_candidates: 61
+attack_context_bonus_events: 25
+selected_defense_bonus_traces: 22
+ordered_core_defense_traces: 6/6
+```

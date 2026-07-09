@@ -8,7 +8,7 @@ Safety boundary: closed simulation PACE audit only; no RF, exploit, or live netw
 | experiment | pace_event_id | time_sec | from_link_inferred | target_link | reason | audit_status | recovery_instability_at_switch |
 |---|---|---:|---|---|---|---|---:|
 | E5_rule_aura_tsra_r | def-00005 | 75 | SATCOM | LTE | SATCOM degraded beyond mission threshold | satcom_to_fallback | 1 |
-| E7_ml_aura_ml_tsra_r | def-00004 | 70 | SATCOM | LTE | SATCOM degraded beyond mission threshold | satcom_to_fallback | 1 |
+| E7_ml_aura_ml_tsra_r | def-00003 | 70 | SATCOM | LTE | SATCOM degraded beyond mission threshold | satcom_to_fallback | 1 |
 | E7_ml_aura_ml_tsra_r | def-00013 | 150 | LTE | MESH | fallback link degraded beyond mission threshold | fallback_reselect | 2 |
 | E7_ml_aura_ml_tsra_r | def-00025 | 260 | MESH | LTE | fallback link degraded beyond mission threshold | fallback_reselect | 3 |
 
@@ -31,7 +31,7 @@ Safety boundary: closed simulation PACE audit only; no RF, exploit, or live netw
 - Residual risk: initial PACE switch protects SATCOM degradation but may expose fallback links to later chasing
 - Safety boundary: closed simulation PACE audit only; no RF, exploit, or live network action
 
-### E7_ml_aura_ml_tsra_r def-00004
+### E7_ml_aura_ml_tsra_r def-00003
 
 - Time: 70
 - Inferred transition: SATCOM -> LTE

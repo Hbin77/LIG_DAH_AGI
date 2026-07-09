@@ -37,7 +37,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=32.024; video_kb=0; stale=0; priority_inversion=0
 - Memory: observations=1; decisions=0; last_selected=; mode=full; event_count=0; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
 - Tools: evaluate_defense_conditions -> priority_reroute_needed=False; stale_badge_needed=False; pace_switch_needed=False; video_throttle_needed=False; summarize_attack_context -> active_attack_count=0; active_attack_targets=; active_attack_types=
-- Candidates: priority_reroute; eligible=False; ready=True; enabled=True || video_throttle; eligible=False; ready=True; enabled=True || stale_badge; eligible=False; ready=True; enabled=True; total=4
+- Candidates: priority_reroute; score=0; impact=; detectability=; target= || video_throttle; score=0; impact=; detectability=; target= || stale_badge; score=0; impact=; detectability=; target=; total=4
 - Selected action: no_op
 - Feedback: event_count=0; mode=full; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
 - Reason: no defense action emitted
@@ -50,7 +50,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=0; queue_kb=0; video_kb=0; stale=0.5; priority_inversion=0.15
 - Memory: observations=5; decisions=4; last_selected=no_op; mode=full; event_count=1; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
 - Tools: evaluate_defense_conditions -> priority_reroute_needed=False; stale_badge_needed=True; pace_switch_needed=False; video_throttle_needed=False; summarize_attack_context -> active_attack_count=0; active_attack_targets=; active_attack_types=
-- Candidates: stale_badge; eligible=True; ready=True; enabled=True || priority_reroute; eligible=False; ready=True; enabled=True || video_throttle; eligible=False; ready=True; enabled=True; total=4
+- Candidates: stale_badge; score=0.78; impact=; detectability=; target= || priority_reroute; score=0; impact=; detectability=; target= || video_throttle; score=0; impact=; detectability=; target=; total=4
 - Selected action: defense_events: def-00001; stale_badge; until=110
 - Feedback: event_count=1; mode=full; enabled_actions=pace_switch,priority_reroute,stale_badge,video_throttle
 - Reason: emitted 1 defense event(s)
@@ -103,7 +103,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Memory: observations=15; decisions=14; last_selected=no_op; last_probability=0.503568; active_defense_until=115
 - Tools: predict_attack_probability -> 0.503568; summarize_attack_context -> active_attack_count=1; active_attack_targets=SATCOM; active_attack_types=queue_pressure; assess_mission_risk_guard -> early_guard_triggered=True; expiry_guard_triggered=False; had_prior_window=False
 - Candidates: open_defense_window; probability=0.503568; threshold=0.75; eligible=True; total=1
-- Selected action: defense_events: def-00001; priority_reroute; until=140 + def-00002; video_throttle; until=130 + def-00003; stale_badge; until=160 + def-00004; pace_switch; until=170
+- Selected action: defense_events: def-00001; priority_reroute; until=140 + def-00002; stale_badge; until=160 + def-00003; pace_switch; until=170 + def-00004; video_throttle; until=130
 - Feedback: event_count=4; active_defense_until=115
 - Reason: mission risk guard opened or maintained defense window
 - Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or live network action

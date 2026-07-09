@@ -786,8 +786,8 @@ def check_csv_outputs() -> list[str]:
 
     cross_agent_rows = read_csv("outputs/report_tables/cross_agent_context_audit.csv")
     require(
-        len(cross_agent_rows) == 7,
-        f"expected 7 cross-agent context audit rows, got {len(cross_agent_rows)}",
+        len(cross_agent_rows) == 8,
+        f"expected 8 cross-agent context audit rows, got {len(cross_agent_rows)}",
     )
     failed_cross_agent_rows = [
         f"{row['check_id']}:{row['area']}"
@@ -808,6 +808,7 @@ def check_csv_outputs() -> list[str]:
             "Defense-to-attack handoff",
             "Event-level context consistency",
             "Context-to-policy score effect",
+            "Attack-context defense priority effect",
         },
         "cross-agent context audit has unexpected areas",
     )
@@ -880,10 +881,22 @@ def check_csv_outputs() -> list[str]:
         "cross-agent audit missing context-to-policy score evidence",
     )
     require(
+        any(
+            observed_int(row, "attack_context_bonus_candidates") > 0
+            and observed_int(row, "attack_context_bonus_events") > 0
+            and observed_int(row, "selected_defense_bonus_traces") > 0
+            and "ordered_core_defense_traces=" in row["observed"]
+            and "counter_" in row["observed"]
+            for row in cross_agent_rows
+            if row["check_id"] == "XAG08"
+        ),
+        "cross-agent audit missing attack-context defense priority evidence",
+    )
+    require(
         all("closed simulation" in row["safety_boundary"] for row in cross_agent_rows),
         "cross-agent context audit missing safety boundary",
     )
-    checks.append("cross_agent_context_audit rows=7 pass")
+    checks.append("cross_agent_context_audit rows=8 pass")
 
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
     require(len(tool_rows) == 33, f"expected 33 agent tool audit rows, got {len(tool_rows)}")

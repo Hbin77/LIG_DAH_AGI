@@ -13,8 +13,8 @@
 | 135 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=195.0 |
 | 140 | TSRA-R | stale_badge |  |  | until=230.0 |
 | 160 | AURA | queue_pressure | LTE | increase non-critical queue occupancy | expected impact=1.0 |
-| 170 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=230.0 |
 | 170 | TSRA-R | stale_badge |  |  | until=260.0 |
+| 170 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=230.0 |
 | 175 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=245.0 |
 | 200 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=270.0 |
 | 200 | TSRA-R | stale_badge |  |  | until=290.0 |

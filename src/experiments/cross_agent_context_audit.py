@@ -320,6 +320,53 @@ def build_rows() -> list[dict[str, str]]:
             if candidate.get("counter_defense_reason")
         }
     )
+    tsra_attack_bonus_candidates = [
+        candidate
+        for trace in tsra_traces
+        for candidate in trace.get("candidate_actions") or []
+        if as_float(candidate.get("attack_context_bonus")) > 0.0
+    ]
+    tsra_attack_bonus_events = [
+        event
+        for event in defenses
+        if as_float((event.get("details") or {}).get("attack_context_bonus")) > 0.0
+    ]
+    selected_defense_bonus_traces = [
+        trace
+        for trace in tsra_traces
+        if selected_type(trace) == "defense_events"
+        and any(
+            as_float((event.get("details") or {}).get("attack_context_bonus")) > 0.0
+            for event in (trace.get("selected_action") or {}).get("events") or []
+        )
+    ]
+    defense_counter_reasons = sorted(
+        {
+            str(candidate.get("attack_context_score_reason", ""))
+            for candidate in tsra_attack_bonus_candidates
+            if candidate.get("attack_context_score_reason")
+        }
+    )
+    multi_core_defense_traces = 0
+    ordered_core_defense_traces = 0
+    for trace in tsra_traces:
+        if selected_type(trace) != "defense_events":
+            continue
+        core_events = [
+            event
+            for event in (trace.get("selected_action") or {}).get("events") or []
+            if event.get("action") != "ml_attack_alert"
+            and "defense_priority_score" in (event.get("details") or {})
+        ]
+        if len(core_events) <= 1:
+            continue
+        multi_core_defense_traces += 1
+        scores = [
+            as_float((event.get("details") or {}).get("defense_priority_score"))
+            for event in core_events
+        ]
+        if scores == sorted(scores, reverse=True):
+            ordered_core_defense_traces += 1
 
     return [
         row(
@@ -462,6 +509,31 @@ def build_rows() -> list[dict[str, str]]:
                 and bool(counter_reasons)
             ),
             interpretation="AURA-ML does not merely log TSRA-R state; it uses that context as a bounded selection-score term.",
+        ),
+        row(
+            check_id="XAG08",
+            area="Attack-context defense priority effect",
+            requirement="TSRA-R should convert AURA attack context into bounded defense priority scores and event ordering.",
+            evidence=[
+                "outputs/experiments/*/tsra_r_decision_traces.jsonl",
+                "outputs/experiments/*/defense_events.jsonl",
+            ],
+            observed=(
+                f"attack_context_bonus_candidates={len(tsra_attack_bonus_candidates)}; "
+                f"attack_context_bonus_events={len(tsra_attack_bonus_events)}; "
+                f"selected_defense_bonus_traces={len(selected_defense_bonus_traces)}; "
+                f"ordered_core_defense_traces={ordered_core_defense_traces}/{multi_core_defense_traces}; "
+                f"defense_counter_reasons={','.join(defense_counter_reasons) if defense_counter_reasons else 'none'}"
+            ),
+            ok=(
+                len(tsra_attack_bonus_candidates) > 0
+                and len(tsra_attack_bonus_events) > 0
+                and len(selected_defense_bonus_traces) > 0
+                and multi_core_defense_traces > 0
+                and ordered_core_defense_traces == multi_core_defense_traces
+                and bool(defense_counter_reasons)
+            ),
+            interpretation="TSRA-R does not merely log AURA state; it uses that context to score and order bounded defense actions.",
         ),
     ]
 

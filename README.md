@@ -309,7 +309,7 @@ This writes:
 - `outputs/report_tables/cross_agent_context_audit.csv`
 - `outputs/report_tables/cross_agent_context_audit.md`
 
-The audit verifies that AURA carries TSRA-R defense context and TSRA-R carries AURA attack context through observations, tool calls, AgentMemory, DecisionTrace feedback, candidate rows, and emitted defense event details. It also checks that AURA-ML converts defender context into a bounded counter-defense selection-score term instead of only logging it.
+The audit verifies that AURA carries TSRA-R defense context and TSRA-R carries AURA attack context through observations, tool calls, AgentMemory, DecisionTrace feedback, candidate rows, and emitted defense event details. It also checks that AURA-ML converts defender context into a bounded counter-defense selection-score term, and that TSRA-R converts attack context into bounded defense-priority scores and ordered core defense events instead of only logging it.
 
 ## Audit Agent Tool Usage
 

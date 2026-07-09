@@ -72,9 +72,14 @@ class RuleTSRAR:
         )
         self._update_attack_context_belief(attack_context)
         candidate_actions: list[dict] = []
-        events: list[DefenseEvent] = []
+        event_requests: list[tuple[float, str, dict]] = []
         now = state.time_sec
 
+        priority_reroute_priority = self._defense_priority_score(
+            "priority_reroute",
+            conditions,
+            attack_context,
+        )
         candidate_actions.append(
             {
                 "action": "priority_reroute",
@@ -82,6 +87,7 @@ class RuleTSRAR:
                 "eligible": conditions["priority_reroute_needed"],
                 "ready": conditions["priority_reroute_ready"],
                 "reason": "critical traffic waiting behind video load",
+                **priority_reroute_priority,
                 **self._adaptive_candidate_context("priority_reroute", extra_feedback),
                 **self._cross_agent_candidate_context("priority_reroute", attack_context),
             }
@@ -91,18 +97,24 @@ class RuleTSRAR:
             and conditions["priority_reroute_needed"]
             and conditions["priority_reroute_ready"]
         ):
-            events.append(
-                self._event(
-                    state,
+            event_requests.append(
+                (
+                    priority_reroute_priority["score"],
                     "priority_reroute",
                     {
                         "until_sec": now + 70,
                         "reason": "critical traffic waiting behind video load",
                         "related_attack_context": self._compact_attack_context(attack_context),
+                        **self._event_priority_details(priority_reroute_priority),
                     },
                 )
             )
 
+        video_throttle_priority = self._defense_priority_score(
+            "video_throttle",
+            conditions,
+            attack_context,
+        )
         candidate_actions.append(
             {
                 "action": "video_throttle",
@@ -110,6 +122,7 @@ class RuleTSRAR:
                 "eligible": conditions["video_throttle_needed"],
                 "ready": conditions["video_throttle_ready"],
                 "reason": "protect critical traffic capacity",
+                **video_throttle_priority,
                 **self._adaptive_candidate_context("video_throttle", extra_feedback),
                 **self._cross_agent_candidate_context("video_throttle", attack_context),
             }
@@ -119,18 +132,24 @@ class RuleTSRAR:
             and conditions["video_throttle_needed"]
             and conditions["video_throttle_ready"]
         ):
-            events.append(
-                self._event(
-                    state,
+            event_requests.append(
+                (
+                    video_throttle_priority["score"],
                     "video_throttle",
                     {
                         "until_sec": now + 60,
                         "reason": "protect critical traffic capacity",
                         "related_attack_context": self._compact_attack_context(attack_context),
+                        **self._event_priority_details(video_throttle_priority),
                     },
                 )
             )
 
+        stale_badge_priority = self._defense_priority_score(
+            "stale_badge",
+            conditions,
+            attack_context,
+        )
         candidate_actions.append(
             {
                 "action": "stale_badge",
@@ -138,6 +157,7 @@ class RuleTSRAR:
                 "eligible": conditions["stale_badge_needed"],
                 "ready": conditions["stale_badge_ready"],
                 "reason": "mark stale COP objects as lower trust",
+                **stale_badge_priority,
                 **self._adaptive_candidate_context("stale_badge", extra_feedback),
                 **self._cross_agent_candidate_context("stale_badge", attack_context),
             }
@@ -147,19 +167,21 @@ class RuleTSRAR:
             and conditions["stale_badge_needed"]
             and conditions["stale_badge_ready"]
         ):
-            events.append(
-                self._event(
-                    state,
+            event_requests.append(
+                (
+                    stale_badge_priority["score"],
                     "stale_badge",
                     {
                         "until_sec": now + 90,
                         "stale_ratio": state.stale_data_ratio,
                         "related_attack_context": self._compact_attack_context(attack_context),
+                        **self._event_priority_details(stale_badge_priority),
                     },
                 )
             )
 
         if self.mode != "full":
+            events = self._materialize_prioritized_events(state, event_requests)
             self._record_decision(
                 state,
                 observation,
@@ -171,6 +193,11 @@ class RuleTSRAR:
             )
             return events
 
+        pace_switch_priority = self._defense_priority_score(
+            "pace_switch",
+            conditions,
+            attack_context,
+        )
         candidate_actions.append(
             {
                 "action": "pace_switch",
@@ -178,6 +205,7 @@ class RuleTSRAR:
                 "eligible": conditions["pace_switch_needed"],
                 "ready": conditions["pace_switch_ready"],
                 "reason": conditions["pace_switch_reason"],
+                **pace_switch_priority,
                 **self._adaptive_candidate_context("pace_switch", extra_feedback),
                 **self._cross_agent_candidate_context("pace_switch", attack_context),
             }
@@ -193,9 +221,9 @@ class RuleTSRAR:
                 state=state,
             )
             if target:
-                events.append(
-                    self._event(
-                        state,
+                event_requests.append(
+                    (
+                        pace_switch_priority["score"],
                         "pace_switch",
                         {
                             "target_link": target,
@@ -203,10 +231,12 @@ class RuleTSRAR:
                             "move_critical": True,
                             "reason": conditions["pace_switch_reason"],
                             "related_attack_context": self._compact_attack_context(attack_context),
+                            **self._event_priority_details(pace_switch_priority),
                         },
                     )
                 )
 
+        events = self._materialize_prioritized_events(state, event_requests)
         self._record_decision(
             state,
             observation,
@@ -276,6 +306,83 @@ class RuleTSRAR:
                 attack_context,
             ),
         }
+
+    def _defense_priority_score(
+        self,
+        action: str,
+        conditions: dict[str, Any],
+        attack_context: dict,
+    ) -> dict:
+        needed = bool(conditions.get(f"{action}_needed"))
+        ready = bool(conditions.get(f"{action}_ready"))
+        enabled = self._enabled(action)
+        base_scores = {
+            "priority_reroute": 0.82,
+            "stale_badge": 0.78,
+            "pace_switch": 0.72,
+            "video_throttle": 0.58,
+        }
+        base_score = base_scores.get(action, 0.40) if enabled and needed else 0.0
+        if base_score and not ready:
+            base_score *= 0.25
+        attack_bonus, attack_reason = self._attack_context_priority_bonus(
+            action,
+            attack_context,
+        )
+        score = base_score + attack_bonus if enabled and needed else 0.0
+        return {
+            "score": round(score, 6),
+            "defense_base_score": round(base_score, 6),
+            "attack_context_bonus": round(attack_bonus if enabled and needed else 0.0, 6),
+            "attack_context_score_reason": (
+                attack_reason if enabled and needed else "not_eligible_for_attack_context_bonus"
+            ),
+        }
+
+    @staticmethod
+    def _attack_context_priority_bonus(action: str, attack_context: dict) -> tuple[float, str]:
+        active_types = set(attack_context.get("active_attack_types") or [])
+        recent_types = set(attack_context.get("recent_attack_types") or [])
+        types = active_types | recent_types
+        if action == "priority_reroute" and types.intersection(
+            {"queue_pressure", "critical_window_degradation"}
+        ):
+            return 0.12, "counter_queue_pressure_priority_reroute"
+        if action == "video_throttle" and types.intersection(
+            {"queue_pressure", "bandwidth_limit"}
+        ):
+            return 0.08, "counter_video_queue_pressure"
+        if action == "stale_badge" and "stale_cop_induction" in types:
+            return 0.12, "counter_stale_cop_induction"
+        if action == "pace_switch" and types.intersection(
+            {
+                "link_degradation",
+                "bandwidth_limit",
+                "failover_chasing",
+                "critical_window_degradation",
+            }
+        ):
+            return 0.10, "counter_link_or_failover_attack"
+        if attack_context.get("attack_context_seen"):
+            return 0.0, "attack_context_observed_no_score_change"
+        return 0.0, "no_attack_context"
+
+    @staticmethod
+    def _event_priority_details(priority: dict) -> dict:
+        return {
+            "defense_priority_score": priority["score"],
+            "defense_base_score": priority["defense_base_score"],
+            "attack_context_bonus": priority["attack_context_bonus"],
+            "attack_context_score_reason": priority["attack_context_score_reason"],
+        }
+
+    def _materialize_prioritized_events(
+        self,
+        state: MissionState,
+        event_requests: list[tuple[float, str, dict]],
+    ) -> list[DefenseEvent]:
+        ordered = sorted(event_requests, key=lambda item: (-item[0], item[1]))
+        return [self._event(state, action, details) for _, action, details in ordered]
 
     @staticmethod
     def _attack_context_relevant(action: str, attack_context: dict) -> bool:

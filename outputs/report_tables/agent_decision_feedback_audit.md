@@ -27,8 +27,8 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 | E5_rule_aura_tsra_r | tsra-r-trace-00028 | def-00009 | defense_event | video_throttle | defense_held | pass |
 | E5_rule_aura_tsra_r | tsra-r-trace-00029 | def-00010 | defense_event | stale_badge | defense_bounded_or_lagged | pass |
 | E5_rule_aura_tsra_r | aura-trace-00017 | atk-00003 | attack_event | queue_pressure | attack_contained_by_defense | pass |
-| E5_rule_aura_tsra_r | tsra-r-trace-00035 | def-00011 | defense_event | video_throttle | defense_held | pass |
-| E5_rule_aura_tsra_r | tsra-r-trace-00035 | def-00012 | defense_event | stale_badge | defense_held | pass |
+| E5_rule_aura_tsra_r | tsra-r-trace-00035 | def-00011 | defense_event | stale_badge | defense_held | pass |
+| E5_rule_aura_tsra_r | tsra-r-trace-00035 | def-00012 | defense_event | video_throttle | defense_held | pass |
 | E5_rule_aura_tsra_r | tsra-r-trace-00036 | def-00013 | defense_event | priority_reroute | defense_held | pass |
 | E5_rule_aura_tsra_r | tsra-r-trace-00041 | def-00014 | defense_event | priority_reroute | defense_improved | pass |
 | E5_rule_aura_tsra_r | tsra-r-trace-00041 | def-00015 | defense_event | stale_badge | defense_improved | pass |
@@ -43,14 +43,14 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 | E5_rule_aura_tsra_r | tsra-r-trace-00060 | def-00022 | defense_event | stale_badge | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | aura-ml-trace-00007 | ml-atk-00001 | attack_event | queue_pressure | attack_contained_by_defense | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00001 | defense_event | priority_reroute | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00002 | defense_event | video_throttle | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00003 | defense_event | stale_badge | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00004 | defense_event | pace_switch | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00002 | defense_event | stale_badge | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00003 | defense_event | pace_switch | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00015 | def-00004 | defense_event | video_throttle | defense_improved | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00017 | def-00005 | defense_event | ml_attack_alert | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00006 | defense_event | ml_attack_alert | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00007 | defense_event | priority_reroute | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00008 | defense_event | video_throttle | defense_improved | pass |
-| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00009 | defense_event | stale_badge | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00008 | defense_event | stale_badge | defense_improved | pass |
+| E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00022 | def-00009 | defense_event | video_throttle | defense_improved | pass |
 | E7_ml_aura_ml_tsra_r | aura-ml-trace-00012 | ml-atk-00002 | attack_event | failover_chasing | attack_pressure_observed | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00027 | def-00010 | defense_event | ml_attack_alert | defense_held | pass |
 | E7_ml_aura_ml_tsra_r | tsra-r-ml-trace-00027 | def-00011 | defense_event | priority_reroute | defense_held | pass |
@@ -225,10 +225,10 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 ### E5_rule_aura_tsra_r tsra-r-trace-00035 def-00011
 
 - Agent: TSRA-R policy=rule_defense_full
-- Decision: eligible=True; ready=True; enabled=True; reason=protect critical traffic capacity
+- Decision: eligible=True; ready=True; enabled=True; reason=mark stale COP objects as lower trust
 - Event link: linked
 - Metrics: before=0.11201; after=0.112973; delta=0.000962778; latency_delta=0.55; trusted_stale_delta=0; priority_delta=-0.00540778
-- Attribution/outcome: observed_effect=held; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
+- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
 - Class: defense_held
 - Status: pass
 - Issues: none
@@ -236,10 +236,10 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 ### E5_rule_aura_tsra_r tsra-r-trace-00035 def-00012
 
 - Agent: TSRA-R policy=rule_defense_full
-- Decision: eligible=True; ready=True; enabled=True; reason=mark stale COP objects as lower trust
+- Decision: eligible=True; ready=True; enabled=True; reason=protect critical traffic capacity
 - Event link: linked
 - Metrics: before=0.11201; after=0.112973; delta=0.000962778; latency_delta=0.55; trusted_stale_delta=0; priority_delta=-0.00540778
-- Attribution/outcome: observed_effect=held; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Attribution/outcome: observed_effect=held; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
 - Class: defense_held
 - Status: pass
 - Issues: none
@@ -404,7 +404,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Decision: reason=mission risk guard opened or maintained defense window
 - Event link: linked
 - Metrics: before=0.209367; after=0.131467; delta=-0.0779006; latency_delta=1.5; trusted_stale_delta=-0.0625; priority_delta=-0.107051
-- Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
+- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
 - Class: defense_improved
 - Status: pass
 - Issues: none
@@ -415,7 +415,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Decision: reason=mission risk guard opened or maintained defense window
 - Event link: linked
 - Metrics: before=0.209367; after=0.131467; delta=-0.0779006; latency_delta=1.5; trusted_stale_delta=-0.0625; priority_delta=-0.107051
-- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Attribution/outcome: observed_effect=improved; attribution_class=bounded_tradeoff_supported; attribution_status=pass; primary_metric=mission_impact
 - Class: defense_improved
 - Status: pass
 - Issues: none
@@ -426,7 +426,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Decision: reason=mission risk guard opened or maintained defense window
 - Event link: linked
 - Metrics: before=0.209367; after=0.131467; delta=-0.0779006; latency_delta=1.5; trusted_stale_delta=-0.0625; priority_delta=-0.107051
-- Attribution/outcome: observed_effect=improved; attribution_class=bounded_tradeoff_supported; attribution_status=pass; primary_metric=mission_impact
+- Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
 - Class: defense_improved
 - Status: pass
 - Issues: none
@@ -470,7 +470,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
 - Metrics: before=0.16109; after=0.0954067; delta=-0.0656828; latency_delta=-1.5; trusted_stale_delta=-0.0625; priority_delta=-0.0426156
-- Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
+- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
 - Class: defense_improved
 - Status: pass
 - Issues: none
@@ -481,7 +481,7 @@ Safety boundary: closed simulation decision-feedback audit only; no RF, exploit,
 - Decision: reason=detector opened or maintained defense window
 - Event link: linked
 - Metrics: before=0.16109; after=0.0954067; delta=-0.0656828; latency_delta=-1.5; trusted_stale_delta=-0.0625; priority_delta=-0.0426156
-- Attribution/outcome: observed_effect=improved; attribution_class=ablation_supported; attribution_status=pass; primary_metric=trusted_stale_exposure
+- Attribution/outcome: observed_effect=improved; attribution_class=local_metric_supported; attribution_status=pass; primary_metric=p95_critical_latency_sec
 - Class: defense_improved
 - Status: pass
 - Issues: none

@@ -117,7 +117,7 @@ None.
 | E4_rule_aura_basic_defense | 195 | TSRA-R | priority_reroute | critical_pending=1; video_queue_kb=59565.2; stale_data_ratio=0.5; total_queue_kb=59607.4; active_link=SATCOM; probability=0; threshold=0.75 | pass |
 | E4_rule_aura_basic_defense | 200 | AURA | no_op | reason=attack cooldown active; candidate_count=0 | pass |
 | E4_rule_aura_basic_defense | 200 | TSRA-R | no_op | ready_goal_actions=none; reason=no defense action emitted | pass |
-| E4_rule_aura_basic_defense | 205 | TSRA-R | video_throttle, stale_badge | critical_pending=0; video_queue_kb=62770.5; stale_data_ratio=0.5; total_queue_kb=62770.5; active_link=SATCOM; probability=0; threshold=0.75 | pass |
+| E4_rule_aura_basic_defense | 205 | TSRA-R | stale_badge, video_throttle | critical_pending=0; video_queue_kb=62770.5; stale_data_ratio=0.5; total_queue_kb=62770.5; active_link=SATCOM; probability=0; threshold=0.75 | pass |
 | E4_rule_aura_basic_defense | 210 | AURA | queue_pressure | selected_score=0.9475; top_score=0.9475; attack_threshold=0.12; predicted_mission_impact=1; detectability_score=0.35 | pass |
 | E4_rule_aura_basic_defense | 210 | TSRA-R | no_op | ready_goal_actions=none; reason=no defense action emitted | pass |
 | E4_rule_aura_basic_defense | 215 | TSRA-R | no_op | ready_goal_actions=none; reason=no defense action emitted | pass |
@@ -199,7 +199,7 @@ None.
 | E5_rule_aura_tsra_r | 160 | TSRA-R | no_op | ready_goal_actions=none; reason=no defense action emitted | pass |
 | E5_rule_aura_tsra_r | 165 | TSRA-R | no_op | ready_goal_actions=none; reason=no defense action emitted | pass |
 | E5_rule_aura_tsra_r | 170 | AURA | no_op | reason=attack cooldown active; candidate_count=0 | pass |
-| E5_rule_aura_tsra_r | 170 | TSRA-R | video_throttle, stale_badge | critical_pending=0; video_queue_kb=19591.3; stale_data_ratio=0.5; total_queue_kb=19620.5; active_link=LTE; probability=0; threshold=0.75 | pass |
+| E5_rule_aura_tsra_r | 170 | TSRA-R | stale_badge, video_throttle | critical_pending=0; video_queue_kb=19591.3; stale_data_ratio=0.5; total_queue_kb=19620.5; active_link=LTE; probability=0; threshold=0.75 | pass |
 | E5_rule_aura_tsra_r | 175 | TSRA-R | priority_reroute | critical_pending=1; video_queue_kb=22187.4; stale_data_ratio=0.5; total_queue_kb=22198.6; active_link=LTE; probability=0; threshold=0.75 | pass |
 | E5_rule_aura_tsra_r | 180 | AURA | no_op | reason=attack cooldown active; candidate_count=0 | pass |
 | E5_rule_aura_tsra_r | 180 | TSRA-R | no_op | ready_goal_actions=none; reason=no defense action emitted | pass |
@@ -353,7 +353,7 @@ None.
 | E7_ml_aura_ml_tsra_r | 60 | TSRA-R-ML | no_op | probability=0.266695; threshold=0.75; active_defense_until=0; active_window=False; reason=probability below threshold and no active defense window | pass |
 | E7_ml_aura_ml_tsra_r | 65 | TSRA-R-ML | no_op | probability=0.409505; threshold=0.75; active_defense_until=0; active_window=False; reason=probability below threshold and no active defense window | pass |
 | E7_ml_aura_ml_tsra_r | 70 | AURA-ML | no_op | reason=attack cooldown active; candidate_count=0 | pass |
-| E7_ml_aura_ml_tsra_r | 70 | TSRA-R-ML | priority_reroute, video_throttle, stale_badge, pace_switch | critical_pending=1; video_queue_kb=5239.34; stale_data_ratio=0.5; total_queue_kb=5421.4; active_link=SATCOM; probability=0.503568; threshold=0.75 | pass |
+| E7_ml_aura_ml_tsra_r | 70 | TSRA-R-ML | priority_reroute, stale_badge, pace_switch, video_throttle | critical_pending=1; video_queue_kb=5239.34; stale_data_ratio=0.5; total_queue_kb=5421.4; active_link=SATCOM; probability=0.503568; threshold=0.75 | pass |
 | E7_ml_aura_ml_tsra_r | 75 | TSRA-R-ML | no_op | probability=0.534851; threshold=0.75; active_defense_until=115; active_window=True; reason=active defense window maintained while downstream rule actions were evaluated | pass |
 | E7_ml_aura_ml_tsra_r | 80 | AURA-ML | no_op | reason=attack cooldown active; candidate_count=0 | pass |
 | E7_ml_aura_ml_tsra_r | 80 | TSRA-R-ML | ml_attack_alert | critical_pending=1; video_queue_kb=8355.54; stale_data_ratio=0.5; total_queue_kb=8394.57; active_link=LTE; probability=0.955265; threshold=0.75 | pass |
@@ -363,7 +363,7 @@ None.
 | E7_ml_aura_ml_tsra_r | 95 | TSRA-R-ML | no_op | probability=0.952487; threshold=0.75; active_defense_until=165; active_window=True; reason=detector opened or maintained defense window | pass |
 | E7_ml_aura_ml_tsra_r | 100 | AURA-ML | no_op | reason=attack cooldown active; candidate_count=0 | pass |
 | E7_ml_aura_ml_tsra_r | 100 | TSRA-R-ML | no_op | probability=0.952487; threshold=0.75; active_defense_until=170; active_window=True; reason=detector opened or maintained defense window | pass |
-| E7_ml_aura_ml_tsra_r | 105 | TSRA-R-ML | ml_attack_alert, priority_reroute, video_throttle, stale_badge | critical_pending=2; video_queue_kb=12348.1; stale_data_ratio=0.5; total_queue_kb=12395.2; active_link=LTE; probability=0.961885; threshold=0.75 | pass |
+| E7_ml_aura_ml_tsra_r | 105 | TSRA-R-ML | ml_attack_alert, priority_reroute, stale_badge, video_throttle | critical_pending=2; video_queue_kb=12348.1; stale_data_ratio=0.5; total_queue_kb=12395.2; active_link=LTE; probability=0.961885; threshold=0.75 | pass |
 | E7_ml_aura_ml_tsra_r | 110 | AURA-ML | failover_chasing | selected_score=0.841848; top_score=0.841848; attack_threshold=0.12; predicted_mission_impact=0.836848; detectability_score=0.5 | pass |
 | E7_ml_aura_ml_tsra_r | 110 | TSRA-R-ML | no_op | probability=0.972533; threshold=0.75; active_defense_until=180; active_window=True; reason=detector opened or maintained defense window | pass |
 | E7_ml_aura_ml_tsra_r | 115 | TSRA-R-ML | no_op | probability=0.965304; threshold=0.75; active_defense_until=185; active_window=True; reason=detector opened or maintained defense window | pass |

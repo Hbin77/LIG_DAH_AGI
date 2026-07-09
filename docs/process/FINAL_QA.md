@@ -100,8 +100,10 @@ agent_goal_alignment_audit rows: 399 pass
 agent_decision_feedback_audit rows: 62 pass
 agent_memory_belief_audit rows: 9 pass
 agent_memory_influence_audit rows: 6 pass
-cross_agent_context_audit rows: 7 pass
+cross_agent_context_audit rows: 8 pass
 cross_agent_context_audit selected_counter_defense_bonus_traces: 3
+cross_agent_context_audit attack_context_bonus_events: 25
+cross_agent_context_audit ordered_core_defense_traces: 6/6
 agent_tool_usage_audit rows: 33 pass
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10

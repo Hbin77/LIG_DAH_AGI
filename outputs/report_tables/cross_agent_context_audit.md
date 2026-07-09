@@ -12,6 +12,7 @@ Safety boundary: closed simulation cross-agent context audit only; no RF, exploi
 | XAG05 | Defense-to-attack handoff | pass | experiments_with_post_defense_context=2/2; defense_context_seen_traces=51; selected_attack_with_defense_context=9 | The attack agent can see that TSRA-R has changed the battlefield before later attack selections. |
 | XAG06 | Event-level context consistency | pass | defense_events=52; related_context_events=52; active_related_events=50; missing_related_context=0 | Selected defense events retain the attack context that was visible during the decision. |
 | XAG07 | Context-to-policy score effect | pass | counter_defense_bonus_candidates=7; selected_counter_defense_bonus_traces=3; counter_defense_reasons=counter_pace_failover_chasing,counter_priority_video_pressure | AURA-ML does not merely log TSRA-R state; it uses that context as a bounded selection-score term. |
+| XAG08 | Attack-context defense priority effect | pass | attack_context_bonus_candidates=61; attack_context_bonus_events=25; selected_defense_bonus_traces=22; ordered_core_defense_traces=6/6; defense_counter_reasons=counter_queue_pressure_priority_reroute,counter_video_queue_pressure | TSRA-R does not merely log AURA state; it uses that context to score and order bounded defense actions. |
 
 ## Detail
 
@@ -76,4 +77,13 @@ Safety boundary: closed simulation cross-agent context audit only; no RF, exploi
 - Observed: counter_defense_bonus_candidates=7; selected_counter_defense_bonus_traces=3; counter_defense_reasons=counter_pace_failover_chasing,counter_priority_video_pressure
 - Status: pass
 - Interpretation: AURA-ML does not merely log TSRA-R state; it uses that context as a bounded selection-score term.
+- Safety boundary: closed simulation cross-agent context audit only; no RF, exploit, or live network action
+
+### XAG08 Attack-context defense priority effect
+
+- Requirement: TSRA-R should convert AURA attack context into bounded defense priority scores and event ordering.
+- Evidence: outputs/experiments/*/tsra_r_decision_traces.jsonl | outputs/experiments/*/defense_events.jsonl
+- Observed: attack_context_bonus_candidates=61; attack_context_bonus_events=25; selected_defense_bonus_traces=22; ordered_core_defense_traces=6/6; defense_counter_reasons=counter_queue_pressure_priority_reroute,counter_video_queue_pressure
+- Status: pass
+- Interpretation: TSRA-R does not merely log AURA state; it uses that context to score and order bounded defense actions.
 - Safety boundary: closed simulation cross-agent context audit only; no RF, exploit, or live network action

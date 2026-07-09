@@ -36,97 +36,97 @@ This table is generated from AURA and TSRA-R DecisionTrace JSONL logs.
 | E3_rule_aura | 290 | AURA | rule_attack_score | no_op |  |  |  |  | max_events=5 reached |
 | E3_rule_aura | 300 | AURA | rule_attack_score | no_op |  |  |  |  | max_events=5 reached |
 | E5_rule_aura_tsra_r | 0 | AURA | rule_attack_score | no_op |  |  |  |  | waiting for min_start_sec=60.0 |
-| E5_rule_aura_tsra_r | 0 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=False; ready=True | no defense action emitted |
-| E5_rule_aura_tsra_r | 5 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=False; ready=True | no defense action emitted |
+| E5_rule_aura_tsra_r | 0 | TSRA-R | rule_defense_full | no_op | 0 |  | priority_reroute | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 5 | TSRA-R | rule_defense_full | no_op | 0 |  | priority_reroute | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 10 | AURA | rule_attack_score | no_op |  |  |  |  | waiting for min_start_sec=60.0 |
-| E5_rule_aura_tsra_r | 10 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=False; ready=True | no defense action emitted |
-| E5_rule_aura_tsra_r | 15 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=False; ready=True | no defense action emitted |
+| E5_rule_aura_tsra_r | 10 | TSRA-R | rule_defense_full | no_op | 0 |  | priority_reroute | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 15 | TSRA-R | rule_defense_full | no_op | 0 |  | priority_reroute | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 20 | AURA | rule_attack_score | no_op |  |  |  |  | waiting for min_start_sec=60.0 |
-| E5_rule_aura_tsra_r | 20 | TSRA-R | rule_defense_full | stale_badge |  |  | stale_badge | eligible=True; ready=True | emitted 1 defense event(s) |
-| E5_rule_aura_tsra_r | 25 | TSRA-R | rule_defense_full | no_op |  |  | stale_badge | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 20 | TSRA-R | rule_defense_full | stale_badge | 0.78 |  | stale_badge | impact=; detectability= | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 25 | TSRA-R | rule_defense_full | no_op | 0.195 |  | stale_badge | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 30 | AURA | rule_attack_score | no_op |  |  |  |  | waiting for min_start_sec=60.0 |
-| E5_rule_aura_tsra_r | 30 | TSRA-R | rule_defense_full | no_op |  |  | stale_badge | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 35 | TSRA-R | rule_defense_full | no_op |  |  | stale_badge | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 30 | TSRA-R | rule_defense_full | no_op | 0.195 |  | stale_badge | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 35 | TSRA-R | rule_defense_full | no_op | 0.195 |  | stale_badge | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 40 | AURA | rule_attack_score | no_op |  |  |  |  | waiting for min_start_sec=60.0 |
-| E5_rule_aura_tsra_r | 40 | TSRA-R | rule_defense_full | no_op |  |  | stale_badge | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 45 | TSRA-R | rule_defense_full | no_op |  |  | stale_badge | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 40 | TSRA-R | rule_defense_full | no_op | 0.195 |  | stale_badge | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 45 | TSRA-R | rule_defense_full | no_op | 0.195 |  | stale_badge | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 50 | AURA | rule_attack_score | no_op |  |  |  |  | waiting for min_start_sec=60.0 |
-| E5_rule_aura_tsra_r | 50 | TSRA-R | rule_defense_full | stale_badge |  |  | stale_badge | eligible=True; ready=True | emitted 1 defense event(s) |
-| E5_rule_aura_tsra_r | 55 | TSRA-R | rule_defense_full | no_op |  |  | stale_badge | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 50 | TSRA-R | rule_defense_full | stale_badge | 0.78 |  | stale_badge | impact=; detectability= | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 55 | TSRA-R | rule_defense_full | no_op | 0.195 |  | stale_badge | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 60 | AURA | rule_attack_score | queue_pressure | 0.543691 |  | queue_pressure | impact=0.566191; detectability=0.15 | increase non-critical queue occupancy |
-| E5_rule_aura_tsra_r | 60 | TSRA-R | rule_defense_full | no_op |  |  | stale_badge | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 65 | TSRA-R | rule_defense_full | priority_reroute+video_throttle |  |  | priority_reroute | eligible=True; ready=True | emitted 2 defense event(s) |
+| E5_rule_aura_tsra_r | 60 | TSRA-R | rule_defense_full | no_op | 0.195 |  | stale_badge | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 65 | TSRA-R | rule_defense_full | priority_reroute+video_throttle | 0.94 |  | priority_reroute | impact=; detectability= | emitted 2 defense event(s) |
 | E5_rule_aura_tsra_r | 70 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 70 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 75 | TSRA-R | rule_defense_full | pace_switch |  |  | pace_switch | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 70 | TSRA-R | rule_defense_full | no_op | 0.325 |  | priority_reroute | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 75 | TSRA-R | rule_defense_full | pace_switch | 0.72 |  | pace_switch | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 80 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 80 | TSRA-R | rule_defense_full | stale_badge |  |  | stale_badge | eligible=True; ready=True | emitted 1 defense event(s) |
-| E5_rule_aura_tsra_r | 85 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 80 | TSRA-R | rule_defense_full | stale_badge | 0.78 |  | stale_badge | impact=; detectability= | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 85 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 90 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 90 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 95 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 90 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 95 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 100 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 100 | TSRA-R | rule_defense_full | video_throttle |  |  | video_throttle | eligible=True; ready=True | emitted 1 defense event(s) |
-| E5_rule_aura_tsra_r | 105 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 100 | TSRA-R | rule_defense_full | video_throttle | 0.66 |  | video_throttle | impact=; detectability= | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 105 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 110 | AURA | rule_attack_score | queue_pressure | 0.916763 |  | queue_pressure | impact=0.939263; detectability=0.15 | increase non-critical queue occupancy |
-| E5_rule_aura_tsra_r | 110 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 115 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 110 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 115 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 120 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 120 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 125 | TSRA-R | rule_defense_full | priority_reroute |  |  | priority_reroute | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 120 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 125 | TSRA-R | rule_defense_full | priority_reroute | 0.94 |  | priority_reroute | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 130 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 130 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 135 | TSRA-R | rule_defense_full | video_throttle |  |  | video_throttle | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 130 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 135 | TSRA-R | rule_defense_full | video_throttle | 0.66 |  | video_throttle | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 140 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 140 | TSRA-R | rule_defense_full | stale_badge |  |  | stale_badge | eligible=True; ready=True | emitted 1 defense event(s) |
-| E5_rule_aura_tsra_r | 145 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 140 | TSRA-R | rule_defense_full | stale_badge | 0.78 |  | stale_badge | impact=; detectability= | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 145 | TSRA-R | rule_defense_full | no_op | 0.325 |  | priority_reroute | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 150 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 150 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 155 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 150 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 155 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 160 | AURA | rule_attack_score | queue_pressure | 0.9775 |  | queue_pressure | impact=1; detectability=0.15 | increase non-critical queue occupancy |
-| E5_rule_aura_tsra_r | 160 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 165 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 160 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 165 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 170 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 170 | TSRA-R | rule_defense_full | video_throttle+stale_badge |  |  | video_throttle | eligible=True; ready=True | emitted 2 defense event(s) |
-| E5_rule_aura_tsra_r | 175 | TSRA-R | rule_defense_full | priority_reroute |  |  | priority_reroute | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 170 | TSRA-R | rule_defense_full | stale_badge+video_throttle | 0.78 |  | stale_badge | impact=; detectability= | emitted 2 defense event(s) |
+| E5_rule_aura_tsra_r | 175 | TSRA-R | rule_defense_full | priority_reroute | 0.94 |  | priority_reroute | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 180 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 180 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 185 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 180 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 185 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 190 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 190 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 195 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 190 | TSRA-R | rule_defense_full | no_op | 0.325 |  | priority_reroute | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 195 | TSRA-R | rule_defense_full | no_op | 0.325 |  | priority_reroute | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 200 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 200 | TSRA-R | rule_defense_full | priority_reroute+stale_badge |  |  | priority_reroute | eligible=True; ready=True | emitted 2 defense event(s) |
-| E5_rule_aura_tsra_r | 205 | TSRA-R | rule_defense_full | video_throttle |  |  | video_throttle | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 200 | TSRA-R | rule_defense_full | priority_reroute+stale_badge | 0.94 |  | priority_reroute | impact=; detectability= | emitted 2 defense event(s) |
+| E5_rule_aura_tsra_r | 205 | TSRA-R | rule_defense_full | video_throttle | 0.66 |  | video_throttle | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 210 | AURA | rule_attack_score | queue_pressure | 0.9475 |  | queue_pressure | impact=1; detectability=0.35 | increase non-critical queue occupancy |
-| E5_rule_aura_tsra_r | 210 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 215 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 210 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 215 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 220 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 220 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 225 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 220 | TSRA-R | rule_defense_full | no_op | 0.325 |  | priority_reroute | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 225 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 230 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 230 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 235 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 230 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 235 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 240 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 240 | TSRA-R | rule_defense_full | video_throttle |  |  | video_throttle | eligible=True; ready=True | emitted 1 defense event(s) |
-| E5_rule_aura_tsra_r | 245 | TSRA-R | rule_defense_full | priority_reroute |  |  | priority_reroute | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 240 | TSRA-R | rule_defense_full | video_throttle | 0.66 |  | video_throttle | impact=; detectability= | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 245 | TSRA-R | rule_defense_full | priority_reroute | 0.94 |  | priority_reroute | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 250 | AURA | rule_attack_score | no_op |  |  |  |  | attack cooldown active |
-| E5_rule_aura_tsra_r | 250 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 255 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 250 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 255 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 260 | AURA | rule_attack_score | queue_pressure | 0.9035 |  | queue_pressure | impact=0.956; detectability=0.35 | increase non-critical queue occupancy |
-| E5_rule_aura_tsra_r | 260 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 265 | TSRA-R | rule_defense_full | stale_badge |  |  | stale_badge | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 260 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 265 | TSRA-R | rule_defense_full | stale_badge | 0.78 |  | stale_badge | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 270 | AURA | rule_attack_score | no_op |  |  |  |  | max_events=5 reached |
-| E5_rule_aura_tsra_r | 270 | TSRA-R | rule_defense_full | priority_reroute |  |  | priority_reroute | eligible=True; ready=True | emitted 1 defense event(s) |
-| E5_rule_aura_tsra_r | 275 | TSRA-R | rule_defense_full | video_throttle |  |  | video_throttle | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 270 | TSRA-R | rule_defense_full | priority_reroute | 0.94 |  | priority_reroute | impact=; detectability= | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 275 | TSRA-R | rule_defense_full | video_throttle | 0.66 |  | video_throttle | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 280 | AURA | rule_attack_score | no_op |  |  |  |  | max_events=5 reached |
-| E5_rule_aura_tsra_r | 280 | TSRA-R | rule_defense_full | no_op |  |  | priority_reroute | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 285 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 280 | TSRA-R | rule_defense_full | no_op | 0.325 |  | priority_reroute | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 285 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E5_rule_aura_tsra_r | 290 | AURA | rule_attack_score | no_op |  |  |  |  | max_events=5 reached |
-| E5_rule_aura_tsra_r | 290 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
-| E5_rule_aura_tsra_r | 295 | TSRA-R | rule_defense_full | stale_badge |  |  | stale_badge | eligible=True; ready=True | emitted 1 defense event(s) |
+| E5_rule_aura_tsra_r | 290 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
+| E5_rule_aura_tsra_r | 295 | TSRA-R | rule_defense_full | stale_badge | 0.78 |  | stale_badge | impact=; detectability= | emitted 1 defense event(s) |
 | E5_rule_aura_tsra_r | 300 | AURA | rule_attack_score | no_op |  |  |  |  | max_events=5 reached |
-| E5_rule_aura_tsra_r | 300 | TSRA-R | rule_defense_full | no_op |  |  | video_throttle | eligible=True; ready=False | no defense action emitted |
+| E5_rule_aura_tsra_r | 300 | TSRA-R | rule_defense_full | no_op | 0.225 |  | video_throttle | impact=; detectability= | no defense action emitted |
 | E7_ml_aura_ml_tsra_r | 0 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | waiting for min_start_sec=60.0 |
 | E7_ml_aura_ml_tsra_r | 0 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.282859 | open_defense_window | eligible=False; threshold=0.75; active_until=0 | probability below threshold and no active defense window |
 | E7_ml_aura_ml_tsra_r | 5 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.282859 | open_defense_window | eligible=False; threshold=0.75; active_until=0 | probability below threshold and no active defense window |
@@ -149,7 +149,7 @@ This table is generated from AURA and TSRA-R DecisionTrace JSONL logs.
 | E7_ml_aura_ml_tsra_r | 60 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.266695 | open_defense_window | eligible=False; threshold=0.75; active_until=0 | probability below threshold and no active defense window |
 | E7_ml_aura_ml_tsra_r | 65 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.409505 | open_defense_window | eligible=False; threshold=0.75; active_until=0 | probability below threshold and no active defense window |
 | E7_ml_aura_ml_tsra_r | 70 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
-| E7_ml_aura_ml_tsra_r | 70 | TSRA-R-ML | ml_anomaly_detector | priority_reroute+video_throttle+stale_badge+pace_switch |  | 0.503568 | open_defense_window | eligible=True; threshold=0.75; active_until=115 | mission risk guard opened or maintained defense window |
+| E7_ml_aura_ml_tsra_r | 70 | TSRA-R-ML | ml_anomaly_detector | priority_reroute+stale_badge+pace_switch+video_throttle |  | 0.503568 | open_defense_window | eligible=True; threshold=0.75; active_until=115 | mission risk guard opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 75 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.534851 | open_defense_window | eligible=False; threshold=0.75; active_until=115 | active defense window maintained while downstream rule actions were evaluated |
 | E7_ml_aura_ml_tsra_r | 80 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
 | E7_ml_aura_ml_tsra_r | 80 | TSRA-R-ML | ml_anomaly_detector | ml_attack_alert |  | 0.955265 | open_defense_window | eligible=True; threshold=0.75; active_until=150 | detector opened or maintained defense window |
@@ -159,7 +159,7 @@ This table is generated from AURA and TSRA-R DecisionTrace JSONL logs.
 | E7_ml_aura_ml_tsra_r | 95 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.952487 | open_defense_window | eligible=True; threshold=0.75; active_until=165 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 100 | AURA-ML | ml_impact_predictor | no_op |  |  |  |  | attack cooldown active |
 | E7_ml_aura_ml_tsra_r | 100 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.952487 | open_defense_window | eligible=True; threshold=0.75; active_until=170 | detector opened or maintained defense window |
-| E7_ml_aura_ml_tsra_r | 105 | TSRA-R-ML | ml_anomaly_detector | ml_attack_alert+priority_reroute+video_throttle+stale_badge |  | 0.961885 | open_defense_window | eligible=True; threshold=0.75; active_until=175 | detector opened or maintained defense window |
+| E7_ml_aura_ml_tsra_r | 105 | TSRA-R-ML | ml_anomaly_detector | ml_attack_alert+priority_reroute+stale_badge+video_throttle |  | 0.961885 | open_defense_window | eligible=True; threshold=0.75; active_until=175 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 110 | AURA-ML | ml_impact_predictor | failover_chasing | 0.841848 |  | failover_chasing | impact=0.836848; detectability=0.5 | ML impact predictor selected failover_chasing |
 | E7_ml_aura_ml_tsra_r | 110 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.972533 | open_defense_window | eligible=True; threshold=0.75; active_until=180 | detector opened or maintained defense window |
 | E7_ml_aura_ml_tsra_r | 115 | TSRA-R-ML | ml_anomaly_detector | no_op |  | 0.965304 | open_defense_window | eligible=True; threshold=0.75; active_until=185 | detector opened or maintained defense window |

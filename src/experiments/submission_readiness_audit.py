@@ -321,7 +321,7 @@ def build_rows() -> list[dict[str, str]]:
                 and decision_counts["feedback"] >= 60
                 and decision_counts["memory"] == 9
                 and decision_counts["memory_influence"] == 6
-                and decision_counts["cross_agent_context"] == 7
+                and decision_counts["cross_agent_context"] == 8
                 and decision_counts["tool"] == 33
             ),
             handoff_value="Agent decisions remain explainable by generated evidence, not only by source code.",

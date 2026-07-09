@@ -33,7 +33,7 @@ Safety boundary: closed simulation coverage mapping only; no RF, exploit, or liv
 
 - Attack agents: AURA-ML
 - Attack evidence count: 2
-- Attack observed effect: targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.749626
+- Attack observed effect: targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.829626
 - Covered by defense capabilities: ml_attack_alert, pace_switch, adaptive_optional_action_gating
 - Defense agents: TSRA-R-ML, TSRA-R, TSRA-R-ADAPTIVE
 - Defense evidence count: ml_attack_alert=8; pace_switch=4; adaptive_optional_action_gating=30 seeds
@@ -48,7 +48,7 @@ Safety boundary: closed simulation coverage mapping only; no RF, exploit, or liv
 
 - Attack agents: AURA, AURA-ML
 - Attack evidence count: 8
-- Attack observed effect: targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.76894
+- Attack observed effect: targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.77394
 - Covered by defense capabilities: priority_reroute, video_throttle, stale_badge
 - Defense agents: TSRA-R, TSRA-R-ML
 - Defense evidence count: priority_reroute=12; video_throttle=13; stale_badge=15

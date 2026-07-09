@@ -2937,7 +2937,7 @@ python3 scripts/verify_submission_state.py
 현재 검증 결과:
 
 ```text
-cross_agent_context_audit rows: 7 pass
+cross_agent_context_audit rows: 8 pass
 aura_observation_context: 62/62
 tsra_observation_context: 122/122
 summarize_attack_context: 122
@@ -2955,6 +2955,11 @@ missing_related_context: 0
 counter_defense_bonus_candidates: 7
 selected_counter_defense_bonus_traces: 3
 counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_pressure
+attack_context_bonus_candidates: 61
+attack_context_bonus_events: 25
+selected_defense_bonus_traces: 22
+ordered_core_defense_traces: 6/6
+defense_counter_reasons: counter_queue_pressure_priority_reroute, counter_video_queue_pressure
 agent_tool_usage_audit rows: 33 pass
 reproduction_order_audit rows: 15 pass
 submission_readiness_audit rows: 10 pass
@@ -2966,4 +2971,5 @@ competition_alignment_matrix rows: 10 verified
 - 공격과 방어가 단순히 같은 시뮬레이터를 공유하는 수준을 넘어서, 상대방 행동 context를 다음 판단 루프의 입력으로 가진다.
 - TSRA-R의 방어 event는 어떤 AURA attack context 아래에서 선택됐는지 event detail로 추적된다.
 - AURA의 이후 공격 후보는 TSRA-R의 active/recent defense context를 candidate row와 feedback으로 설명한다.
+- AURA-ML은 defense context를 counter-defense score로, TSRA-R은 attack context를 defense-priority score와 core event ordering으로 바꾼다.
 - 이 변경은 closed simulation 내부 context와 감사 증거만 강화하며 RF, exploit, live network action은 추가하지 않는다.

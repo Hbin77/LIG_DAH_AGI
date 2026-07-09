@@ -7,8 +7,8 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 | capability_id | side | agent_family | capability | evidence_count | observed_effect | validation_gate |
 |---|---|---|---|---:|---|---|
 | ATK-01 | attack | AURA | bandwidth_limit | 3 | targets=SATCOM; max_expected_impact=1; avg_attack_score=0.9475 | G01/G02 |
-| ATK-02 | attack | AURA-ML | failover_chasing | 2 | targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.749626 | G02/G10 |
-| ATK-03 | attack | AURA, AURA-ML | queue_pressure | 8 | targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.76894 | G01/G02 |
+| ATK-02 | attack | AURA-ML | failover_chasing | 2 | targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.829626 | G02/G10 |
+| ATK-03 | attack | AURA, AURA-ML | queue_pressure | 8 | targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.77394 | G01/G02 |
 | ATK-04 | attack | AURA, AURA-ML | stale_cop_induction | 2 | targets=MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.848446 | G01/G02 |
 | DEF-01 | defense | TSRA-R-ML | ml_attack_alert | 8 | ML detector opens or maintains reactive defense window; validated by E6/E7 separation gate | G10 |
 | DEF-02 | defense | TSRA-R, TSRA-R-ML | pace_switch | 4 | removal_delta_recovery_instability=-2.06667; used as bounded fallback path control | G03/G04 |
@@ -41,7 +41,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Trigger or selection logic: ML impact predictor selected failover_chasing
 - Evidence count: 2
 - Evidence experiments: E7_ml_aura_ml_tsra_r
-- Observed effect: targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.749626
+- Observed effect: targets=LTE,MESH; max_expected_impact=0.836848; avg_attack_score=0.829626
 - Validation gate: G02/G10
 - Safety boundary: closed simulation capability matrix only; no RF, exploit, or live network action
 
@@ -54,7 +54,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Trigger or selection logic: increase non-critical queue occupancy
 - Evidence count: 8
 - Evidence experiments: E3_rule_aura, E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
-- Observed effect: targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.76894
+- Observed effect: targets=LTE,MESH,SATCOM; max_expected_impact=1; avg_attack_score=0.77394
 - Validation gate: G01/G02
 - Safety boundary: closed simulation capability matrix only; no RF, exploit, or live network action
 

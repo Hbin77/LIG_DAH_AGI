@@ -376,7 +376,7 @@ outputs/report_tables/cross_agent_context_audit.md
 현재 결과:
 
 ```text
-cross_agent_context_audit rows: 7 pass
+cross_agent_context_audit rows: 8 pass
 attack_handoffs: 10/10
 summarize_attack_context: 122
 summarize_defense_context: 62
@@ -387,6 +387,11 @@ missing_related_context: 0
 counter_defense_bonus_candidates: 7
 selected_counter_defense_bonus_traces: 3
 counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_pressure
+attack_context_bonus_candidates: 61
+attack_context_bonus_events: 25
+selected_defense_bonus_traces: 22
+ordered_core_defense_traces: 6/6
+defense_counter_reasons: counter_queue_pressure_priority_reroute, counter_video_queue_pressure
 ```
 
 해석:
@@ -394,6 +399,7 @@ counter_defense_reasons: counter_pace_failover_chasing, counter_priority_video_p
 - TSRA-R은 AURA attack context를 observation, tool call, AgentMemory, feedback, candidate row, emitted defense event detail에 남긴다.
 - AURA는 TSRA-R defense context를 observation, tool call, AgentMemory, feedback, candidate row에 남긴다.
 - AURA-ML은 TSRA-R defense context를 `counter_defense_bonus`라는 제한된 selection-score 항으로 바꾼다.
+- TSRA-R은 AURA attack context를 `attack_context_bonus`와 `defense_priority_score`로 바꾸고, 같은 tick의 core defense event를 점수 순서로 정렬한다.
 - 이 감사는 공격/방어가 단순히 같은 로그 폴더에 있는 것이 아니라, 서로의 행동 context를 다음 판단 근거와 정책 점수로 수용했는지 확인한다.
 
 ## Tool Usage Audit
