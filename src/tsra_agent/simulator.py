@@ -19,6 +19,7 @@ from .models import (
     MissionMessage,
     RunMetrics,
 )
+from .runtime import AgentTraceRecorder
 
 
 DEFAULT_PROFILES = [
@@ -35,6 +36,7 @@ class SimulationResult:
     name: str
     events: list[dict[str, Any]]
     metrics: RunMetrics
+    traces: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
 
 
 @dataclass
@@ -77,12 +79,22 @@ class MissionSimulator:
             self.blue = MLTSRARLite(**ml_kwargs)
         else:
             self.blue = TSRARLite()
+        self.aura_trace = AgentTraceRecorder(
+            "AURA-lite",
+            "select bounded simulated mission-effect attacks",
+        )
+        blue_name = "TSRA-ML" if self.defense_mode == "ml" else "TSRA-R-lite"
+        self.blue_trace = AgentTraceRecorder(
+            blue_name,
+            "detect and mitigate synthetic C4ISR data-trust degradation",
+        )
 
     def run(self, name: str) -> SimulationResult:
         for tick in range(self.ticks):
             self._generate_messages(tick)
             state = self._state(tick)
             attack = self.red.choose_action(state)
+            self._record_attack_decision(tick, state, attack)
             self._apply_attack(tick, attack)
 
             defense = DefenseAction(self.active_link, False, False, None, False)
@@ -91,6 +103,7 @@ class MissionSimulator:
                     defense = self._rule_defense_action(tick, self._state(tick))
                 else:
                     defense = self.blue.choose_action(self._state(tick))
+                self._record_defense_decision(tick, self._state(tick), defense)
                 self.active_link = defense.active_link
                 self._apply_defense(tick, defense)
                 if defense.minimum_mode:
@@ -103,7 +116,15 @@ class MissionSimulator:
 
         self._flush_backlog(self.ticks)
         metrics = evaluate(self.events, self.blue.alert_tick, self.blue.recovery_tick)
-        return SimulationResult(name=name, events=self.events, metrics=metrics)
+        return SimulationResult(
+            name=name,
+            events=self.events,
+            metrics=metrics,
+            traces={
+                "aura": self.aura_trace.traces,
+                "tsra": self.blue_trace.traces,
+            },
+        )
 
     def _generate_messages(self, tick: int) -> None:
         for profile in DEFAULT_PROFILES:
@@ -198,6 +219,54 @@ class MissionSimulator:
             }
         )
 
+    def _record_attack_decision(self, tick: int, state: MissionState, attack) -> None:
+        observation = self.aura_trace.observe(state)
+        candidate_actions = [
+            {
+                "action": attack.mode.value,
+                "target_link": attack.target_link.value,
+                "intensity": round(attack.intensity, 4),
+                "duration": attack.duration,
+                "eligible": attack.mode != AttackMode.NONE,
+                "reason": attack.rationale,
+            }
+        ]
+        self.aura_trace.memory.update_belief("last_attack_mode", attack.mode.value)
+        self.aura_trace.memory.update_belief("last_target_link", attack.target_link.value)
+        self.aura_trace.record_decision(
+            tick=tick,
+            policy="aura_lite_hybrid_schedule",
+            observation=observation,
+            candidate_actions=candidate_actions,
+            tool_calls=[
+                {
+                    "tool_name": "select_attack_effect",
+                    "input_summary": {
+                        "scenario": self.attack_mode.value,
+                        "tick": tick,
+                        "active_link": state.active_link.value,
+                    },
+                    "output_summary": {
+                        "mode": attack.mode.value,
+                        "target_link": attack.target_link.value,
+                    },
+                    "status": "ok",
+                }
+            ],
+            selected_action={
+                "type": "attack_action" if attack.mode != AttackMode.NONE else "no_op",
+                "mode": attack.mode.value,
+                "target_link": attack.target_link.value,
+                "intensity": round(attack.intensity, 4),
+            },
+            reason=attack.rationale,
+            feedback={
+                "closed_simulation_only": True,
+                "attack_start": self.red.attack_start,
+                "max_pulses": self.red.max_pulses,
+            },
+        )
+
     def _apply_defense(self, tick: int, defense: DefenseAction) -> None:
         if defense.priority_boost:
             for item in self.queue:
@@ -221,6 +290,73 @@ class MissionSimulator:
                     "stale_badge": defense.stale_badge,
                 }
             )
+
+    def _record_defense_decision(self, tick: int, state: MissionState, defense: DefenseAction) -> None:
+        observation = self.blue_trace.observe(state)
+        candidate_actions = [
+            {
+                "action": "priority_boost",
+                "selected": defense.priority_boost,
+                "reason": "critical traffic protection",
+            },
+            {
+                "action": "minimum_mode",
+                "selected": defense.minimum_mode,
+                "reason": "shed or compress noncritical load under risk",
+            },
+            {
+                "action": "stale_badge",
+                "selected": defense.stale_badge,
+                "reason": "mark stale COP data as lower trust",
+            },
+            {
+                "action": "pace_transition",
+                "selected": defense.pace_transition,
+                "target_link": defense.active_link.value,
+                "reason": "select resilient PACE path",
+            },
+            {
+                "action": "quarantine",
+                "selected": defense.quarantine,
+                "reason": "source or terminal trust pressure",
+            },
+        ]
+        selected_flags = [item["action"] for item in candidate_actions if item["selected"]]
+        self.blue_trace.memory.update_belief("last_risk_score", defense.risk_score)
+        self.blue_trace.memory.update_belief("last_active_link", defense.active_link.value)
+        self.blue_trace.record_decision(
+            tick=tick,
+            policy=f"{self.defense_mode}_risk_fusion",
+            observation=observation,
+            candidate_actions=candidate_actions,
+            tool_calls=[
+                {
+                    "tool_name": "fuse_mission_risk",
+                    "input_summary": observation["signals"],
+                    "output_summary": {"risk_score": defense.risk_score},
+                    "status": "ok",
+                },
+                {
+                    "tool_name": "select_pace_link",
+                    "input_summary": {"active_link": state.active_link.value},
+                    "output_summary": {"active_link": defense.active_link.value},
+                    "status": "ok",
+                },
+            ],
+            selected_action={
+                "type": "defense_action" if selected_flags or defense.alert else "no_op",
+                "actions": selected_flags,
+                "active_link": defense.active_link.value,
+                "risk_score": defense.risk_score,
+                "alert": defense.alert,
+            },
+            reason=defense.alert or "monitoring state; no defense action required",
+            feedback={
+                "detection_tick": self.blue.alert_tick,
+                "recovery_tick": self.blue.recovery_tick,
+                "closed_simulation_only": True,
+            },
+        )
 
     def _rule_defense_action(self, tick: int, state: MissionState) -> DefenseAction:
         degraded = state.satcom_health < 0.45
@@ -468,3 +604,7 @@ def write_result(result: SimulationResult, output_dir: Path) -> None:
     with (output_dir / f"{result.name}_events.jsonl").open("w", encoding="utf-8") as f:
         for event in result.events:
             f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    for agent_name, traces in result.traces.items():
+        with (output_dir / f"{result.name}_{agent_name}_decision_traces.jsonl").open("w", encoding="utf-8") as f:
+            for trace in traces:
+                f.write(json.dumps(trace, ensure_ascii=False) + "\n")

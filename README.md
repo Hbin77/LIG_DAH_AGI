@@ -11,6 +11,7 @@ DAH 2026 예선용 AI 공방 에이전트 부가자료입니다. 범위는 예�
 - `src/tsra_agent/simulator.py`: UAV/UGV/SATCOM/PACE mission event simulator
 - `src/tsra_agent/evaluator.py`: latency, stale ratio, priority inversion, backlog, false alarm, resilience gain 평가
 - `src/tsra_agent/cli.py`: 단일/다중 seed 실험 실행 및 산출물 생성
+- `src/tsra_agent/runtime.py`: AURA/TSRA-R 판단 과정을 observation, memory, tool call, candidate action, selected action, feedback 형태로 기록하는 경량 AgentRuntime
 - `models/`: trained TSRA-ML scikit-learn ensemble, tuned/final policy config, logistic fallback model, training/tuning/selection reports
 - `scripts/train_sklearn_policy.py`: primary TSRA-ML scikit-learn ensemble training script
 - `scripts/train_ml_policy.py`: dependency-free logistic fallback training script
@@ -53,6 +54,7 @@ conda run -n base python -m src.tsra_agent.cli \
 - `incident_report.md`: 보고서에 붙일 수 있는 실행 요약
 - `run_manifest.json`: 산출물 구조와 안전 경계
 - `seed_<seed>/*_events.jsonl`: 실험별 이벤트 로그
+- `seed_<seed>/*_decision_traces.jsonl`: AURA/TSRA-R 판단 trace 로그
 
 ## 검증
 
@@ -82,6 +84,12 @@ conda run -n base python -m unittest discover -s tests -v
 - TSRA-ML adaptive baseline-adjusted resilience gain: `90.374%`
 - TSRA-ML scikit-learn validation F1: `0.9956`
 - TSRA-ML scikit-learn ROC-AUC: `1.0`
+
+## 브랜치 비교 통합 결과
+
+`origin/GubikoDev`는 실행 안정성, CLI, 훈련된 모델, 테스트가 강하고 `origin/hbin`은 AgentRuntime/DecisionTrace 기반 설명 가능성이 강합니다. 최종 통합본은 `GubikoDev`를 실행 베이스로 유지하고, `hbin`의 핵심 장점인 판단 trace 구조를 `src/tsra_agent/runtime.py`와 simulator 산출물로 이식했습니다.
+
+상세 비교는 `docs/agent_branch_comparison.md`에 기록했습니다.
 
 ## 제출 패키지 권장
 

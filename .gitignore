@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+
+# Local verification artifacts.
+outputs/
+
+# Generated submission archives. Existing tracked archives remain tracked.
+dist/*.zip

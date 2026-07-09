@@ -157,6 +157,15 @@ class CliArtifactTests(unittest.TestCase):
             self.assertIn("ml_defended", summary["aggregate"])
             self.assertEqual(manifest["schema_version"], "tsra-run-manifest/v1")
             self.assertTrue((output_dir / "incident_report.md").exists())
+            trace_path = output_dir / "seed_7" / "defended_tsra_decision_traces.jsonl"
+            self.assertTrue(trace_path.exists())
+            first_trace = json.loads(trace_path.read_text(encoding="utf-8").splitlines()[0])
+            self.assertIn("observation", first_trace)
+            self.assertIn("memory", first_trace)
+            self.assertTrue(first_trace["candidate_actions"])
+            self.assertTrue(first_trace["tool_calls"])
+            self.assertIn("selected_action", first_trace)
+            self.assertIn("closed synthetic mission simulation", first_trace["safety_boundary"])
 
 
 if __name__ == "__main__":

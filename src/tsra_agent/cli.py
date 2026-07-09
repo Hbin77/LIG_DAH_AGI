@@ -207,6 +207,8 @@ def build_manifest(summary: dict[str, Any]) -> dict[str, Any]:
             "models/tsra_ml_tuning_report.json",
             "models/tsra_final_selection_report.json",
             "seed_<seed>/<experiment>_events.jsonl",
+            "seed_<seed>/<experiment>_aura_decision_traces.jsonl",
+            "seed_<seed>/<experiment>_tsra_decision_traces.jsonl",
             "seed_<seed>/summary.json",
         ],
         "safety_boundary": {
