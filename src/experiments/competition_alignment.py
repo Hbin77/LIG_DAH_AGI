@@ -121,19 +121,22 @@ ALIGNMENT_SPECS = [
             "src/experiments/validate_event_contracts.py",
             "src/experiments/trace_quality_audit.py",
             "src/experiments/agent_loop_replay.py",
+            "src/experiments/agent_interface_manifest.py",
             "outputs/report_tables/agent_decision_trace_summary.csv",
             "outputs/report_tables/agent_contract_validation.csv",
             "outputs/report_tables/decision_trace_quality_audit.csv",
             "outputs/report_tables/agent_loop_replay.csv",
+            "outputs/report_tables/agent_interface_manifest.csv",
         ],
         next_gate=(
-            "Agent changes must leave replayable DecisionTrace evidence and pass contract plus trace-quality validation."
+            "Agent changes must keep attack/defense interfaces explicit and pass contract plus trace-quality validation."
         ),
         row_checks=[
             RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 200),
             RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 49),
             RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 9),
             RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
+            RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
         ],
     ),
     AlignmentSpec(

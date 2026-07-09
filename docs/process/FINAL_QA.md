@@ -15,6 +15,7 @@ python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.agent_loop_replay
+python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards
@@ -44,6 +45,7 @@ agent_decision_trace_summary rows: 215
 agent_contract_validation rows: 49 pass
 decision_trace_quality_audit rows: 9 pass
 agent_loop_replay rows: 8
+agent_interface_manifest rows: 4
 aura_coa_cards rows: 15
 battle_timeline rows: 46
 incident_summary rows: 10
@@ -53,7 +55,7 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 116
+package_zip entries: 119
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

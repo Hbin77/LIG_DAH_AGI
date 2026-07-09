@@ -131,9 +131,10 @@ Metrics
 3. AURA/TSRA-R/MissionSimulator 사이의 event contract가 깨지지 않는지 검증한다.
 4. DecisionTrace가 reason, memory, tool, candidate, selected action을 충분히 남기는지 검증한다.
 5. 대표 agent loop replay로 observe-memory-tool-candidate-decision-feedback 흐름을 확인한다.
-6. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
-7. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-8. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+6. 에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 인터페이스를 manifest로 명시한다.
+7. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
+8. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+9. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -455,6 +456,32 @@ metric gates: 11
 status: all pass
 key gates: E5 resilience >= 0.80, E5/E3 impact ratio <= 0.20,
            E6/E7 separation >= 0.005
+```
+
+### P13. Agent Interface Manifest
+
+상태: 완료
+
+목적:
+
+- 공격/방어 에이전트를 분리 개발하기 위한 인터페이스 기준을 명시한다.
+- AURA/AURA-ML과 TSRA-R/TSRA-R-ML의 side, goal, policy, input, memory, tool, candidate, selected action, event output을 정리한다.
+- 팀원이 추가되어도 각 agent가 어떤 계약을 지키는지 바로 확인할 수 있게 한다.
+
+산출물:
+
+```text
+src/experiments/agent_interface_manifest.py
+outputs/report_tables/agent_interface_manifest.csv
+outputs/report_tables/agent_interface_manifest.md
+```
+
+검증 결과:
+
+```text
+agent_interface_manifest rows: 4
+attack side: AURA, AURA-ML
+defense side: TSRA-R, TSRA-R-ML
 ```
 
 ## 최종 판단 기준

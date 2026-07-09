@@ -192,6 +192,23 @@ Replay는 각 active agent/policy에서 `no_op` 판단과 실제 action 판단�
 observe -> memory -> tools -> candidates -> selected_action -> feedback -> reason
 ```
 
+## 인터페이스 Manifest
+
+에이전트별 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 계약은 다음 명령으로 생성한다.
+
+```bash
+python3 -m src.experiments.agent_interface_manifest
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_interface_manifest.csv
+outputs/report_tables/agent_interface_manifest.md
+```
+
+이 manifest는 AURA/AURA-ML을 `attack`, TSRA-R/TSRA-R-ML을 `defense` side로 분리해 보여준다.
+
 예시:
 
 ```json

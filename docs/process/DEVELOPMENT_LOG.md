@@ -875,6 +875,58 @@ E6/E7 impact separation: 0.0151044
 - 이 산출물은 공방 효과가 숫자로 유지되는지 확인하는 품질 게이트다.
 - 이후 정책이나 실험을 바꿔 핵심 결과가 약해지면 최종 검증에서 실패한다.
 
+### 24. Agent Interface Manifest를 추가한 이유
+
+공격 에이전트와 방어 에이전트를 따로 개발하려면, 각 agent가 어떤 입력을 보고 어떤 메모리와 도구를 사용하며 어떤 이벤트를 출력하는지 명확해야 한다. trace와 replay는 실행 사례를 보여주지만, 팀 협업 관점에서는 agent별 인터페이스 기준표가 필요하다.
+
+그래서 observed trace를 기반으로 Agent Interface Manifest를 추가했다.
+
+구현:
+
+```text
+src/experiments/agent_interface_manifest.py
+outputs/report_tables/agent_interface_manifest.csv
+outputs/report_tables/agent_interface_manifest.md
+```
+
+Manifest 필드:
+
+- agent
+- side: attack 또는 defense
+- goal
+- policies
+- input contract
+- memory contract
+- tool contract
+- candidate contract
+- selected action contract
+- event outputs
+- evidence experiments
+- trace count
+- non-no-op count
+- safety boundary
+
+검증:
+
+```text
+python3 -m src.experiments.agent_interface_manifest
+```
+
+결과:
+
+```text
+agent_interface_manifest.csv: 4 agents
+AURA / AURA-ML: attack side
+TSRA-R / TSRA-R-ML: defense side
+tool contract present: yes
+non-no-op decisions: present for all agents
+```
+
+해석:
+
+- 이 산출물은 AURA와 TSRA-R을 따로 고도화할 때 깨지면 안 되는 인터페이스 기준이다.
+- `verify_submission_state.py`와 `competition_alignment.py`에 연결해 필수 산출물로 만들었다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

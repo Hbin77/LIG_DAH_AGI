@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
     "src/experiments/agent_loop_replay.py",
+    "src/experiments/agent_interface_manifest.py",
     "src/experiments/metric_gate.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -50,6 +51,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/decision_trace_quality_audit.md",
     "outputs/report_tables/agent_loop_replay.csv",
     "outputs/report_tables/agent_loop_replay.md",
+    "outputs/report_tables/agent_interface_manifest.csv",
+    "outputs/report_tables/agent_interface_manifest.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -203,6 +206,30 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("agent_loop_replay rows=8 agents/cases=complete")
 
+    interface_rows = read_csv("outputs/report_tables/agent_interface_manifest.csv")
+    require(len(interface_rows) == 4, f"expected 4 agent interface rows, got {len(interface_rows)}")
+    interface_agents = {row["agent"] for row in interface_rows}
+    require(
+        interface_agents == {"AURA", "AURA-ML", "TSRA-R", "TSRA-R-ML"},
+        f"unexpected agent interface agents: {sorted(interface_agents)}",
+    )
+    sides = {row["agent"]: row["side"] for row in interface_rows}
+    require(sides["AURA"] == "attack" and sides["AURA-ML"] == "attack", "AURA agents must be attack side")
+    require(sides["TSRA-R"] == "defense" and sides["TSRA-R-ML"] == "defense", "TSRA-R agents must be defense side")
+    require(
+        all(row["tool_contract"] and row["tool_contract"] != "none" for row in interface_rows),
+        "agent interface manifest missing tool contracts",
+    )
+    require(
+        all(int(float(row["non_noop_count"])) > 0 for row in interface_rows),
+        "agent interface manifest has agent without non-no-op decision",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in interface_rows),
+        "agent interface manifest missing safety boundary",
+    )
+    checks.append("agent_interface_manifest rows=4 agents=attack/defense")
+
     metric_gate_rows = read_csv("outputs/report_tables/metric_gate_summary.csv")
     require(len(metric_gate_rows) == 11, f"expected 11 metric gate rows, got {len(metric_gate_rows)}")
     failed_metric_gates = [
@@ -340,6 +367,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_loop_replay.md" in manifest_text,
         "manifest missing agent loop replay",
+    )
+    require(
+        "outputs/report_tables/agent_interface_manifest.md" in manifest_text,
+        "manifest missing agent interface manifest",
     )
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,

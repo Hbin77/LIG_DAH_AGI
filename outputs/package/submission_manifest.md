@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 115
-- total_payload_bytes: 2272312
+- payload_file_count: 118
+- total_payload_bytes: 2296968
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 116
-- zip_bytes: 1562084
-- zip_sha256: `8fec4b1cb948d247c696f25e62209844e9b7b839f53ba9d44727afea0cb63048`
+- zip_file_count: 119
+- zip_bytes: 1568468
+- zip_sha256: `2bf7ef2f51a9e3eb5a9b164948dcd33c8a34d0f840094d19500e3db7e9800321`
 
 ## 포함 파일
 
@@ -84,6 +84,8 @@
 - `outputs/report_tables/agent_contract_validation.md`
 - `outputs/report_tables/agent_decision_trace_summary.csv`
 - `outputs/report_tables/agent_decision_trace_summary.md`
+- `outputs/report_tables/agent_interface_manifest.csv`
+- `outputs/report_tables/agent_interface_manifest.md`
 - `outputs/report_tables/agent_loop_replay.csv`
 - `outputs/report_tables/agent_loop_replay.md`
 - `outputs/report_tables/aura_coa_cards.csv`
@@ -116,6 +118,7 @@
 - `src/aura/ml_impact_predictor.py`
 - `src/aura/rule_decision_engine.py`
 - `src/experiments/__init__.py`
+- `src/experiments/agent_interface_manifest.py`
 - `src/experiments/agent_loop_replay.py`
 - `src/experiments/aura_coa_cards.py`
 - `src/experiments/battle_timeline.py`

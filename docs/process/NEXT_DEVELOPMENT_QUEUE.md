@@ -665,7 +665,58 @@ checked: AURA impact, TSRA-R resilience, action ablation,
 - 이 산출물은 "결과가 좋아 보인다"가 아니라, 핵심 방향을 자동 gate로 통과한다는 증거다.
 - 이후 실험을 다시 돌려도 공방 효과가 무너지면 final verifier에서 실패한다.
 
-## P13. 제출 직전 브랜치/패키지 동결
+## P13. Agent Interface Manifest
+
+상태: 완료
+
+문제:
+
+- AURA와 TSRA-R을 따로 개발하려면 각 에이전트의 입력, 메모리, 도구, 후보, 선택 행동, 이벤트 출력 계약을 한눈에 볼 수 있어야 한다.
+- 기존 문서와 trace는 상세하지만, 공격/방어 side별 인터페이스를 구조화한 표는 없었다.
+- 팀원이 추가되면 어떤 파일과 action을 건드려야 하는지 빠르게 파악할 기준이 필요하다.
+
+구현:
+
+```text
+src/experiments/agent_interface_manifest.py
+outputs/report_tables/agent_interface_manifest.csv
+outputs/report_tables/agent_interface_manifest.md
+```
+
+구현 방식:
+
+- E3, E5, E7 DecisionTrace를 읽어 active agent를 추출한다.
+- AURA/AURA-ML은 `attack`, TSRA-R/TSRA-R-ML은 `defense` side로 분류한다.
+- goal, policy, observation input contract, memory contract, tool contract, candidate contract, selected action contract, event output을 요약한다.
+- safety boundary를 각 agent row에 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.agent_interface_manifest` 명령으로 재생성 가능하다.
+- 완료. AURA, AURA-ML, TSRA-R, TSRA-R-ML 4개 agent row가 생성된다.
+- 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_interface_manifest
+```
+
+검증 결과:
+
+```text
+agent_interface_manifest.csv: 4 agents
+attack side: AURA, AURA-ML
+defense side: TSRA-R, TSRA-R-ML
+all agents: tool contract present, non-no-op decision present
+```
+
+해석:
+
+- 이 산출물은 공격/방어 에이전트를 따로 개발하기 위한 인터페이스 기준표다.
+- 새 agent나 policy를 추가할 때 입력·도구·출력 계약이 manifest에 반영되는지 확인할 수 있다.
+
+## P14. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 
