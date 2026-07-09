@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 103
-- total_payload_bytes: 2166356
+- payload_file_count: 106
+- total_payload_bytes: 2196956
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 104
-- zip_bytes: 1533883
-- zip_sha256: `cb5736f78c038c368eac14dd02bf644fe5c0471c886948313af8ca45f064e802`
+- zip_file_count: 107
+- zip_bytes: 1541202
+- zip_sha256: `f8c8de246f75f712fec71ce0176b1d16ac28d5b908356a35cd8ee71d5a51f77d`
 
 ## 포함 파일
 
@@ -80,6 +80,8 @@
 - `outputs/models/tsra_detector_metrics.json`
 - `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.csv`
 - `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.md`
+- `outputs/report_tables/agent_contract_validation.csv`
+- `outputs/report_tables/agent_contract_validation.md`
 - `outputs/report_tables/agent_decision_trace_summary.csv`
 - `outputs/report_tables/agent_decision_trace_summary.md`
 - `outputs/report_tables/aura_coa_cards.csv`
@@ -118,6 +120,7 @@
 - `src/experiments/run_batch.py`
 - `src/experiments/run_tsra_ablation.py`
 - `src/experiments/trace_summary.py`
+- `src/experiments/validate_event_contracts.py`
 - `src/ml/__init__.py`
 - `src/ml/build_dataset.py`
 - `src/ml/train_aura_impact_model.py`

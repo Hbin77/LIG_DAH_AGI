@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
     "src/experiments/competition_alignment.py",
+    "src/experiments/validate_event_contracts.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
@@ -40,6 +41,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/incident_summary.csv",
     "outputs/report_tables/competition_alignment_matrix.csv",
     "outputs/report_tables/competition_alignment_matrix.md",
+    "outputs/report_tables/agent_contract_validation.csv",
+    "outputs/report_tables/agent_contract_validation.md",
     "outputs/figures/aura_tsra_architecture.png",
     "outputs/figures/batch_resilience_gain.png",
     "outputs/figures/tsra_action_ablation.png",
@@ -119,6 +122,30 @@ def check_csv_outputs() -> list[str]:
     trace_rows = read_csv("outputs/report_tables/agent_decision_trace_summary.csv")
     require(len(trace_rows) >= 200, f"trace summary too small: {len(trace_rows)} rows")
     checks.append(f"agent_decision_trace_summary rows={len(trace_rows)}")
+
+    contract_rows = read_csv("outputs/report_tables/agent_contract_validation.csv")
+    require(len(contract_rows) == 49, f"expected 49 contract checks, got {len(contract_rows)}")
+    failed_contracts = [
+        f"{row['experiment']}:{row['contract']}"
+        for row in contract_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_contracts, f"failed agent contracts: {failed_contracts[:8]}")
+    required_contracts = {
+        "attack_event_schema",
+        "defense_event_schema",
+        "metric_snapshot_schema",
+        "mission_event_schema",
+        "aura_decision_trace_schema",
+        "tsra-r_decision_trace_schema",
+        "agent_cross_contract",
+    }
+    observed_contracts = {row["contract"] for row in contract_rows}
+    require(
+        required_contracts.issubset(observed_contracts),
+        f"agent contract validation missing contracts: {sorted(required_contracts - observed_contracts)}",
+    )
+    checks.append("agent_contract_validation rows=49 pass")
 
     coa_rows = read_csv("outputs/report_tables/aura_coa_cards.csv")
     require(len(coa_rows) >= 10, f"COA cards too small: {len(coa_rows)} rows")
@@ -223,6 +250,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/competition_alignment_matrix.md" in manifest_text,
         "manifest missing competition alignment matrix",
+    )
+    require(
+        "outputs/report_tables/agent_contract_validation.md" in manifest_text,
+        "manifest missing agent contract validation",
     )
     return [f"package_zip entries={len(names)}", "package exclusions=passed"]
 

@@ -684,6 +684,49 @@ evidence_status: all verified
 - 이 변경은 기능 추가 자체보다 개발 방향 이탈을 막는 자동 점검 장치다.
 - README, package builder, final verifier에도 연결해 제출 산출물에서 빠지지 않게 했다.
 
+### 20. Agent Event Contract Validation을 추가한 이유
+
+AURA와 TSRA-R은 별도 에이전트로 개발하지만, 실제 실행에서는 같은 MissionSimulator와 JSONL 로그를 공유한다. 따라서 공격 에이전트가 `attack_events.jsonl` 형식을 바꾸거나 방어 에이전트가 `defense_events.jsonl` 필드를 바꾸면, timeline, incident summary, trace summary가 연쇄적으로 깨질 수 있다.
+
+이 문제를 막기 위해 event contract validation을 추가했다.
+
+구현:
+
+```text
+src/experiments/validate_event_contracts.py
+outputs/report_tables/agent_contract_validation.csv
+outputs/report_tables/agent_contract_validation.md
+```
+
+검증 범위:
+
+- `attack_events.jsonl`: event id, selected time, candidate, expected impact, agent
+- `defense_events.jsonl`: event id, time, action, details, agent
+- `mission_events.jsonl`: message lifecycle 필드
+- `metric_snapshots.jsonl`: mission impact 관련 지표
+- `aura_decision_traces.jsonl`: AURA AgentRuntime trace
+- `tsra_r_decision_traces.jsonl`: TSRA-R AgentRuntime trace
+- cross-contract: attack event와 AURA trace, defense event와 TSRA-R trace, metric time coverage 연결
+
+검증:
+
+```text
+python3 -m src.experiments.validate_event_contracts --fail-on-error
+```
+
+결과:
+
+```text
+agent_contract_validation.csv: 49 contract checks
+status: all pass
+```
+
+해석:
+
+- 이 검증기는 새 공격/방어 로직을 추가하지 않는다.
+- 대신 두 에이전트가 분리 개발돼도 공유 인터페이스가 깨지지 않게 한다.
+- `verify_submission_state.py`와 `competition_alignment.py`에 연결해 최종 산출물의 필수 게이트로 만들었다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

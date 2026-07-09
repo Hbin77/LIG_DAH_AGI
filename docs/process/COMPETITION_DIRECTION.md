@@ -128,8 +128,9 @@ Metrics
 
 1. 새 기능이 DAH 대회 목표와 직접 연결되는지 alignment matrix로 먼저 확인한다.
 2. 공격, 방어, AI 에이전트 판단 루프 중 어디를 강화하는지 명시한다.
-3. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-4. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+3. AURA/TSRA-R/MissionSimulator 사이의 event contract가 깨지지 않는지 검증한다.
+4. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+5. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -346,6 +347,32 @@ outputs/report_tables/competition_alignment_matrix.md
 competition_alignment_matrix rows: 10
 evidence_status: all verified
 checked: file existence, row counts, safety boundary text
+```
+
+### P9. Agent Event Contract Validation
+
+상태: 완료
+
+목적:
+
+- AURA와 TSRA-R이 분리 개발돼도 공유 JSONL 계약이 유지되는지 확인한다.
+- attack event, defense event, mission event, metric snapshot, DecisionTrace 구조를 자동 검증한다.
+- 공방 timeline과 incident summary가 참조하는 원천 로그의 신뢰성을 높인다.
+
+산출물:
+
+```text
+src/experiments/validate_event_contracts.py
+outputs/report_tables/agent_contract_validation.csv
+outputs/report_tables/agent_contract_validation.md
+```
+
+검증 결과:
+
+```text
+agent_contract_validation checks: 49
+status: all pass
+safety boundary: closed simulation only
 ```
 
 ## 최종 판단 기준

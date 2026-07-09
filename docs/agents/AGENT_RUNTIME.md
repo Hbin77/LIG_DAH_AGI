@@ -123,6 +123,31 @@ outputs/experiments/<experiment>/aura_decision_traces.jsonl
 outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
 ```
 
+## 계약 검증
+
+AURA, TSRA-R, MissionSimulator가 공유하는 JSONL 인터페이스는 다음 명령으로 검증한다.
+
+```bash
+python3 -m src.experiments.validate_event_contracts --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_contract_validation.csv
+outputs/report_tables/agent_contract_validation.md
+```
+
+검증 범위:
+
+- attack event schema
+- defense event schema
+- mission event schema
+- metric snapshot schema
+- AURA DecisionTrace schema
+- TSRA-R DecisionTrace schema
+- attack/defense event와 trace의 cross-contract
+
 예시:
 
 ```json

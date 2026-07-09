@@ -129,6 +129,19 @@ This writes:
 
 The incident summary condenses the battle timeline into attack-anchored incident windows with defense response, mission impact movement, residual risk, outcome, and safety boundary.
 
+## Validate Agent Event Contracts
+
+```bash
+python3 -m src.experiments.validate_event_contracts --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/agent_contract_validation.csv`
+- `outputs/report_tables/agent_contract_validation.md`
+
+The validator checks AURA attack events, TSRA-R defense events, mission events, metric snapshots, DecisionTrace logs, and cross-log relationships for the shared simulator contract.
+
 ## Generate AURA COA Cards
 
 ```bash
@@ -294,6 +307,7 @@ python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
+python3 -m src.experiments.validate_event_contracts --fail-on-error
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards

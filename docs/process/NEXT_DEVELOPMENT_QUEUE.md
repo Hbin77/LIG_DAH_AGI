@@ -458,7 +458,61 @@ covered areas: attack scenario, defense architecture, AI agent architecture,
 - 새 기능은 이 matrix의 next gate 중 하나 이상을 통과해야 한다.
 - `main`이 아니라 `hbin` 브랜치에서 이어 작업하는 협업 기준도 함께 검증한다.
 
-## P9. 제출 직전 브랜치/패키지 동결
+## P9. Agent Event Contract Validation
+
+상태: 완료
+
+문제:
+
+- AURA와 TSRA-R은 분리된 에이전트지만 같은 시뮬레이터와 JSONL 로그 계약을 공유한다.
+- 한쪽 에이전트가 이벤트 필드를 바꾸면 battle timeline, incident summary, trace summary가 조용히 깨질 수 있다.
+- 팀원이 추가될 경우 attack event, defense event, mission event, DecisionTrace 형식을 자동으로 확인할 필요가 있다.
+
+구현:
+
+```text
+src/experiments/validate_event_contracts.py
+outputs/report_tables/agent_contract_validation.csv
+outputs/report_tables/agent_contract_validation.md
+```
+
+구현 방식:
+
+- `attack_events.jsonl`: AURA attack event와 candidate/expected impact 필드 검증
+- `defense_events.jsonl`: TSRA-R defense action과 details 필드 검증
+- `mission_events.jsonl`: message lifecycle 필드 검증
+- `metric_snapshots.jsonl`: mission impact metric 필드 검증
+- `aura_decision_traces.jsonl`, `tsra_r_decision_traces.jsonl`: AgentRuntime trace 구조 검증
+- cross-contract: attack event와 AURA trace, defense event와 TSRA-R trace, metric time coverage 연결 검증
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.validate_event_contracts --fail-on-error` 명령으로 재생성 가능하다.
+- 완료. E1~E7 전체에서 49개 contract check가 모두 통과한다.
+- 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.validate_event_contracts --fail-on-error
+```
+
+검증 결과:
+
+```text
+agent_contract_validation.csv: 49 contract checks
+status: all pass
+contracts: attack_event_schema, defense_event_schema, metric_snapshot_schema,
+           mission_event_schema, aura_decision_trace_schema,
+           tsra-r_decision_trace_schema, agent_cross_contract
+```
+
+해석:
+
+- 공격 에이전트와 방어 에이전트를 따로 개발해도 공유 로그 계약이 깨지면 바로 실패한다.
+- 실제 공격 기능은 추가하지 않고, 폐쇄형 시뮬레이션 산출물의 신뢰성을 높이는 작업이다.
+
+## P10. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 
