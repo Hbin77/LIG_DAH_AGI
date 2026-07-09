@@ -426,6 +426,7 @@ emission_gate_violations: 0
 - ML detector 기반 reactive defense window
 - AURA attack context 기반 defense priority score
 - defense priority score 기반 core event ordering
+- Defense Priority Decision Path 감사
 - Adaptive Memory 기반 optional action gating
 - Adaptive Defense Decision Path 감사
 - defense event JSONL 로그
@@ -518,6 +519,33 @@ score = defense_base_score + attack_context_bonus
 - `defense_base_score`: action별 기본 임무 보호 우선순위다.
 - `attack_context_bonus`: active/recent AURA attack type이 해당 방어 action과 직접 관련될 때만 붙는 제한된 가산점이다.
 - `attack_context_score_reason`: `counter_queue_pressure_priority_reroute`, `counter_video_queue_pressure` 같은 점수 이유를 남긴다.
+
+방어 우선순위 판단 경로는 별도 감사로 검증한다.
+
+```bash
+python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error
+```
+
+현재 감사 결과:
+
+```text
+defense_priority_decision_path_audit rows: 6 pass
+scored_candidates: 671
+formula_matches: 671
+attack_context_bonus_candidates: 177
+attack_context_bonus_events: 51
+checked_event_matches: 70
+event_match_failures: 0
+ordered_core_defense_traces: 12/12
+no_op_ready_violations: 0
+```
+
+해석:
+
+- 후보 row의 `score`와 emitted `DefenseEvent.details.defense_priority_score`가 같은 공식으로 이어진다.
+- attack context bonus는 관련 방어 action에만 붙고, 상한 안에서 유지된다.
+- 같은 tick에 여러 core defense event가 나오면 priority score가 높은 순서로 정렬된다.
+- no-op 판단은 ready candidate가 없을 때만 통과한다.
 - 같은 tick에서 여러 core defense event가 나오면 `defense_priority_score` 내림차순으로 생성되어 시뮬레이터에 적용된다.
 
 Cross-agent 감사 결과:

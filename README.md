@@ -311,6 +311,19 @@ This writes:
 
 The audit verifies that AURA carries TSRA-R defense context and TSRA-R carries AURA attack context through observations, tool calls, AgentMemory, DecisionTrace feedback, candidate rows, and emitted defense event details. It also checks that AURA-ML converts defender context into a bounded counter-defense selection-score term, and that TSRA-R converts attack context into bounded defense-priority scores and ordered core defense events instead of only logging it.
 
+## Audit Defense Priority Decision Path
+
+```bash
+python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/defense_priority_decision_path_audit.csv`
+- `outputs/report_tables/defense_priority_decision_path_audit.md`
+
+The audit verifies that TSRA-R candidate priority scores follow `score = defense_base_score + attack_context_bonus`, stay bounded, match emitted `DefenseEvent.details`, preserve same-tick core event ordering, and do not emit a defense action unless the matching candidate was eligible and ready.
+
 ## Audit Agent Tool Usage
 
 ```bash
@@ -854,6 +867,7 @@ python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error
 python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_memory_influence_audit --fail-on-error
 python3 -m src.experiments.cross_agent_context_audit --fail-on-error
+python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix

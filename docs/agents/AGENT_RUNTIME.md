@@ -402,6 +402,42 @@ defense_counter_reasons: counter_queue_pressure_priority_reroute, counter_video_
 - TSRA-R은 AURA attack context를 `attack_context_bonus`와 `defense_priority_score`로 바꾸고, 같은 tick의 core defense event를 점수 순서로 정렬한다.
 - 이 감사는 공격/방어가 단순히 같은 로그 폴더에 있는 것이 아니라, 서로의 행동 context를 다음 판단 근거와 정책 점수로 수용했는지 확인한다.
 
+## Defense Priority Decision Path Audit
+
+TSRA-R의 attack-context-aware priority score가 후보 row, selected action, emitted `DefenseEvent.details`까지 일관되게 이어지는지 확인한다.
+
+```bash
+python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/defense_priority_decision_path_audit.csv
+outputs/report_tables/defense_priority_decision_path_audit.md
+```
+
+현재 결과:
+
+```text
+defense_priority_decision_path_audit rows: 6 pass
+scored_candidates: 671
+formula_matches: 671
+attack_context_bonus_candidates: 177
+attack_context_bonus_events: 51
+checked_event_matches: 70
+ordered_core_defense_traces: 12/12
+no_op_ready_violations: 0
+```
+
+감사 항목:
+
+- `score = defense_base_score + attack_context_bonus` 공식 일치
+- `attack_context_bonus` 상한과 eligible 조건
+- 후보 점수와 emitted `DefenseEvent.details` 점수 일치
+- 같은 decision 안의 core defense event 우선순위 정렬
+- ready candidate가 없을 때만 no-op 선택
+
 ## Tool Usage Audit
 
 AgentTool이 단순 등록 목록이 아니라 실제 판단 루프에서 호출되는지 확인한다.

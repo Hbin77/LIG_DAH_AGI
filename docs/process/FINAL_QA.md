@@ -23,6 +23,7 @@ python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error
 python3 -m src.experiments.agent_memory_belief_audit
 python3 -m src.experiments.agent_memory_influence_audit --fail-on-error
 python3 -m src.experiments.cross_agent_context_audit --fail-on-error
+python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix
@@ -104,6 +105,11 @@ cross_agent_context_audit rows: 8 pass
 cross_agent_context_audit selected_counter_defense_bonus_traces: 3
 cross_agent_context_audit attack_context_bonus_events: 25
 cross_agent_context_audit ordered_core_defense_traces: 6/6
+defense_priority_decision_path_audit rows: 6 pass
+defense_priority_decision_path_audit formula_matches: 671
+defense_priority_decision_path_audit attack_context_bonus_events: 51
+defense_priority_decision_path_audit ordered_core_defense_traces: 12/12
+defense_priority_decision_path_audit no_op_ready_violations: 0
 agent_tool_usage_audit rows: 33 pass
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10
@@ -112,7 +118,7 @@ attack_defense_response_audit rows: 10 no missed required
 pace_transition_audit rows: 4 status=2 initial/2 fallback
 mission_impact_decomposition rows: 35 components=5
 safety_boundary_audit rows: 5 pass
-reproduction_order_audit rows: 15 pass
+reproduction_order_audit rows: 16 pass
 submission_readiness_audit rows: 10 pass
 aura_coa_cards rows: 15
 battle_timeline rows: 47

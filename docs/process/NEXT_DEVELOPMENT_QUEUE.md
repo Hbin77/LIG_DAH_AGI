@@ -2973,3 +2973,70 @@ competition_alignment_matrix rows: 10 verified
 - AURA의 이후 공격 후보는 TSRA-R의 active/recent defense context를 candidate row와 feedback으로 설명한다.
 - AURA-ML은 defense context를 counter-defense score로, TSRA-R은 attack context를 defense-priority score와 core event ordering으로 바꾼다.
 - 이 변경은 closed simulation 내부 context와 감사 증거만 강화하며 RF, exploit, live network action은 추가하지 않는다.
+
+## P57. Defense Priority Decision Path Audit
+
+상태: 완료
+
+문제:
+
+- P56에서 TSRA-R은 AURA attack context를 `attack_context_bonus`와 `defense_priority_score`로 바꾸게 됐다.
+- 하지만 cross-agent context audit만으로는 후보 점수 공식, emitted `DefenseEvent.details`, same-tick event ordering, no-op consistency를 한 번에 분리 검증하기 어렵다.
+- 방어 에이전트의 신뢰도를 높이려면 "공격 context를 봤다"에서 끝나지 않고, 그 context가 어떤 방어 우선순위 판단으로 이어졌는지 별도 감사가 필요하다.
+
+구현:
+
+```text
+src/experiments/defense_priority_decision_path_audit.py
+outputs/report_tables/defense_priority_decision_path_audit.csv
+outputs/report_tables/defense_priority_decision_path_audit.md
+src/experiments/reproduction_order_audit.py
+src/experiments/submission_readiness_audit.py
+src/experiments/competition_alignment.py
+scripts/verify_submission_state.py
+scripts/build_submission_package.py
+```
+
+설계:
+
+- TSRA-R trace의 `candidate_actions`에서 `defense_base_score`, `attack_context_bonus`, `score`를 읽는다.
+- `score = defense_base_score + attack_context_bonus` 공식이 모든 scored candidate에서 맞는지 확인한다.
+- `attack_context_bonus`가 eligible하지 않은 candidate에 붙지 않는지 확인한다.
+- selected `DefenseEvent.details`의 priority score와 candidate row가 일치하는지 확인한다.
+- 같은 decision에서 여러 core defense event가 나오면 priority score 내림차순인지 확인한다.
+- no-op trace에 ready scored action이 남아 있지 않은지 확인한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+defense_priority_decision_path_audit rows: 6 pass
+scored_candidates: 671
+formula_matches: 671
+max_score: 0.94
+max_attack_context_bonus: 0.12
+non_eligible_bonus: 0
+attack_context_bonus_candidates: 177
+attack_context_bonus_events: 51
+checked_event_matches: 70
+event_match_failures: 0
+no_candidate_for_event: 0
+ordered_core_defense_traces: 12/12
+no_op_ready_violations: 0
+unselected_ready_actions: 0
+selected_without_ready: 0
+```
+
+해석:
+
+- TSRA-R 방어 우선순위는 단순 설명 문구가 아니라 후보 점수, 선택 action, emitted event detail까지 검증되는 decision path가 됐다.
+- AURA attack context가 방어 점수에 영향을 주지만 bounded bonus로 제한되어 과도한 자동 방어로 번지지 않는다.
+- 이 변경은 closed simulation 안의 trace 감사와 검증 체계만 강화하며 RF, exploit, live network action은 추가하지 않는다.

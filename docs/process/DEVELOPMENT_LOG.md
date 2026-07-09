@@ -2953,3 +2953,62 @@ reproduction_order_audit rows: 15 pass
 - TSRA-R은 attack context를 `attack_context_bonus`, `attack_context_score_reason`, `defense_priority_score`로 바꿔 후보와 emitted defense event detail에 남기고, 같은 tick의 core defense event를 점수 순서로 생성한다.
 
 이 보강의 의미는 공격/방어 에이전트가 단순히 같은 simulator를 공유하는 수준을 넘어, 상대 에이전트의 최근 행동 context를 다음 판단 루프와 정책 점수 안에서 수용한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation context, trace, audit만 강화한다.
+
+### 72. Defense Priority Decision Path Audit를 추가한 이유
+
+Cross-agent context flow 이후 TSRA-R은 AURA attack context를 후보 점수에 반영하고, emitted `DefenseEvent.details`에도 priority score를 남긴다. 다만 이것을 cross-agent context audit 안에만 두면 검증 범위가 넓어져서 방어 판단 경로 자체의 품질을 독립적으로 보기 어렵다.
+
+이번 변경은 TSRA-R 방어 우선순위를 별도 decision-path audit로 분리했다.
+
+```text
+score = defense_base_score + attack_context_bonus
+```
+
+감사 기준은 다음과 같다.
+
+- 모든 scored candidate가 위 공식을 만족해야 한다.
+- `attack_context_bonus`는 bounded 값이어야 하고, eligible하지 않은 후보에는 붙으면 안 된다.
+- selected defense event의 `defense_priority_score`, `defense_base_score`, `attack_context_bonus`, `attack_context_score_reason`은 후보 row와 일치해야 한다.
+- 같은 decision에서 여러 core defense event가 나오면 priority score 내림차순으로 emitted 되어야 한다.
+- no-op trace에는 ready scored action이 남아 있으면 안 된다.
+
+추가한 파일은 다음과 같다.
+
+```text
+src/experiments/defense_priority_decision_path_audit.py
+outputs/report_tables/defense_priority_decision_path_audit.csv
+outputs/report_tables/defense_priority_decision_path_audit.md
+```
+
+동반 수정:
+
+- README Full Reproduction에 defense priority decision path audit 명령을 추가했다.
+- `reproduction_order_audit`는 RO16 체계로 확장했다.
+- `submission_readiness_audit`, `competition_alignment`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
+- `docs/agents/AGENT_RUNTIME.md`와 `docs/agents/TSRA_R_DEFENSE_AGENT.md`에 감사 목적과 현재 결과를 추가했다.
+
+현재 검증 결과는 다음과 같다.
+
+```text
+defense_priority_decision_path_audit rows: 6 pass
+scored_candidates: 671
+formula_matches: 671
+base_score_present: 671
+reason_count: 671
+max_score: 0.94
+max_attack_context_bonus: 0.12
+negative_scores: 0
+over_bound_scores: 0
+non_eligible_bonus: 0
+attack_context_bonus_candidates: 177
+attack_context_bonus_events: 51
+checked_event_matches: 70
+event_match_failures: 0
+no_candidate_for_event: 0
+ordered_core_defense_traces: 12/12
+no_op_ready_violations: 0
+unselected_ready_actions: 0
+selected_without_ready: 0
+```
+
+이 보강의 의미는 TSRA-R이 "공격 context를 읽었다"에서 끝나지 않고, 그 context를 bounded priority score로 바꿔 후보 선택, event detail, event ordering까지 일관되게 남기는 방어 에이전트가 됐다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace와 감사 체계만 강화한다.

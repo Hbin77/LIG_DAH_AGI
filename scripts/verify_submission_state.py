@@ -33,6 +33,7 @@ REQUIRED_FILES = [
     "src/tsra_r/rule_defender.py",
     "src/tsra_r/adaptive_defender.py",
     "src/experiments/cross_agent_context_audit.py",
+    "src/experiments/defense_priority_decision_path_audit.py",
     "src/experiments/adaptive_defense_decision_path_audit.py",
     "src/experiments/run_ml_threshold_sweep.py",
     "src/experiments/battle_timeline.py",
@@ -81,6 +82,8 @@ REQUIRED_FILES = [
     "outputs/batch/adaptive_memory_summary.csv",
     "outputs/report_tables/cross_agent_context_audit.csv",
     "outputs/report_tables/cross_agent_context_audit.md",
+    "outputs/report_tables/defense_priority_decision_path_audit.csv",
+    "outputs/report_tables/defense_priority_decision_path_audit.md",
     "outputs/report_tables/adaptive_defense_decision_path_audit.csv",
     "outputs/report_tables/adaptive_defense_decision_path_audit.md",
     "outputs/batch/ml_threshold_sweep_raw.csv",
@@ -898,6 +901,98 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("cross_agent_context_audit rows=8 pass")
 
+    defense_priority_rows = read_csv("outputs/report_tables/defense_priority_decision_path_audit.csv")
+    require(
+        len(defense_priority_rows) == 6,
+        f"expected 6 defense priority decision path rows, got {len(defense_priority_rows)}",
+    )
+    failed_defense_priority_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in defense_priority_rows
+        if row.get("status") != "pass"
+    ]
+    require(
+        not failed_defense_priority_rows,
+        f"failed defense priority decision path rows: {failed_defense_priority_rows[:8]}",
+    )
+    required_defense_priority_areas = {
+        "Candidate priority score contract",
+        "Bounded priority score inputs",
+        "Attack-context priority bonus",
+        "Selected event score consistency",
+        "Core defense event ordering",
+        "No-op and ready-action consistency",
+    }
+    observed_defense_priority_areas = {row["area"] for row in defense_priority_rows}
+    require(
+        observed_defense_priority_areas == required_defense_priority_areas,
+        f"defense priority path audit has unexpected areas: {sorted(observed_defense_priority_areas)}",
+    )
+    require(
+        any(
+            observed_int(row, "scored_candidates") >= 600
+            and observed_int(row, "formula_matches") == observed_int(row, "scored_candidates")
+            and observed_int(row, "reason_count") == observed_int(row, "scored_candidates")
+            for row in defense_priority_rows
+            if row["check_id"] == "DPR01"
+        ),
+        "defense priority path audit missing formula contract evidence",
+    )
+    require(
+        any(
+            observed_int(row, "negative_scores") == 0
+            and observed_int(row, "over_bound_scores") == 0
+            and observed_int(row, "non_eligible_bonus") == 0
+            and float(observed_value(row, "max_attack_context_bonus")) <= 0.12
+            for row in defense_priority_rows
+            if row["check_id"] == "DPR02"
+        ),
+        "defense priority path audit missing bounded-score evidence",
+    )
+    require(
+        any(
+            observed_int(row, "attack_context_bonus_candidates") > 0
+            and observed_int(row, "attack_context_bonus_events") > 0
+            and "counter_" in row["observed"]
+            for row in defense_priority_rows
+            if row["check_id"] == "DPR03"
+        ),
+        "defense priority path audit missing attack-context bonus evidence",
+    )
+    require(
+        any(
+            observed_int(row, "checked_event_matches") > 0
+            and observed_int(row, "event_match_failures") == 0
+            and observed_int(row, "no_candidate_for_event") == 0
+            for row in defense_priority_rows
+            if row["check_id"] == "DPR04"
+        ),
+        "defense priority path audit missing selected-event consistency evidence",
+    )
+    require(
+        any(
+            "ordered_core_defense_traces=12/12" in row["observed"]
+            for row in defense_priority_rows
+            if row["check_id"] == "DPR05"
+        ),
+        "defense priority path audit missing core event ordering evidence",
+    )
+    require(
+        any(
+            observed_int(row, "no_op_ready_violations") == 0
+            and observed_int(row, "unselected_ready_actions") == 0
+            and observed_int(row, "selected_without_ready") == 0
+            for row in defense_priority_rows
+            if row["check_id"] == "DPR06"
+        ),
+        "defense priority path audit missing no-op/ready consistency evidence",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in defense_priority_rows),
+        "defense priority path audit missing safety boundary",
+    )
+    checks.append("defense_priority_decision_path_audit rows=6 pass")
+
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
     require(len(tool_rows) == 33, f"expected 33 agent tool audit rows, got {len(tool_rows)}")
     failed_tool_rows = [
@@ -1683,8 +1778,8 @@ def check_csv_outputs() -> list[str]:
 
     reproduction_order_rows = read_csv("outputs/report_tables/reproduction_order_audit.csv")
     require(
-        len(reproduction_order_rows) == 15,
-        f"expected 15 reproduction order rows, got {len(reproduction_order_rows)}",
+        len(reproduction_order_rows) == 16,
+        f"expected 16 reproduction order rows, got {len(reproduction_order_rows)}",
     )
     failed_reproduction_order = [
         f"{row['check_id']}:{row['order_status']}:{row['output_status']}"
@@ -1697,7 +1792,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         {row["check_id"] for row in reproduction_order_rows}
-        == {f"RO{index:02d}" for index in range(1, 16)},
+        == {f"RO{index:02d}" for index in range(1, 17)},
         "reproduction order audit check ids are incomplete",
     )
     require(
@@ -1714,7 +1809,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO09"
+            row["check_id"] == "RO10"
             and "ml_attack_decision_path_audit" in row["required_before"]
             and "ml_defense_decision_path_audit" in row["required_before"]
             for row in reproduction_order_rows
@@ -1731,7 +1826,16 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO10"
+            row["check_id"] == "RO07"
+            and "run_all" in row["required_before"]
+            and "cross_agent_context_audit" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
+        "reproduction order audit missing defense priority path prerequisites",
+    )
+    require(
+        any(
+            row["check_id"] == "RO11"
             and "run_adaptive_memory" in row["required_before"]
             for row in reproduction_order_rows
         ),
@@ -1739,7 +1843,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO12"
+            row["check_id"] == "RO13"
             and "agent_stress_scenario_audit" in row["required_before"]
             and "reproduction_order_audit" in row["required_before"]
             for row in reproduction_order_rows
@@ -1748,14 +1852,14 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO13"
+            row["check_id"] == "RO14"
             and "submission_readiness_audit" in row["required_before"]
             and "competition_alignment" in row["required_before"]
             for row in reproduction_order_rows
         ),
         "reproduction order audit missing package prerequisites",
     )
-    checks.append("reproduction_order_audit rows=15 pass")
+    checks.append("reproduction_order_audit rows=16 pass")
 
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(
@@ -2478,6 +2582,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/cross_agent_context_audit.md" in manifest_text,
         "manifest missing cross-agent context audit",
+    )
+    require(
+        "outputs/report_tables/defense_priority_decision_path_audit.md" in manifest_text,
+        "manifest missing defense priority decision path audit",
     )
     require(
         "outputs/report_tables/agent_tool_usage_audit.md" in manifest_text,

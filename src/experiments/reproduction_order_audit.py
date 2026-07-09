@@ -141,6 +141,22 @@ SPECS = [
     ),
     OrderSpec(
         check_id="RO07",
+        command="python3 -m src.experiments.defense_priority_decision_path_audit --fail-on-error",
+        required_before=(
+            "python3 -m src.experiments.run_all",
+            "python3 -m src.experiments.cross_agent_context_audit --fail-on-error",
+        ),
+        output_files=(
+            "outputs/report_tables/defense_priority_decision_path_audit.csv",
+            "outputs/report_tables/defense_priority_decision_path_audit.md",
+        ),
+        interpretation=(
+            "Defense priority path audit should run after core TSRA-R traces and cross-agent "
+            "context evidence are fresh so attack-context priority scores can be checked."
+        ),
+    ),
+    OrderSpec(
+        check_id="RO08",
         command="python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error",
         required_before=(
             "python3 -m src.experiments.agent_engagement_scorecard",
@@ -155,7 +171,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO08",
+        check_id="RO09",
         command="python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error",
         required_before=(
             "python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error",
@@ -170,7 +186,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO09",
+        check_id="RO10",
         command="python3 -m src.experiments.ml_red_blue_interaction_audit --fail-on-error",
         required_before=(
             "python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error",
@@ -187,7 +203,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO10",
+        check_id="RO11",
         command="python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error",
         required_before=(
             "python3 -m src.experiments.run_adaptive_memory",
@@ -202,7 +218,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO11",
+        check_id="RO12",
         command="python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error",
         required_before=(
             "python3 -m src.ml.train_tsra_detector --rows 5000",
@@ -219,7 +235,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO12",
+        check_id="RO13",
         command="python3 -m src.experiments.competition_alignment --fail-on-incomplete",
         required_before=(
             "python3 -m src.experiments.agent_collaboration_graph",
@@ -237,7 +253,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO13",
+        check_id="RO14",
         command="python3 scripts/build_submission_package.py",
         required_before=(
             "python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete",
@@ -252,7 +268,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO14",
+        check_id="RO15",
         command="python3 scripts/generate_release_handoff.py",
         required_before=(
             "python3 scripts/build_submission_package.py",
@@ -265,7 +281,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO15",
+        check_id="RO16",
         command="python3 scripts/verify_submission_state.py",
         required_before=(
             "python3 scripts/freeze_release_candidate.py",
