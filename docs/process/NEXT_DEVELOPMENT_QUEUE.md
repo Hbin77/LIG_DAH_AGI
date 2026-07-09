@@ -261,8 +261,8 @@ python3 scripts/build_submission_package.py
 검증 결과:
 
 ```text
-payload_file_count: 92
-zip_file_count: 93
+payload_file_count: 95
+zip_file_count: 96
 zip_bytes: 약 1.5MB
 excluded __pycache__: 0
 excluded outputs/tmp*: 0
@@ -273,14 +273,22 @@ excluded outputs/batch/seed_*: 0
 
 ## P5. 공방 Timeline 패키지
 
-상태: 다음 작업
+상태: 완료
 
 문제:
 
 - 현재 trace summary, event timeline, COA card가 따로 존재한다.
 - 공격 이벤트, 방어 이벤트, DecisionTrace를 한 화면에서 연결해 보는 산출물은 아직 부족하다.
 
-구현 방향:
+구현:
+
+```text
+src/experiments/battle_timeline.py
+outputs/report_tables/battle_timeline.csv
+outputs/report_tables/battle_timeline.md
+```
+
+구현 방식:
 
 - AURA attack event, TSRA-R defense event, DecisionTrace reason을 같은 시간축으로 병합한다.
 - E5와 E7 중심으로 공방 timeline Markdown/CSV를 생성한다.
@@ -288,9 +296,46 @@ excluded outputs/batch/seed_*: 0
 
 완료 기준:
 
-- `python3 -m src.experiments.<timeline_tool>` 형태로 재생성 가능하다.
-- E5/E7 공방 sequence가 한 파일에서 비교된다.
-- 공격-방어-AI 판단 루프를 설명하는 데 직접 사용할 수 있다.
+- 완료. `python3 -m src.experiments.battle_timeline` 형태로 재생성 가능하다.
+- 완료. E5/E7 공방 sequence가 한 파일에서 비교된다.
+- 완료. 공격-방어-AI 판단 루프를 설명하는 데 직접 사용할 수 있다.
+
+검증:
+
+```bash
+python3 -m compileall src
+python3 -m src.experiments.battle_timeline
+```
+
+검증 결과:
+
+```text
+battle_timeline.csv: 46 rows
+experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+E5 rows: 24, attack rows: 5, defense rows: 19
+E7 rows: 22, attack rows: 5, defense rows: 19
+excluded unsafe action: actual RF/exploit/live network action 없음
+```
+
+## P6. 최종 재현 QA
+
+상태: 다음 작업
+
+문제:
+
+- 주요 생성 도구는 준비됐지만, 최종 제출 직전에는 clean state 기준으로 한 번에 실행되는지 확인해야 한다.
+
+구현 방향:
+
+- README Full Reproduction 순서대로 실행한다.
+- 패키지 manifest를 최신 산출물 기준으로 다시 생성한다.
+- `hbin` 원격 브랜치와 `main` 보호 상태를 마지막으로 확인한다.
+
+완료 기준:
+
+- 전체 재현 명령이 오류 없이 끝난다.
+- package manifest에 최신 timeline 산출물이 포함된다.
+- `origin/main`은 유지되고 `origin/hbin`만 최신 개발 커밋을 가리킨다.
 
 ## 진행 원칙
 

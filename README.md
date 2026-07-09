@@ -102,6 +102,19 @@ This writes:
 
 The summary combines AURA and TSRA-R `DecisionTrace` logs into one time-ordered table with selected action, top candidate, score/probability, tool calls, and reason.
 
+## Generate Battle Timeline
+
+```bash
+python3 -m src.experiments.battle_timeline
+```
+
+This writes:
+
+- `outputs/report_tables/battle_timeline.csv`
+- `outputs/report_tables/battle_timeline.md`
+
+The battle timeline merges AURA attack events, TSRA-R defense events, DecisionTrace reasons, and metric snapshots for E5 and E7 on the same event-time axis.
+
 ## Generate AURA COA Cards
 
 ```bash
@@ -246,6 +259,7 @@ python3 -m src.ml.train_aura_impact_model
 python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
+python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory

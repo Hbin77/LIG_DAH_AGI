@@ -457,8 +457,8 @@ python3 scripts/build_submission_package.py
 결과:
 
 ```text
-payload_file_count: 92
-zip_file_count: 93
+payload_file_count: 95
+zip_file_count: 96
 zip_bytes: about 1.5MB
 excluded __pycache__: 0
 excluded outputs/tmp*: 0
@@ -472,6 +472,60 @@ excluded outputs/batch/seed_*: 0
 - ZIP은 코드와 핵심 산출물을 포함하지만 재생성 가능한 대용량 파일은 제외한다.
 - `outputs/package/submission_manifest.md`가 ZIP 구성과 SHA-256 확인 기준이 된다.
 - ZIP 파일 자체는 로컬 생성 산출물이며 Git에는 올리지 않는다.
+
+### 16. 공방 Timeline 패키지를 추가한 이유
+
+기존 산출물은 각각 역할이 달랐다.
+
+- `agent_decision_trace_summary`: 에이전트 판단 로그 요약
+- `aura_coa_cards`: AURA가 선택한 공격 효과 카드
+- `E5_rule_aura_tsra_r_event_timeline`: 단순 공격/방어 이벤트 순서
+
+하지만 공격 이벤트, 방어 이벤트, 판단 이유, mission metric이 한 시간축에 붙어 있지 않아 공방 흐름을 한 번에 설명하기 어려웠다. 그래서 E5와 E7 중심의 battle timeline을 추가했다.
+
+구현:
+
+```text
+src/experiments/battle_timeline.py
+outputs/report_tables/battle_timeline.csv
+outputs/report_tables/battle_timeline.md
+```
+
+포함 필드:
+
+- experiment
+- time_sec
+- AURA attack event
+- TSRA-R defense event
+- AURA DecisionTrace reason
+- TSRA-R DecisionTrace reason
+- mission impact
+- trusted stale exposure
+- priority inversion rate
+- critical/video/total queue signal
+- safety boundary
+
+검증:
+
+```text
+python3 -m compileall src
+python3 -m src.experiments.battle_timeline
+```
+
+결과:
+
+```text
+battle_timeline.csv: 46 rows
+experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+E5 rows: 24, attack rows: 5, defense rows: 19
+E7 rows: 22, attack rows: 5, defense rows: 19
+```
+
+해석:
+
+- E5는 rule AURA와 rule TSRA-R의 공방을 보여준다.
+- E7은 ML AURA와 ML TSRA-R의 탐지 기반 reactive defense 공방을 보여준다.
+- 각 row는 실제 공격 명령이 아니라 폐쇄형 시뮬레이션 event라는 safety boundary를 가진다.
 
 ## 최신 핵심 결과
 

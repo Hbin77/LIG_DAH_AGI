@@ -242,6 +242,33 @@ zip size:    about 1.5MB
 excluded:    __pycache__, tmp logs, datasets, model binaries, seed-level logs
 ```
 
+### P5. 공방 Timeline 패키지
+
+상태: 완료
+
+목적:
+
+- 공격 이벤트, 방어 이벤트, DecisionTrace 이유, metric 변화를 같은 시간축에서 확인한다.
+- E5 rule 공방과 E7 ML 공방을 같은 파일에서 비교한다.
+
+산출물:
+
+```text
+src/experiments/battle_timeline.py
+outputs/report_tables/battle_timeline.csv
+outputs/report_tables/battle_timeline.md
+```
+
+검증 결과:
+
+```text
+battle timeline rows: 46
+experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
+attack rows: 10
+defense rows: 38
+safe boundary: closed simulation only
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.
