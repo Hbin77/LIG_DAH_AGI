@@ -6,7 +6,7 @@ Safety boundary: closed simulation safety-boundary audit only; no RF, exploit, o
 | check_id | area | status | observed | allowed_exceptions |
 |---|---|---|---|---|
 | S01 | Operational core source | pass | files_scanned=26; network_hits=0; shell_hits=0 | none in operational core |
-| S02 | Automation exceptions | pass | network_hits=scripts/verify_external_package_link.py; shell_hits=scripts/freeze_release_candidate.py,scripts/generate_release_handoff.py,scripts/verify_submission_state.py,src/experiments/submission_readiness_audit.py; unexpected_network_hits=0; unexpected_shell_hits=0 | urllib only in scripts/verify_external_package_link.py; subprocess only in release/Git verification scripts |
+| S02 | Automation exceptions | pass | network_hits=scripts/verify_external_package_link.py; shell_hits=scripts/freeze_release_candidate.py,scripts/generate_release_handoff.py,scripts/verify_submission_state.py,src/experiments/agent_quality_gate_audit.py,src/experiments/submission_readiness_audit.py; unexpected_network_hits=0; unexpected_shell_hits=0 | urllib only in scripts/verify_external_package_link.py; subprocess only in release/Git verification scripts |
 | S03 | Attack-effect schema | pass | uses_AttackCandidate=True; uses_AttackEvent=True; simulated_effect_fields=True | packet_loss_add is a simulator metric field, not packet generation |
 | S04 | Safety-boundary text | pass | closed_simulation=True; no_rf=True; no_exploit=True; no_live_network=True | safety terms may appear in negative boundary statements |
 | S05 | Submission package safety | pass | zip_path=outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip; zip_exists=True; manifest_has_exclusion_policy=True; excluded_artifact_hits=0 | model metric JSON is included; .pkl/.pt binaries are excluded |
@@ -27,7 +27,7 @@ Safety boundary: closed simulation safety-boundary audit only; no RF, exploit, o
 
 - Requirement: External access primitives may appear only in package-link or Git/local verification automation.
 - Evidence: scripts | src/experiments
-- Observed: network_hits=scripts/verify_external_package_link.py; shell_hits=scripts/freeze_release_candidate.py,scripts/generate_release_handoff.py,scripts/verify_submission_state.py,src/experiments/submission_readiness_audit.py; unexpected_network_hits=0; unexpected_shell_hits=0
+- Observed: network_hits=scripts/verify_external_package_link.py; shell_hits=scripts/freeze_release_candidate.py,scripts/generate_release_handoff.py,scripts/verify_submission_state.py,src/experiments/agent_quality_gate_audit.py,src/experiments/submission_readiness_audit.py; unexpected_network_hits=0; unexpected_shell_hits=0
 - Status: pass
 - Allowed exceptions: urllib only in scripts/verify_external_package_link.py; subprocess only in release/Git verification scripts
 - Next gate: New automation that touches network or subprocess must be listed in this allowlist and justified.

@@ -1205,7 +1205,7 @@ def check_csv_outputs() -> list[str]:
     checks.append("defense_priority_decision_path_audit rows=6 pass")
 
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
-    require(len(tool_rows) == 33, f"expected 33 agent tool audit rows, got {len(tool_rows)}")
+    require(len(tool_rows) == 34, f"expected 34 agent tool audit rows, got {len(tool_rows)}")
     failed_tool_rows = [
         f"{row['experiment']}:{row['agent']}:{row['tool_name']}"
         for row in tool_rows
@@ -1215,6 +1215,7 @@ def check_csv_outputs() -> list[str]:
     expected_tools = {
         "estimate_candidate_effect",
         "estimate_detectability",
+        "execute_rule_defense_actions",
         "evaluate_defense_conditions",
         "generate_attack_candidates",
         "assess_mission_risk_guard",
@@ -1253,7 +1254,7 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in tool_rows),
         "agent tool audit missing safety boundary",
     )
-    checks.append("agent_tool_usage_audit rows=33 pass")
+    checks.append("agent_tool_usage_audit rows=34 pass")
 
     interface_rows = read_csv("outputs/report_tables/agent_interface_manifest.csv")
     require(len(interface_rows) == 4, f"expected 4 agent interface rows, got {len(interface_rows)}")
@@ -1629,8 +1630,8 @@ def check_csv_outputs() -> list[str]:
 
     ml_path_rows = read_csv("outputs/report_tables/ml_defense_decision_path_audit.csv")
     require(
-        len(ml_path_rows) == 6,
-        f"expected 6 ML defense decision path rows, got {len(ml_path_rows)}",
+        len(ml_path_rows) == 7,
+        f"expected 7 ML defense decision path rows, got {len(ml_path_rows)}",
     )
     failed_ml_path_rows = [
         f"{row['check_id']}:{row['area']}"
@@ -1643,6 +1644,7 @@ def check_csv_outputs() -> list[str]:
         "Threshold-to-window transition",
         "Alert cooldown and window refresh",
         "Core defense fanout",
+        "Rule-defense tool execution",
         "Memory continuity",
         "Closed-loop coordination effect",
     }
@@ -1686,14 +1688,28 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            "memory_mismatches=0" in row["observed"]
-            and "threshold_window_nondecreasing=true" in row["observed"]
+            observed_int(row, "active_window_traces") > 0
+            and observed_int(row, "rule_tool_traces")
+            == observed_int(row, "active_window_traces")
+            and observed_int(row, "selected_defense_traces_with_rule_tool")
+            == observed_int(row, "selected_defense_traces")
+            and observed_int(row, "rule_tool_error_count") == 0
+            and "tool_name=execute_rule_defense_actions" in row["observed"]
             for row in ml_path_rows
             if row["check_id"] == "MDP05"
         ),
+        "ML defense path audit missing rule-defense tool execution evidence",
+    )
+    require(
+        any(
+            "memory_mismatches=0" in row["observed"]
+            and "threshold_window_nondecreasing=true" in row["observed"]
+            for row in ml_path_rows
+            if row["check_id"] == "MDP06"
+        ),
         "ML defense path audit missing memory continuity evidence",
     )
-    checks.append("ml_defense_decision_path_audit rows=6 pass")
+    checks.append("ml_defense_decision_path_audit rows=7 pass")
 
     ml_interaction_rows = read_csv("outputs/report_tables/ml_red_blue_interaction_audit.csv")
     require(

@@ -99,8 +99,11 @@ evaluate_defense_conditions
 select_fallback_link
 predict_attack_probability
 update_adaptive_action_policy
+execute_rule_defense_actions
 summarize_attack_context
 ```
+
+`execute_rule_defense_actions`는 TSRA-R-ML이 방어 window를 연 뒤 core rule defense action을 실행할 때 쓰는 도구다. 이 호출이 `DecisionTrace.tool_calls`에 남기 때문에 ML detector 판단과 실제 방어 action fanout 사이의 연결을 숨은 메서드 호출이 아니라 검증 가능한 agent tool chain으로 볼 수 있다.
 
 ### DecisionTrace
 

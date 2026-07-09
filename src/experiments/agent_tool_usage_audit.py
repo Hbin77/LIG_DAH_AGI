@@ -30,6 +30,7 @@ TOOL_ROLES = {
     "select_fallback_link": "TSRA-R PACE fallback selection",
     "predict_attack_probability": "TSRA-R ML anomaly probability prediction",
     "assess_mission_risk_guard": "TSRA-R ML residual mission-risk guard assessment",
+    "execute_rule_defense_actions": "TSRA-R ML defense-window rule action execution",
     "summarize_attack_context": "TSRA-R cross-agent AURA attack context summary",
     "summarize_defense_context": "AURA cross-agent TSRA-R defense context summary",
 }
@@ -226,6 +227,8 @@ def decision_link(agent: str, tool_name: str) -> str:
         return "ML anomaly probability opens TSRA-R reactive defense window"
     if tool_name == "assess_mission_risk_guard":
         return "Residual mission risk can extend a previously opened TSRA-R-ML defense window"
+    if tool_name == "execute_rule_defense_actions":
+        return "ML-opened defense windows delegate bounded core defense actions through a recorded runtime tool"
     if tool_name == "summarize_attack_context":
         return "AURA attack context feeds TSRA-R memory, candidates, feedback, and event details"
     if tool_name == "summarize_defense_context":

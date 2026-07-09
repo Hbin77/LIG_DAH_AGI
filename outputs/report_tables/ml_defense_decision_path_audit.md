@@ -9,8 +9,9 @@ Safety boundary: closed simulation ML defense decision-path audit only; no RF, e
 | MDP02 | Threshold-to-window transition | pass | first_attack_time=60; first_threshold_time=80; first_response_latency_sec=20; first_probability=0.955265; threshold=0.75; opened_window=true; event_count=1; same_time_actions=ml_attack_alert | The detector threshold is wired to an actual defense-window transition, not only to an offline probability score. |
 | MDP03 | Alert cooldown and window refresh | pass | threshold_traces=37; above_threshold_event_traces=17; above_threshold_no_event_refresh_traces=20; ml_attack_alerts=8; min_alert_gap_sec=25; all_alert_probabilities_above_threshold=true | No-op traces above threshold are not dead code; they represent cooldown-bounded window refresh decisions. |
 | MDP04 | Core defense fanout | pass | defense_events=30; ml_attack_alert=8; priority_reroute=6; stale_badge=7; video_throttle=6; pace_switch=3 | The ML detector opens the gate; the defense agent still executes mission-aware TSRA-R actions inside that window. |
-| MDP05 | Memory continuity | pass | memory_mismatches=0; threshold_window_nondecreasing=true; first_active_until=150; last_active_until=370 | The window is agent memory, not a stateless if-branch; trace feedback and memory stay aligned across the E7 run. |
-| MDP06 | Closed-loop coordination effect | pass | e7_coordination_rows=5; ml_reactive_rows=1; max_ml_reactive_defense_latency_sec=10; min_ml_reactive_impact_reduction_from_peak=0.251649 | The ML decision path reaches closed-loop evidence: response latency is bounded and post-peak mission impact decreases. |
+| MDP05 | Rule-defense tool execution | pass | trace_count=61; active_window_traces=47; rule_tool_traces=47; selected_defense_traces=20; selected_defense_traces_with_rule_tool=20; rule_tool_invocations=47; rule_tool_error_count=0; rule_tool_output_count=47; tool_name=execute_rule_defense_actions | The ML defender does not hide rule-action fanout behind an untraced method call; the delegation appears in TSRA-R-ML DecisionTrace tool calls. |
+| MDP06 | Memory continuity | pass | memory_mismatches=0; threshold_window_nondecreasing=true; first_active_until=150; last_active_until=370 | The window is agent memory, not a stateless if-branch; trace feedback and memory stay aligned across the E7 run. |
+| MDP07 | Closed-loop coordination effect | pass | e7_coordination_rows=5; ml_reactive_rows=1; max_ml_reactive_defense_latency_sec=10; min_ml_reactive_impact_reduction_from_peak=0.251649 | The ML decision path reaches closed-loop evidence: response latency is bounded and post-peak mission impact decreases. |
 
 ## Detail
 
@@ -50,7 +51,16 @@ Safety boundary: closed simulation ML defense decision-path audit only; no RF, e
 - Interpretation: The ML detector opens the gate; the defense agent still executes mission-aware TSRA-R actions inside that window.
 - Safety boundary: closed simulation ML defense decision-path audit only; no RF, exploit, or live network action
 
-### MDP05 Memory continuity
+### MDP05 Rule-defense tool execution
+
+- Requirement: When TSRA-R-ML has an active defense window, it must execute bounded rule-defense actions as a recorded runtime tool call.
+- Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_decision_traces.jsonl
+- Observed: trace_count=61; active_window_traces=47; rule_tool_traces=47; selected_defense_traces=20; selected_defense_traces_with_rule_tool=20; rule_tool_invocations=47; rule_tool_error_count=0; rule_tool_output_count=47; tool_name=execute_rule_defense_actions
+- Status: pass
+- Interpretation: The ML defender does not hide rule-action fanout behind an untraced method call; the delegation appears in TSRA-R-ML DecisionTrace tool calls.
+- Safety boundary: closed simulation ML defense decision-path audit only; no RF, exploit, or live network action
+
+### MDP06 Memory continuity
 
 - Requirement: Active defense window memory should match trace feedback and extend monotonically on above-threshold decisions.
 - Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_decision_traces.jsonl
@@ -59,7 +69,7 @@ Safety boundary: closed simulation ML defense decision-path audit only; no RF, e
 - Interpretation: The window is agent memory, not a stateless if-branch; trace feedback and memory stay aligned across the E7 run.
 - Safety boundary: closed simulation ML defense decision-path audit only; no RF, exploit, or live network action
 
-### MDP06 Closed-loop coordination effect
+### MDP07 Closed-loop coordination effect
 
 - Requirement: At least one ML-reactive episode should connect the ML defense window to bounded response latency and positive post-peak reduction.
 - Evidence: outputs/report_tables/agent_coordination_latency_audit.csv

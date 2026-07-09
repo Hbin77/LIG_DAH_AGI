@@ -5,9 +5,9 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 ## Summary
 
-- Audit rows: 33
-- Status counts: pass=33
-- Tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link, summarize_attack_context, summarize_defense_context
+- Audit rows: 34
+- Status counts: pass=34
+- Tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, execute_rule_defense_actions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link, summarize_attack_context, summarize_defense_context
 
 ## Tool Table
 
@@ -44,6 +44,7 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | predict_candidate_impact | 26 | 0.16129 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | summarize_defense_context | 31 | 1 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | assess_mission_risk_guard | 61 | 1 | pass |
+| E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | execute_rule_defense_actions | 47 | 0.770492 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | predict_attack_probability | 61 | 1 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | summarize_attack_context | 61 | 1 | pass |
 
@@ -80,6 +81,14 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 - Total invocations: 183
 - Status: pass=3
 - Decision link: condition outputs drive TSRA-R defense action candidates
+
+### execute_rule_defense_actions
+
+- Role: TSRA-R ML defense-window rule action execution
+- Rows: 1
+- Total invocations: 47
+- Status: pass=1
+- Decision link: ML-opened defense windows delegate bounded core defense actions through a recorded runtime tool
 
 ### generate_attack_candidates
 

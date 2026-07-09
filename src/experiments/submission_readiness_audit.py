@@ -347,7 +347,7 @@ def build_rows() -> list[dict[str, str]]:
                 and decision_counts["aura_attack_path"] == 6
                 and decision_counts["cross_agent_context"] == 8
                 and decision_counts["defense_priority_path"] == 6
-                and decision_counts["tool"] == 33
+                and decision_counts["tool"] == 34
             ),
             handoff_value="Agent decisions remain explainable by generated evidence, not only by source code.",
             next_gate="Policy changes must keep causality, margin, goal alignment, memory, and tool evidence passing final verification.",
@@ -420,7 +420,7 @@ def build_rows() -> list[dict[str, str]]:
                 and metric_counts["gates"] == 12
                 and metric_counts["ml_contribution"] == 7
                 and metric_counts["ml_attack_path"] == 6
-                and metric_counts["ml_defense_path"] == 6
+                and metric_counts["ml_defense_path"] == 7
                 and metric_counts["ml_interaction"] == 5
                 and metric_counts["reactive_tradeoff"] == 7
                 and metric_counts["threshold_sweep"] == 5

@@ -121,6 +121,18 @@ ML TSRA-R은 현재 상태가 단순 혼잡인지 공격성 저하인지 분류�
 attack_present probability
 ```
 
+실행 구조:
+
+```text
+predict_attack_probability
+-> assess_mission_risk_guard
+-> open_defense_window
+-> execute_rule_defense_actions
+-> DefenseEvent fanout
+```
+
+`execute_rule_defense_actions`는 TSRA-R-ML의 runtime tool이다. ML detector가 방어 window를 열면, 이 tool이 bounded rule defense action(`priority_reroute`, `video_throttle`, `stale_badge`, `pace_switch`)을 실행한다. 그래서 E7의 DecisionTrace에는 "ML이 판단했다"와 "그 판단으로 어떤 core 방어 action을 실행했다"가 같은 trace 안에 남는다.
+
 성능:
 
 ```text

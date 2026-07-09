@@ -164,7 +164,10 @@ def required_tools_for_trace(trace: dict[str, Any]) -> list[str]:
             tools.append("estimate_candidate_effect")
         return tools
     if agent == "TSRA-R-ML":
-        return ["predict_attack_probability", "assess_mission_risk_guard"]
+        tools = ["predict_attack_probability", "assess_mission_risk_guard"]
+        if selected_type == "defense_events":
+            tools.append("execute_rule_defense_actions")
+        return tools
     if agent.startswith("TSRA-R"):
         tools = ["evaluate_defense_conditions"]
         actions = set(selected_action_names(selected))

@@ -35,6 +35,7 @@ ALLOWED_SUBPROCESS_AUTOMATION = {
     "scripts/freeze_release_candidate.py",
     "scripts/generate_release_handoff.py",
     "scripts/verify_submission_state.py",
+    "src/experiments/agent_quality_gate_audit.py",
     "src/experiments/submission_readiness_audit.py",
 }
 

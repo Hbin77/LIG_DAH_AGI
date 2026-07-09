@@ -88,7 +88,7 @@ ml_contribution_audit rows: 7 pass
 ml_attack_decision_path_audit rows: 6 pass
 ml_attack_decision_path_audit counter_defense_bonus_candidates: 7
 ml_attack_decision_path_audit selected_counter_defense_bonus_count: 3
-ml_defense_decision_path_audit rows: 6 pass
+ml_defense_decision_path_audit rows: 7 pass
 ml_red_blue_interaction_audit rows: 5 pass
 agent_stress_scenario_audit rows: 6 seeds: 5 pass
 reactive_defense_tradeoff_audit rows: 7 pass
@@ -120,7 +120,7 @@ defense_priority_decision_path_audit formula_matches: 671
 defense_priority_decision_path_audit attack_context_bonus_events: 51
 defense_priority_decision_path_audit ordered_core_defense_traces: 12/12
 defense_priority_decision_path_audit no_op_ready_violations: 0
-agent_tool_usage_audit rows: 33 pass
+agent_tool_usage_audit rows: 34 pass
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10
 attack_defense_coverage rows: 4 covered

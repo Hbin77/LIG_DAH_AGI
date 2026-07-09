@@ -6,6 +6,7 @@ from pathlib import Path
 from src.agents.runtime import AgentRuntime
 from src.aura.ml_impact_predictor import MLAURA
 from src.shared.schemas import LinkState, MissionState
+from src.tsra_r.ml_defender import MLTSRAR
 from src.tsra_r.rule_defender import RuleTSRAR
 
 
@@ -15,6 +16,14 @@ class ConstantImpactModel:
 
     def predict(self, rows: list[list[float]]) -> list[float]:
         return [self.value for _ in rows]
+
+
+class ConstantProbabilityModel:
+    def __init__(self, value: float = 0.91) -> None:
+        self.value = value
+
+    def predict_proba(self, rows: list[list[float]]) -> list[list[float]]:
+        return [[1.0 - self.value, self.value] for _ in rows]
 
 
 def make_links(
@@ -289,6 +298,49 @@ class TsraRRegressionTests(unittest.TestCase):
                 for row in followup_trace.candidate_actions
             )
         )
+
+    def test_ml_tsra_records_rule_defense_execution_as_runtime_tool(self) -> None:
+        defender = MLTSRAR(
+            model_path=Path("outputs/models/__missing_for_unit_test__.pkl"),
+            threshold=0.75,
+            defense_window_sec=70.0,
+            alert_cooldown_sec=25.0,
+        )
+        defender.model = ConstantProbabilityModel(0.91)
+
+        state = make_state(
+            time_sec=100.0,
+            links=make_links(satcom_latency_ms=1300.0, satcom_loss=0.06),
+            active_attack_types=[
+                "queue_pressure",
+                "stale_cop_induction",
+                "failover_chasing",
+            ],
+            recent_attack_types=["queue_pressure"],
+        )
+
+        events = defender.decide(state)
+        actions = [event.action for event in events]
+        self.assertIn("ml_attack_alert", actions)
+        self.assertIn("priority_reroute", actions)
+        self.assertIn("stale_badge", actions)
+
+        trace = list(defender.runtime.memory.decisions)[-1]
+        self.assertEqual(trace.agent, "TSRA-R-ML")
+        self.assertEqual(trace.selected_action["type"], "defense_events")
+        tool_names = [call.tool_name for call in trace.tool_calls]
+        self.assertIn("predict_attack_probability", tool_names)
+        self.assertIn("assess_mission_risk_guard", tool_names)
+        self.assertIn("execute_rule_defense_actions", tool_names)
+        rule_tool_calls = [
+            call for call in trace.tool_calls
+            if call.tool_name == "execute_rule_defense_actions"
+        ]
+        self.assertEqual(len(rule_tool_calls), 1)
+        self.assertEqual(rule_tool_calls[0].status, "ok")
+        self.assertIsInstance(rule_tool_calls[0].output_summary, list)
+        self.assertGreaterEqual(len(rule_tool_calls[0].output_summary), 3)
+        self.assertEqual(trace.feedback["event_count"], len(events))
 
 
 if __name__ == "__main__":

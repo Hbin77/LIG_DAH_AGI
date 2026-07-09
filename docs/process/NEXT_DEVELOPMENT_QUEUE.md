@@ -1282,7 +1282,7 @@ outputs/report_tables/agent_tool_usage_audit.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_tool_usage_audit` 명령으로 재생성 가능하다.
-- 완료. 33개 agent/policy/tool row가 모두 `pass`다.
+- 완료. 34개 agent/policy/tool row가 모두 `pass`다.
 - 완료. 10개 tool이 모두 포함된다: `generate_attack_candidates`, `estimate_candidate_effect`, `estimate_detectability`, `predict_candidate_impact`, `summarize_defense_context`, `evaluate_defense_conditions`, `select_fallback_link`, `predict_attack_probability`, `assess_mission_risk_guard`, `summarize_attack_context`.
 - 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
 
@@ -1299,7 +1299,7 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_tool_usage_audit.csv: 33 rows
+agent_tool_usage_audit.csv: 34 rows
 status: pass=24
 tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link, summarize_attack_context, summarize_defense_context
 ```
@@ -2454,7 +2454,7 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-ml_defense_decision_path_audit rows: 6
+ml_defense_decision_path_audit rows: 7
 status: pass=6
 pre_threshold_noop_count: 16
 pre_threshold_defense_events: 0
@@ -2960,7 +2960,7 @@ attack_context_bonus_events: 25
 selected_defense_bonus_traces: 22
 ordered_core_defense_traces: 6/6
 defense_counter_reasons: counter_queue_pressure_priority_reroute, counter_video_queue_pressure
-agent_tool_usage_audit rows: 33 pass
+agent_tool_usage_audit rows: 34 pass
 reproduction_order_audit rows: 15 pass
 submission_readiness_audit rows: 10 pass
 competition_alignment_matrix rows: 10 verified
@@ -3280,3 +3280,57 @@ reproduction_order_audit rows: 18 pass
 - 새 팀원은 공격/방어/ML/QA/통합 중 어느 lane을 맡아도 primary files와 required evidence를 바로 찾을 수 있다.
 - 팀 핸드오프 문서는 final verifier와 package manifest로 묶여 누락되면 검증에서 실패한다.
 - 이 변경은 팀 개발 계약과 closed simulation handoff evidence만 추가하며 RF, exploit, live network action은 추가하지 않는다.
+
+## P62. TSRA-R-ML Rule Defense Tool Delegation
+
+상태: 완료
+
+문제:
+
+- TSRA-R-ML은 detector probability와 mission risk guard로 방어 window를 열고, 그 안에서 `RuleTSRAR.decide(state)`를 실행한다.
+- 기존 구조도 동작은 맞지만, 상위 `TSRA-R-ML` DecisionTrace에서는 core rule defense 실행이 별도 runtime tool로 보이지 않았다.
+- 이 상태에서는 "ML이 판단했고 그 판단으로 어떤 방어 action fanout을 실행했는지"가 trace 하나에서 덜 명확하다.
+
+구현:
+
+```text
+src/tsra_r/ml_defender.py
+tests/test_agent_regression.py
+src/experiments/ml_defense_decision_path_audit.py
+src/experiments/agent_decision_causality_audit.py
+src/experiments/agent_tool_usage_audit.py
+```
+
+설계:
+
+- `MLTSRAR`에 `execute_rule_defense_actions` runtime tool을 등록했다.
+- active defense window가 열렸을 때 `self.rule.decide(state)`를 직접 호출하지 않고 `runtime.call_tool("execute_rule_defense_actions", ...)`로 실행한다.
+- `agent_decision_causality_audit`는 TSRA-R-ML이 `defense_events`를 선택할 때 이 tool이 없으면 실패한다.
+- `ml_defense_decision_path_audit`에 `Rule-defense tool execution` row를 추가해 active window trace와 rule tool trace가 1:1로 맞는지 확인한다.
+- `agent_tool_usage_audit`는 새 tool의 역할과 decision link를 설명한다.
+
+검증:
+
+```bash
+python3 -m unittest discover -s tests
+python3 -m src.experiments.run_all
+python3 -m src.experiments.agent_tool_usage_audit
+python3 -m src.experiments.agent_decision_causality_audit
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+agent_regression_tests: 4 pass
+agent_tool_usage_audit rows: 34 pass
+ml_defense_decision_path_audit rows: 7 pass
+MDP05 Rule-defense tool execution: pass
+```
+
+해석:
+
+- TSRA-R-ML은 ML detector로 window를 열고, core 방어 action은 명시적 tool delegation으로 실행한다.
+- 이 변경은 "ML 점수만 낸 코드"가 아니라 observe-memory-tool-decision-trace 구조를 갖춘 방어 에이전트라는 증거를 강화한다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense delegation evidence만 강화한다.

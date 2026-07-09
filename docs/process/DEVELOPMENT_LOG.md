@@ -1494,8 +1494,8 @@ DecisionTrace.tool_calls
 검증 결과:
 
 ```text
-agent_tool_usage_audit.csv: initially 24 rows; current cross-agent context build has 33 rows
-status: pass=24
+agent_tool_usage_audit.csv: initially 24 rows; current build has 34 rows
+status: pass=34
 tools:
   assess_mission_risk_guard
   estimate_candidate_effect
@@ -2479,8 +2479,8 @@ impact_reduction_from_peak > 0 for all rows
 검증 결과는 다음과 같다.
 
 ```text
-ml_defense_decision_path_audit rows: 6
-status: pass=6
+ml_defense_decision_path_audit rows: 7
+status: pass=7
 pre_threshold_noop_count: 16
 pre_threshold_defense_events: 0
 first_response_latency_sec: 20
@@ -2938,7 +2938,7 @@ attack_context_bonus_events: 25
 selected_defense_bonus_traces: 22
 ordered_core_defense_traces: 6/6
 defense_counter_reasons: counter_queue_pressure_priority_reroute, counter_video_queue_pressure
-agent_tool_usage_audit rows: 33 pass
+agent_tool_usage_audit rows: 34 pass
 reproduction_order_audit rows: 15 pass
 ```
 
@@ -3210,3 +3210,41 @@ reproduction_order_audit rows: 18 pass
 ```
 
 이 보강의 의미는 새 팀원이 들어와도 공격/방어/ML/QA/통합의 작업 경계와 필수 검증 경로를 같은 기준으로 공유할 수 있다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 팀 개발 계약과 closed simulation handoff evidence만 강화한다.
+
+### 77. TSRA-R-ML Rule Defense Tool Delegation을 추가한 이유
+
+TSRA-R-ML은 detector probability와 mission risk guard로 방어 window를 열고, window 안에서는 core TSRA-R rule defense action을 실행한다. 기존 코드도 동작은 했지만, 상위 `TSRA-R-ML` DecisionTrace에서는 rule defense fanout이 별도 runtime tool로 보이지 않았다. 그래서 "ML이 판단했다"와 "그 판단으로 어떤 방어 action을 실행했다"의 연결이 trace 하나에서 충분히 강하지 않았다.
+
+이번 변경은 `RuleTSRAR.decide(state)` 호출을 `execute_rule_defense_actions` runtime tool로 승격했다.
+
+변경한 파일:
+
+```text
+src/tsra_r/ml_defender.py
+tests/test_agent_regression.py
+src/experiments/ml_defense_decision_path_audit.py
+src/experiments/agent_decision_causality_audit.py
+src/experiments/agent_tool_usage_audit.py
+docs/agents/AGENT_RUNTIME.md
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+```
+
+핵심 설계:
+
+- `MLTSRAR`가 `execute_rule_defense_actions` tool을 등록한다.
+- active defense window에서는 hidden method call 대신 `runtime.call_tool("execute_rule_defense_actions", state=state)`를 사용한다.
+- tool output은 `DefenseEvent` list summary로 `TSRA-R-ML` DecisionTrace에 남는다.
+- causality audit는 `TSRA-R-ML`이 `defense_events`를 선택할 때 이 tool이 없으면 실패한다.
+- ML defense path audit는 active window trace 수와 rule tool trace 수가 일치하는지 검사한다.
+- unit regression은 detector threshold 초과 시 `ml_attack_alert`, core defense action, tool trace가 함께 남는지 확인한다.
+
+검증 의미:
+
+```text
+agent_regression_tests: 4 pass
+agent_tool_usage_audit rows: 34 pass
+ml_defense_decision_path_audit rows: 7 pass
+MDP05 Rule-defense tool execution: pass
+```
+
+이 보강의 의미는 TSRA-R-ML을 "ML 확률값 + if문"이 아니라, ML 판단, risk guard, tool delegation, selected defense event, feedback이 같은 DecisionTrace에 묶이는 방어 에이전트 구조로 올렸다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense delegation evidence만 강화한다.

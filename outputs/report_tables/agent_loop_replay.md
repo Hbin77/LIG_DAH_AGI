@@ -101,7 +101,7 @@ Safety boundary: closed simulation agent-loop replay only; no RF, exploit, or li
 - Trace: `tsra-r-ml-trace-00015` at t=70 sec
 - Observe: phase=normal_patrol; active_link=SATCOM; critical_pending=1; queue_kb=5421.4; video_kb=5239.34; stale=0.5; priority_inversion=0.2568
 - Memory: observations=15; decisions=14; last_selected=no_op; last_probability=0.503568; active_defense_until=115
-- Tools: predict_attack_probability -> 0.503568; summarize_attack_context -> active_attack_count=1; active_attack_targets=SATCOM; active_attack_types=queue_pressure; assess_mission_risk_guard -> early_guard_triggered=True; expiry_guard_triggered=False; had_prior_window=False
+- Tools: predict_attack_probability -> 0.503568; summarize_attack_context -> active_attack_count=1; active_attack_targets=SATCOM; active_attack_types=queue_pressure; assess_mission_risk_guard -> early_guard_triggered=True; expiry_guard_triggered=False; had_prior_window=False; execute_rule_defense_actions -> items=4
 - Candidates: open_defense_window; probability=0.503568; threshold=0.75; eligible=True; total=1
 - Selected action: defense_events: def-00001; priority_reroute; until=140 + def-00002; stale_badge; until=160 + def-00003; pace_switch; until=170 + def-00004; video_throttle; until=130
 - Feedback: event_count=4; active_defense_until=115

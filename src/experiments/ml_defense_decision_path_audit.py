@@ -85,6 +85,18 @@ def selected_type(trace: dict[str, Any]) -> str:
     return str(selected.get("type", ""))
 
 
+def tool_names(trace: dict[str, Any]) -> list[str]:
+    return [
+        str(call.get("tool_name", ""))
+        for call in trace.get("tool_calls") or []
+        if isinstance(call, dict)
+    ]
+
+
+def has_tool(trace: dict[str, Any], tool_name: str) -> bool:
+    return tool_name in tool_names(trace)
+
+
 def probability(trace: dict[str, Any]) -> float:
     return as_float((trace.get("feedback") or {}).get("probability"))
 
@@ -244,6 +256,30 @@ def build_rows() -> list[dict[str, str]]:
     counts = action_counts(defenses)
     core_actions = ["priority_reroute", "stale_badge", "video_throttle", "pace_switch"]
 
+    rule_tool_name = "execute_rule_defense_actions"
+    active_window_traces = [
+        trace for trace in traces if active_until(trace) > trace_time(trace)
+    ]
+    rule_tool_traces = [trace for trace in traces if has_tool(trace, rule_tool_name)]
+    selected_defense_traces = [
+        trace for trace in traces if selected_type(trace) == "defense_events"
+    ]
+    selected_defense_traces_with_rule_tool = [
+        trace for trace in selected_defense_traces if has_tool(trace, rule_tool_name)
+    ]
+    rule_tool_calls = [
+        call
+        for trace in traces
+        for call in trace.get("tool_calls") or []
+        if isinstance(call, dict) and call.get("tool_name") == rule_tool_name
+    ]
+    rule_tool_error_count = sum(
+        1 for call in rule_tool_calls if call.get("status") != "ok"
+    )
+    rule_tool_output_count = sum(
+        1 for call in rule_tool_calls if "output_summary" in call
+    )
+
     memory_mismatches = 0
     for trace in traces:
         feedback_until = active_until(trace)
@@ -389,6 +425,36 @@ def build_rows() -> list[dict[str, str]]:
         ),
         row(
             check_id="MDP05",
+            area="Rule-defense tool execution",
+            requirement="When TSRA-R-ML has an active defense window, it must execute bounded rule-defense actions as a recorded runtime tool call.",
+            evidence=[TRACE_PATH],
+            observed=(
+                f"trace_count={len(traces)}; "
+                f"active_window_traces={len(active_window_traces)}; "
+                f"rule_tool_traces={len(rule_tool_traces)}; "
+                f"selected_defense_traces={len(selected_defense_traces)}; "
+                f"selected_defense_traces_with_rule_tool={len(selected_defense_traces_with_rule_tool)}; "
+                f"rule_tool_invocations={len(rule_tool_calls)}; "
+                f"rule_tool_error_count={rule_tool_error_count}; "
+                f"rule_tool_output_count={rule_tool_output_count}; "
+                f"tool_name={rule_tool_name}"
+            ),
+            ok=(
+                bool(traces)
+                and len(active_window_traces) > 0
+                and len(rule_tool_traces) == len(active_window_traces)
+                and len(selected_defense_traces_with_rule_tool) == len(selected_defense_traces)
+                and len(rule_tool_calls) == len(rule_tool_traces)
+                and rule_tool_error_count == 0
+                and rule_tool_output_count == len(rule_tool_calls)
+            ),
+            interpretation=(
+                "The ML defender does not hide rule-action fanout behind an untraced method call; "
+                "the delegation appears in TSRA-R-ML DecisionTrace tool calls."
+            ),
+        ),
+        row(
+            check_id="MDP06",
             area="Memory continuity",
             requirement="Active defense window memory should match trace feedback and extend monotonically on above-threshold decisions.",
             evidence=[TRACE_PATH],
@@ -410,7 +476,7 @@ def build_rows() -> list[dict[str, str]]:
             ),
         ),
         row(
-            check_id="MDP06",
+            check_id="MDP07",
             area="Closed-loop coordination effect",
             requirement="At least one ML-reactive episode should connect the ML defense window to bounded response latency and positive post-peak reduction.",
             evidence=[COORDINATION_PATH],

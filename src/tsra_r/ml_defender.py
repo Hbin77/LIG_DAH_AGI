@@ -60,6 +60,11 @@ class MLTSRAR:
             "Summarize recent AURA attack events for TSRA-R-ML reactive context",
             RuleTSRAR._summarize_attack_context,
         )
+        self.runtime.register_tool(
+            "execute_rule_defense_actions",
+            "Execute bounded TSRA-R rule defense actions inside an ML-opened defense window",
+            self._execute_rule_defense_actions,
+        )
 
     def bind_runtime(self, trace_path: Path) -> None:
         self.runtime.bind_trace_log(trace_path)
@@ -155,7 +160,12 @@ class MLTSRAR:
 
         active_window = state.time_sec < self.active_defense_until
         if active_window:
-            events.extend(self.rule.decide(state))
+            rule_events = self.runtime.call_tool(
+                "execute_rule_defense_actions",
+                tool_calls,
+                state=state,
+            )
+            events.extend(rule_events)
 
         selected_action = (
             {
@@ -219,6 +229,9 @@ class MLTSRAR:
     def _predict_attack_probability(self, state: MissionState) -> float:
         features = state_features(state)
         return float(self.model.predict_proba([features])[0][1])
+
+    def _execute_rule_defense_actions(self, state: MissionState) -> list[DefenseEvent]:
+        return self.rule.decide(state)
 
     def _assess_mission_risk_guard(
         self,
