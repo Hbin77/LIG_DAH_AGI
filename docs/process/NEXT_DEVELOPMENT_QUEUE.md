@@ -2358,6 +2358,54 @@ Adaptive delta_defense_count_mean: -4.93333
 - memory가 단순 저장소가 아니라 행동을 억제하거나 유지하거나 적응시키는 gate로 검증된다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
+## P47. Agent Coordination Latency Audit
+
+상태: 완료
+
+문제:
+
+- closed-loop evidence는 충분하지만, 공격 이후 방어 반응과 operator alert가 몇 초 안에 이어졌는지 한눈에 보기 어렵다.
+- 공방 협력 구조를 강화하려면 response window 안에서 attack -> defense -> alert -> metric feedback이 닫히는지 검증해야 한다.
+
+구현:
+
+```text
+src/experiments/agent_coordination_latency_audit.py
+outputs/report_tables/agent_coordination_latency_audit.csv
+outputs/report_tables/agent_coordination_latency_audit.md
+```
+
+검증 기준:
+
+- E5/E7 episode 10개를 모두 포함한다.
+- 모든 row가 `coordination_status=pass`여야 한다.
+- response status가 complete여야 한다.
+- first operator alert latency가 40초 response window 안이어야 한다.
+- impact reduction from peak가 양수여야 한다.
+- prepositioned defense와 ML reactive window class가 모두 나타나야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_coordination_latency_audit rows: 10
+coordination_status: pass=10
+coordination_class: prepositioned_defense=9, ml_reactive_window=1
+experiments: E5_rule_aura_tsra_r=5, E7_ml_aura_ml_tsra_r=5
+```
+
+해석:
+
+- 공격-방어-operator alert-지표 완화가 response window 안에서 시간상 연결된다.
+- E7 첫 공격은 ML reactive window로 분류되어 ML 방어자의 시간 역할이 명확해진다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

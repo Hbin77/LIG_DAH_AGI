@@ -39,6 +39,7 @@ REQUIRED_FILES = [
     "src/experiments/defense_effectiveness_ledger.py",
     "src/experiments/defense_action_attribution_audit.py",
     "src/experiments/closed_loop_episode_replay.py",
+    "src/experiments/agent_coordination_latency_audit.py",
     "src/experiments/mission_thread_summary.py",
     "src/experiments/agent_engagement_scorecard.py",
     "src/experiments/agent_collaboration_graph.py",
@@ -85,6 +86,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/defense_action_attribution_audit.md",
     "outputs/report_tables/closed_loop_episode_replay.csv",
     "outputs/report_tables/closed_loop_episode_replay.md",
+    "outputs/report_tables/agent_coordination_latency_audit.csv",
+    "outputs/report_tables/agent_coordination_latency_audit.md",
     "outputs/report_tables/mission_thread_summary.csv",
     "outputs/report_tables/mission_thread_summary.md",
     "outputs/report_tables/agent_engagement_scorecard.csv",
@@ -1424,6 +1427,50 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("closed_loop_episode_replay rows=10 complete")
 
+    coordination_rows = read_csv("outputs/report_tables/agent_coordination_latency_audit.csv")
+    require(
+        len(coordination_rows) == 10,
+        f"expected 10 coordination latency rows, got {len(coordination_rows)}",
+    )
+    require(
+        {row["experiment"] for row in coordination_rows}
+        == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        "coordination latency audit missing E5/E7 experiments",
+    )
+    failed_coordination = [
+        f"{row['experiment']}:{row['attack_event_id']}"
+        for row in coordination_rows
+        if row.get("coordination_status") != "pass"
+    ]
+    require(not failed_coordination, f"failed coordination latency rows: {failed_coordination[:8]}")
+    require(
+        sum(1 for row in coordination_rows if row["experiment"] == "E5_rule_aura_tsra_r") == 5,
+        "coordination latency audit must include 5 E5 rows",
+    )
+    require(
+        sum(1 for row in coordination_rows if row["experiment"] == "E7_ml_aura_ml_tsra_r") == 5,
+        "coordination latency audit must include 5 E7 rows",
+    )
+    require(
+        {"prepositioned_defense", "ml_reactive_window"}.issubset(
+            {row["coordination_class"] for row in coordination_rows}
+        ),
+        "coordination latency audit missing prepositioned or ML reactive classes",
+    )
+    require(
+        all(float(row["first_operator_alert_latency_sec"]) <= 40.0 for row in coordination_rows),
+        "coordination latency audit has alert latency outside response window",
+    )
+    require(
+        all(float(row["impact_reduction_from_peak"]) > 0.0 for row in coordination_rows),
+        "coordination latency audit has no positive post-peak reduction",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in coordination_rows),
+        "coordination latency audit missing safety boundary",
+    )
+    checks.append("agent_coordination_latency_audit rows=10 pass")
+
     mission_thread_rows = read_csv("outputs/report_tables/mission_thread_summary.csv")
     require(
         len(mission_thread_rows) == 10,
@@ -1707,6 +1754,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/closed_loop_episode_replay.md" in manifest_text,
         "manifest missing closed-loop episode replay",
+    )
+    require(
+        "outputs/report_tables/agent_coordination_latency_audit.md" in manifest_text,
+        "manifest missing agent coordination latency audit",
     )
     require(
         "outputs/report_tables/mission_thread_summary.md" in manifest_text,

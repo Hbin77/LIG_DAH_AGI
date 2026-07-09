@@ -201,7 +201,8 @@ ALIGNMENT_SPECS = [
             "to the TSRA-R capabilities and validation gates that cover it; response audit checks "
             "whether required defenses are active or emitted within the response window; the collaboration "
             "graph summarizes the closed-loop agent cooperation evidence; episode replay joins attack, "
-            "defense, alert, and metric movement per attack event; the defense effectiveness ledger "
+            "defense, alert, and metric movement per attack event; coordination latency audit checks "
+            "response, operator alert, metric peak, and reduction timing per attack; the defense effectiveness ledger "
             "adds event-level response-to-metric movement evidence; engagement scorecard joins attack "
             "decision margin, defense response, and mission-impact movement per attack; defense action "
             "attribution summarizes which defense actions have direct ablation support, local metric "
@@ -222,6 +223,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/defense_effectiveness_ledger.py",
             "src/experiments/defense_action_attribution_audit.py",
             "src/experiments/agent_collaboration_graph.py",
+            "src/experiments/agent_coordination_latency_audit.py",
             "src/experiments/attack_defense_coverage.py",
             "src/experiments/attack_defense_response_audit.py",
             "outputs/report_tables/battle_timeline.csv",
@@ -232,6 +234,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/defense_effectiveness_ledger.csv",
             "outputs/report_tables/defense_action_attribution_audit.csv",
             "outputs/report_tables/agent_collaboration_graph.csv",
+            "outputs/report_tables/agent_coordination_latency_audit.csv",
             "outputs/report_tables/attack_defense_coverage.csv",
             "outputs/report_tables/attack_defense_response_audit.csv",
         ],
@@ -248,6 +251,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/defense_effectiveness_ledger.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/defense_action_attribution_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/agent_collaboration_graph.csv", "closed simulation"),
+            ContentCheck("outputs/report_tables/agent_coordination_latency_audit.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_coverage.csv", "closed simulation"),
             ContentCheck("outputs/report_tables/attack_defense_response_audit.csv", "closed simulation"),
         ],
@@ -260,6 +264,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/defense_effectiveness_ledger.csv", 56),
             RowCountCheck("outputs/report_tables/defense_action_attribution_audit.csv", 5),
             RowCountCheck("outputs/report_tables/agent_collaboration_graph.csv", 13),
+            RowCountCheck("outputs/report_tables/agent_coordination_latency_audit.csv", 10),
             RowCountCheck("outputs/report_tables/attack_defense_coverage.csv", 4),
             RowCountCheck("outputs/report_tables/attack_defense_response_audit.csv", 10),
         ],

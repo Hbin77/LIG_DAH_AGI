@@ -515,6 +515,19 @@ This writes:
 
 The replay joins each defended attack event to response coverage, defense chains, operator alerts, and mission metric movement. Run it after `attack_defense_response_audit`, `operator_alerts`, and `defense_effectiveness_ledger` have been generated.
 
+## Audit Agent Coordination Latency
+
+```bash
+python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/agent_coordination_latency_audit.csv`
+- `outputs/report_tables/agent_coordination_latency_audit.md`
+
+The audit checks whether each E5/E7 attack episode is time-linked to a defense response, operator alert, metric peak, and post-peak impact reduction inside the response window.
+
 ## Generate Mission Thread Summary
 
 ```bash
@@ -769,6 +782,7 @@ python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
+python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error
 python3 -m src.experiments.mission_thread_summary --fail-on-error
 python3 -m src.experiments.agent_engagement_scorecard
 python3 -m src.experiments.pace_transition_audit

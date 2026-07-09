@@ -2433,3 +2433,38 @@ MI06 memory chain rows=9, pass_rows=9, min_last_selected_chain_match_rate=1
 - TSRA-R-ML은 active defense window를 memory로 유지한다.
 - Adaptive TSRA-R은 recent memory window로 optional defense를 줄이면서 mission impact도 낮춘다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation memory-influence audit만 생성한다.
+
+### 60. Agent Coordination Latency Audit를 추가한 이유
+
+`closed_loop_episode_replay`와 `mission_thread_summary`는 공격-방어-알림-지표를 묶어 보여준다. 하지만 협력 구조의 시간 품질, 즉 공격 이후 방어 반응과 operator alert가 response window 안에 실제로 이어졌는지는 별도 수치로 고정하는 편이 더 명확하다.
+
+이번 변경은 E5/E7 closed-loop episode별 coordination latency audit를 추가했다.
+
+추가한 것:
+
+```text
+src/experiments/agent_coordination_latency_audit.py
+outputs/report_tables/agent_coordination_latency_audit.csv
+outputs/report_tables/agent_coordination_latency_audit.md
+```
+
+검증 기준:
+
+```text
+agent_coordination_latency_audit rows: 10
+coordination_status: pass=10
+experiments: E5_rule_aura_tsra_r=5, E7_ml_aura_ml_tsra_r=5
+coordination_class:
+  prepositioned_defense=9
+  ml_reactive_window=1
+first_operator_alert_latency_sec <= 40 for all rows
+impact_reduction_from_peak > 0 for all rows
+```
+
+해석:
+
+- 방어가 이미 active였거나 response window 안에서 이어졌는지 episode 단위로 확인한다.
+- operator-facing alert가 response window 안에 나왔는지 확인한다.
+- metric peak 이후 impact reduction이 있었는지 확인한다.
+- E7 첫 공격은 ML reactive window로 분류되어 ML 방어자의 시간상 역할을 따로 보여준다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation coordination-latency audit만 생성한다.

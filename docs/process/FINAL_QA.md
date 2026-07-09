@@ -42,6 +42,7 @@ python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
+python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error
 python3 -m src.experiments.mission_thread_summary --fail-on-error
 python3 -m src.experiments.agent_engagement_scorecard
 python3 -m src.experiments.pace_transition_audit
@@ -101,6 +102,7 @@ operator_alerts rows: 56 actions=5
 defense_effectiveness_ledger rows: 56 actions=5
 defense_action_attribution_audit rows: 5 pass
 closed_loop_episode_replay rows: 10 complete
+agent_coordination_latency_audit rows: 10 pass
 mission_thread_summary rows: 10 pass
 agent_engagement_scorecard rows: 10 pass
 agent_collaboration_graph edges: 17 verified

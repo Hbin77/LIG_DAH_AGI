@@ -1051,6 +1051,24 @@ TSRA-R-ML active defense window evidence present
 Adaptive TSRA-R delta_mission_impact_mean < 0 and delta_defense_count_mean < 0
 ```
 
+### P37. Agent Coordination Latency Audit
+
+목적:
+
+- 공격 이후 방어 반응, operator alert, metric feedback이 response window 안에서 이어지는지 검증한다.
+- 공방 협력 구조를 정적인 graph가 아니라 시간 지연 수치로도 보여준다.
+- ML reactive defense window와 prepositioned defense를 분리해서 협력 방식의 차이를 설명한다.
+
+검증 기준:
+
+```text
+agent_coordination_latency_audit rows: 10
+coordination_status: pass=10
+coordination_class: prepositioned_defense, ml_reactive_window
+first_operator_alert_latency_sec <= 40
+impact_reduction_from_peak > 0
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

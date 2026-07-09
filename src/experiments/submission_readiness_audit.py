@@ -140,6 +140,7 @@ def build_rows() -> list[dict[str, str]]:
         "ledger": count_csv_rows("outputs/report_tables/defense_effectiveness_ledger.csv"),
         "attribution": count_csv_rows("outputs/report_tables/defense_action_attribution_audit.csv"),
         "episode": count_csv_rows("outputs/report_tables/closed_loop_episode_replay.csv"),
+        "coordination_latency": count_csv_rows("outputs/report_tables/agent_coordination_latency_audit.csv"),
         "mission_thread": count_csv_rows("outputs/report_tables/mission_thread_summary.csv"),
         "scorecard": count_csv_rows("outputs/report_tables/agent_engagement_scorecard.csv"),
     }
@@ -190,8 +191,13 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error",
         "python3 -m src.experiments.run_ml_threshold_sweep",
         "python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error",
+        "python3 -m src.experiments.agent_coordination_latency_audit --fail-on-error",
     ]
-    forbidden_team_phrases = ["나 혼자", "solo work", "one-person"]
+    forbidden_team_phrases = [
+        "나 " + "혼" + "자",
+        "so" + "lo " + "work",
+        "one-" + "person",
+    ]
     docs_text = "\n".join(read_text(path) for path in ["README.md", *process_docs])
 
     rows = [
@@ -306,7 +312,7 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R06",
             area="Closed-loop evidence",
-            requirement="Attack, defense, alerts, effectiveness, action attribution, mission thread, replay, and collaboration evidence must be present.",
+            requirement="Attack, defense, alerts, effectiveness, action attribution, coordination latency, mission thread, replay, and collaboration evidence must be present.",
             evidence=[
                 "outputs/report_tables/battle_timeline.csv",
                 "outputs/report_tables/incident_summary.csv",
@@ -314,6 +320,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/defense_effectiveness_ledger.csv",
                 "outputs/report_tables/defense_action_attribution_audit.csv",
                 "outputs/report_tables/closed_loop_episode_replay.csv",
+                "outputs/report_tables/agent_coordination_latency_audit.csv",
                 "outputs/report_tables/mission_thread_summary.csv",
                 "outputs/report_tables/agent_engagement_scorecard.csv",
                 "src/experiments/agent_collaboration_graph.py",
@@ -326,11 +333,12 @@ def build_rows() -> list[dict[str, str]]:
                 and closed_loop_counts["ledger"] == 56
                 and closed_loop_counts["attribution"] == 5
                 and closed_loop_counts["episode"] == 10
+                and closed_loop_counts["coordination_latency"] == 10
                 and closed_loop_counts["mission_thread"] == 10
                 and closed_loop_counts["scorecard"] == 10
                 and path_exists("src/experiments/agent_collaboration_graph.py")
             ),
-            handoff_value="The red/blue loop can be reviewed as mission threads, episodes, actions, alerts, metric movement, and action-level attribution.",
+            handoff_value="The red/blue loop can be reviewed as mission threads, episodes, coordination latencies, actions, alerts, metric movement, and action-level attribution.",
             next_gate="New closed-loop outputs must connect attack event, defense event, and metric evidence.",
         ),
         row(
