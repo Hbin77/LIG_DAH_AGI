@@ -136,7 +136,9 @@ ALIGNMENT_SPECS = [
             "top-score, threshold, eligible-ready, and no-op decision support; goal-alignment audit "
             "checks that attack and defense decisions match their stated objectives and observed risks; "
             "decision feedback audit links selected E5/E7 events to event logs, metric feedback, "
-            "closed-loop outcomes, and defense action attribution."
+            "closed-loop outcomes, and defense action attribution; memory influence audit verifies "
+            "that cadence memory, defense cooldown memory, active defense windows, and adaptive "
+            "memory policy affect bounded agent decisions."
         ),
         agent_or_component="AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace",
         evidence_files=[
@@ -152,6 +154,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/agent_goal_alignment_audit.py",
             "src/experiments/agent_decision_feedback_audit.py",
             "src/experiments/agent_memory_belief_audit.py",
+            "src/experiments/agent_memory_influence_audit.py",
             "src/experiments/agent_tool_usage_audit.py",
             "src/experiments/agent_interface_manifest.py",
             "src/experiments/agent_capability_matrix.py",
@@ -164,6 +167,7 @@ ALIGNMENT_SPECS = [
             "outputs/report_tables/agent_goal_alignment_audit.csv",
             "outputs/report_tables/agent_decision_feedback_audit.csv",
             "outputs/report_tables/agent_memory_belief_audit.csv",
+            "outputs/report_tables/agent_memory_influence_audit.csv",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             "outputs/report_tables/agent_interface_manifest.csv",
             "outputs/report_tables/agent_capability_matrix.csv",
@@ -181,6 +185,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/agent_goal_alignment_audit.csv", 399),
             RowCountCheck("outputs/report_tables/agent_decision_feedback_audit.csv", 66),
             RowCountCheck("outputs/report_tables/agent_memory_belief_audit.csv", 9),
+            RowCountCheck("outputs/report_tables/agent_memory_influence_audit.csv", 6),
             RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 23),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
             RowCountCheck("outputs/report_tables/agent_capability_matrix.csv", 10),

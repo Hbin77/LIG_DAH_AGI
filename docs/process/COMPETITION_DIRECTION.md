@@ -1032,6 +1032,25 @@ feedback classes: attack_pressure_observed, attack_contained_by_defense, defense
 event_link_status: linked for all rows
 ```
 
+### P36. Agent Memory Influence Audit
+
+목적:
+
+- AgentMemory가 단순 기록이 아니라 decision gate라는 점을 검증한다.
+- AURA cadence, TSRA-R action cooldown, TSRA-R-ML active defense window, Adaptive TSRA-R memory policy를 한 표에서 확인한다.
+- "에이전트 구조" 주장에 Memory가 실제 행동에 영향을 준다는 근거를 추가한다.
+
+검증 기준:
+
+```text
+agent_memory_influence_audit rows: 6
+influence_status: pass=6
+AURA/AURA-ML cooldown and max-event memory gates present
+TSRA-R eligible-not-ready cooldown evidence present
+TSRA-R-ML active defense window evidence present
+Adaptive TSRA-R delta_mission_impact_mean < 0 and delta_defense_count_mean < 0
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

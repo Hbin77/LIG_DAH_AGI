@@ -285,6 +285,19 @@ This writes:
 
 The audit verifies that AgentMemory is populated, changes across decisions, carries belief-state keys, and passes the previous selected action into the next decision loop.
 
+## Audit Agent Memory Influence
+
+```bash
+python3 -m src.experiments.agent_memory_influence_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/agent_memory_influence_audit.csv`
+- `outputs/report_tables/agent_memory_influence_audit.md`
+
+The audit verifies that memory acts as a decision gate: AURA cadence and event-budget control, TSRA-R action cooldowns, TSRA-R-ML active defense windows, and adaptive TSRA-R memory policy effects.
+
 ## Audit Agent Tool Usage
 
 ```bash
@@ -735,6 +748,7 @@ python3 -m src.experiments.agent_decision_margin_audit
 python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error
 python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error
 python3 -m src.experiments.agent_memory_belief_audit
+python3 -m src.experiments.agent_memory_influence_audit --fail-on-error
 python3 -m src.experiments.agent_tool_usage_audit
 python3 -m src.experiments.agent_interface_manifest
 python3 -m src.experiments.agent_capability_matrix

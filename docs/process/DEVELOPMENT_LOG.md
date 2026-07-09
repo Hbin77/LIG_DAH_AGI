@@ -2398,3 +2398,38 @@ feedback_class:
 - 공격 선택은 pressure observed 또는 defense containment로 분류한다.
 - 방어 선택은 improved/held/bounded attribution/ML window trigger로 분류한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation decision-feedback audit만 생성한다.
+
+### 59. Agent Memory Influence Audit를 추가한 이유
+
+`agent_memory_belief_audit`는 memory가 존재하고 변화하며 이전 selected action을 다음 loop로 넘기는지 검증한다. 하지만 그것만으로는 memory가 실제 선택을 바꾸는 decision gate인지 충분히 드러나지 않는다.
+
+이번 변경은 memory가 행동에 영향을 주는 대표 경로를 별도 audit로 고정했다.
+
+추가한 것:
+
+```text
+src/experiments/agent_memory_influence_audit.py
+outputs/report_tables/agent_memory_influence_audit.csv
+outputs/report_tables/agent_memory_influence_audit.md
+```
+
+검증 기준:
+
+```text
+agent_memory_influence_audit rows: 6
+influence_status: pass=6
+MI01 AURA cooldown_noops=48, max_event_noops=12
+MI02 AURA-ML cooldown_noops=32, max_event_noops=8
+MI03 TSRA-R eligible_not_ready actions present for priority_reroute, video_throttle, stale_badge, pace_switch
+MI04 TSRA-R-ML opened_windows=45, active_window_noops=22
+MI05 Adaptive TSRA-R delta_mission_impact_mean=-0.0479341, delta_defense_count_mean=-4.93333
+MI06 memory chain rows=9, pass_rows=9, min_last_selected_chain_match_rate=1
+```
+
+해석:
+
+- AURA/AURA-ML은 공격 후보가 있어도 cadence memory 때문에 공격을 보류한다.
+- TSRA-R은 조건이 맞아도 action cooldown memory 때문에 반복 방어를 억제한다.
+- TSRA-R-ML은 active defense window를 memory로 유지한다.
+- Adaptive TSRA-R은 recent memory window로 optional defense를 줄이면서 mission impact도 낮춘다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation memory-influence audit만 생성한다.

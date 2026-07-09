@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 200
-- total_payload_bytes: 3959784
+- payload_file_count: 203
+- total_payload_bytes: 3994979
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 201
-- zip_bytes: 1838538
-- zip_sha256: `b52d916e223a78ad272a93c6e0c0633570528b0e50d9e5ea7d11c1bbe18c4da7`
+- zip_file_count: 204
+- zip_bytes: 1848032
+- zip_sha256: `2617b1b38dff7dd3fdc83f910d2dbb9b1d8d1a1729445992ef706c334eaf5491`
 
 ## 포함 파일
 
@@ -107,6 +107,8 @@
 - `outputs/report_tables/agent_loop_replay.md`
 - `outputs/report_tables/agent_memory_belief_audit.csv`
 - `outputs/report_tables/agent_memory_belief_audit.md`
+- `outputs/report_tables/agent_memory_influence_audit.csv`
+- `outputs/report_tables/agent_memory_influence_audit.md`
 - `outputs/report_tables/agent_runtime_invariant_audit.csv`
 - `outputs/report_tables/agent_runtime_invariant_audit.md`
 - `outputs/report_tables/agent_tool_usage_audit.csv`
@@ -185,6 +187,7 @@
 - `src/experiments/agent_interface_manifest.py`
 - `src/experiments/agent_loop_replay.py`
 - `src/experiments/agent_memory_belief_audit.py`
+- `src/experiments/agent_memory_influence_audit.py`
 - `src/experiments/agent_runtime_invariant_audit.py`
 - `src/experiments/agent_tool_usage_audit.py`
 - `src/experiments/attack_defense_coverage.py`

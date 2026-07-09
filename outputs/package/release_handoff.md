@@ -5,13 +5,13 @@ It is a repo-side handoff file and is intentionally not embedded inside the subm
 
 ## Release Candidate
 
-- release_candidate_id: `b52d916e223a`
+- release_candidate_id: `2617b1b38dff`
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_sha256: `b52d916e223a78ad272a93c6e0c0633570528b0e50d9e5ea7d11c1bbe18c4da7`
-- zip_bytes: 1838538
-- zip_file_count: 201
-- payload_file_count: 200
-- total_payload_bytes: 3959784
+- zip_sha256: `2617b1b38dff7dd3fdc83f910d2dbb9b1d8d1a1729445992ef706c334eaf5491`
+- zip_bytes: 1848032
+- zip_file_count: 204
+- payload_file_count: 203
+- total_payload_bytes: 3994979
 - generated_branch: `hbin`
 
 ## Branch Rule
@@ -71,9 +71,9 @@ The external link is acceptable only when the verifier reports:
 
 ```text
 status: pass
-sha256: b52d916e223a78ad272a93c6e0c0633570528b0e50d9e5ea7d11c1bbe18c4da7
-zip_file_count: 201
-bytes_read: 1838538
+sha256: 2617b1b38dff7dd3fdc83f910d2dbb9b1d8d1a1729445992ef706c334eaf5491
+zip_file_count: 204
+bytes_read: 1848032
 ```
 
 ## Remaining External Action

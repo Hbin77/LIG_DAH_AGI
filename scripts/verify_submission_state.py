@@ -52,6 +52,7 @@ REQUIRED_FILES = [
     "src/experiments/agent_goal_alignment_audit.py",
     "src/experiments/agent_decision_feedback_audit.py",
     "src/experiments/agent_memory_belief_audit.py",
+    "src/experiments/agent_memory_influence_audit.py",
     "src/experiments/agent_tool_usage_audit.py",
     "src/experiments/agent_interface_manifest.py",
     "src/experiments/agent_capability_matrix.py",
@@ -111,6 +112,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/agent_decision_feedback_audit.md",
     "outputs/report_tables/agent_memory_belief_audit.csv",
     "outputs/report_tables/agent_memory_belief_audit.md",
+    "outputs/report_tables/agent_memory_influence_audit.csv",
+    "outputs/report_tables/agent_memory_influence_audit.md",
     "outputs/report_tables/agent_tool_usage_audit.csv",
     "outputs/report_tables/agent_tool_usage_audit.md",
     "outputs/report_tables/agent_interface_manifest.csv",
@@ -587,6 +590,75 @@ def check_csv_outputs() -> list[str]:
         "agent memory audit missing safety boundary",
     )
     checks.append("agent_memory_belief_audit rows=9 pass")
+
+    memory_influence_rows = read_csv("outputs/report_tables/agent_memory_influence_audit.csv")
+    require(
+        len(memory_influence_rows) == 6,
+        f"expected 6 agent memory influence rows, got {len(memory_influence_rows)}",
+    )
+    failed_memory_influence = [
+        f"{row['check_id']}:{row['area']}"
+        for row in memory_influence_rows
+        if row.get("influence_status") != "pass"
+    ]
+    require(
+        not failed_memory_influence,
+        f"failed agent memory influence rows: {failed_memory_influence[:8]}",
+    )
+    required_memory_influence_areas = {
+        "AURA cadence memory",
+        "AURA-ML cadence memory",
+        "TSRA-R action cooldown memory",
+        "TSRA-R-ML active defense window memory",
+        "Adaptive TSRA-R memory policy",
+        "Memory chain integrity",
+    }
+    observed_memory_influence_areas = {row["area"] for row in memory_influence_rows}
+    require(
+        observed_memory_influence_areas == required_memory_influence_areas,
+        f"agent memory influence audit has unexpected areas: {sorted(observed_memory_influence_areas)}",
+    )
+    require(
+        any(
+            "cooldown_noops=48" in row["observed"]
+            and "max_event_noops=12" in row["observed"]
+            for row in memory_influence_rows
+            if row["check_id"] == "MI01"
+        ),
+        "memory influence audit missing AURA cadence evidence",
+    )
+    require(
+        any(
+            "eligible_not_ready=" in row["observed"]
+            and "emitted_events=" in row["observed"]
+            for row in memory_influence_rows
+            if row["check_id"] == "MI03"
+        ),
+        "memory influence audit missing TSRA-R cooldown evidence",
+    )
+    require(
+        any(
+            "opened_windows=45" in row["observed"]
+            and "active_window_noops=22" in row["observed"]
+            for row in memory_influence_rows
+            if row["check_id"] == "MI04"
+        ),
+        "memory influence audit missing ML active-window evidence",
+    )
+    require(
+        any(
+            "delta_mission_impact_mean=-0.0479341" in row["observed"]
+            and "delta_defense_count_mean=-4.93333" in row["observed"]
+            for row in memory_influence_rows
+            if row["check_id"] == "MI05"
+        ),
+        "memory influence audit missing adaptive memory effect evidence",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in memory_influence_rows),
+        "agent memory influence audit missing safety boundary",
+    )
+    checks.append("agent_memory_influence_audit rows=6 pass")
 
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
     require(len(tool_rows) == 23, f"expected 23 agent tool audit rows, got {len(tool_rows)}")
@@ -1691,6 +1763,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_memory_belief_audit.md" in manifest_text,
         "manifest missing agent memory belief audit",
+    )
+    require(
+        "outputs/report_tables/agent_memory_influence_audit.md" in manifest_text,
+        "manifest missing agent memory influence audit",
     )
     require(
         "outputs/report_tables/agent_tool_usage_audit.md" in manifest_text,

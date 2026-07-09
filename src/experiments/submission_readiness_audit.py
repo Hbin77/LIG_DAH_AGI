@@ -130,6 +130,7 @@ def build_rows() -> list[dict[str, str]]:
         "goal_alignment": count_csv_rows("outputs/report_tables/agent_goal_alignment_audit.csv"),
         "feedback": count_csv_rows("outputs/report_tables/agent_decision_feedback_audit.csv"),
         "memory": count_csv_rows("outputs/report_tables/agent_memory_belief_audit.csv"),
+        "memory_influence": count_csv_rows("outputs/report_tables/agent_memory_influence_audit.csv"),
         "tool": count_csv_rows("outputs/report_tables/agent_tool_usage_audit.csv"),
     }
     closed_loop_counts = {
@@ -178,6 +179,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.agent_decision_margin_audit",
         "python3 -m src.experiments.agent_goal_alignment_audit --fail-on-error",
         "python3 -m src.experiments.agent_decision_feedback_audit --fail-on-error",
+        "python3 -m src.experiments.agent_memory_influence_audit --fail-on-error",
         "python3 -m src.experiments.defense_action_attribution_audit --fail-on-error",
         "python3 -m src.experiments.mission_thread_summary --fail-on-error",
         "python3 -m src.experiments.safety_boundary_audit",
@@ -268,7 +270,7 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R05",
             area="Decision evidence",
-            requirement="DecisionTrace, contract, causality, margin, goal alignment, feedback, memory, and tool evidence must all be generated.",
+            requirement="DecisionTrace, contract, causality, margin, goal alignment, feedback, memory, memory influence, and tool evidence must all be generated.",
             evidence=[
                 "outputs/report_tables/agent_decision_trace_summary.csv",
                 "outputs/report_tables/agent_contract_validation.csv",
@@ -280,6 +282,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/agent_goal_alignment_audit.csv",
                 "outputs/report_tables/agent_decision_feedback_audit.csv",
                 "outputs/report_tables/agent_memory_belief_audit.csv",
+                "outputs/report_tables/agent_memory_influence_audit.csv",
                 "outputs/report_tables/agent_tool_usage_audit.csv",
             ],
             observed=", ".join(f"{key}={value}" for key, value in decision_counts.items()),
@@ -294,6 +297,7 @@ def build_rows() -> list[dict[str, str]]:
                 and decision_counts["goal_alignment"] == 399
                 and decision_counts["feedback"] == 66
                 and decision_counts["memory"] == 9
+                and decision_counts["memory_influence"] == 6
                 and decision_counts["tool"] == 23
             ),
             handoff_value="Agent decisions remain explainable by generated evidence, not only by source code.",

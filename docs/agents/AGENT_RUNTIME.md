@@ -306,6 +306,28 @@ outputs/report_tables/agent_memory_belief_audit.md
 - feedback key
 - 이전 selected action이 다음 memory의 `last_selected_action`으로 들어가는지
 
+## Memory Influence Audit
+
+AgentMemory가 단순 저장소가 아니라 실제 decision gate로 작동하는지 확인한다.
+
+```bash
+python3 -m src.experiments.agent_memory_influence_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/agent_memory_influence_audit.csv
+outputs/report_tables/agent_memory_influence_audit.md
+```
+
+감사 항목:
+
+- AURA/AURA-ML cadence memory가 cooldown과 max-event gate를 만드는지
+- TSRA-R action cooldown memory가 eligible-but-not-ready defense action을 막는지
+- TSRA-R-ML active defense window memory가 reactive window를 유지하는지
+- Adaptive TSRA-R memory policy가 mission impact와 optional defense load를 줄이는지
+
 ## Tool Usage Audit
 
 AgentTool이 단순 등록 목록이 아니라 실제 판단 루프에서 호출되는지 확인한다.

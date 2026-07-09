@@ -2309,6 +2309,55 @@ experiments: E5_rule_aura_tsra_r=28, E7_ml_aura_ml_tsra_r=38
 - 공격과 방어를 같은 feedback audit 형식으로 비교할 수 있다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
+## P46. Agent Memory Influence Audit
+
+상태: 완료
+
+문제:
+
+- memory belief audit는 memory의 존재와 변화는 검증하지만, memory가 실제 action gate로 작동한다는 설명은 약하다.
+- 에이전트를 함수 호출이 아니라 runtime-memory 기반 loop로 보이게 하려면 memory influence를 따로 증명해야 한다.
+
+구현:
+
+```text
+src/experiments/agent_memory_influence_audit.py
+outputs/report_tables/agent_memory_influence_audit.csv
+outputs/report_tables/agent_memory_influence_audit.md
+```
+
+검증 기준:
+
+- AURA/AURA-ML cadence memory가 cooldown과 max-event no-op을 만든다.
+- TSRA-R action cooldown memory가 eligible-not-ready action을 만든다.
+- TSRA-R-ML active defense window memory가 opened/maintained/no-op window를 만든다.
+- Adaptive TSRA-R memory policy가 평균 mission impact와 optional defense load를 줄인다.
+- 기존 memory belief audit의 last-selected chain이 1.0이어야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.agent_memory_influence_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+agent_memory_influence_audit rows: 6
+influence_status: pass=6
+AURA cooldown_noops: 48
+AURA-ML cooldown_noops: 32
+TSRA-R-ML opened_windows: 45
+Adaptive delta_mission_impact_mean: -0.0479341
+Adaptive delta_defense_count_mean: -4.93333
+```
+
+해석:
+
+- memory가 단순 저장소가 아니라 행동을 억제하거나 유지하거나 적응시키는 gate로 검증된다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.
