@@ -128,6 +128,20 @@ This writes:
 
 The ablation compares full TSRA-R against variants with one defensive action disabled: `priority_reroute`, `video_throttle`, `stale_badge`, or `pace_switch`.
 
+## Run Adaptive Memory Comparison
+
+```bash
+python3 -m src.experiments.run_adaptive_memory
+```
+
+This writes:
+
+- `outputs/batch/adaptive_memory_raw.csv`
+- `outputs/batch/adaptive_memory_summary.csv`
+- `outputs/figures/adaptive_memory_comparison.png`
+
+The comparison keeps baseline E1-E7 behavior unchanged and runs a separate `AdaptiveTSRAR` mode where AgentMemory gates optional defense actions. Core actions, `priority_reroute` and `stale_badge`, stay enabled; `video_throttle` and `pace_switch` require repeated memory evidence before activation.
+
 ## Run 30-Seed Repeated Experiments
 
 ```bash
@@ -220,5 +234,6 @@ python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
+python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 ```

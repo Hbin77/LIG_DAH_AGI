@@ -368,6 +368,53 @@ no_pace_switch:          0.107  delta -0.017
 - `stale_badge`는 trusted stale exposure 억제의 핵심이다.
 - `video_throttle`, `pace_switch`는 현재 scalar mission impact에서는 항상 이득으로 나타나지 않는다. 이 둘은 운용형 방어 기능으로 분리해 다루고, 이후 정책 조건을 더 정교화해야 한다.
 
+### 14. Adaptive Memory를 추가한 이유
+
+Agent Runtime을 추가한 뒤에도 Memory가 단순 기록에 머무르면, 에이전트 구조의 설득력이 약하다. 그래서 TSRA-R에 별도 adaptive mode를 추가해 최근 관측 memory가 다음 방어 액션 선택에 직접 영향을 주게 했다.
+
+구현:
+
+```text
+src/tsra_r/adaptive_defender.py
+src/experiments/run_adaptive_memory.py
+```
+
+설계 판단:
+
+- 기본 E1~E7은 그대로 유지한다.
+- `AdaptiveTSRAR`는 별도 class로 두어 실험에서만 켠다.
+- `priority_reroute`와 `stale_badge`는 ablation에서 핵심 액션으로 확인됐으므로 항상 유지한다.
+- `video_throttle`은 최근 memory에 critical/video pressure가 반복될 때만 켠다.
+- `pace_switch`는 SATCOM 저하와 심한 queue pressure가 같이 반복될 때만 켠다.
+- 각 판단의 `feedback.adaptive_policy`에 memory count, enabled actions, reasons를 남긴다.
+
+검증:
+
+```text
+python3 -m compileall src
+python3 -m src.experiments.run_all
+python3 -m src.experiments.run_adaptive_memory
+```
+
+결과:
+
+```text
+full TSRA-R mission impact:      0.123928
+adaptive TSRA-R mission impact:  0.109489
+delta mission impact:           -0.014439
+trusted stale exposure:         0.129167 -> 0.125000
+priority inversion:             0.047238 -> 0.027455
+video throttle count:           6.4 -> 3.1
+pace switch count:              1.0 -> 1.0
+adaptive trace feedback rows:   61
+```
+
+해석:
+
+- AdaptiveTSRA-R은 방어 액션을 많이 내보내는 방식이 아니라, memory에 반복 증거가 쌓인 경우에만 optional action을 켠다.
+- 결과적으로 video throttle은 줄었고, mission impact와 priority inversion도 함께 내려갔다.
+- 이 변경은 기본 baseline을 바꾸지 않으므로, 별도 adaptive defense 개선 실험으로 해석한다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

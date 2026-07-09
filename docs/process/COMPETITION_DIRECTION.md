@@ -126,8 +126,9 @@ Metrics
 
 현재 가장 중요한 개발 방향:
 
-1. AgentMemory를 다음 판단에 더 적극적으로 반영한다.
+1. AgentMemory 기반 adaptive defense를 기본 baseline과 분리해 검증한다.
 2. 공방 timeline에서 `왜 이 행동이 나왔는지`를 더 직접적으로 확인 가능하게 한다.
+3. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -180,7 +181,7 @@ outputs/figures/tsra_action_ablation.png
 
 ### P3. Adaptive Memory
 
-상태: 다음 작업
+상태: 완료
 
 목적:
 
@@ -188,8 +189,42 @@ outputs/figures/tsra_action_ablation.png
 
 주의:
 
-- 기존 E1~E7 baseline이 흔들리면 안 된다.
-- 먼저 별도 실험으로 켜고 끌 수 있게 만든다.
+- 기존 E1~E7 baseline은 유지한다.
+- adaptive mode는 별도 실험으로 켜고 끌 수 있게 둔다.
+
+산출물:
+
+```text
+src/tsra_r/adaptive_defender.py
+src/experiments/run_adaptive_memory.py
+outputs/batch/adaptive_memory_summary.csv
+outputs/figures/adaptive_memory_comparison.png
+```
+
+검증 결과:
+
+```text
+full TSRA-R impact:      0.123928
+adaptive TSRA-R impact:  0.109489
+priority inversion:      0.047238 -> 0.027455
+video throttle count:    6.4 -> 3.1
+E1-E7 baseline:          unchanged in run_all
+```
+
+### P4. 산출물 안정화
+
+상태: 다음 작업
+
+목적:
+
+- 제출용 ZIP과 GitHub 공유 기준으로 재현 명령, 핵심 산출물, 제외할 임시 파일을 정리한다.
+- 팀원이 같은 브랜치에서 이어 받아도 실행 순서와 파일 의미를 바로 이해하게 한다.
+
+완료 기준:
+
+- README의 full reproduction 명령이 최신 코드와 일치한다.
+- 핵심 CSV/figure/docs가 누락되지 않는다.
+- 재생성 가능한 대용량 임시 로그는 제출물에서 제외할 수 있게 구분된다.
 
 ## 최종 판단 기준
 

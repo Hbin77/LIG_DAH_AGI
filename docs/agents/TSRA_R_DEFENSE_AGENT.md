@@ -186,7 +186,40 @@ no_pace_switch:           0.107  delta -0.017
 - `stale_badge`를 제거하면 trusted stale exposure가 크게 증가한다. 이 액션은 지휘소가 오래된 COP 정보를 최신 정보로 믿는 위험을 낮추는 핵심이다.
 - `video_throttle`과 `pace_switch`는 현재 scalar mission impact만 보면 항상 이득으로 나타나지 않는다. 따라서 이 둘은 단일 점수 최소화가 아니라 운용형 방어 기능으로 분리해서 해석한다.
 
-## 10. 현재 구현 상태
+## 10. Adaptive Memory TSRA-R
+
+AdaptiveTSRA-R은 기본 TSRA-R을 대체하지 않는다. 기본 E1~E7 baseline은 그대로 두고, AgentMemory가 다음 방어 판단에 영향을 주는 별도 실험 모드로 구현했다.
+
+코드:
+
+```text
+src/tsra_r/adaptive_defender.py
+src/experiments/run_adaptive_memory.py
+```
+
+동작 방식:
+
+- `priority_reroute`와 `stale_badge`는 항상 유지한다.
+- `video_throttle`은 최근 memory에서 critical traffic과 video queue pressure가 반복될 때만 켠다.
+- `pace_switch`는 SATCOM 저하와 심한 queue pressure가 같이 반복될 때만 켠다.
+- 판단마다 `feedback.adaptive_policy`에 enabled actions, memory counts, reasons를 남긴다.
+
+30-seed 비교 결과:
+
+```text
+full TSRA-R impact:      0.123928
+adaptive TSRA-R impact:  0.109489
+priority inversion:      0.047238 -> 0.027455
+video throttle count:    6.4 -> 3.1
+```
+
+해석:
+
+- AdaptiveTSRA-R은 방어 액션을 무조건 많이 쓰는 정책이 아니다.
+- Memory에 반복 증거가 있을 때만 optional action을 켜서 과한 video throttle을 줄인다.
+- mission impact와 priority inversion이 같이 감소했으므로, Memory가 실제 방어 판단에 영향을 준 증거로 볼 수 있다.
+
+## 11. 현재 구현 상태
 
 완료:
 
@@ -200,17 +233,17 @@ no_pace_switch:           0.107  delta -0.017
 - PACE switch
 - ML anomaly detector
 - ML detector 기반 reactive defense window
+- Adaptive Memory 기반 optional action gating
 - defense event JSONL 로그
 - 30-seed 반복 실험
 
 보완할 것:
 
 - PACE switch의 link selection 근거를 더 정교화
-- 방어 action별 ablation study
 - operator alert 문구 자동 생성
 - incident report 자동 생성
 
-## 11. 런타임 구조
+## 12. 런타임 구조
 
 TSRA-R은 `src/agents/AgentRuntime` 위에서 실행된다.
 
@@ -245,6 +278,23 @@ AgentRuntime
     - threshold decision
     - opened defense window
     - emitted defense events
+```
+
+Adaptive TSRA-R:
+
+```text
+AgentRuntime
+  goal: minimize mission impact using memory-gated defensive response actions
+  memory: adaptive_policy, enabled_actions, action_cooldowns
+  tools:
+    - update_adaptive_action_policy
+    - evaluate_defense_conditions
+    - select_fallback_link
+  trace:
+    - memory-based enabled action set
+    - repeated pressure/degradation counts
+    - emitted defense events
+    - selected no-op/action reason
 ```
 
 생성 로그:

@@ -63,6 +63,11 @@ TSRA-R-ML:
   active_defense_until
   last_probability
   last_alert_time
+
+TSRA-R-ADAPTIVE:
+  adaptive_policy
+  enabled_actions
+  action_cooldowns
 ```
 
 ### ToolRegistry
@@ -87,6 +92,7 @@ TSRA-R 도구:
 evaluate_defense_conditions
 select_fallback_link
 predict_attack_probability
+update_adaptive_action_policy
 ```
 
 ### DecisionTrace
@@ -147,13 +153,14 @@ outputs/experiments/<experiment>/tsra_r_decision_traces.jsonl
 ## 현재 한계
 
 - Memory는 최근 관측/판단과 belief state를 저장하는 경량 메모리다.
+- AdaptiveTSRA-R에서는 이 Memory가 optional defense action gating에 직접 사용된다.
 - 장기 학습 또는 온라인 policy update는 아직 없다.
 - Tool은 시뮬레이터 내부 함수만 호출한다.
 - 외부 네트워크, 실제 RF, 실제 공격 도구는 호출하지 않는다.
 
 ## 다음 개선
 
-1. decision trace를 요약하는 CLI 추가
-2. AURA 후보별 COA card 자동 생성
-3. TSRA-R 방어 action별 ablation 실행기 추가
-4. Memory에 최근 공격/방어 효과 피드백을 누적해 adaptive threshold 조정
+1. Adaptive Memory 정책을 더 많은 mission phase별 rule로 분리
+2. 공방 timeline에서 trace와 event를 같이 보여주는 요약 산출물 추가
+3. PACE switch의 link selection 근거를 더 정교화
+4. operator alert와 incident summary 자동 생성

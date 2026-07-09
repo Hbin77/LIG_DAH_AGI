@@ -53,6 +53,7 @@ class RuleTSRAR:
     def decide(self, state: MissionState) -> list[DefenseEvent]:
         observation = self.runtime.observe(state)
         tool_calls: list[ToolCallRecord] = []
+        extra_feedback = self._before_decide(state, tool_calls)
         conditions = self.runtime.call_tool(
             "evaluate_defense_conditions",
             tool_calls,
@@ -129,7 +130,14 @@ class RuleTSRAR:
             )
 
         if self.mode != "full":
-            self._record_decision(state, observation, candidate_actions, tool_calls, events)
+            self._record_decision(
+                state,
+                observation,
+                candidate_actions,
+                tool_calls,
+                events,
+                extra_feedback=extra_feedback,
+            )
             return events
 
         candidate_actions.append(
@@ -165,8 +173,22 @@ class RuleTSRAR:
                     )
                 )
 
-        self._record_decision(state, observation, candidate_actions, tool_calls, events)
+        self._record_decision(
+            state,
+            observation,
+            candidate_actions,
+            tool_calls,
+            events,
+            extra_feedback=extra_feedback,
+        )
         return events
+
+    def _before_decide(
+        self,
+        state: MissionState,
+        tool_calls: list[ToolCallRecord],
+    ) -> dict:
+        return {}
 
     def _evaluate_conditions(self, state: MissionState) -> dict[str, bool]:
         now = state.time_sec
@@ -197,6 +219,7 @@ class RuleTSRAR:
         candidate_actions: list[dict],
         tool_calls: list[ToolCallRecord],
         events: list[DefenseEvent],
+        extra_feedback: dict | None = None,
     ) -> None:
         if events:
             reason = f"emitted {len(events)} defense event(s)"
@@ -219,6 +242,15 @@ class RuleTSRAR:
         self.runtime.memory.update_belief("mode", self.mode)
         self.runtime.memory.update_belief("enabled_actions", sorted(self.enabled_actions))
         self.runtime.memory.update_belief("action_cooldowns", dict(self.action_cooldowns))
+        feedback = {
+            "mode": self.mode,
+            "enabled_actions": sorted(self.enabled_actions),
+            "event_count": self.event_count,
+            "action_cooldowns": dict(self.action_cooldowns),
+        }
+        if extra_feedback:
+            feedback.update(extra_feedback)
+
         self.runtime.record_decision(
             time_sec=state.time_sec,
             policy=f"rule_defense_{self.mode}",
@@ -227,12 +259,7 @@ class RuleTSRAR:
             tool_calls=tool_calls,
             selected_action=selected_action,
             reason=reason,
-            feedback={
-                "mode": self.mode,
-                "enabled_actions": sorted(self.enabled_actions),
-                "event_count": self.event_count,
-                "action_cooldowns": dict(self.action_cooldowns),
-            },
+            feedback=feedback,
         )
 
     @staticmethod

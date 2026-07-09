@@ -169,30 +169,79 @@ no_pace_switch: mission impact -0.017
 
 ## P3. Adaptive Memory
 
-상태: 다음 작업
+상태: 완료
 
 문제:
 
 - 현재 AgentMemory는 최근 관측/판단과 belief state를 보관하지만, 다음 판단 기준을 바꾸는 데는 제한적으로만 사용된다.
 
-구현 방향:
+구현:
+
+```text
+src/tsra_r/adaptive_defender.py
+src/experiments/run_adaptive_memory.py
+```
+
+구현 방식:
 
 - 기본 E1~E7 baseline은 유지한다.
 - 별도 옵션으로 adaptive mode를 둔다.
-- 최근 false alarm, late defense, ineffective attack 등을 memory에 반영해 threshold/action ranking을 조정한다.
+- 최근 관측 memory를 기반으로 optional defense action을 gating한다.
+- `priority_reroute`, `stale_badge`는 ablation에서 핵심 방어로 확인됐으므로 항상 유지한다.
+- `video_throttle`, `pace_switch`는 반복적인 pressure/degradation이 memory에 쌓일 때만 활성화한다.
 
 완료 기준:
 
-- adaptive mode on/off가 가능하다.
-- 기존 기본 실험 결과가 의도치 않게 바뀌지 않는다.
-- adaptive mode 전용 실험 결과가 따로 생성된다.
+- 완료. adaptive mode on/off가 별도 class와 runner로 분리됐다.
+- 완료. 기존 기본 실험 결과가 의도치 않게 바뀌지 않는다.
+- 완료. adaptive mode 전용 실험 결과가 따로 생성된다.
 
 검증:
 
 ```bash
+python3 -m compileall src
 python3 -m src.experiments.run_all
 python3 -m src.experiments.run_adaptive_memory
 ```
+
+검증 결과:
+
+```text
+adaptive_memory_summary.csv: 2 conditions
+adaptive_memory_raw.csv: 60 rows
+conditions: full_tsra_r, adaptive_tsra_r
+full_tsra_r mission impact: 0.123928
+adaptive_tsra_r mission impact: 0.109489
+priority inversion: 0.047238 -> 0.027455
+video throttle count: 6.4 -> 3.1
+adaptive trace rows with feedback.adaptive_policy: 61
+```
+
+해석:
+
+- AdaptiveTSRA-R은 방어 액션을 무조건 늘리지 않고, Memory에 반복 신호가 쌓였을 때 선택적으로 확장한다.
+- 기본 TSRA-R보다 video throttle을 덜 쓰면서 mission impact와 priority inversion을 낮췄다.
+- baseline E1~E7은 기존 실험 체계로 유지되므로, adaptive mode는 별도 개선 실험으로 해석한다.
+
+## P4. 산출물 안정화
+
+상태: 다음 작업
+
+문제:
+
+- 코드와 실험 산출물은 준비되어 있지만, 제출용 ZIP 기준으로 재현 명령, 생성 파일, 제외할 임시 로그를 마지막으로 정리해야 한다.
+
+구현 방향:
+
+- README의 재현 명령을 실제 실행 순서와 맞춘다.
+- 대용량 또는 재생성 가능한 임시 로그가 ZIP에 섞이지 않게 확인한다.
+- 핵심 CSV, figure, docs가 빠지지 않았는지 체크한다.
+
+완료 기준:
+
+- clean clone 또는 ZIP 기준으로 실행 순서가 명확하다.
+- `main`은 보호 브랜치로 유지되고 개발 산출물은 `hbin`에만 있다.
+- 제출용 산출물 목록이 Markdown으로 확인 가능하다.
 
 ## 진행 원칙
 
