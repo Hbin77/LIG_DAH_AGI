@@ -300,8 +300,8 @@ def check_regression_tests() -> list[str]:
     match = re.search(r"Ran\s+(\d+)\s+tests?", output)
     test_count = int(match.group(1)) if match else 0
     require(
-        test_count >= 3,
-        f"expected at least 3 agent regression tests, got {test_count}",
+        test_count >= 7,
+        f"expected at least 7 agent regression tests, got {test_count}",
     )
     return [f"agent_regression_tests={test_count} pass"]
 

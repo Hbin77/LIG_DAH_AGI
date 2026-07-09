@@ -3605,3 +3605,37 @@ agent_interface_manifest TSRA-R trace_count: 108 non_noop_count: 35
 ```
 
 이 보강의 의미는 E7 ML 방어 에이전트가 내부에서 rule delegate를 호출한 사실이 숨은 JSONL에만 남지 않고, trace summary, interface manifest, replay까지 같은 증거 체계로 이어진다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation explainability evidence만 강화한다.
+
+### 88. Rule Delegate Summary 회귀 테스트를 추가한 이유
+
+P72로 E7 rule delegate sidecar는 사람이 읽는 trace summary, interface manifest, loop replay까지 들어갔다. 하지만 생성 산출물과 final verifier만으로는 소스 레벨에서 이 연결을 보호하기 부족했다. 누군가 나중에 생성기 `TRACE_FILES`에서 `tsra_r_rule_delegate_traces.jsonl`를 빼면, 단위 테스트 단계에서는 지나가고 뒤쪽 패키지 검증에서야 깨질 수 있었다.
+
+이번 변경은 sidecar human-readable coverage를 `tests/test_agent_regression.py`에 직접 고정했다.
+
+변경한 파일:
+
+```text
+tests/test_agent_regression.py
+src/experiments/agent_quality_gate_audit.py
+scripts/verify_submission_state.py
+outputs/report_tables/agent_quality_gate_audit.csv
+outputs/report_tables/agent_quality_gate_audit.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- trace summary 회귀 테스트는 E7 `TSRA-R / rule_defense_full` sidecar 47 rows, `trace_file`, `trace_id`, non-no-op 선택 존재를 확인한다.
+- interface manifest 회귀 테스트는 TSRA-R row의 `evidence_experiments`, `trace_count=108`, `non_noop_count=35`, defense tool contract를 확인한다.
+- loop replay 회귀 테스트는 sidecar에서 대표 `no_op`과 `action` 루프가 모두 생성되는지 확인한다.
+- quality gate와 final verifier의 최소 regression test 기준을 7개로 올렸다.
+
+검증 의미:
+
+```text
+Ran 7 tests
+agent_quality_gate_audit rows: 6 pass
+agent_regression_tests=7 pass
+```
+
+이 보강의 의미는 E7 rule delegate sidecar가 산출물에만 우연히 들어간 상태가 아니라, 소스 테스트/quality gate/final verifier에서 모두 보호되는 에이전트 evidence가 됐다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation regression evidence만 강화한다.

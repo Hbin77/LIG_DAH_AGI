@@ -7,6 +7,7 @@ from pathlib import Path
 
 from src.agents.runtime import AgentRuntime
 from src.aura.ml_impact_predictor import MLAURA
+from src.experiments import agent_interface_manifest, agent_loop_replay, trace_summary
 from src.shared.schemas import LinkState, MissionState
 from src.tsra_r.ml_defender import MLTSRAR
 from src.tsra_r.rule_defender import RuleTSRAR
@@ -435,6 +436,62 @@ class TsraRRegressionTests(unittest.TestCase):
         ]
         self.assertEqual(delegate_rule_events, tool_rule_events)
         self.assertEqual(trace.feedback["event_count"], len(events))
+
+
+class AgentSummaryRegressionTests(unittest.TestCase):
+    def test_trace_summary_exposes_e7_rule_delegate_source(self) -> None:
+        rows = trace_summary.collect_rows(
+            Path("outputs/experiments"),
+            ["E7_ml_aura_ml_tsra_r"],
+        )
+
+        delegate_rows = [
+            row
+            for row in rows
+            if row["agent"] == "TSRA-R"
+            and row["policy"] == "rule_defense_full"
+            and row["trace_file"] == "tsra_r_rule_delegate_traces.jsonl"
+        ]
+
+        self.assertIn("trace_file", trace_summary.FIELDNAMES)
+        self.assertIn("trace_id", trace_summary.FIELDNAMES)
+        self.assertEqual(len(delegate_rows), 47)
+        self.assertTrue(all(row["trace_id"].startswith("tsra-r-trace-") for row in delegate_rows))
+        self.assertTrue(any(row["selected_action"] != "no_op" for row in delegate_rows))
+
+    def test_interface_manifest_merges_rule_delegate_into_tsra_r_contract(self) -> None:
+        traces = agent_interface_manifest.collect_traces(
+            Path("outputs/experiments"),
+            agent_interface_manifest.DEFAULT_EXPERIMENTS,
+        )
+        rows = agent_interface_manifest.build_manifest_rows(traces)
+        tsra_row = next(row for row in rows if row["agent"] == "TSRA-R")
+
+        self.assertEqual(tsra_row["side"], "defense")
+        self.assertIn("E7_ml_aura_ml_tsra_r", tsra_row["evidence_experiments"])
+        self.assertEqual(tsra_row["trace_count"], "108")
+        self.assertEqual(tsra_row["non_noop_count"], "35")
+        self.assertIn("evaluate_defense_conditions", tsra_row["tool_contract"])
+        self.assertIn("select_fallback_link", tsra_row["tool_contract"])
+
+    def test_loop_replay_has_rule_delegate_noop_and_action_cases(self) -> None:
+        rows = agent_loop_replay.collect_rows(
+            Path("outputs/experiments"),
+            ["E7_ml_aura_ml_tsra_r"],
+        )
+        delegate_rows = [
+            row
+            for row in rows
+            if row["agent"] == "TSRA-R"
+            and row["policy"] == "rule_defense_full"
+            and row["trace_file"] == "tsra_r_rule_delegate_traces.jsonl"
+        ]
+
+        self.assertEqual({row["loop_case"] for row in delegate_rows}, {"no_op", "action"})
+        self.assertTrue(all(row["observe"] for row in delegate_rows))
+        self.assertTrue(all(row["memory"] for row in delegate_rows))
+        self.assertTrue(all(row["selected_action"] for row in delegate_rows))
+        self.assertTrue(all("closed simulation" in row["safety_boundary"] for row in delegate_rows))
 
 
 if __name__ == "__main__":

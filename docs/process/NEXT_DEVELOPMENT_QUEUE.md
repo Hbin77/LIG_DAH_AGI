@@ -3860,3 +3860,54 @@ agent_interface_manifest TSRA-R non_noop_count: 35
 - E7 ML 방어 에이전트의 내부 rule delegate 판단이 더 이상 숨은 부속 로그로만 남지 않는다.
 - 검증기와 사람이 읽는 요약 산출물이 같은 trace evidence를 보게 되므로, 에이전트 구조 설명과 실제 파일 증거의 간극이 줄어든다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation explainability evidence만 강화한다.
+
+## P73. Rule Delegate Summary Regression Tests
+
+상태: 완료
+
+문제:
+
+- P72에서 E7 rule delegate sidecar를 trace summary, interface manifest, loop replay에 연결했다.
+- 하지만 이 연결은 생성 산출물과 final verifier에만 의존했다.
+- 소스 레벨 회귀 테스트가 없으면 누군가 `TRACE_FILES`에서 `tsra_r_rule_delegate_traces.jsonl`를 제거했을 때 늦게 발견될 수 있다.
+
+구현:
+
+```text
+tests/test_agent_regression.py
+src/experiments/agent_quality_gate_audit.py
+scripts/verify_submission_state.py
+outputs/report_tables/agent_quality_gate_audit.csv
+outputs/report_tables/agent_quality_gate_audit.md
+```
+
+설계:
+
+- `AgentSummaryRegressionTests`를 추가해 실제 `outputs/experiments/E7_ml_aura_ml_tsra_r` 산출물을 읽는다.
+- trace summary는 E7 `TSRA-R / rule_defense_full` sidecar 47 rows와 `trace_file`, `trace_id` 컬럼을 확인한다.
+- interface manifest는 TSRA-R row가 E5와 E7 evidence를 합쳐 `trace_count=108`, `non_noop_count=35`를 보이는지 확인한다.
+- loop replay는 sidecar의 대표 `no_op`/`action` 두 케이스가 모두 존재하는지 확인한다.
+- quality gate와 final verifier의 regression test 최소 기준을 7개로 올렸다.
+
+검증:
+
+```bash
+python3 -m compileall -q src scripts tests
+python3 -m unittest discover -s tests
+python3 -m src.experiments.agent_quality_gate_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+Ran 7 tests
+agent_quality_gate_audit rows: 6 pass
+agent_regression_tests=7 pass
+```
+
+해석:
+
+- sidecar human-readable coverage는 이제 생성 산출물, final verifier, unit regression test 세 층에서 보호된다.
+- 에이전트 구조를 설명하는 파일과 실제 DecisionTrace evidence가 다시 벌어지는 위험을 줄인다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation regression evidence만 강화한다.

@@ -110,7 +110,7 @@ def collect_checks() -> list[dict[str, str]]:
             area="unit_regression_execution",
             requirement="Agent core regression tests must execute locally and pass.",
             observed=f"test_count={test_count}; result={'pass' if unittest_ok else 'fail'}; output={unittest_output}",
-            status="pass" if unittest_ok and test_count >= 3 else "fail",
+            status="pass" if unittest_ok and test_count >= 7 else "fail",
             evidence_files="tests/test_agent_regression.py",
             interpretation=(
                 "Fast regression tests run before full experiments, so core agent invariants fail early."
