@@ -213,7 +213,7 @@ E1-E7 baseline:          unchanged in run_all
 
 ### P4. 산출물 안정화
 
-상태: 다음 작업
+상태: 완료
 
 목적:
 
@@ -222,9 +222,25 @@ E1-E7 baseline:          unchanged in run_all
 
 완료 기준:
 
-- README의 full reproduction 명령이 최신 코드와 일치한다.
-- 핵심 CSV/figure/docs가 누락되지 않는다.
-- 재생성 가능한 대용량 임시 로그는 제출물에서 제외할 수 있게 구분된다.
+- 완료. README의 full reproduction 명령이 최신 코드와 일치한다.
+- 완료. 핵심 CSV/figure/docs가 누락되지 않도록 패키지 required path를 검증한다.
+- 완료. 재생성 가능한 대용량 임시 로그는 제출물에서 제외할 수 있게 구분된다.
+
+산출물:
+
+```text
+scripts/build_submission_package.py
+docs/process/SUBMISSION_PACKAGE.md
+outputs/package/submission_manifest.md
+```
+
+검증 결과:
+
+```text
+package zip: outputs/package/DAH2026_source_LIG_DAH_AGI.zip
+zip size:    about 1.5MB
+excluded:    __pycache__, tmp logs, datasets, model binaries, seed-level logs
+```
 
 ## 최종 판단 기준
 

@@ -225,23 +225,72 @@ adaptive trace rows with feedback.adaptive_policy: 61
 
 ## P4. 산출물 안정화
 
-상태: 다음 작업
+상태: 완료
 
 문제:
 
 - 코드와 실험 산출물은 준비되어 있지만, 제출용 ZIP 기준으로 재현 명령, 생성 파일, 제외할 임시 로그를 마지막으로 정리해야 한다.
 
-구현 방향:
+구현:
 
-- README의 재현 명령을 실제 실행 순서와 맞춘다.
-- 대용량 또는 재생성 가능한 임시 로그가 ZIP에 섞이지 않게 확인한다.
-- 핵심 CSV, figure, docs가 빠지지 않았는지 체크한다.
+```text
+scripts/build_submission_package.py
+docs/process/SUBMISSION_PACKAGE.md
+outputs/package/submission_manifest.md
+```
+
+구현 방식:
+
+- README의 재현 명령을 실제 실행 순서와 맞췄다.
+- 대용량 또는 재생성 가능한 임시 로그가 ZIP에 섞이지 않게 선별 규칙을 코드화했다.
+- 핵심 CSV, figure, docs가 빠지지 않았는지 required path 검증을 추가했다.
 
 완료 기준:
 
-- clean clone 또는 ZIP 기준으로 실행 순서가 명확하다.
-- `main`은 보호 브랜치로 유지되고 개발 산출물은 `hbin`에만 있다.
-- 제출용 산출물 목록이 Markdown으로 확인 가능하다.
+- 완료. clean clone 또는 ZIP 기준으로 실행 순서가 README에 있다.
+- 완료. `main`은 보호 브랜치로 유지되고 개발 산출물은 `hbin`에만 있다.
+- 완료. 제출용 산출물 목록이 `outputs/package/submission_manifest.md`로 확인 가능하다.
+
+검증:
+
+```bash
+python3 -m compileall src scripts
+python3 scripts/build_submission_package.py
+```
+
+검증 결과:
+
+```text
+payload_file_count: 92
+zip_file_count: 93
+zip_bytes: 약 1.5MB
+excluded __pycache__: 0
+excluded outputs/tmp*: 0
+excluded outputs/datasets/: 0
+excluded *.pkl/*.pt: 0
+excluded outputs/batch/seed_*: 0
+```
+
+## P5. 공방 Timeline 패키지
+
+상태: 다음 작업
+
+문제:
+
+- 현재 trace summary, event timeline, COA card가 따로 존재한다.
+- 공격 이벤트, 방어 이벤트, DecisionTrace를 한 화면에서 연결해 보는 산출물은 아직 부족하다.
+
+구현 방향:
+
+- AURA attack event, TSRA-R defense event, DecisionTrace reason을 같은 시간축으로 병합한다.
+- E5와 E7 중심으로 공방 timeline Markdown/CSV를 생성한다.
+- 각 시점마다 공격 의도, 방어 반응, metric 변화가 보이게 한다.
+
+완료 기준:
+
+- `python3 -m src.experiments.<timeline_tool>` 형태로 재생성 가능하다.
+- E5/E7 공방 sequence가 한 파일에서 비교된다.
+- 공격-방어-AI 판단 루프를 설명하는 데 직접 사용할 수 있다.
 
 ## 진행 원칙
 

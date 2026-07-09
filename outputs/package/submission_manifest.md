@@ -1,0 +1,125 @@
+# 제출 패키지 Manifest
+
+이 manifest는 `scripts/build_submission_package.py`로 생성한다.
+
+## 포함 기준
+
+- `README.md`, `requirements*.txt`
+- `src/`: 공격/방어 에이전트, 시뮬레이터, ML, 실험 코드
+- `docs/`: 시나리오, 에이전트, 개발 판단 근거
+- `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약
+- `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림
+- `outputs/report_tables/*`: trace/COA/모델 비교 요약표
+- `outputs/models/*_metrics.json`: 모델 성능 메트릭
+
+## 제외 기준
+
+- `.git/`, `.venv*`, `__pycache__/`, `*.pyc`
+- `outputs/tmp*`: 재생성 가능한 임시 실행 로그
+- `outputs/batch/seed_*`: 30-seed 실행 중간 로그
+- `outputs/datasets/`: 재생성 가능한 synthetic dataset
+- `outputs/models/*.pkl`, `outputs/models/*.pt`: 재생성 가능한 model binary
+
+## 패키지 요약
+
+- payload_file_count: 92
+- total_payload_bytes: 2006391
+- zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
+- zip_file_count: 93
+- zip_bytes: 1498171
+- zip_sha256: `41eaf163b31403310f95658fb0295b5e0887bb7993bfa758c7e10a1b3cad54a6`
+
+## 포함 파일
+
+- `.gitignore`
+- `README.md`
+- `docs/1-DAH 예선_안내서_260615_123033.pdf`
+- `docs/AURA_Attack_Agent_Plan.md`
+- `docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md`
+- `docs/GPU_Scale_Experiment.md`
+- `docs/Implementation_Report.md`
+- `docs/ML_Development_Plan.md`
+- `docs/Report_Ready_Summary.md`
+- `docs/Requirements.md`
+- `docs/agents/AGENT_RUNTIME.md`
+- `docs/agents/AURA_ATTACK_AGENT.md`
+- `docs/agents/TSRA_R_DEFENSE_AGENT.md`
+- `docs/process/COMPETITION_DIRECTION.md`
+- `docs/process/DEVELOPMENT_LOG.md`
+- `docs/process/GITHUB_WORKFLOW.md`
+- `docs/process/NEXT_DEVELOPMENT_QUEUE.md`
+- `docs/process/SUBMISSION_PACKAGE.md`
+- `outputs/batch/adaptive_memory_raw.csv`
+- `outputs/batch/adaptive_memory_summary.csv`
+- `outputs/batch/repeated_experiment_raw.csv`
+- `outputs/batch/repeated_experiment_summary.csv`
+- `outputs/batch/resilience_gain_summary.csv`
+- `outputs/batch/tsra_action_ablation_raw.csv`
+- `outputs/batch/tsra_action_ablation_summary.csv`
+- `outputs/experiments/experiment_summary.csv`
+- `outputs/figures/E3_rule_aura_timeline.png`
+- `outputs/figures/E5_rule_aura_tsra_r_timeline.png`
+- `outputs/figures/E7_ml_aura_ml_tsra_r_timeline.png`
+- `outputs/figures/adaptive_memory_comparison.png`
+- `outputs/figures/aura_mps_mlp_training_loss.png`
+- `outputs/figures/aura_tsra_architecture.png`
+- `outputs/figures/batch_critical_latency_errorbar.png`
+- `outputs/figures/batch_mission_impact_errorbar.png`
+- `outputs/figures/batch_priority_inversion_errorbar.png`
+- `outputs/figures/batch_resilience_gain.png`
+- `outputs/figures/batch_trusted_stale_errorbar.png`
+- `outputs/figures/critical_latency.png`
+- `outputs/figures/mission_impact.png`
+- `outputs/figures/priority_inversion.png`
+- `outputs/figures/stale_data_ratio.png`
+- `outputs/figures/trusted_stale_exposure.png`
+- `outputs/figures/tsra_action_ablation.png`
+- `outputs/models/aura_impact_model_metrics.json`
+- `outputs/models/aura_mps_mlp_metrics.json`
+- `outputs/models/tsra_detector_metrics.json`
+- `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.csv`
+- `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.md`
+- `outputs/report_tables/agent_decision_trace_summary.csv`
+- `outputs/report_tables/agent_decision_trace_summary.md`
+- `outputs/report_tables/aura_coa_cards.csv`
+- `outputs/report_tables/aura_coa_cards.md`
+- `outputs/report_tables/ml_model_comparison.csv`
+- `outputs/report_tables/ml_model_comparison.md`
+- `requirements-gpu.txt`
+- `requirements.txt`
+- `scripts/build_submission_package.py`
+- `src/__init__.py`
+- `src/agents/__init__.py`
+- `src/agents/memory.py`
+- `src/agents/runtime.py`
+- `src/agents/schema.py`
+- `src/agents/tools.py`
+- `src/aura/__init__.py`
+- `src/aura/candidate_generator.py`
+- `src/aura/impact_estimator.py`
+- `src/aura/ml_impact_predictor.py`
+- `src/aura/rule_decision_engine.py`
+- `src/experiments/__init__.py`
+- `src/experiments/aura_coa_cards.py`
+- `src/experiments/report_assets.py`
+- `src/experiments/run_adaptive_memory.py`
+- `src/experiments/run_all.py`
+- `src/experiments/run_batch.py`
+- `src/experiments/run_tsra_ablation.py`
+- `src/experiments/trace_summary.py`
+- `src/ml/__init__.py`
+- `src/ml/build_dataset.py`
+- `src/ml/train_aura_impact_model.py`
+- `src/ml/train_aura_mps_mlp.py`
+- `src/ml/train_tsra_detector.py`
+- `src/shared/__init__.py`
+- `src/shared/event_log.py`
+- `src/shared/features.py`
+- `src/shared/metrics.py`
+- `src/shared/schemas.py`
+- `src/simulator/__init__.py`
+- `src/simulator/mission_simulator.py`
+- `src/tsra_r/__init__.py`
+- `src/tsra_r/adaptive_defender.py`
+- `src/tsra_r/ml_defender.py`
+- `src/tsra_r/rule_defender.py`

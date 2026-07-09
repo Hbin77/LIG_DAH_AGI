@@ -415,6 +415,64 @@ adaptive trace feedback rows:   61
 - 결과적으로 video throttle은 줄었고, mission impact와 priority inversion도 함께 내려갔다.
 - 이 변경은 기본 baseline을 바꾸지 않으므로, 별도 adaptive defense 개선 실험으로 해석한다.
 
+### 15. 제출 패키지 생성기를 추가한 이유
+
+전체 작업 디렉터리를 그대로 압축하면 재생성 가능한 임시 로그, synthetic dataset, model binary가 섞인다. 이는 제출 ZIP을 불필요하게 무겁게 만들고, 심사자가 봐야 할 핵심 산출물을 흐린다.
+
+그래서 제출용 패키지를 명시적으로 생성하는 스크립트를 추가했다.
+
+구현:
+
+```text
+scripts/build_submission_package.py
+docs/process/SUBMISSION_PACKAGE.md
+outputs/package/submission_manifest.md
+```
+
+포함 기준:
+
+- `README.md`, `requirements*.txt`
+- `src/`: 에이전트, 시뮬레이터, ML, 실험 코드
+- `docs/`: 시나리오, 에이전트 구조, 개발 판단 근거
+- `outputs/batch/*.csv`
+- `outputs/figures/*.png`
+- `outputs/report_tables/*`
+- `outputs/models/*_metrics.json`
+
+제외 기준:
+
+- `.git/`, `.venv*`, `__pycache__/`, `*.pyc`
+- `outputs/tmp*`
+- `outputs/batch/seed_*`
+- `outputs/datasets/`
+- `outputs/models/*.pkl`, `outputs/models/*.pt`
+
+검증:
+
+```text
+python3 -m compileall src scripts
+python3 scripts/build_submission_package.py
+```
+
+결과:
+
+```text
+payload_file_count: 92
+zip_file_count: 93
+zip_bytes: about 1.5MB
+excluded __pycache__: 0
+excluded outputs/tmp*: 0
+excluded outputs/datasets/: 0
+excluded *.pkl/*.pt: 0
+excluded outputs/batch/seed_*: 0
+```
+
+해석:
+
+- ZIP은 코드와 핵심 산출물을 포함하지만 재생성 가능한 대용량 파일은 제외한다.
+- `outputs/package/submission_manifest.md`가 ZIP 구성과 SHA-256 확인 기준이 된다.
+- ZIP 파일 자체는 로컬 생성 산출물이며 Git에는 올리지 않는다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

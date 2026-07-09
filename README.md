@@ -37,12 +37,13 @@ Read order:
 1. docs/Requirements.md
 2. docs/process/COMPETITION_DIRECTION.md
 3. docs/process/NEXT_DEVELOPMENT_QUEUE.md
-4. docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md
-5. docs/agents/AGENT_RUNTIME.md
-6. docs/agents/AURA_ATTACK_AGENT.md
-7. docs/agents/TSRA_R_DEFENSE_AGENT.md
-8. docs/Implementation_Report.md
-9. docs/Report_Ready_Summary.md
+4. docs/process/SUBMISSION_PACKAGE.md
+5. docs/DAH2026_TSRA_v3_realistic_attack_rewrite.md
+6. docs/agents/AGENT_RUNTIME.md
+7. docs/agents/AURA_ATTACK_AGENT.md
+8. docs/agents/TSRA_R_DEFENSE_AGENT.md
+9. docs/Implementation_Report.md
+10. docs/Report_Ready_Summary.md
 ```
 
 ## Components
@@ -224,6 +225,19 @@ Outputs:
 - `outputs/models/aura_mps_mlp_metrics.json`
 - `outputs/figures/aura_mps_mlp_training_loss.png`
 
+## Build Source Package
+
+```bash
+python3 scripts/build_submission_package.py
+```
+
+This writes:
+
+- `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
+- `outputs/package/submission_manifest.md`
+
+The package includes code, docs, curated CSV summaries, figures, report tables, and model metric JSON files. It excludes regenerated temporary logs, seed-level batch directories, synthetic datasets, Python caches, and model binaries such as `.pkl` or `.pt`.
+
 ## Full Reproduction
 
 ```bash
@@ -236,4 +250,5 @@ python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
+python3 scripts/build_submission_package.py
 ```
