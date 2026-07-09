@@ -843,6 +843,10 @@ def check_csv_outputs() -> list[str]:
     require(
         any(
             observed_int(row, "candidate_traces") == 25
+            and observed_int(row, "generated_candidate_total")
+            == observed_int(row, "candidate_total")
+            and observed_int(row, "generated_candidate_payload_matches") == 25
+            and observed_int(row, "generated_candidate_payload_mismatches") == 0
             and observed_int(row, "estimate_candidate_effect") == observed_int(row, "candidate_total")
             and observed_int(row, "estimate_detectability") == observed_int(row, "candidate_total")
             and observed_int(row, "predict_candidate_impact") == 51

@@ -116,6 +116,8 @@ cross_agent_context_audit attack_context_bonus_events: 25
 cross_agent_context_audit ordered_core_defense_traces: 6/6
 aura_attack_decision_path_audit rows: 6 pass
 aura_attack_decision_path_audit candidate_total: 123
+aura_attack_decision_path_audit generated_candidate_payload_matches: 25
+aura_attack_decision_path_audit generated_candidate_payload_mismatches: 0
 aura_attack_decision_path_audit selected_matches_top_candidate: 25
 aura_attack_decision_path_audit event_agent_matches_trace: 25
 aura_attack_decision_path_audit ml_agent_events: 10

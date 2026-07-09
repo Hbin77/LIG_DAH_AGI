@@ -176,6 +176,8 @@ python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error
 ```text
 aura_attack_decision_path_audit rows: 6 pass
 candidate_total: 123
+generated_candidate_payload_matches: 25
+generated_candidate_payload_mismatches: 0
 base_formula_matches: 123
 selection_formula_matches: 123
 generate_attack_candidates: 25

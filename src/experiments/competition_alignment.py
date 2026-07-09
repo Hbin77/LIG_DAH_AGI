@@ -89,6 +89,8 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/aura_coa_cards.csv", "Simulated effect only"),
             ContentCheck("outputs/report_tables/aura_coa_cards.csv", "no RF"),
             ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "event_agent_matches_trace=25"),
+            ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "generated_candidate_payload_matches=25"),
+            ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "generated_candidate_payload_mismatches=0"),
             ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "ml_agent_events=10"),
         ],
         row_checks=[
@@ -304,6 +306,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "selected_counter_defense_bonus_traces="),
             ContentCheck("outputs/report_tables/cross_agent_context_audit.csv", "attack_context_bonus_events="),
             ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "selected_matches_top_candidate=25"),
+            ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "generated_candidate_payload_matches=25"),
             ContentCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", "selected_with_defense_context=19"),
             ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "formula_matches="),
             ContentCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", "ordered_core_defense_traces=12/12"),

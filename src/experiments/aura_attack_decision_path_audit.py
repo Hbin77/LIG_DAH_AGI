@@ -135,6 +135,48 @@ def tool_error_count(traces: list[dict[str, Any]]) -> int:
     )
 
 
+def candidate_identity_from_generated(candidate: dict[str, Any]) -> tuple:
+    return (
+        str(candidate.get("attack_type", "")),
+        str(candidate.get("target_link", "")),
+        tuple(candidate.get("target_traffic_classes") or []),
+        as_float(candidate.get("start_time")),
+        as_float(candidate.get("duration_sec")),
+        as_float(candidate.get("latency_ms_add")),
+        as_float(candidate.get("jitter_ms_add")),
+        as_float(candidate.get("packet_loss_add")),
+        candidate.get("bandwidth_limit_mbps"),
+        bool(candidate.get("queue_pressure")),
+    )
+
+
+def candidate_identity_from_action(candidate: dict[str, Any]) -> tuple:
+    return (
+        str(candidate.get("action", "")),
+        str(candidate.get("target_link", "")),
+        tuple(candidate.get("target_traffic_classes") or []),
+        as_float(candidate.get("start_time")),
+        as_float(candidate.get("duration_sec")),
+        as_float(candidate.get("latency_ms_add")),
+        as_float(candidate.get("jitter_ms_add")),
+        as_float(candidate.get("packet_loss_add")),
+        candidate.get("bandwidth_limit_mbps"),
+        bool(candidate.get("queue_pressure")),
+    )
+
+
+def generated_candidates(trace: dict[str, Any]) -> list[dict[str, Any]]:
+    calls = [
+        call
+        for call in trace.get("tool_calls") or []
+        if call.get("tool_name") == "generate_attack_candidates"
+    ]
+    if len(calls) != 1:
+        return []
+    output = calls[0].get("output_summary")
+    return output if isinstance(output, list) else []
+
+
 def base_score_formula_ok(candidate: dict[str, Any]) -> bool:
     predicted = as_float(candidate.get("predicted_mission_impact"))
     detectability = clamp(as_float(candidate.get("detectability_score")))
@@ -233,6 +275,23 @@ def build_rows() -> list[dict[str, str]]:
     candidate_tool_errors = tool_error_count(candidate_traces)
     all_tool_counts = tool_counts([trace for _, trace in traces])
     all_tool_errors = tool_error_count([trace for _, trace in traces])
+    generated_candidate_total = 0
+    generated_candidate_payload_matches = 0
+    generated_candidate_payload_mismatches = 0
+    for trace in candidate_traces:
+        generated = generated_candidates(trace)
+        generated_candidate_total += len(generated)
+        generated_identities = [
+            candidate_identity_from_generated(candidate) for candidate in generated
+        ]
+        action_identities = [
+            candidate_identity_from_action(candidate)
+            for candidate in trace.get("candidate_actions") or []
+        ]
+        if generated_identities and generated_identities == action_identities:
+            generated_candidate_payload_matches += 1
+        else:
+            generated_candidate_payload_mismatches += 1
 
     selected_matches_top = 0
     linked_attack_events = 0
@@ -399,6 +458,9 @@ def build_rows() -> list[dict[str, str]]:
             evidence=["outputs/experiments/*/aura_decision_traces.jsonl"],
             observed=(
                 f"candidate_traces={len(candidate_traces)}; candidate_total={len(candidates)}; "
+                f"generated_candidate_total={generated_candidate_total}; "
+                f"generated_candidate_payload_matches={generated_candidate_payload_matches}; "
+                f"generated_candidate_payload_mismatches={generated_candidate_payload_mismatches}; "
                 f"generate_attack_candidates={candidate_tool_counts['generate_attack_candidates']}; "
                 f"estimate_candidate_effect={candidate_tool_counts['estimate_candidate_effect']}; "
                 f"estimate_detectability={candidate_tool_counts['estimate_detectability']}; "
@@ -407,6 +469,9 @@ def build_rows() -> list[dict[str, str]]:
             ),
             ok=(
                 len(candidate_traces) == len(attack_traces)
+                and generated_candidate_total == len(candidates)
+                and generated_candidate_payload_matches == len(candidate_traces)
+                and generated_candidate_payload_mismatches == 0
                 and candidate_tool_counts["generate_attack_candidates"] == len(candidate_traces)
                 and candidate_tool_counts["estimate_candidate_effect"] == len(candidates)
                 and candidate_tool_counts["estimate_detectability"] == len(candidates)
@@ -415,7 +480,8 @@ def build_rows() -> list[dict[str, str]]:
                 and all_tool_errors == 0
             ),
             interpretation=(
-                "AURA uses AgentRuntime tools for generation and scoring rather than hidden inline state."
+                "AURA uses AgentRuntime tools for generation and scoring rather than hidden inline state, "
+                "and generated candidate payloads match the candidate_actions that are actually scored."
             ),
         ),
         row(

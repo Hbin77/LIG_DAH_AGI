@@ -3354,3 +3354,36 @@ agent_regression_tests: 4 pass
 ```
 
 이 보강의 의미는 AURA-ML이 생성한 후보와 실제 평가한 후보가 같은 객체적 의미를 갖는다는 점을 trace에서 증명한다는 것이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.
+
+### 81. AURA Common Candidate Payload Parity를 추가한 이유
+
+P65는 E7의 AURA-ML decision path에서 생성 후보와 평가 후보 payload parity를 닫았다. 하지만 공통 공격 감사인 `aura_attack_decision_path_audit`는 E3/E4/E5 rule AURA와 E6/E7 AURA-ML을 함께 보므로, 이 계약을 전체 공격 경로에도 적용해야 한다. 그래야 AURA 설명이 "ML path 하나만 검증됐다"가 아니라, rule/ML 공격 에이전트 모두가 같은 후보 생성-평가 계약을 따른다고 말할 수 있다.
+
+이번 변경은 `aura_attack_decision_path_audit`의 AAP02를 강화했다.
+
+변경한 파일:
+
+```text
+src/experiments/aura_attack_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AURA_ATTACK_AGENT.md
+docs/process/FINAL_QA.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- 각 attack trace에는 `generate_attack_candidates` tool output이 1회 있어야 한다.
+- 해당 tool output 후보 identity와 `candidate_actions` identity가 trace별로 일치해야 한다.
+- 비교 필드는 attack type, target link, target traffic classes, start/duration, latency/jitter/loss, bandwidth limit, queue pressure다.
+- final verifier는 `generated_candidate_payload_matches=25`, `generated_candidate_payload_mismatches=0`을 요구한다.
+
+검증 의미:
+
+```text
+aura_attack_decision_path_audit AAP02 generated_candidate_payload_matches: 25
+aura_attack_decision_path_audit AAP02 generated_candidate_payload_mismatches: 0
+```
+
+이 보강의 의미는 AURA/AURA-ML 전체 공격 경로에서 생성 후보와 실제 평가 후보가 같은 payload임을 증명한다는 것이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.

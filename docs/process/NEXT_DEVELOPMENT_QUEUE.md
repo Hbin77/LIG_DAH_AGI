@@ -3496,3 +3496,51 @@ MAP02 generated_candidate_payload_mismatches: 0
 - AURA-ML은 생성한 후보와 평가한 후보가 같은 payload인지 trace에서 증명한다.
 - 이 변경은 공격 에이전트의 observe-tool-candidate-score-selected_action 연결성을 강화한다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.
+
+## P66. AURA Common Candidate Payload Parity
+
+상태: 완료
+
+문제:
+
+- P65는 E7의 AURA-ML path에서 생성 후보와 평가 후보 payload parity를 검증했다.
+- 하지만 공통 `aura_attack_decision_path_audit`는 E3/E4/E5 rule AURA와 E6/E7 ML AURA를 모두 보면서도, 후보 생성 tool output과 `candidate_actions`의 identity parity는 아직 검사하지 않았다.
+- 공격 에이전트 전체를 설명할 때는 ML path 하나가 아니라 AURA/AURA-ML 전체 25개 attack trace에서 같은 계약을 확인해야 한다.
+
+구현:
+
+```text
+src/experiments/aura_attack_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AURA_ATTACK_AGENT.md
+docs/process/FINAL_QA.md
+```
+
+설계:
+
+- AAP02 `Candidate scoring toolchain`이 각 candidate trace의 `generate_attack_candidates` tool output identity와 `candidate_actions` identity를 비교한다.
+- 비교 필드는 attack type, target link, traffic classes, start/duration, latency/jitter/loss, bandwidth limit, queue pressure다.
+- final verifier와 competition alignment가 `generated_candidate_payload_matches=25`, `generated_candidate_payload_mismatches=0`을 요구한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.aura_attack_decision_path_audit --fail-on-error
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+aura_attack_decision_path_audit rows: 6 pass
+AAP02 generated_candidate_payload_matches: 25
+AAP02 generated_candidate_payload_mismatches: 0
+```
+
+해석:
+
+- AURA/AURA-ML 전체 공격 경로에서 생성 후보와 실제 평가 후보가 같은 payload임을 검증한다.
+- 이 변경은 특정 ML path만이 아니라 공통 공격 에이전트 계약을 강화한다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation candidate payload evidence만 강화한다.

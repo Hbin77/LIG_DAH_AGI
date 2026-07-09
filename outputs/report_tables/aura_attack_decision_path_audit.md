@@ -6,7 +6,7 @@ Safety boundary: closed simulation AURA attack decision-path audit only; no RF, 
 | check_id | area | status | observed | interpretation |
 |---|---|---|---|---|
 | AAP01 | Candidate score contract | pass | candidate_total=123; rule_candidates=72; ml_candidates=51; base_formula_matches=123; selection_formula_matches=123 | AURA candidate ranking is formula-backed instead of relying on implicit branch order. |
-| AAP02 | Candidate scoring toolchain | pass | candidate_traces=25; candidate_total=123; generate_attack_candidates=25; estimate_candidate_effect=123; estimate_detectability=123; predict_candidate_impact=51; tool_errors=0; all_trace_tool_errors=0 | AURA uses AgentRuntime tools for generation and scoring rather than hidden inline state. |
+| AAP02 | Candidate scoring toolchain | pass | candidate_traces=25; candidate_total=123; generated_candidate_total=123; generated_candidate_payload_matches=25; generated_candidate_payload_mismatches=0; generate_attack_candidates=25; estimate_candidate_effect=123; estimate_detectability=123; predict_candidate_impact=51; tool_errors=0; all_trace_tool_errors=0 | AURA uses AgentRuntime tools for generation and scoring rather than hidden inline state, and generated candidate payloads match the candidate_actions that are actually scored. |
 | AAP03 | Top-score selection and event link | pass | attack_trace_count=25; attack_event_count=25; selected_matches_top_candidate=25; linked_attack_events=25; score_event_matches=25; type_link_event_matches=25; event_time_matches=25; event_agent_matches_trace=25; threshold_passes=25 | AURA selected actions are directly traceable to event logs and threshold support. |
 | AAP04 | No-op and cadence gate discipline | pass | noop_traces=130; pre_start_noops=30; cooldown_noops=80; max_event_noops=20; below_threshold_noops=0; no_candidate_noops=0; pre_start_attack_events=0; min_attack_gap_sec=50; cooldown_gap_violations=0; event_budget_violations=0; no_op_threshold_violations=0 | AURA is an agent with start, cadence, threshold, and event-budget gates, not an always-fire loop. |
 | AAP05 | AttackEvent payload consistency | pass | event_payloads=25; impact_field_matches=25; event_score_formula_matches=25; selected_at_matches_candidate=25; allowed_agent_events=25; allowed_attack_type_events=25; rule_agent_events=15; ml_agent_events=10 | AttackEvent logs preserve the same decision evidence and agent identity used by traces. |
@@ -27,9 +27,9 @@ Safety boundary: closed simulation AURA attack decision-path audit only; no RF, 
 
 - Requirement: Candidate-generating traces should call candidate generation once, estimate effect and detectability for each candidate, and call ML prediction for each ML candidate.
 - Evidence: outputs/experiments/*/aura_decision_traces.jsonl
-- Observed: candidate_traces=25; candidate_total=123; generate_attack_candidates=25; estimate_candidate_effect=123; estimate_detectability=123; predict_candidate_impact=51; tool_errors=0; all_trace_tool_errors=0
+- Observed: candidate_traces=25; candidate_total=123; generated_candidate_total=123; generated_candidate_payload_matches=25; generated_candidate_payload_mismatches=0; generate_attack_candidates=25; estimate_candidate_effect=123; estimate_detectability=123; predict_candidate_impact=51; tool_errors=0; all_trace_tool_errors=0
 - Status: pass
-- Interpretation: AURA uses AgentRuntime tools for generation and scoring rather than hidden inline state.
+- Interpretation: AURA uses AgentRuntime tools for generation and scoring rather than hidden inline state, and generated candidate payloads match the candidate_actions that are actually scored.
 - Safety boundary: closed simulation AURA attack decision-path audit only; no RF, exploit, or live network action
 
 ### AAP03 Top-score selection and event link
