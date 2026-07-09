@@ -1,0 +1,29 @@
+| time_sec | side | action | target | reason | expected_or_observed |
+|---:|---|---|---|---|---|
+| 20 | TSRA-R | stale_badge |  |  | until=110.0 |
+| 50 | TSRA-R | stale_badge |  |  | until=140.0 |
+| 60 | AURA | queue_pressure | SATCOM | increase non-critical queue occupancy | expected impact=0.5661906158627639 |
+| 65 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=135.0 |
+| 65 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=125.0 |
+| 75 | TSRA-R | pace_switch | LTE | SATCOM degraded beyond mission threshold | until=175.0 |
+| 80 | TSRA-R | stale_badge |  |  | until=170.0 |
+| 100 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=160.0 |
+| 110 | AURA | queue_pressure | LTE | increase non-critical queue occupancy | expected impact=0.9392629297958226 |
+| 125 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=195.0 |
+| 135 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=195.0 |
+| 140 | TSRA-R | stale_badge |  |  | until=230.0 |
+| 160 | AURA | queue_pressure | LTE | increase non-critical queue occupancy | expected impact=1.0 |
+| 170 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=230.0 |
+| 170 | TSRA-R | stale_badge |  |  | until=260.0 |
+| 175 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=245.0 |
+| 200 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=270.0 |
+| 200 | TSRA-R | stale_badge |  |  | until=290.0 |
+| 205 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=265.0 |
+| 210 | AURA | queue_pressure | LTE | increase non-critical queue occupancy | expected impact=1.0 |
+| 240 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=300.0 |
+| 245 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=315.0 |
+| 260 | AURA | queue_pressure | LTE | increase non-critical queue occupancy | expected impact=0.956 |
+| 265 | TSRA-R | stale_badge |  |  | until=355.0 |
+| 270 | TSRA-R | priority_reroute |  | critical traffic waiting behind video load | until=340.0 |
+| 275 | TSRA-R | video_throttle |  | protect critical traffic capacity | until=335.0 |
+| 295 | TSRA-R | stale_badge |  |  | until=385.0 |

@@ -1,0 +1,13 @@
+{
+  "mae": 0.005236480850726366,
+  "rmse": 0.009371194988489151,
+  "r2": 0.9951224327087402,
+  "top1_action_match_rate": 0.7486666666666667,
+  "device": "mps",
+  "torch_version": "2.13.0",
+  "train_samples_per_epoch": 1000000,
+  "epochs": 20,
+  "batch_size": 32768,
+  "elapsed_sec": 12.764454416930676,
+  "samples_per_sec": 1566851.143553159
+}

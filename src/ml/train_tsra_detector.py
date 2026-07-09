@@ -1,0 +1,116 @@
+from __future__ import annotations
+
+import argparse
+import json
+import pickle
+import random
+from pathlib import Path
+
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix, f1_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+
+from src.ml.build_dataset import random_state
+from src.shared.features import state_features
+
+
+def build_detector_rows(rows: int, seed: int) -> list[dict]:
+    rng = random.Random(seed)
+    records = []
+    for sample_id in range(rows):
+        state = random_state(rng, sample_id)
+        attack_present = rng.random() < 0.5
+        attack_type = "none"
+        if attack_present:
+            attack_type = rng.choice(
+                ["link_degradation", "bandwidth_limit", "queue_pressure", "critical_window_degradation"]
+            )
+            active = state.links[state.active_link]
+            if attack_type == "link_degradation":
+                active.base_latency_ms += rng.uniform(500, 1300)
+                active.jitter_ms += rng.uniform(80, 260)
+                active.loss_rate = min(active.loss_rate + rng.uniform(0.02, 0.08), 0.4)
+            elif attack_type == "bandwidth_limit":
+                active.bandwidth_mbps = min(active.bandwidth_mbps, rng.uniform(0.5, 1.4))
+                state.total_queue_kb += rng.uniform(800, 2500)
+            elif attack_type == "queue_pressure":
+                state.video_queue_kb += rng.uniform(1200, 5000)
+                state.total_queue_kb += state.video_queue_kb * rng.uniform(0.2, 0.5)
+                state.priority_inversion_rate = min(state.priority_inversion_rate + rng.uniform(0.1, 0.35), 1.0)
+            elif attack_type == "critical_window_degradation":
+                active.base_latency_ms += rng.uniform(800, 1600)
+                state.critical_pending += rng.randint(1, 5)
+                state.recent_p95_critical_latency_sec += rng.uniform(10, 60)
+
+        record = {
+            "sample_id": sample_id,
+            "attack_present": int(attack_present),
+            "attack_type": attack_type,
+        }
+        record.update(state_features(state))
+        records.append(record)
+    return records
+
+
+def train(rows: int, output_dir: Path, seed: int) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    records = build_detector_rows(rows, seed)
+    df = pd.DataFrame(records).fillna(0)
+    dataset_path = Path("outputs/datasets/tsra_detection_dataset.csv")
+    dataset_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(dataset_path, index=False)
+
+    y = df["attack_present"].astype(int)
+    x = df.drop(columns=["attack_present", "attack_type", "sample_id"]).to_dict(orient="records")
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.2, random_state=42, stratify=y
+    )
+    models = {
+        "logistic_regression": LogisticRegression(max_iter=5000, solver="liblinear"),
+        "random_forest": RandomForestClassifier(n_estimators=180, random_state=42, min_samples_leaf=3),
+    }
+    fitted = {}
+    results = {}
+    for name, model in models.items():
+        pipe = Pipeline([("vec", DictVectorizer(sparse=False)), ("model", model)])
+        pipe.fit(x_train, y_train)
+        pred = pipe.predict(x_test)
+        results[name] = {
+            "precision": float(precision_score(y_test, pred)),
+            "recall": float(recall_score(y_test, pred)),
+            "f1": float(f1_score(y_test, pred)),
+            "confusion_matrix": confusion_matrix(y_test, pred).tolist(),
+            "classification_report": classification_report(y_test, pred, output_dict=True),
+        }
+        fitted[name] = pipe
+
+    best_name = max(results, key=lambda name: results[name]["f1"])
+    model_path = output_dir / "tsra_detector.pkl"
+    with model_path.open("wb") as f:
+        pickle.dump(fitted[best_name], f)
+    metrics_path = output_dir / "tsra_detector_metrics.json"
+    metrics_path.write_text(
+        json.dumps({"best_model": best_name, "models": results}, indent=2),
+        encoding="utf-8",
+    )
+    print(f"Best detector: {best_name}")
+    print(metrics_path.read_text(encoding="utf-8"))
+    print(f"Wrote {model_path}")
+    print(f"Wrote {dataset_path}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rows", type=int, default=5000)
+    parser.add_argument("--seed", type=int, default=84)
+    parser.add_argument("--output-dir", type=Path, default=Path("outputs/models"))
+    args = parser.parse_args()
+    train(args.rows, args.output_dir, args.seed)
+
+
+if __name__ == "__main__":
+    main()
