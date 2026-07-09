@@ -152,6 +152,7 @@ def build_rows() -> list[dict[str, str]]:
         "decomposition": count_csv_rows("outputs/report_tables/mission_impact_decomposition.csv"),
         "gates": count_csv_rows("outputs/report_tables/metric_gate_summary.csv"),
         "ml_contribution": count_csv_rows("outputs/report_tables/ml_contribution_audit.csv"),
+        "ml_attack_path": count_csv_rows("outputs/report_tables/ml_attack_decision_path_audit.csv"),
         "ml_defense_path": count_csv_rows("outputs/report_tables/ml_defense_decision_path_audit.csv"),
         "reactive_tradeoff": count_csv_rows("outputs/report_tables/reactive_defense_tradeoff_audit.csv"),
         "threshold_sweep": count_csv_rows("outputs/batch/ml_threshold_sweep_summary.csv"),
@@ -189,6 +190,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 scripts/build_submission_package.py",
         "python3 scripts/verify_submission_state.py",
         "python3 -m src.experiments.ml_contribution_audit --fail-on-error",
+        "python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error",
         "python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error",
         "python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error",
         "python3 -m src.experiments.run_ml_threshold_sweep",
@@ -346,7 +348,7 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R07",
             area="Metric and ML evidence",
-            requirement="Repeated metrics, action ablation, adaptive memory, decomposition, gates, ML contribution, ML defense path, reactive tradeoff, threshold tuning, detector calibration, and ML metrics must exist.",
+            requirement="Repeated metrics, action ablation, adaptive memory, decomposition, gates, ML contribution, ML attack path, ML defense path, reactive tradeoff, threshold tuning, detector calibration, and ML metrics must exist.",
             evidence=[
                 "outputs/batch/repeated_experiment_summary.csv",
                 "outputs/batch/resilience_gain_summary.csv",
@@ -356,6 +358,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/mission_impact_decomposition.csv",
                 "outputs/report_tables/metric_gate_summary.csv",
                 "outputs/report_tables/ml_contribution_audit.csv",
+                "outputs/report_tables/ml_attack_decision_path_audit.csv",
                 "outputs/report_tables/ml_defense_decision_path_audit.csv",
                 "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
                 "outputs/report_tables/ml_threshold_sweep.csv",
@@ -374,14 +377,15 @@ def build_rows() -> list[dict[str, str]]:
                 and metric_counts["decomposition"] == 35
                 and metric_counts["gates"] == 11
                 and metric_counts["ml_contribution"] == 7
+                and metric_counts["ml_attack_path"] == 6
                 and metric_counts["ml_defense_path"] == 6
                 and metric_counts["reactive_tradeoff"] == 7
                 and metric_counts["threshold_sweep"] == 5
                 and metric_counts["detector_calibration"] == 6
                 and all_files_present(model_metrics)
             ),
-            handoff_value="Quantitative and ML-agent claims are backed by batch, ablation, adaptive, gate, model metric, ML contribution, ML defense decision-path, reactive tradeoff, threshold tuning, and detector calibration artifacts.",
-            next_gate="Metric or ML-agent changes must update metric gates, ML contribution audit, ML defense path audit, reactive tradeoff audit, threshold sweep, detector calibration, and package manifest before push.",
+            handoff_value="Quantitative and ML-agent claims are backed by batch, ablation, adaptive, gate, model metric, ML contribution, ML attack decision-path, ML defense decision-path, reactive tradeoff, threshold tuning, and detector calibration artifacts.",
+            next_gate="Metric or ML-agent changes must update metric gates, ML contribution audit, ML attack path audit, ML defense path audit, reactive tradeoff audit, threshold sweep, detector calibration, and package manifest before push.",
         ),
         row(
             check_id="R08",

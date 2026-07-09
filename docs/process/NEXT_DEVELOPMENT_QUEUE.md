@@ -2471,3 +2471,64 @@ threshold_window_nondecreasing: true
 - TSRA-R-ML은 probability threshold를 기준으로 no-op, window open, cooldown-bounded refresh, core defense fanout을 구분한다.
 - ML 방어자는 단순 분류기가 아니라 AgentMemory와 ToolCall, DecisionTrace를 통해 상태를 유지하며 행동한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+## P49. ML Attack Decision Path Audit
+
+상태: 완료
+
+문제:
+
+- ML defense path는 threshold에서 defense window까지 이어지는 흐름을 보여주지만, 공격 쪽 AURA-ML도 같은 수준의 path evidence가 필요하다.
+- 기존 ML contribution audit는 AURA-ML tool invocation을 보여주지만, candidate generation, ML impact prediction, detectability penalty, top-score selection, cooldown, event budget, closed-loop feedback을 한 표로 묶지 않는다.
+
+구현:
+
+```text
+src/experiments/ml_attack_decision_path_audit.py
+outputs/report_tables/ml_attack_decision_path_audit.csv
+outputs/report_tables/ml_attack_decision_path_audit.md
+```
+
+검증 기준:
+
+- E7 AURA-ML DecisionTrace 31개를 읽는다.
+- min_start 전 trace 6개는 no-op이고 attack event가 없어야 한다.
+- attack decision 5개는 후보 27개를 평가해야 한다.
+- 각 후보마다 `predict_candidate_impact`, `estimate_candidate_effect`, `estimate_detectability`가 호출되어야 한다.
+- selected attack은 top-score candidate와 일치하고 attack event log와 score/time이 맞아야 한다.
+- score는 `predicted_mission_impact - 0.15 * detectability_score`와 일치해야 한다.
+- cooldown no-op과 max-event no-op이 존재해야 한다.
+- E7 scorecard에서 5개 attack 모두 complete response와 positive reduction을 가져야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.ml_attack_decision_path_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+ml_attack_decision_path_audit rows: 6
+status: pass=6
+pre_start_noop_count: 6
+candidate_total: 27
+predict_candidate_impact: 27
+estimate_candidate_effect: 27
+estimate_detectability: 27
+selected_matches_top_candidate: 5
+score_formula_matches: 27
+cooldown_noops: 16
+max_event_noops: 4
+min_attack_gap_sec: 50
+complete_responses: 5
+positive_reductions: 5
+```
+
+해석:
+
+- AURA-ML은 공격 후보를 임의로 고르지 않고, ML impact prediction과 detectability-adjusted score로 선택한다.
+- no-op, cooldown, max-event gate가 있어 무조건 공격하지 않는 에이전트 구조를 유지한다.
+- 선택된 attack event는 closed-loop defense response와 metric feedback까지 연결된다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

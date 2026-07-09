@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 209
-- total_payload_bytes: 4068454
+- payload_file_count: 212
+- total_payload_bytes: 4109077
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 210
-- zip_bytes: 1865708
-- zip_sha256: `c7c129fab474e523a57905cf2a69cbe91f61f5545136d106946544dd8d4da999`
+- zip_file_count: 213
+- zip_bytes: 1875862
+- zip_sha256: `68b11c5015fcdc1192f0ac6697c5222bddc79056ae1dc8113f77791f332f59ce`
 
 ## 포함 파일
 
@@ -141,6 +141,8 @@
 - `outputs/report_tables/mission_impact_decomposition.md`
 - `outputs/report_tables/mission_thread_summary.csv`
 - `outputs/report_tables/mission_thread_summary.md`
+- `outputs/report_tables/ml_attack_decision_path_audit.csv`
+- `outputs/report_tables/ml_attack_decision_path_audit.md`
 - `outputs/report_tables/ml_contribution_audit.csv`
 - `outputs/report_tables/ml_contribution_audit.md`
 - `outputs/report_tables/ml_defense_decision_path_audit.csv`
@@ -207,6 +209,7 @@
 - `src/experiments/metric_gate.py`
 - `src/experiments/mission_impact_decomposition.py`
 - `src/experiments/mission_thread_summary.py`
+- `src/experiments/ml_attack_decision_path_audit.py`
 - `src/experiments/ml_contribution_audit.py`
 - `src/experiments/ml_defense_decision_path_audit.py`
 - `src/experiments/operator_alerts.py`

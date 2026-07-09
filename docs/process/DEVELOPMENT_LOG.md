@@ -2492,3 +2492,30 @@ threshold_window_nondecreasing: true
 ```
 
 이 보강의 의미는 E7 ML 방어자가 단순한 모델 성능 숫자나 장식적 이벤트가 아니라, threshold 판단을 통해 active defense window를 열고, alert cooldown으로 과잉 알림을 막고, 그 window 안에서 core TSRA-R action을 실행하며, memory로 window 상태를 유지한다는 점을 검증 가능한 형태로 만든 것이다.
+
+### 62. ML Attack Decision Path Audit를 추가한 이유
+
+방어 쪽은 `ml_defense_decision_path_audit`로 probability threshold에서 defense window까지 이어지는 흐름을 검증했다. 같은 수준으로 공격 쪽도 AURA-ML이 실제로 후보를 만들고, ML impact prediction과 detectability penalty로 top candidate를 고르고, cooldown과 event budget을 지키며, attack event와 closed-loop feedback까지 연결되는지 분해할 필요가 있었다.
+
+그래서 `src/experiments/ml_attack_decision_path_audit.py`를 추가했다. 이 감사는 E7의 `aura_decision_traces.jsonl`, `attack_events.jsonl`, `agent_engagement_scorecard.csv`를 읽어서 AURA-ML decision path를 검증한다.
+
+검증 결과는 다음과 같다.
+
+```text
+ml_attack_decision_path_audit rows: 6
+status: pass=6
+pre_start_noop_count: 6
+candidate_total: 27
+predict_candidate_impact: 27
+estimate_candidate_effect: 27
+estimate_detectability: 27
+selected_matches_top_candidate: 5
+score_formula_matches: 27
+cooldown_noops: 16
+max_event_noops: 4
+min_attack_gap_sec: 50
+complete_responses: 5
+positive_reductions: 5
+```
+
+이 보강의 의미는 AURA-ML이 단순히 attack event 5개를 만든 것이 아니라, AgentRuntime tool path와 scoring formula, memory gate, post-action feedback을 갖춘 공격 에이전트로 검증된다는 점이다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

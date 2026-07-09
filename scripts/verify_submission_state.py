@@ -63,6 +63,7 @@ REQUIRED_FILES = [
     "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
     "src/experiments/ml_contribution_audit.py",
+    "src/experiments/ml_attack_decision_path_audit.py",
     "src/experiments/ml_defense_decision_path_audit.py",
     "src/experiments/reactive_defense_tradeoff_audit.py",
     "src/experiments/tsra_detector_calibration_audit.py",
@@ -136,6 +137,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/report_tables/ml_contribution_audit.csv",
     "outputs/report_tables/ml_contribution_audit.md",
+    "outputs/report_tables/ml_attack_decision_path_audit.csv",
+    "outputs/report_tables/ml_attack_decision_path_audit.md",
     "outputs/report_tables/ml_defense_decision_path_audit.csv",
     "outputs/report_tables/ml_defense_decision_path_audit.md",
     "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
@@ -987,6 +990,85 @@ def check_csv_outputs() -> list[str]:
         "ML contribution audit missing MPS sample-pass and top-1 comparison evidence",
     )
     checks.append("ml_contribution_audit rows=7 pass")
+
+    ml_attack_path_rows = read_csv("outputs/report_tables/ml_attack_decision_path_audit.csv")
+    require(
+        len(ml_attack_path_rows) == 6,
+        f"expected 6 ML attack decision path rows, got {len(ml_attack_path_rows)}",
+    )
+    failed_ml_attack_path_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in ml_attack_path_rows
+        if row.get("status") != "pass"
+    ]
+    require(
+        not failed_ml_attack_path_rows,
+        f"failed ML attack path rows: {failed_ml_attack_path_rows[:8]}",
+    )
+    required_ml_attack_path_areas = {
+        "Pre-start no-op gate",
+        "Candidate scoring toolchain",
+        "Top-score selection link",
+        "Detectability-adjusted score",
+        "Cadence and event budget gate",
+        "Closed-loop attack feedback",
+    }
+    observed_ml_attack_path_areas = {row["area"] for row in ml_attack_path_rows}
+    require(
+        required_ml_attack_path_areas == observed_ml_attack_path_areas,
+        f"ML attack path audit has unexpected areas: {sorted(observed_ml_attack_path_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in ml_attack_path_rows),
+        "ML attack path audit missing safety boundary",
+    )
+    require(
+        any(
+            "pre_start_noop_count=6" in row["observed"]
+            and "pre_start_attack_events=0" in row["observed"]
+            for row in ml_attack_path_rows
+            if row["check_id"] == "MAP01"
+        ),
+        "ML attack path audit missing pre-start no-op evidence",
+    )
+    require(
+        any(
+            "candidate_total=27" in row["observed"]
+            and "predict_candidate_impact=27" in row["observed"]
+            and "estimate_detectability=27" in row["observed"]
+            for row in ml_attack_path_rows
+            if row["check_id"] == "MAP02"
+        ),
+        "ML attack path audit missing candidate toolchain evidence",
+    )
+    require(
+        any(
+            "selected_matches_top_candidate=5" in row["observed"]
+            and "score_event_matches=5" in row["observed"]
+            for row in ml_attack_path_rows
+            if row["check_id"] == "MAP03"
+        ),
+        "ML attack path audit missing top-score selection evidence",
+    )
+    require(
+        any(
+            "score_formula_matches=27" in row["observed"]
+            for row in ml_attack_path_rows
+            if row["check_id"] == "MAP04"
+        ),
+        "ML attack path audit missing detectability-adjusted score evidence",
+    )
+    require(
+        any(
+            "cooldown_noops=16" in row["observed"]
+            and "max_event_noops=4" in row["observed"]
+            and "min_attack_gap_sec=50" in row["observed"]
+            for row in ml_attack_path_rows
+            if row["check_id"] == "MAP05"
+        ),
+        "ML attack path audit missing cadence/event budget evidence",
+    )
+    checks.append("ml_attack_decision_path_audit rows=6 pass")
 
     ml_path_rows = read_csv("outputs/report_tables/ml_defense_decision_path_audit.csv")
     require(
@@ -1923,6 +2005,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/ml_contribution_audit.md" in manifest_text,
         "manifest missing ML contribution audit",
+    )
+    require(
+        "outputs/report_tables/ml_attack_decision_path_audit.md" in manifest_text,
+        "manifest missing ML attack decision path audit",
     )
     require(
         "outputs/report_tables/ml_defense_decision_path_audit.md" in manifest_text,

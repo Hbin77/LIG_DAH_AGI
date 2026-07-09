@@ -1084,6 +1084,21 @@ E7 TSRA-R-ML은 모델 성능 숫자만으로 설명하면 약하다. 대회 목
 
 이 방향은 "ML을 넣었다"가 아니라 "ML이 에이전트 decision path를 바꿨다"는 증거를 남기는 쪽이다. 실제 RF, exploit, live network 동작은 계속 배제한다.
 
+### P39. ML Attack Decision Path Audit
+
+AURA-ML은 공격 event를 만드는 코드만으로는 부족하다. 대회 방향상 중요한 것은 공격 에이전트가 후보를 만들고, 임무 영향과 탐지 가능성을 함께 평가하고, 무조건 공격하지 않는 gate를 거쳐 실제 closed-loop 결과까지 연결되는지다.
+
+이번 보강은 `ml_attack_decision_path_audit`로 다음 흐름을 검증한다.
+
+- min_start 이전에는 no-op으로 유지한다.
+- attack decision 시점에는 후보를 생성하고 각 후보에 ML impact prediction, analytic effect estimate, detectability estimate를 적용한다.
+- selected attack은 top-score candidate와 attack event log가 일치한다.
+- score는 `predicted_mission_impact - 0.15 * detectability_score` 공식을 따른다.
+- cooldown과 max-event budget으로 연속 공격을 제한한다.
+- selected attacks는 scorecard에서 complete response와 positive reduction까지 연결된다.
+
+이 방향은 공격 에이전트를 "공격 실행기"가 아니라 mission-impact simulator 안에서 판단, 기억, 도구 호출, 사후 feedback을 갖춘 AI 에이전트로 증명하는 쪽이다. 실제 RF, exploit, live network 동작은 계속 배제한다.
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.
