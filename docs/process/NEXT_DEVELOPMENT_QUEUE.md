@@ -1281,8 +1281,8 @@ outputs/report_tables/agent_tool_usage_audit.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.agent_tool_usage_audit` 명령으로 재생성 가능하다.
-- 완료. 23개 agent/policy/tool row가 모두 `pass`다.
-- 완료. 7개 tool이 모두 포함된다: `generate_attack_candidates`, `estimate_candidate_effect`, `estimate_detectability`, `predict_candidate_impact`, `evaluate_defense_conditions`, `select_fallback_link`, `predict_attack_probability`.
+- 완료. 24개 agent/policy/tool row가 모두 `pass`다.
+- 완료. 8개 tool이 모두 포함된다: `generate_attack_candidates`, `estimate_candidate_effect`, `estimate_detectability`, `predict_candidate_impact`, `evaluate_defense_conditions`, `select_fallback_link`, `predict_attack_probability`, `assess_mission_risk_guard`.
 - 완료. README, Agent Runtime 문서, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
 
 검증:
@@ -1298,9 +1298,9 @@ python3 scripts/verify_submission_state.py
 검증 결과:
 
 ```text
-agent_tool_usage_audit.csv: 23 rows
-status: pass=23
-tools: estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link
+agent_tool_usage_audit.csv: 24 rows
+status: pass=24
+tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link
 ```
 
 해석:
@@ -1997,7 +1997,7 @@ E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
 ML alert active-attack overlap: 9/9
-E7 minus E6 mission impact mean: 0.0167761
+E7 minus E6 mission impact mean: 0.0162307
 ```
 
 해석:
@@ -2049,7 +2049,7 @@ ml_threshold_sweep_summary rows: 5
 0.75 status: usable
 0.95 status: watch
 0.75 mission impact mean: 0.161111
-0.95 mission impact mean: 0.232634
+0.95 mission impact mean: 0.184434
 ```
 
 해석:
@@ -2668,12 +2668,15 @@ agent_stress_scenario_audit rows: 6
 status: pass=6
 seed_count: 5 per row
 tsra_r_full resilience_gain_mean min: 0.775357
-tsra_r_ml resilience_gain_mean min: 0.675561
-defended_mission_impact_mean max: 0.229527
+tsra_r_ml resilience_gain_mean min: 0.754937
+defended_mission_impact_mean max: 0.174011
+stale-COP mission_guard_trigger_count_mean: 3.2
+stale-COP mission_guard_event_trace_count_mean: 1.0
 ```
 
 해석:
 
 - 방어 에이전트가 일반 E5/E7 루프뿐 아니라 강한 폐쇄형 stress fixture에서도 mission impact를 낮춘다.
-- ML TSRA-R은 stale-COP chain에서 seed별 편차가 크지만, 5-seed 평균 기준 stress threshold를 넘는 방어력을 유지한다.
+- ML TSRA-R은 residual mission-risk guard로 stale-COP chain의 window 종료 시점 방어 누락을 줄인다.
+- ML TSRA-R은 세 stress fixture 모두에서 5-seed 평균 기준 stress threshold를 넘는 방어력을 유지한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.

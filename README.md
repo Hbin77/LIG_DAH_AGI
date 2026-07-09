@@ -432,7 +432,7 @@ This writes:
 - `outputs/report_tables/ml_contribution_audit.csv`
 - `outputs/report_tables/ml_contribution_audit.md`
 
-The audit verifies that ML is used inside bounded agent decisions: AURA-ML model quality, TSRA-R-ML detector quality, ML tool invocations in DecisionTrace, E6/E7 closed-loop separation, E7 ML action evidence, and the Mac MPS scale experiment framing.
+The audit verifies that ML is used inside bounded agent decisions: AURA-ML model quality, TSRA-R-ML detector quality, ML tool invocations in DecisionTrace, E6/E7 closed-loop separation, E7 ML action evidence, and the Mac MPS scale experiment framing. TSRA-R-ML also records a mission-risk guard tool that can extend an already opened defense window when residual COP, queue, or link risk remains near expiry.
 
 ## Audit ML Attack Decision Path
 
@@ -776,7 +776,7 @@ Outputs:
 - `outputs/report_tables/agent_stress_scenario_audit.csv`
 - `outputs/report_tables/agent_stress_scenario_audit.md`
 
-This runs closed-simulation air-defense, stale-COP, and PACE pressure stress fixtures across five seeds, then compares TSRA-R and TSRA-R-ML aggregate outcomes against attack-only outcomes.
+This runs closed-simulation air-defense, stale-COP, and PACE pressure stress fixtures across five seeds, then compares TSRA-R and TSRA-R-ML aggregate outcomes against attack-only outcomes. The stress table also records TSRA-R-ML mission-guard trigger counts so residual-risk window extensions are visible rather than hidden in code.
 
 ## Verify External Package Link
 

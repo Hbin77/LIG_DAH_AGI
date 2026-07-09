@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pickle
 from pathlib import Path
+from typing import Any
 
 from src.agents.runtime import AgentRuntime
 from src.agents.schema import ToolCallRecord
@@ -17,11 +18,15 @@ class MLTSRAR:
         threshold: float = 0.75,
         defense_window_sec: float = 70.0,
         alert_cooldown_sec: float = 25.0,
+        mission_guard_window_sec: float = 45.0,
+        guard_refresh_margin_sec: float = 20.0,
     ) -> None:
         self.rule = RuleTSRAR(mode="full")
         self.threshold = threshold
         self.defense_window_sec = defense_window_sec
         self.alert_cooldown_sec = alert_cooldown_sec
+        self.mission_guard_window_sec = mission_guard_window_sec
+        self.guard_refresh_margin_sec = guard_refresh_margin_sec
         self.active_defense_until = 0.0
         self.last_alert_time = -10_000.0
         if model_path.exists():
@@ -31,12 +36,20 @@ class MLTSRAR:
             self.model = None
         self.runtime = AgentRuntime(
             agent_name="TSRA-R-ML",
-            goal="open reactive defense windows when anomaly probability exceeds threshold",
+            goal=(
+                "open reactive defense windows when anomaly probability exceeds threshold "
+                "or residual mission risk remains near window expiry"
+            ),
         )
         self.runtime.register_tool(
             "predict_attack_probability",
             "Predict attack-induced degradation probability from mission state features",
             self._predict_attack_probability,
+        )
+        self.runtime.register_tool(
+            "assess_mission_risk_guard",
+            "Assess residual COP, queue, and link risk before closing a reactive defense window",
+            self._assess_mission_risk_guard,
         )
 
     def bind_runtime(self, trace_path: Path) -> None:
@@ -68,16 +81,29 @@ class MLTSRAR:
             tool_calls,
             state=state,
         )
+        mission_guard = self.runtime.call_tool(
+            "assess_mission_risk_guard",
+            tool_calls,
+            state=state,
+            probability=probability,
+        )
         events: list[DefenseEvent] = []
         opened_window = False
+        detector_triggered = probability >= self.threshold
+        guard_triggered = bool(mission_guard["open_window"])
 
-        if probability >= self.threshold:
+        if detector_triggered or guard_triggered:
+            window_sec = (
+                self.defense_window_sec
+                if detector_triggered
+                else self.mission_guard_window_sec
+            )
             self.active_defense_until = max(
                 self.active_defense_until,
-                state.time_sec + self.defense_window_sec,
+                state.time_sec + window_sec,
             )
             opened_window = True
-            if state.time_sec - self.last_alert_time >= self.alert_cooldown_sec:
+            if detector_triggered and state.time_sec - self.last_alert_time >= self.alert_cooldown_sec:
                 self.last_alert_time = state.time_sec
                 events.append(
                     self.rule._event(
@@ -95,9 +121,13 @@ class MLTSRAR:
         candidate_actions.append(
             {
                 "action": "open_defense_window",
-                "eligible": probability >= self.threshold,
+                "eligible": detector_triggered or guard_triggered,
                 "probability": round(probability, 6),
                 "threshold": self.threshold,
+                "detector_triggered": detector_triggered,
+                "mission_guard_triggered": guard_triggered,
+                "mission_guard_reason": mission_guard["reason"],
+                "mission_guard_score": mission_guard["risk_score"],
                 "active_defense_until": self.active_defense_until,
             }
         )
@@ -124,6 +154,8 @@ class MLTSRAR:
         self.runtime.memory.update_belief("active_defense_until", self.active_defense_until)
         self.runtime.memory.update_belief("last_probability", probability)
         self.runtime.memory.update_belief("last_alert_time", self.last_alert_time)
+        self.runtime.memory.update_belief("last_mission_guard_reason", mission_guard["reason"])
+        self.runtime.memory.update_belief("last_mission_guard_score", mission_guard["risk_score"])
         self.runtime.record_decision(
             time_sec=state.time_sec,
             policy="ml_anomaly_detector",
@@ -132,13 +164,21 @@ class MLTSRAR:
             tool_calls=tool_calls,
             selected_action=selected_action,
             reason=(
-                "detector opened or maintained defense window"
+                self._decision_reason(
+                    detector_triggered=detector_triggered,
+                    guard_triggered=guard_triggered,
+                    active_window=active_window,
+                )
                 if opened_window or active_window
                 else "probability below threshold and no active defense window"
             ),
             feedback={
                 "probability": probability,
                 "threshold": self.threshold,
+                "detector_triggered": detector_triggered,
+                "mission_guard_triggered": guard_triggered,
+                "mission_guard_reason": mission_guard["reason"],
+                "mission_guard_score": mission_guard["risk_score"],
                 "opened_window": opened_window,
                 "active_defense_until": self.active_defense_until,
                 "event_count": len(events),
@@ -149,3 +189,91 @@ class MLTSRAR:
     def _predict_attack_probability(self, state: MissionState) -> float:
         features = state_features(state)
         return float(self.model.predict_proba([features])[0][1])
+
+    def _assess_mission_risk_guard(
+        self,
+        state: MissionState,
+        probability: float,
+    ) -> dict[str, Any]:
+        had_prior_window = self.active_defense_until > 0.0
+        time_to_window_end = self.active_defense_until - state.time_sec
+        near_or_after_window_end = time_to_window_end <= self.guard_refresh_margin_sec
+
+        stale_component = min(state.stale_data_ratio / 0.5, 1.0)
+        inversion_component = min(state.priority_inversion_rate / 0.12, 1.0)
+        queue_component = min(state.video_queue_kb / 1500.0, 1.0)
+        latency_component = min(state.recent_p95_critical_latency_sec / 3.0, 1.0)
+        risk_score = round(
+            min(
+                1.0,
+                0.40 * stale_component
+                + 0.25 * inversion_component
+                + 0.20 * queue_component
+                + 0.15 * latency_component,
+            ),
+            6,
+        )
+
+        reasons = []
+        if state.stale_data_ratio >= 0.5:
+            reasons.append("residual_stale_cop")
+        if (
+            state.critical_pending > 0
+            and state.video_queue_kb > 500.0
+            and state.priority_inversion_rate >= 0.08
+        ):
+            reasons.append("critical_queue_pressure")
+        if self._active_link_degraded(state) and (
+            state.critical_pending > 0
+            or state.total_queue_kb > 4500.0
+            or state.priority_inversion_rate >= 0.1
+        ):
+            reasons.append("residual_link_degradation")
+
+        open_window = (
+            had_prior_window
+            and near_or_after_window_end
+            and bool(reasons)
+            and probability < self.threshold
+        )
+        reason = "+".join(reasons) if reasons else "none"
+        return {
+            "open_window": open_window,
+            "reason": reason,
+            "risk_score": risk_score,
+            "had_prior_window": had_prior_window,
+            "time_to_window_end_sec": round(time_to_window_end, 6),
+            "near_or_after_window_end": near_or_after_window_end,
+        }
+
+    @staticmethod
+    def _active_link_degraded(state: MissionState) -> bool:
+        active = state.links[state.active_link]
+        if state.active_link == "SATCOM":
+            return (
+                active.base_latency_ms > 1100
+                or active.loss_rate > 0.055
+                or state.total_queue_kb > 4500.0
+            )
+        return (
+            active.base_latency_ms > 550
+            or active.loss_rate > 0.04
+            or state.total_queue_kb > 6500.0
+        )
+
+    @staticmethod
+    def _decision_reason(
+        *,
+        detector_triggered: bool,
+        guard_triggered: bool,
+        active_window: bool,
+    ) -> str:
+        if detector_triggered and guard_triggered:
+            return "detector and mission risk guard opened or maintained defense window"
+        if detector_triggered:
+            return "detector opened or maintained defense window"
+        if guard_triggered:
+            return "mission risk guard opened or maintained defense window"
+        if active_window:
+            return "active defense window maintained while downstream rule actions were evaluated"
+        return "probability below threshold and no active defense window"

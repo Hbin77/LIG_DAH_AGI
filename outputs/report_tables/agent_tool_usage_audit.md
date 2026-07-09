@@ -5,9 +5,9 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 ## Summary
 
-- Audit rows: 23
-- Status counts: pass=23
-- Tools: estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link
+- Audit rows: 24
+- Status counts: pass=24
+- Tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link
 
 ## Tool Table
 
@@ -35,9 +35,18 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | estimate_detectability | 27 | 0.16129 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | generate_attack_candidates | 5 | 0.16129 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | predict_candidate_impact | 27 | 0.16129 | pass |
+| E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | assess_mission_risk_guard | 61 | 1 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | predict_attack_probability | 61 | 1 | pass |
 
 ## By Tool
+
+### assess_mission_risk_guard
+
+- Role: TSRA-R ML residual mission-risk guard assessment
+- Rows: 1
+- Total invocations: 61
+- Status: pass=1
+- Decision link: Residual mission risk can extend a previously opened TSRA-R-ML defense window
 
 ### estimate_candidate_effect
 

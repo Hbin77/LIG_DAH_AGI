@@ -907,7 +907,7 @@ package excluded artifact hits: 0
 ml_contribution_audit rows: 7 pass
 AURA-ML predict_candidate_impact invocations: 52
 TSRA-R-ML predict_attack_probability invocations: 61
-E6/E7 mission impact gap: 0.0167761
+E6/E7 mission impact gap: 0.0162307
 E7 attack types: failover_chasing, queue_pressure
 E7 ML alert count: 9
 Mac MPS sample_passes: 20000000
@@ -931,7 +931,7 @@ E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
 ML alert active-attack overlap: 9/9
-E7 minus E6 mission impact mean: 0.0167761
+E7 minus E6 mission impact mean: 0.0162307
 E7 detector below_threshold traces: 16
 E7 detector above_threshold traces: 45
 ```
@@ -953,7 +953,7 @@ thresholds: 0.55, 0.65, 0.75, 0.85, 0.95
 0.75 status: usable
 0.95 status: watch
 0.75 mission impact mean: 0.161111
-0.95 mission impact mean: 0.232634
+0.95 mission impact mean: 0.184434
 ```
 
 ### P31. TSRA-R Detector Calibration Audit

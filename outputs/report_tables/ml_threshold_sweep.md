@@ -10,4 +10,4 @@ Safety boundary: closed simulation ML threshold sweep only; no RF, exploit, or l
 | 0.65 | 10 | 0.161111 | 9 | 19 | 38.7 | usable | lower threshold opens reactive windows more readily; status=usable; impact_mean=0.161; alert_mean=9.00; first_alert_latency_mean=19.0s; no_op_mean=38.7 |
 | 0.75 | 10 | 0.161111 | 9 | 19 | 38.7 | usable | baseline threshold balances alert timing and no-op evidence; status=usable; impact_mean=0.161; alert_mean=9.00; first_alert_latency_mean=19.0s; no_op_mean=38.7 |
 | 0.85 | 10 | 0.161111 | 9 | 19 | 38.7 | usable | higher threshold requires stronger anomaly probability before action; status=usable; impact_mean=0.161; alert_mean=9.00; first_alert_latency_mean=19.0s; no_op_mean=38.7 |
-| 0.95 | 10 | 0.232634 | 5.8 | 24.5 | 42.1 | watch | higher threshold requires stronger anomaly probability before action; status=watch; impact_mean=0.233; alert_mean=5.80; first_alert_latency_mean=24.5s; no_op_mean=42.1 |
+| 0.95 | 10 | 0.184434 | 6.2 | 24.5 | 40.2 | watch | higher threshold requires stronger anomaly probability before action; status=watch; impact_mean=0.184; alert_mean=6.20; first_alert_latency_mean=24.5s; no_op_mean=40.2 |

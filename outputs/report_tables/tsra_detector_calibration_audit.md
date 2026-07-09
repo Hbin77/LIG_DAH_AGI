@@ -10,7 +10,7 @@ Safety boundary: closed simulation TSRA-R detector calibration audit only; no RF
 | CAL03 | Baseline threshold quality | pass | threshold=0.75; precision=1; recall=0.833417; f1=0.909141; false_positive_rate=0; false_negative_rate=0.166583; tp=1651; fp=0; fn=330; tn=2019 | The 0.75 detector threshold is conservative: it sharply limits false positives while retaining enough attack recall for reactive defense. |
 | CAL04 | Threshold sensitivity | pass | threshold_0.55_precision=0.991767; threshold_0.55_recall=0.912166; threshold_0.75_precision=1; threshold_0.75_recall=0.833417; threshold_0.95_precision=1; threshold_0.95_recall=0.532055 | The detector behaves monotonically enough for threshold tuning: higher threshold reduces recall while preserving high precision. |
 | CAL05 | Class probability separation | pass | positive_median=0.956382; positive_q75=0.986759; negative_median=0.106435; negative_q95=0.31731; median_gap=0.849948 | Attack-present states cluster near high probabilities and non-attack states stay low, which supports threshold-triggered defense windows. |
-| CAL06 | Closed-loop threshold consistency | pass | sweep_0.75_status=usable; sweep_0.75_impact=0.161111; sweep_0.95_status=watch; sweep_0.95_impact=0.232634; offline_0.75_recall=0.833417; offline_0.95_recall=0.532055 | Offline calibration and closed-loop sweep agree: an overly high threshold loses recall and increases mission impact. |
+| CAL06 | Closed-loop threshold consistency | pass | sweep_0.75_status=usable; sweep_0.75_impact=0.161111; sweep_0.95_status=watch; sweep_0.95_impact=0.184434; offline_0.75_recall=0.833417; offline_0.95_recall=0.532055 | Offline calibration and closed-loop sweep agree: an overly high threshold loses recall and increases mission impact. |
 
 ## Detail
 
@@ -63,7 +63,7 @@ Safety boundary: closed simulation TSRA-R detector calibration audit only; no RF
 
 - Requirement: Offline detector calibration must agree with the closed-loop threshold sweep direction.
 - Evidence: outputs/batch/ml_threshold_sweep_summary.csv | outputs/report_tables/ml_threshold_sweep.csv
-- Observed: sweep_0.75_status=usable; sweep_0.75_impact=0.161111; sweep_0.95_status=watch; sweep_0.95_impact=0.232634; offline_0.75_recall=0.833417; offline_0.95_recall=0.532055
+- Observed: sweep_0.75_status=usable; sweep_0.75_impact=0.161111; sweep_0.95_status=watch; sweep_0.95_impact=0.184434; offline_0.75_recall=0.833417; offline_0.95_recall=0.532055
 - Status: pass
 - Interpretation: Offline calibration and closed-loop sweep agree: an overly high threshold loses recall and increases mission impact.
 - Safety boundary: closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action

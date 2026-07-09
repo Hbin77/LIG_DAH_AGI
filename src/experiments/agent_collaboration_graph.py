@@ -238,7 +238,7 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             "Tool usage audit verifies tool invocation, input summaries, and output summaries",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             counts["agent_tool_audit_rows"],
-            counts["agent_tool_audit_rows"] == 23,
+            counts["agent_tool_audit_rows"] == 24,
             "Proves tools are invoked inside agent decision loops.",
         ),
         (

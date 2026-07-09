@@ -38,7 +38,7 @@ flowchart LR
   Tsra -->|E13 56 verified| Ledger
   Metrics -->|local before/after| Ledger
   Memory -->|E14 9 verified| Verifier
-  Tools -->|E15 23 verified| Verifier
+  Tools -->|E15 24 verified| Verifier
   Trace -->|E16 399 verified| Verifier
   Readiness -->|E17 10 verified| Verifier
   Tsra -->|response evidence| Replay
@@ -67,7 +67,7 @@ flowchart LR
 | E12 | Attack/Defense/Alert Evidence | Closed-Loop Episode Replay | 10 | verified | outputs/report_tables/closed_loop_episode_replay.csv | Shows attack, defense, alert, and metric progression in one reviewable episode record. |
 | E13 | DefenseEvent | Defense Effectiveness Ledger | 56 | verified | outputs/report_tables/defense_effectiveness_ledger.csv | Turns defensive actions into event-level effectiveness evidence. |
 | E14 | AgentMemory | Verifier/Package | 9 | verified | outputs/report_tables/agent_memory_belief_audit.csv | Proves memory is active loop state, not just a static trace field. |
-| E15 | AgentTool | Verifier/Package | 23 | verified | outputs/report_tables/agent_tool_usage_audit.csv | Proves tools are invoked inside agent decision loops. |
+| E15 | AgentTool | Verifier/Package | 24 | verified | outputs/report_tables/agent_tool_usage_audit.csv | Proves tools are invoked inside agent decision loops. |
 | E16 | DecisionTrace | Verifier/Package | 399 | verified | outputs/report_tables/agent_decision_causality_audit.csv | Proves selected actions are grounded in recorded decision evidence. |
 | E17 | Submission Readiness Audit | Verifier/Package | 10 | verified | outputs/report_tables/submission_readiness_audit.csv | Connects teammate handoff and packaging readiness to the same evidence bundle. |
 
@@ -203,7 +203,7 @@ flowchart LR
 
 - Interaction: Tool usage audit verifies tool invocation, input summaries, and output summaries
 - Evidence: outputs/report_tables/agent_tool_usage_audit.csv
-- Evidence count: 23
+- Evidence count: 24
 - Validation status: verified
 - Purpose: Proves tools are invoked inside agent decision loops.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

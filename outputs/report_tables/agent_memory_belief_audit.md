@@ -21,7 +21,7 @@ Safety boundary: closed simulation agent-memory audit only; no RF, exploit, or l
 | E6_ml_aura_tsra_r | AURA-ML | ml_impact_predictor | 31 | 31 | event_count, last_attack_time, last_attack_type | 1 | pass |
 | E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | 61 | 61 | action_cooldowns, event_count | 1 | pass |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | 31 | 31 | event_count, last_attack_time, last_attack_type | 1 | pass |
-| E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | 61 | 61 | active_defense_until, last_alert_time, last_probability | 1 | pass |
+| E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | 61 | 61 | active_defense_until, last_alert_time, last_mission_guard_reason, last_mission_guard_score, last_probability | 1 | pass |
 
 ## Detail
 
@@ -134,10 +134,10 @@ Safety boundary: closed simulation agent-memory audit only; no RF, exploit, or l
 - Memory coverage: 1
 - Observation count: 1 -> 24 (true)
 - Decision count: 0 -> 24 (true)
-- Belief keys: active_defense_until, last_alert_time, last_probability
-- Changing belief keys: active_defense_until, last_alert_time, last_probability
-- Feedback keys: active_defense_until, event_count, opened_window, probability, threshold
+- Belief keys: active_defense_until, last_alert_time, last_mission_guard_reason, last_mission_guard_score, last_probability
+- Changing belief keys: active_defense_until, last_alert_time, last_mission_guard_reason, last_mission_guard_score, last_probability
+- Feedback keys: active_defense_until, detector_triggered, event_count, mission_guard_reason, mission_guard_score, mission_guard_triggered, opened_window, probability, threshold
 - Last-selected chain: 60/60
-- Effect summary: ML TSRA-R memory carries anomaly probability and active defense window state into reactive defense decisions; changing=active_defense_until, last_alert_time, last_probability; feedback=active_defense_until, event_count, opened_window, probability, threshold.
+- Effect summary: ML TSRA-R memory carries anomaly probability and active defense window state into reactive defense decisions; changing=active_defense_until, last_alert_time, last_mission_guard_reason, last_mission_guard_score, last_probability; feedback=active_defense_until, detector_triggered, event_count, mission_guard_reason, mission_guard_score, mission_guard_triggered, opened_window, probability, threshold.
 - Status: pass
 - Issues: none

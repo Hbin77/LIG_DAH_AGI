@@ -136,6 +136,47 @@ RandomForest를 배포 모델로 둔 이유:
 - LogisticRegression은 synthetic holdout 점수는 높았지만 실제 폐루프의 큰 queue-pressure 상태에서 detector probability가 낮게 나오는 calibration 문제가 있었다.
 - RandomForest는 nonlinear feature interaction을 반영해 실제 시뮬레이터 상태에서 방어 window를 안정적으로 연다.
 
+### 7.1 TSRA-R-ML Mission Risk Guard
+
+TSRA-R-ML은 detector probability만 보는 구조로 두지 않는다.
+
+문제:
+
+- detector가 첫 공격 구간에서는 방어 window를 잘 열 수 있다.
+- 하지만 공격 효과가 끝나가는 시점에는 probability가 낮아질 수 있다.
+- 이때 COP stale exposure 같은 잔여 임무 위험이 남아 있으면 window가 닫히면서 `stale_badge` 갱신을 놓칠 수 있다.
+
+보강:
+
+```text
+Tool: assess_mission_risk_guard
+조건:
+- 이전에 ML detector가 방어 window를 연 적이 있어야 한다.
+- window 종료가 가까워졌거나 이미 지나야 한다.
+- residual_stale_cop, critical_queue_pressure, residual_link_degradation 중 하나가 있어야 한다.
+- probability가 threshold 아래일 때만 guard extension으로 해석한다.
+```
+
+출력:
+
+```text
+mission_guard_triggered
+mission_guard_reason
+mission_guard_score
+active_defense_until
+```
+
+이 guard는 새 방어 action을 만들지 않는다. 기존 `stale_badge`, `priority_reroute`, `video_throttle`, `pace_switch`를 실행할 수 있는 짧은 방어 window만 연장한다. 그래서 시뮬레이터 action contract는 유지되고, 근거는 `DecisionTrace`와 `agent_stress_scenario_audit`에 남는다.
+
+stress 검증 결과:
+
+```text
+stale-COP chain TSRA-R-ML gain_mean: 0.675561 -> 0.754937
+stale-COP chain TSRA-R-ML gain_min:  0.486689 -> 0.699806
+mission_guard_trigger_count_mean:    3.2
+mission_guard_event_trace_count_mean: 1.0
+```
+
 ## 8. 반복 실험 결과
 
 30개 seed 평균:

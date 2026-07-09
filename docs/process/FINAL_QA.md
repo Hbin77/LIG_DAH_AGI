@@ -95,7 +95,7 @@ agent_goal_alignment_audit rows: 399 pass
 agent_decision_feedback_audit rows: 66 pass
 agent_memory_belief_audit rows: 9 pass
 agent_memory_influence_audit rows: 6 pass
-agent_tool_usage_audit rows: 23 pass
+agent_tool_usage_audit rows: 24 pass
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10
 attack_defense_coverage rows: 4 covered

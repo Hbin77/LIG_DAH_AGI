@@ -867,7 +867,7 @@ status: all pass
 E3-E1 impact delta: 0.456259
 E5 resilience gain: 0.826993
 E5/E3 impact ratio: 0.172152
-E6/E7 impact separation: 0.0167761
+E6/E7 impact separation: 0.0162307
 ```
 
 해석:
@@ -1494,9 +1494,10 @@ DecisionTrace.tool_calls
 검증 결과:
 
 ```text
-agent_tool_usage_audit.csv: 23 rows
-status: pass=23
+agent_tool_usage_audit.csv: 24 rows
+status: pass=24
 tools:
+  assess_mission_risk_guard
   estimate_candidate_effect
   estimate_detectability
   evaluate_defense_conditions
@@ -1511,7 +1512,7 @@ tools:
 - AURA는 후보 생성, mission impact what-if, detectability penalty tool을 실제 호출한다.
 - AURA-ML은 ML impact prediction tool을 추가로 호출한다.
 - TSRA-R은 방어 조건 평가와 PACE fallback 선택 tool을 실제 호출한다.
-- TSRA-R-ML은 anomaly probability prediction tool을 실제 호출한다.
+- TSRA-R-ML은 anomaly probability prediction tool과 residual mission-risk guard tool을 실제 호출한다.
 - 이 산출물은 `Tool`이 정적 코드 구조가 아니라 DecisionTrace 안에서 검증 가능한 실행 증거라는 점을 보여준다.
 
 연결한 것:
@@ -2069,7 +2070,7 @@ ml_contribution_audit rows: 7
 status: pass=7
 AURA-ML predict_candidate_impact invocations: 52
 TSRA-R-ML predict_attack_probability invocations: 61
-E6/E7 mission impact gap: 0.0167761
+E6/E7 mission impact gap: 0.0162307
 Mac MPS sample_passes: 20000000
 ```
 
@@ -2115,13 +2116,13 @@ E6 pre-first defense events: 2
 E7 pre-first defense events: 0
 E7 first ML alert latency: 20 sec
 ML alerts overlapping active attack: 9/9
-E7 minus E6 mission impact mean: 0.0167761
+E7 minus E6 mission impact mean: 0.0162307
 ```
 
 해석:
 
 - E7은 pre-attack 방어 이벤트를 억제하고, 탐지 확률이 높아진 뒤 방어창을 연다.
-- 그 비용으로 첫 alert가 20초 늦고, repeated metric에서 E7 impact가 E6보다 0.0167761 높다.
+- 그 비용으로 첫 alert가 20초 늦고, repeated metric에서 E7 impact가 E6보다 0.0162307 높다.
 - core defense action은 유지되므로 E7은 방어 기능 축소가 아니라 reactive trigger 구조의 차이를 보여준다.
 - 실제 공격 기능은 추가하지 않고 closed simulation trace, event log, batch metric만 읽는다.
 
@@ -2158,7 +2159,7 @@ ml_threshold_sweep_summary rows: 5
 0.65 impact_mean: 0.161111, status: usable
 0.75 impact_mean: 0.161111, status: usable
 0.85 impact_mean: 0.161111, status: usable
-0.95 impact_mean: 0.232634, status: watch
+0.95 impact_mean: 0.184434, status: watch
 ```
 
 해석:
@@ -2610,17 +2611,62 @@ scenarios: air_defense_queue_saturation, stale_cop_latency_chain, pace_failover_
 defender variants: tsra_r_full, tsra_r_ml
 seed_count: 5 per row
 tsra_r_full resilience_gain_mean range: 0.775357-0.842876
-tsra_r_ml resilience_gain_mean range: 0.675561-0.833690
+tsra_r_ml resilience_gain_mean range: 0.754937-0.833690
 tsra_r_full resilience_gain_min floor: 0.710987
-tsra_r_ml stressed stale-COP gain_min: 0.486689
-defended_mission_impact_mean max: 0.229527
+tsra_r_ml stressed stale-COP gain_min: 0.699806
+defended_mission_impact_mean max: 0.174011
+stale-COP mission_guard_trigger_count_mean: 3.2
+stale-COP mission_guard_event_trace_count_mean: 1.0
 ```
 
 해석:
 
 - TSRA-R full은 세 stress fixture 모두에서 평균 0.75 이상의 resilience gain을 유지한다.
 - TSRA-R-ML은 세 stress fixture 모두에서 평균 0.65 이상의 resilience gain을 유지한다.
-- TSRA-R-ML은 stale-COP chain에서 seed별 편차가 크므로 `resilience_gain_min`과 `resilience_gain_std`를 함께 노출한다.
+- TSRA-R-ML은 stale-COP chain에서 residual mission-risk guard를 사용해 window 종료 시점의 `stale_badge` 갱신 누락을 줄인다.
 - 모든 stress row에서 평균 P95 latency, trusted stale exposure, priority inversion이 attack-only 대비 감소한다.
 - 이 보강은 방어 에이전트가 일반 실험뿐 아니라 특정 임무 압박 조건에서도 작동한다는 증거를 추가한다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않고 closed simulation stress evidence만 생성한다.
+
+### 66. TSRA-R-ML Residual Mission-Risk Guard를 추가한 이유
+
+stress audit에서 가장 약했던 지점은 `stress_stale_cop_latency_chain`의 TSRA-R-ML seed 편차였다. 원인은 detector가 첫 공격 구간에서는 방어 window를 열지만, 공격 효과가 약해진 뒤 probability가 threshold 아래로 내려가면서 window가 닫히고, stale COP 위험이 남은 시점의 `stale_badge` refresh를 놓치는 구조였다.
+
+이번 변경은 `MLTSRAR`에 두 번째 tool을 추가했다.
+
+```text
+assess_mission_risk_guard
+```
+
+작동 기준:
+
+```text
+1. 이전에 ML detector가 방어 window를 연 적이 있어야 한다.
+2. active_defense_until이 가까워졌거나 지났어야 한다.
+3. residual_stale_cop, critical_queue_pressure, residual_link_degradation 중 하나가 있어야 한다.
+4. probability가 threshold 아래일 때만 mission guard extension으로 해석한다.
+```
+
+중요한 설계 선택:
+
+- 새 `DefenseEvent` action을 만들지 않았다.
+- guard는 기존 core action을 실행할 수 있는 짧은 window만 연장한다.
+- 기본 E7에서는 `mission_guard_triggered=0`으로 기존 threshold decision path를 바꾸지 않았다.
+- stress audit에는 `mission_guard_trigger_count_mean`, `mission_guard_event_trace_count_mean` 컬럼을 추가해 guard 작동 여부를 산출물에서 바로 볼 수 있게 했다.
+
+검증 결과:
+
+```text
+stress_stale_cop_latency_chain TSRA-R-ML
+gain_mean: 0.675561 -> 0.754937
+gain_min:  0.486689 -> 0.699806
+impact_mean: 0.229527 -> 0.174011
+mission_guard_trigger_count_mean: 3.2
+mission_guard_event_trace_count_mean: 1.0
+```
+
+해석:
+
+- 이번 변경은 ML 방어자를 full rule 방어자로 되돌린 것이 아니다.
+- detector probability가 닫히는 경계에서 residual mission risk만 확인해 방어 window를 제한적으로 연장한다.
+- Agent Runtime 관점에서는 `predict_attack_probability`와 `assess_mission_risk_guard`가 모두 ToolCallRecord에 남고, Memory에는 `last_mission_guard_reason`, `last_mission_guard_score`가 남는다.

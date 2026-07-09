@@ -171,7 +171,9 @@ def defense_decision_source(action: str, agents: list[str]) -> str:
             + (", select_fallback_link" if action == "pace_switch" else "")
         )
     if "TSRA-R-ML" in agents:
-        sources.append("TSRA-R-ML: predict_attack_probability, reactive defense window")
+        sources.append(
+            "TSRA-R-ML: predict_attack_probability, assess_mission_risk_guard, reactive defense window"
+        )
     return "; ".join(sources) if sources else "evaluate_defense_conditions"
 
 

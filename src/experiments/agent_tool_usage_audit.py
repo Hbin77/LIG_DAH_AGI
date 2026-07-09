@@ -29,6 +29,7 @@ TOOL_ROLES = {
     "evaluate_defense_conditions": "TSRA-R defense condition evaluation",
     "select_fallback_link": "TSRA-R PACE fallback selection",
     "predict_attack_probability": "TSRA-R ML anomaly probability prediction",
+    "assess_mission_risk_guard": "TSRA-R ML residual mission-risk guard assessment",
 }
 
 FIELDNAMES = [
@@ -221,6 +222,8 @@ def decision_link(agent: str, tool_name: str) -> str:
         return "PACE fallback selection drives TSRA-R pace_switch details"
     if tool_name == "predict_attack_probability":
         return "ML anomaly probability opens TSRA-R reactive defense window"
+    if tool_name == "assess_mission_risk_guard":
+        return "Residual mission risk can extend a previously opened TSRA-R-ML defense window"
     return f"{agent} decision trace records this tool before selected_action"
 
 

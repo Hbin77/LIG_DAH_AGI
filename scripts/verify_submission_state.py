@@ -679,7 +679,7 @@ def check_csv_outputs() -> list[str]:
     checks.append("agent_memory_influence_audit rows=6 pass")
 
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
-    require(len(tool_rows) == 23, f"expected 23 agent tool audit rows, got {len(tool_rows)}")
+    require(len(tool_rows) == 24, f"expected 24 agent tool audit rows, got {len(tool_rows)}")
     failed_tool_rows = [
         f"{row['experiment']}:{row['agent']}:{row['tool_name']}"
         for row in tool_rows
@@ -691,6 +691,7 @@ def check_csv_outputs() -> list[str]:
         "estimate_detectability",
         "evaluate_defense_conditions",
         "generate_attack_candidates",
+        "assess_mission_risk_guard",
         "predict_attack_probability",
         "predict_candidate_impact",
         "select_fallback_link",
@@ -724,7 +725,7 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in tool_rows),
         "agent tool audit missing safety boundary",
     )
-    checks.append("agent_tool_usage_audit rows=23 pass")
+    checks.append("agent_tool_usage_audit rows=24 pass")
 
     interface_rows = read_csv("outputs/report_tables/agent_interface_manifest.csv")
     require(len(interface_rows) == 4, f"expected 4 agent interface rows, got {len(interface_rows)}")
@@ -1252,7 +1253,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            "e7_minus_e6=0.0167761" in row["observed"]
+            "e7_minus_e6=0.0162307" in row["observed"]
             for row in tradeoff_rows
             if row["check_id"] == "RDT06"
         ),

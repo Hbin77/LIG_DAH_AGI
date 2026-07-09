@@ -89,7 +89,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Side: defense
 - Agent family: TSRA-R, TSRA-R-ML
 - Runtime actions: defense_events
-- Decision source: TSRA-R: evaluate_defense_conditions, select_fallback_link; TSRA-R-ML: predict_attack_probability, reactive defense window
+- Decision source: TSRA-R: evaluate_defense_conditions, select_fallback_link; TSRA-R-ML: predict_attack_probability, assess_mission_risk_guard, reactive defense window
 - Trigger or selection logic: active link degradation crosses mission threshold
 - Evidence count: 6
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
@@ -102,7 +102,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Side: defense
 - Agent family: TSRA-R, TSRA-R-ML
 - Runtime actions: defense_events
-- Decision source: TSRA-R: evaluate_defense_conditions; TSRA-R-ML: predict_attack_probability, reactive defense window
+- Decision source: TSRA-R: evaluate_defense_conditions; TSRA-R-ML: predict_attack_probability, assess_mission_risk_guard, reactive defense window
 - Trigger or selection logic: critical traffic waits behind video or queue pressure
 - Evidence count: 11
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
@@ -115,7 +115,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Side: defense
 - Agent family: TSRA-R, TSRA-R-ML
 - Runtime actions: defense_events
-- Decision source: TSRA-R: evaluate_defense_conditions; TSRA-R-ML: predict_attack_probability, reactive defense window
+- Decision source: TSRA-R: evaluate_defense_conditions; TSRA-R-ML: predict_attack_probability, assess_mission_risk_guard, reactive defense window
 - Trigger or selection logic: COP stale ratio exceeds trust threshold
 - Evidence count: 16
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r
@@ -128,7 +128,7 @@ Safety boundary: closed simulation capability matrix only; no RF, exploit, or li
 - Side: defense
 - Agent family: TSRA-R, TSRA-R-ML
 - Runtime actions: defense_events
-- Decision source: TSRA-R: evaluate_defense_conditions; TSRA-R-ML: predict_attack_probability, reactive defense window
+- Decision source: TSRA-R: evaluate_defense_conditions; TSRA-R-ML: predict_attack_probability, assess_mission_risk_guard, reactive defense window
 - Trigger or selection logic: video load threatens critical traffic capacity
 - Evidence count: 14
 - Evidence experiments: E5_rule_aura_tsra_r, E7_ml_aura_ml_tsra_r

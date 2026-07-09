@@ -10,7 +10,7 @@ Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, 
 | RDT03 | First-response latency cost | pass | e6_first_core_response_latency_sec=5; e7_first_ml_alert_latency_sec=20 | E7 waits for detector confidence before opening the defense window; the measured cost in the representative run is a 20 second first-alert delay. |
 | RDT04 | ML alert attack overlap | pass | ml_attack_alerts=9; active_attack_overlap=9; avg_alert_probability=0.951163; threshold=0.75 | Every E7 ML alert overlaps an active simulated attack window, so the alert stream is tied to attack context rather than arbitrary noise. |
 | RDT05 | Core defense preservation | pass | e6_core_defense_events=24; e7_core_defense_events=24; e7_actions=ml_attack_alert:9,pace_switch:3,priority_reroute:6,stale_badge:8,video_throttle:7 | E7 adds ML alerting without dropping the core response vocabulary: PACE, priority reroute, stale badge, and video throttle remain present. |
-| RDT06 | Bounded impact tradeoff | pass | e6_mission_impact_mean=0.14924; e7_mission_impact_mean=0.166017; e7_minus_e6=0.0167761; e6_std=0.012923; e7_std=0.0120651 | E7 is not sold as lower-impact than E6. Its observed cost is bounded while remaining stable across repeated seeds. |
+| RDT06 | Bounded impact tradeoff | pass | e6_mission_impact_mean=0.14924; e7_mission_impact_mean=0.165471; e7_minus_e6=0.0162307; e6_std=0.012923; e7_std=0.0119458 | E7 is not sold as lower-impact than E6. Its observed cost is bounded while remaining stable across repeated seeds. |
 | RDT07 | Detector threshold evidence | pass | trace_count=61; probability_count=61; threshold=0.75; below_threshold=16; above_threshold=45; opened_window=45; no_op=38; min_probability=0.229467; max_probability=0.97963 | The ML defender is not always-on: traces include no-op decisions below threshold and defense-window openings above threshold. |
 
 ## Detail
@@ -64,7 +64,7 @@ Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, 
 
 - Requirement: Reactive defense may cost mission-impact containment versus always-on rule defense, but the cost must stay bounded.
 - Evidence: outputs/batch/repeated_experiment_summary.csv
-- Observed: e6_mission_impact_mean=0.14924; e7_mission_impact_mean=0.166017; e7_minus_e6=0.0167761; e6_std=0.012923; e7_std=0.0120651
+- Observed: e6_mission_impact_mean=0.14924; e7_mission_impact_mean=0.165471; e7_minus_e6=0.0162307; e6_std=0.012923; e7_std=0.0119458
 - Status: pass
 - Interpretation: E7 is not sold as lower-impact than E6. Its observed cost is bounded while remaining stable across repeated seeds.
 - Safety boundary: closed simulation reactive-defense tradeoff audit only; no RF, exploit, or live network action

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean, pstdev
@@ -45,6 +46,8 @@ FIELDNAMES = [
     "priority_inversion_reduction_mean",
     "attack_count_mean",
     "defense_count_mean",
+    "mission_guard_trigger_count_mean",
+    "mission_guard_event_trace_count_mean",
     "required_mean_gain",
     "required_mean_impact_ceiling",
     "status",
@@ -193,12 +196,15 @@ def run_variant(
     seed: int,
     temp_root: Path,
 ) -> dict[str, float]:
+    output_dir = temp_root / scenario.scenario_id / variant / f"seed_{seed}"
     sim = MissionSimulator(
         duration_sec=300,
         seed=seed,
-        output_dir=temp_root / scenario.scenario_id / variant / f"seed_{seed}",
+        output_dir=output_dir,
     )
-    return sim.run(defender=defender, fixed_attacks=make_attacks(scenario))
+    summary = sim.run(defender=defender, fixed_attacks=make_attacks(scenario))
+    summary.update(ml_guard_profile(output_dir))
+    return summary
 
 
 def collect_rows(temp_root: Path = DEFAULT_TEMP_ROOT) -> list[dict[str, str]]:
@@ -292,6 +298,8 @@ def build_row(
     )
     defense_counts = values(defended_rows, "defense_count")
     attack_counts = values(defended_rows, "attack_count")
+    guard_trigger_counts = values(defended_rows, "mission_guard_trigger_count")
+    guard_event_trace_counts = values(defended_rows, "mission_guard_event_trace_count")
     gain_mean = mean(gains)
     defended_impact_mean = mean(defended_impacts)
     status = (
@@ -326,6 +334,8 @@ def build_row(
         "priority_inversion_reduction_mean": fmt(mean(inversion_reductions)),
         "attack_count_mean": fmt(mean(attack_counts)),
         "defense_count_mean": fmt(mean(defense_counts)),
+        "mission_guard_trigger_count_mean": fmt(mean(guard_trigger_counts)),
+        "mission_guard_event_trace_count_mean": fmt(mean(guard_event_trace_counts)),
         "required_mean_gain": fmt(required_mean_gain),
         "required_mean_impact_ceiling": fmt(required_mean_impact_ceiling),
         "status": status,
@@ -339,6 +349,8 @@ def build_row(
             p95_reduction_mean=mean(p95_reductions),
             stale_reduction_mean=mean(stale_reductions),
             inversion_reduction_mean=mean(inversion_reductions),
+            guard_trigger_count_mean=mean(guard_trigger_counts),
+            guard_event_trace_count_mean=mean(guard_event_trace_counts),
         ),
         "safety_boundary": SAFETY_BOUNDARY,
     }
@@ -346,6 +358,36 @@ def build_row(
 
 def values(rows: list[dict[str, float]], key: str) -> list[float]:
     return [float(row[key]) for row in rows]
+
+
+def ml_guard_profile(output_dir: Path) -> dict[str, float]:
+    traces = read_jsonl(output_dir / "tsra_r_decision_traces.jsonl")
+    guard_traces = [
+        trace
+        for trace in traces
+        if (trace.get("feedback") or {}).get("mission_guard_triggered")
+    ]
+    guard_event_traces = [
+        trace
+        for trace in guard_traces
+        if int((trace.get("feedback") or {}).get("event_count") or 0) > 0
+    ]
+    return {
+        "mission_guard_trigger_count": float(len(guard_traces)),
+        "mission_guard_event_trace_count": float(len(guard_event_traces)),
+    }
+
+
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows = []
+    with path.open(encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    return rows
 
 
 def paired_reductions(
@@ -391,14 +433,23 @@ def interpretation(
     p95_reduction_mean: float,
     stale_reduction_mean: float,
     inversion_reduction_mean: float,
+    guard_trigger_count_mean: float,
+    guard_event_trace_count_mean: float,
 ) -> str:
+    guard_text = (
+        f", mission_guard_trigger_count_mean={fmt(guard_trigger_count_mean)}, "
+        f"mission_guard_event_trace_count_mean={fmt(guard_event_trace_count_mean)}"
+        if variant == "tsra_r_ml"
+        else ""
+    )
     return (
         f"{variant} preserved aggregate stress resilience in {scenario.scenario_id} "
         f"across {seed_count} seeds: gain_mean={fmt(gain_mean)}, "
         f"gain_min={fmt(gain_min)}, defended_impact_mean={fmt(defended_impact_mean)}, "
         f"p95_reduction_sec_mean={fmt(p95_reduction_mean)}, "
         f"trusted_stale_reduction_mean={fmt(stale_reduction_mean)}, "
-        f"priority_inversion_reduction_mean={fmt(inversion_reduction_mean)}."
+        f"priority_inversion_reduction_mean={fmt(inversion_reduction_mean)}"
+        f"{guard_text}."
     )
 
 
@@ -464,6 +515,8 @@ def write_markdown(path: Path, rows: list[dict[str, str]]) -> None:
                 f"- Trusted stale reduction mean: {row['trusted_stale_reduction_mean']}",
                 f"- Priority inversion reduction mean: {row['priority_inversion_reduction_mean']}",
                 f"- Defense count mean: {row['defense_count_mean']}",
+                f"- Mission guard trigger count mean: {row['mission_guard_trigger_count_mean']}",
+                f"- Mission guard event trace count mean: {row['mission_guard_event_trace_count_mean']}",
                 f"- Status: {row['status']}",
                 f"- Interpretation: {row['interpretation']}",
                 f"- Safety boundary: {row['safety_boundary']}",

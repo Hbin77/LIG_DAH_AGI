@@ -289,7 +289,7 @@ def summarize_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
             "avg_trace_probability": mean_std(group, "avg_trace_probability"),
             "max_trace_probability": mean_std(group, "max_trace_probability"),
         }
-        status = tuning_status(metrics)
+        status = tuning_status(float(threshold), metrics)
         summary_rows.append(
             {
                 "threshold": threshold,
@@ -332,12 +332,19 @@ def mean_std(rows: list[dict[str, str]], key: str) -> tuple[float, float]:
     return statistics.fmean(values), statistics.stdev(values)
 
 
-def tuning_status(metrics: dict[str, tuple[float, float]]) -> str:
+def tuning_status(threshold: float, metrics: dict[str, tuple[float, float]]) -> str:
     mission_impact = metrics["mission_impact"][0]
     overlap = metrics["alert_active_overlap_rate"][0]
     pre_first = metrics["pre_first_defense_events"][0]
     core_count = metrics["core_defense_count"][0]
     latency = metrics["first_ml_alert_latency_sec"][0]
+    alert_count = metrics["ml_alert_count"][0]
+    if threshold >= 0.95 and (
+        mission_impact > 0.18
+        or alert_count < 8.0
+        or latency > 20.0
+    ):
+        return "watch"
     if (
         mission_impact <= 0.20
         and overlap >= 0.80

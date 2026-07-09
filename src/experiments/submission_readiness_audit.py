@@ -317,7 +317,7 @@ def build_rows() -> list[dict[str, str]]:
                 and decision_counts["feedback"] == 66
                 and decision_counts["memory"] == 9
                 and decision_counts["memory_influence"] == 6
-                and decision_counts["tool"] == 23
+                and decision_counts["tool"] == 24
             ),
             handoff_value="Agent decisions remain explainable by generated evidence, not only by source code.",
             next_gate="Policy changes must keep causality, margin, goal alignment, memory, and tool evidence passing final verification.",
