@@ -3,9 +3,23 @@
 ## 브랜치 원칙
 
 - 작업 브랜치: `hbin`
+- 보호/기본 브랜치: `main`
 - 원격 저장소: `https://github.com/Hbin77/LIG_DAH_AGI.git`
-- `main` 브랜치에는 직접 push하지 않는다.
+- `main` 브랜치는 삭제하지 않고 보존한다.
+- `main` 브랜치에는 개발 산출물을 직접 push하지 않는다.
 - 모든 개발 기록, 실험 근거, 문서 수정은 `hbin` 브랜치에 커밋한다.
+
+현재 운영 방식:
+
+```text
+main: GitHub 기본 브랜치. 보호용 README만 둔다.
+hbin: 실제 개발 브랜치. 코드, 실험 결과, 보고서 문서를 계속 갱신한다.
+```
+
+이렇게 분리하는 이유는 두 가지다.
+
+1. `main`을 안정적인 기본 브랜치로 남겨 저장소 구조가 깨지지 않게 한다.
+2. 대회 개발 과정의 모든 변경 이력은 `hbin`에서만 추적해 main 오염을 막는다.
 
 ## 커밋 원칙
 
@@ -72,4 +86,3 @@ python3 -m venv .venv-gpu
 .venv-gpu/bin/python -m pip install -r requirements-gpu.txt
 .venv-gpu/bin/python -m src.ml.train_aura_mps_mlp --device mps --samples 1000000 --epochs 20 --batch-size 32768 --eval-samples 120000 --top1-groups 1500
 ```
-
