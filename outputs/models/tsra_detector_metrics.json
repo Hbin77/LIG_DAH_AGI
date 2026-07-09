@@ -1,5 +1,5 @@
 {
-  "best_model": "logistic_regression",
+  "best_model": "random_forest",
   "models": {
     "logistic_regression": {
       "precision": 0.9918032786885246,

@@ -6,7 +6,7 @@
 
 ## 결과 한 줄
 
-30개 seed 반복 실험에서 AURA는 Mission Impact를 평균 `0.914`까지 증가시켰고, TSRA-R 적용 후 평균 `0.124`로 감소했다. 이는 AURA 공격 대비 약 `86.4%`의 Resilience Gain이다.
+30개 seed 반복 실험에서 AURA는 Mission Impact를 평균 `0.914`까지 증가시켰고, TSRA-R 적용 후 평균 `0.124`로 감소했다. 이는 AURA 공격 대비 약 `86.4%`의 Resilience Gain이다. ML TSRA-R은 항상 방어하는 rule 방식이 아니라 detector가 공격성 저하를 판단한 구간에서만 방어 window를 여는 reactive defense로 구현했다.
 
 ## 보고서에 넣을 표
 
@@ -32,11 +32,10 @@
 
 > TSRA-R은 stale data 자체를 즉시 제거하지는 못하지만, stale badge와 confidence annotation을 통해 지휘소가 오래된 정보를 최신 정보로 오인하는 비율을 낮춘다. 이를 표현하기 위해 본 실험은 raw stale_data_ratio와 trusted_stale_exposure를 분리했다.
 
-> 30개 seed 반복 실험에서 AURA 공격은 Mission Impact를 평균 0.914까지 증가시켰다. TSRA-R 적용 후 Mission Impact는 평균 0.124로 감소했으며, 이는 AURA 공격 대비 약 86.4%의 Resilience Gain이다.
+> 30개 seed 반복 실험에서 AURA 공격은 Mission Impact를 평균 0.914까지 증가시켰다. TSRA-R 적용 후 Mission Impact는 평균 0.124로 감소했으며, 이는 AURA 공격 대비 약 86.4%의 Resilience Gain이다. ML TSRA-R은 평균 0.135의 Mission Impact와 약 85.2%의 Resilience Gain을 보였으며, 이는 detector가 공격성 저하를 판단한 구간에서만 방어 window를 여는 reactive defense 결과다.
 
-> ML은 두 지점에 적용했다. AURA Impact Predictor는 공격 후보의 MissionImpactScore를 예측하고, TSRA-R Anomaly Detector는 링크·큐·freshness 변화량을 기반으로 공격성 저하를 탐지한다. 추가로 Apple M3 Pro의 MPS backend를 활용해 2천만 개 synthetic attack candidate를 학습하는 GPU-scale MLP 실험을 수행했다.
+> ML은 두 지점에 적용했다. AURA Impact Predictor는 공격 후보의 MissionImpactScore를 예측하고, TSRA-R Anomaly Detector는 링크·큐·freshness 변화량을 기반으로 공격성 저하를 탐지한다. 추가로 Apple M3 Pro의 MPS backend를 활용해 100만 개 synthetic attack candidate를 20 epoch 반복 학습하는 GPU-scale MLP 실험을 수행했다. GPU MLP는 회귀 정밀도는 높지만 action selection 정확도는 tree 기반 모델이 더 안정적이므로 확장성 실험으로 제시한다.
 
 ## 주의 문장
 
 > 본 구현은 실제 SATCOM 침해, RF 재밍, 장비 취약점 악용을 수행하지 않는다. 모든 공격은 폐쇄형 시뮬레이터 내부의 지연, 손실, 대역폭 제한, 큐 혼잡 효과로만 표현된다. ML 성능은 합성 데이터 기준이며 실제 운용망 적용 전에는 실측 telemetry 기반 재학습과 검증이 필요하다.
-

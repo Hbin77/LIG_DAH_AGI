@@ -12,10 +12,16 @@ class MLTSRAR:
     def __init__(
         self,
         model_path: Path = Path("outputs/models/tsra_detector.pkl"),
-        threshold: float = 0.55,
+        threshold: float = 0.75,
+        defense_window_sec: float = 70.0,
+        alert_cooldown_sec: float = 25.0,
     ) -> None:
         self.rule = RuleTSRAR(mode="full")
         self.threshold = threshold
+        self.defense_window_sec = defense_window_sec
+        self.alert_cooldown_sec = alert_cooldown_sec
+        self.active_defense_until = 0.0
+        self.last_alert_time = -10_000.0
         if model_path.exists():
             with model_path.open("rb") as f:
                 self.model = pickle.load(f)
@@ -23,37 +29,34 @@ class MLTSRAR:
             self.model = None
 
     def decide(self, state: MissionState) -> list[DefenseEvent]:
-        events = self.rule.decide(state)
         if self.model is None:
-            return events
+            return []
 
         features = state_features(state)
         probability = float(self.model.predict_proba([features])[0][1])
-        if probability < self.threshold:
-            return events
+        events: list[DefenseEvent] = []
 
-        actions = {event.action for event in events}
-        if "priority_reroute" not in actions and state.critical_pending > 0:
-            events.append(
-                self.rule._event(
-                    state,
-                    "priority_reroute",
-                    {
-                        "until_sec": state.time_sec + 80,
-                        "reason": f"ML anomaly detector probability={probability:.2f}",
-                    },
-                )
+        if probability >= self.threshold:
+            self.active_defense_until = max(
+                self.active_defense_until,
+                state.time_sec + self.defense_window_sec,
             )
-        if "video_throttle" not in actions and state.video_queue_kb > 300:
-            events.append(
-                self.rule._event(
-                    state,
-                    "video_throttle",
-                    {
-                        "until_sec": state.time_sec + 70,
-                        "reason": f"ML anomaly detector probability={probability:.2f}",
-                    },
+            if state.time_sec - self.last_alert_time >= self.alert_cooldown_sec:
+                self.last_alert_time = state.time_sec
+                events.append(
+                    self.rule._event(
+                        state,
+                        "ml_attack_alert",
+                        {
+                            "probability": probability,
+                            "threshold": self.threshold,
+                            "until_sec": self.active_defense_until,
+                            "reason": "ML anomaly detector opened defense window",
+                        },
+                    )
                 )
-            )
+
+        if state.time_sec <= self.active_defense_until:
+            events.extend(self.rule.decide(state))
+
         return events
-

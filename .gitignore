@@ -13,4 +13,4 @@ outputs/experiments/*/summary.csv
 outputs/datasets/
 outputs/models/*.pkl
 outputs/models/*.pt
-
+outputs/tmp*/

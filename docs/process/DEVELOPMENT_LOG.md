@@ -93,6 +93,7 @@ E1 Baseline:              impact 0.458 +- 0.014
 E2 Fixed Attack:          impact 0.695 +- 0.077
 E3 AURA Attack:           impact 0.914 +- 0.056
 E5 AURA + TSRA-R Defense: impact 0.124 +- 0.019
+E7 ML AURA + ML TSRA-R Defense: impact 0.135 +- 0.013
 ```
 
 Resilience Gain:
@@ -100,7 +101,30 @@ Resilience Gain:
 ```text
 TSRA-R: 약 86.4% +- 2.0%
 ML AURA + TSRA-R: 약 86.9% +- 1.6%
+ML AURA + ML TSRA-R: 약 85.2% +- 1.8%
 ```
+
+## 2026-07-09 검증 반영
+
+### E6/E7 동일 문제
+
+검증 중 E6와 E7이 완전히 동일한 문제가 발견됐다. 원인은 `MLTSRAR`가 내부에서 `RuleTSRAR(mode="full")`을 항상 먼저 실행하고, ML detector는 이미 방어 액션이 나간 뒤 보조 액션만 추가하는 구조였기 때문이다.
+
+수정:
+
+- `MLTSRAR`를 reactive defense로 변경했다.
+- detector probability가 threshold 이상일 때만 defense window를 연다.
+- defense window 안에서만 full TSRA-R rule actions를 실행한다.
+- `ml_attack_alert` 이벤트를 남겨 ML 판단이 실제 폐루프에 개입했음을 로그로 확인 가능하게 했다.
+
+결과:
+
+```text
+E6 ML AURA + TSRA-R:     impact 0.120 +- 0.016
+E7 ML AURA + ML TSRA-R:  impact 0.135 +- 0.013
+```
+
+E7은 E6보다 약간 높은 impact를 보이지만, 이는 항상 방어하는 E6와 달리 ML detector가 공격성 저하를 탐지한 구간에서만 방어를 여는 설계 때문이다. 따라서 E7은 "최소 impact"가 아니라 "탐지 기반 reactive defense"의 근거로 사용한다.
 
 ## 다음 개발 기준
 
@@ -108,4 +132,3 @@ ML AURA + TSRA-R: 약 86.9% +- 1.6%
 2. 그 다음 방어 에이전트 TSRA-R을 같은 수준으로 다듬는다.
 3. 각 단계마다 설계 문서와 결과 요약을 커밋한다.
 4. `hbin` 브랜치에만 push한다.
-

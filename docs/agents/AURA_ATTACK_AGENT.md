@@ -154,7 +154,8 @@ Top-1 action match: 0.904
 결과:
 
 ```text
-20,000,000 synthetic candidates
+1,000,000 synthetic candidates/epoch x 20 epochs
+20,000,000 sample-passes
 MAE: 0.0052
 R2: 0.995
 Throughput: 약 1,566,851 samples/sec
@@ -163,7 +164,7 @@ Throughput: 약 1,566,851 samples/sec
 주의:
 
 - GPU MLP는 기본 공방 정책 모델이 아니라 확장성 실험이다.
-- Top-1 action match는 scikit-learn gradient boosting이 더 안정적이다.
+- 회귀 정밀도는 높지만 Top-1 action match는 scikit-learn tree 계열 모델이 더 안정적이다.
 
 ## 8. 현재 구현 상태
 
@@ -188,4 +189,3 @@ Throughput: 약 1,566,851 samples/sec
 보고서에서는 이렇게 주장한다.
 
 > AURA는 실제 위성통신 침해를 수행하지 않고, 폐쇄형 C4ISR/SATCOM 시뮬레이터 내에서 공격 효과를 생성한다. AURA는 작전 단계, 링크 상태, 메시지 큐, COP freshness를 관측해 공격 후보를 만들고, MissionImpactScore가 가장 높은 공격 효과를 선택한다.
-

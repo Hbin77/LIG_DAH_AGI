@@ -48,14 +48,13 @@ torch: 2.13.0
 
 ## 해석
 
-- GPU MLP는 2천만 개 synthetic 후보를 약 13초에 학습했다.
+- GPU MLP는 100만 개 synthetic 후보를 20 epoch 반복해 총 2천만 sample-pass를 약 13초에 학습했다.
 - R2는 약 0.995로 impact regression 성능은 높다.
-- Top-1 action match는 약 0.749로, 최종 정책 선택 모델로 바로 쓰기보다는 대규모 후보 선별 또는 보조 predictor로 쓰는 편이 안전하다.
-- 보고서에서는 `scikit-learn gradient boosting`을 기본 모델로 두고, GPU MLP는 대규모 synthetic 학습 확장성 실험으로 제시하는 것이 가장 안전하다.
+- Top-1 action match는 약 0.749로, action selection에서는 scikit-learn tree 계열 모델이 더 안정적이다.
+- 보고서에서는 `scikit-learn gradient boosting`을 기본 impact predictor로 두고, GPU MLP는 대규모 synthetic 학습 처리량과 회귀 확장성 실험으로 제시하는 것이 가장 안전하다.
 
 ## 산출물
 
 - `outputs/models/aura_mps_mlp.pt`
 - `outputs/models/aura_mps_mlp_metrics.json`
 - `outputs/figures/aura_mps_mlp_training_loss.png`
-

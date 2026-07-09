@@ -124,11 +124,17 @@ attack_present probability
 성능:
 
 ```text
-Best model: LogisticRegression
-Precision: 0.992
-Recall: 0.968
-F1: 0.980
+Synthetic holdout best F1 baseline: LogisticRegression, F1 0.980
+Deployed closed-loop model: RandomForestClassifier
+RandomForest Precision: 0.996
+RandomForest Recall: 0.934
+RandomForest F1: 0.964
 ```
+
+RandomForest를 배포 모델로 둔 이유:
+
+- LogisticRegression은 synthetic holdout 점수는 높았지만 실제 폐루프의 큰 queue-pressure 상태에서 detector probability가 낮게 나오는 calibration 문제가 있었다.
+- RandomForest는 nonlinear feature interaction을 반영해 실제 시뮬레이터 상태에서 방어 window를 안정적으로 연다.
 
 ## 8. 반복 실험 결과
 
@@ -137,12 +143,14 @@ F1: 0.980
 ```text
 E3 AURA Attack:           impact 0.914 +- 0.056
 E5 AURA + TSRA-R Defense: impact 0.124 +- 0.019
+E7 ML AURA + ML TSRA-R Defense: impact 0.135 +- 0.013
 ```
 
 Resilience Gain:
 
 ```text
 약 86.4% +- 2.0%
+ML/ML reactive defense: 약 85.2% +- 1.8%
 ```
 
 ## 9. 현재 구현 상태
@@ -154,6 +162,7 @@ Resilience Gain:
 - stale badge
 - PACE switch
 - ML anomaly detector
+- ML detector 기반 reactive defense window
 - defense event JSONL 로그
 - 30-seed 반복 실험
 
@@ -169,4 +178,3 @@ Resilience Gain:
 보고서에서는 이렇게 주장한다.
 
 > TSRA-R은 AURA와 동일한 시뮬레이터 상태를 관측해 priority reroute, video throttle, stale badge, PACE switch를 수행한다. TSRA-R은 raw stale data를 즉시 제거하지는 못하지만, trusted stale exposure를 낮춰 지휘소가 오래된 정보를 최신 정보로 오인하는 위험을 줄인다.
-

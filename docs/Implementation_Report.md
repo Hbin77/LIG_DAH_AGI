@@ -42,7 +42,7 @@ E3_rule_aura: impact=0.950, p95=168.00s, stale=0.50, trusted_stale=0.50, inv=0.8
 E4_rule_aura_basic_defense: impact=0.093, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.02
 E5_rule_aura_tsra_r: impact=0.104, p95=1.30s, stale=0.50, trusted_stale=0.12, inv=0.02
 E6_ml_aura_tsra_r: impact=0.114, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.03
-E7_ml_aura_ml_tsra_r: impact=0.114, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.03
+E7_ml_aura_ml_tsra_r: impact=0.124, p95=2.00s, stale=0.50, trusted_stale=0.12, inv=0.05
 ```
 
 해석:
@@ -50,7 +50,7 @@ E7_ml_aura_ml_tsra_r: impact=0.114, p95=2.00s, stale=0.50, trusted_stale=0.12, i
 - E3에서 AURA가 critical latency와 priority inversion을 크게 악화시킨다.
 - E4~E7에서 TSRA-R이 critical latency와 priority inversion을 낮춘다.
 - TSRA-R은 raw stale data 자체를 모두 제거하지는 못하지만, stale badge를 통해 `trusted_stale_exposure`를 0.50에서 0.12로 낮춘다.
-- ML AURA/ML TSRA-R은 현재 rule 기반 결과와 비슷하지만, 모델 학습 및 검증 지표를 통해 AI 적용 근거를 제공한다.
+- ML TSRA-R은 full rule 방어를 항상 실행하는 방식이 아니라, anomaly detector가 공격성 저하를 탐지했을 때 방어 window를 여는 reactive 방식으로 동작한다. 이 때문에 E7은 E6와 동일하지 않으며, 탐지 모델의 판단이 실제 폐루프 결과에 반영된다.
 
 ## 30-seed 반복 실험 결과
 
@@ -64,7 +64,7 @@ E7_ml_aura_ml_tsra_r: impact=0.114, p95=2.00s, stale=0.50, trusted_stale=0.12, i
 | E4 Rule AURA + Basic Defense | 0.107 | 0.016 |
 | E5 Rule AURA + TSRA-R | 0.124 | 0.019 |
 | E6 ML AURA + TSRA-R | 0.120 | 0.016 |
-| E7 ML AURA + ML TSRA-R | 0.120 | 0.016 |
+| E7 ML AURA + ML TSRA-R | 0.135 | 0.013 |
 
 Resilience Gain:
 
@@ -72,7 +72,7 @@ Resilience Gain:
 E4 Basic Defense: 86.8% +- 3.9%
 E5 TSRA-R:        86.4% +- 2.0%
 E6 ML AURA/TSRA:  86.9% +- 1.6%
-E7 ML/ML:         86.9% +- 1.6%
+E7 ML/ML:         85.2% +- 1.8%
 ```
 
 계산식:
@@ -96,16 +96,17 @@ AURA Impact Predictor:
 
 TSRA-R Anomaly Detector:
 
-- best model: LogisticRegression
-- precision: 약 0.992
-- recall: 약 0.968
-- F1: 약 0.980
+- deployed model: RandomForestClassifier
+- precision: 약 0.996
+- recall: 약 0.934
+- F1: 약 0.964
+- note: LogisticRegression baseline은 synthetic holdout F1이 약 0.980으로 높지만, 실제 폐루프 시뮬레이션의 큰 queue-pressure 상태에서 calibration이 불안정했다. 따라서 폐루프 방어용 배포 모델은 nonlinear RandomForest로 고정했다.
 
 AURA GPU-scale MPS MLP:
 
 - device: Apple Silicon MPS
 - torch: 2.13.0
-- 학습 규모: 1,000,000 synthetic attack candidates/epoch x 20 epochs = 20,000,000 candidates
+- 학습 규모: 1,000,000 synthetic attack candidates/epoch x 20 epochs = 20,000,000 sample-passes
 - batch size: 32,768
 - throughput: 약 1,566,851 samples/sec
 - MAE: 약 0.0052
@@ -117,7 +118,20 @@ AURA GPU-scale MPS MLP:
 
 - 위 ML 성능은 본 시뮬레이터가 생성한 합성 데이터 기준이다.
 - 실제 군 통신망 성능을 주장하는 수치가 아니라, 프로토타입 환경 내 검증 결과로 보고서에 명시해야 한다.
-- GPU MLP는 대규모 synthetic 후보 학습 가능성을 보이기 위한 선택 실험이다. 최종 공방 실험에는 설명 가능성과 안정성이 높은 scikit-learn 모델을 기본값으로 사용한다.
+- GPU MLP는 대규모 synthetic 후보 학습 가능성을 보이기 위한 선택 실험이다. 회귀 정밀도는 높지만 action selection 정확도는 HistGradientBoosting/RandomForest 계열이 더 안정적이므로, 최종 공방 실험에는 설명 가능성과 안정성이 높은 scikit-learn 모델을 기본값으로 사용한다.
+
+## E4와 E5 해석
+
+E4 basic defense가 Mission Impact 하나만 보면 E5 TSRA-R보다 약간 낮게 나온다. 이는 E4가 PACE 전환을 하지 않고 단순 priority/video/stale 정책만 강하게 적용하기 때문이다.
+
+TSRA-R의 가치는 단일 impact 최소화만이 아니라 다음에 있다.
+
+- `pace_switch`를 통해 SATCOM 저하 시 fallback link를 사용하는 적응성
+- `trusted_stale_exposure` 감소를 통한 지휘소 오인 위험 축소
+- `defense_events.jsonl`에 남는 operator-action trace
+- ML detector와 결합 가능한 reactive defense window
+
+따라서 보고서에서는 E5를 "항상 최소 impact를 내는 규칙 집합"이 아니라, PACE와 stale trust annotation까지 포함한 운용형 방어 아키텍처로 설명한다.
 
 ## 보고서에 넣을 증거 파일
 
