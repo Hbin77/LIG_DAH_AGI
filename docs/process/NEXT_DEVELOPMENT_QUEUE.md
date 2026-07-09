@@ -3306,7 +3306,7 @@ src/experiments/agent_tool_usage_audit.py
 - `MLTSRAR`에 `execute_rule_defense_actions` runtime tool을 등록했다.
 - active defense window가 열렸을 때 `self.rule.decide(state)`를 직접 호출하지 않고 `runtime.call_tool("execute_rule_defense_actions", ...)`로 실행한다.
 - `agent_decision_causality_audit`는 TSRA-R-ML이 `defense_events`를 선택할 때 이 tool이 없으면 실패한다.
-- `ml_defense_decision_path_audit`에 `Rule-defense tool execution` row를 추가해 active window trace와 rule tool trace가 1:1로 맞는지 확인한다.
+- `ml_defense_decision_path_audit`에 `Rule-defense tool execution` row를 추가해 active window trace와 rule tool trace가 1:1로 맞고, tool output event가 최종 selected rule-defense event와 일치하는지 확인한다.
 - `agent_tool_usage_audit`는 새 tool의 역할과 decision link를 설명한다.
 
 검증:
@@ -3327,6 +3327,7 @@ agent_regression_tests: 4 pass
 agent_tool_usage_audit rows: 34 pass
 ml_defense_decision_path_audit rows: 7 pass
 MDP05 Rule-defense tool execution: pass
+rule_tool_selected_event_mismatches: 0
 ```
 
 해석:

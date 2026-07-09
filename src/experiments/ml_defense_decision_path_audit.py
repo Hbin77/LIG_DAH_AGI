@@ -97,6 +97,33 @@ def has_tool(trace: dict[str, Any], tool_name: str) -> bool:
     return tool_name in tool_names(trace)
 
 
+def rule_tool_event_pairs(trace: dict[str, Any], tool_name: str) -> list[tuple[str, str]]:
+    pairs: list[tuple[str, str]] = []
+    for call in trace.get("tool_calls") or []:
+        if not isinstance(call, dict) or call.get("tool_name") != tool_name:
+            continue
+        output = call.get("output_summary")
+        if not isinstance(output, list):
+            continue
+        for event in output:
+            if isinstance(event, dict) and event.get("event_id") and event.get("action"):
+                pairs.append((str(event["event_id"]), str(event["action"])))
+    return pairs
+
+
+def selected_rule_event_pairs(trace: dict[str, Any]) -> list[tuple[str, str]]:
+    selected = trace.get("selected_action") or {}
+    pairs: list[tuple[str, str]] = []
+    for event in selected.get("events") or []:
+        if not isinstance(event, dict):
+            continue
+        action = str(event.get("action") or "")
+        event_id = str(event.get("event_id") or "")
+        if event_id and action and action != "ml_attack_alert":
+            pairs.append((event_id, action))
+    return pairs
+
+
 def probability(trace: dict[str, Any]) -> float:
     return as_float((trace.get("feedback") or {}).get("probability"))
 
@@ -279,6 +306,19 @@ def build_rows() -> list[dict[str, str]]:
     rule_tool_output_count = sum(
         1 for call in rule_tool_calls if "output_summary" in call
     )
+    rule_tool_event_pair_count = sum(
+        len(rule_tool_event_pairs(trace, rule_tool_name))
+        for trace in selected_defense_traces
+    )
+    selected_rule_event_pair_count = sum(
+        len(selected_rule_event_pairs(trace))
+        for trace in selected_defense_traces
+    )
+    rule_tool_selected_event_mismatches = [
+        trace
+        for trace in selected_defense_traces
+        if rule_tool_event_pairs(trace, rule_tool_name) != selected_rule_event_pairs(trace)
+    ]
 
     memory_mismatches = 0
     for trace in traces:
@@ -437,6 +477,9 @@ def build_rows() -> list[dict[str, str]]:
                 f"rule_tool_invocations={len(rule_tool_calls)}; "
                 f"rule_tool_error_count={rule_tool_error_count}; "
                 f"rule_tool_output_count={rule_tool_output_count}; "
+                f"rule_tool_event_pairs={rule_tool_event_pair_count}; "
+                f"selected_rule_event_pairs={selected_rule_event_pair_count}; "
+                f"rule_tool_selected_event_mismatches={len(rule_tool_selected_event_mismatches)}; "
                 f"tool_name={rule_tool_name}"
             ),
             ok=(
@@ -447,10 +490,14 @@ def build_rows() -> list[dict[str, str]]:
                 and len(rule_tool_calls) == len(rule_tool_traces)
                 and rule_tool_error_count == 0
                 and rule_tool_output_count == len(rule_tool_calls)
+                and rule_tool_event_pair_count > 0
+                and rule_tool_event_pair_count == selected_rule_event_pair_count
+                and not rule_tool_selected_event_mismatches
             ),
             interpretation=(
                 "The ML defender does not hide rule-action fanout behind an untraced method call; "
-                "the delegation appears in TSRA-R-ML DecisionTrace tool calls."
+                "the delegation appears in TSRA-R-ML DecisionTrace tool calls and the tool output "
+                "matches the final selected rule-defense events."
             ),
         ),
         row(

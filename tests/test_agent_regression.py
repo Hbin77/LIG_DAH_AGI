@@ -340,6 +340,16 @@ class TsraRRegressionTests(unittest.TestCase):
         self.assertEqual(rule_tool_calls[0].status, "ok")
         self.assertIsInstance(rule_tool_calls[0].output_summary, list)
         self.assertGreaterEqual(len(rule_tool_calls[0].output_summary), 3)
+        selected_rule_events = [
+            (event["event_id"], event["action"])
+            for event in trace.selected_action["events"]
+            if event["action"] != "ml_attack_alert"
+        ]
+        tool_rule_events = [
+            (event["event_id"], event["action"])
+            for event in rule_tool_calls[0].output_summary
+        ]
+        self.assertEqual(tool_rule_events, selected_rule_events)
         self.assertEqual(trace.feedback["event_count"], len(events))
 
 
