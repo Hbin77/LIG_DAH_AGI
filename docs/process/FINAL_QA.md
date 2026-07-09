@@ -101,7 +101,8 @@ reactive_defense_tradeoff_audit rows: 7 pass
 ml_threshold_sweep_summary rows: 5
 tsra_detector_calibration_audit rows: 6 pass
 agent_decision_trace_summary rows: 215
-agent_contract_validation rows: 49 pass
+agent_contract_validation rows: 50 pass
+agent_contract_validation includes E7 tsra-r_rule_delegate_trace_schema rows: 47
 decision_trace_quality_audit rows: 10 pass
 decision_trace_quality_audit includes E7 TSRA-R rule delegate traces: 47
 agent_runtime_invariant_audit rows: 10 pass

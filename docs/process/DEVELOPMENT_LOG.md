@@ -706,7 +706,8 @@ outputs/report_tables/agent_contract_validation.md
 - `metric_snapshots.jsonl`: mission impact 관련 지표
 - `aura_decision_traces.jsonl`: AURA AgentRuntime trace
 - `tsra_r_decision_traces.jsonl`: TSRA-R AgentRuntime trace
-- cross-contract: attack event와 AURA trace, defense event와 TSRA-R trace, metric time coverage 연결
+- `tsra_r_rule_delegate_traces.jsonl`: E7 TSRA-R rule delegate sidecar trace
+- cross-contract: attack event와 AURA trace, defense event와 TSRA-R/sidecar trace, metric time coverage 연결
 
 검증:
 
@@ -717,7 +718,7 @@ python3 -m src.experiments.validate_event_contracts --fail-on-error
 결과:
 
 ```text
-agent_contract_validation.csv: 49 contract checks
+agent_contract_validation.csv: 50 contract checks
 status: all pass
 ```
 
@@ -3496,3 +3497,37 @@ candidate_feedback_mismatches: 0
 ```
 
 이 보강의 의미는 TSRA-R-ML이 확률을 계산한 뒤 임의로 feedback을 적는 구조가 아니라, 후보 판단값이 최종 DecisionTrace feedback까지 보존되는 검증 가능한 방어 에이전트 루프를 갖는다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation ML-defense trace evidence만 강화한다.
+
+### 85. Rule Delegate Trace Schema Contract를 추가한 이유
+
+E7의 `tsra_r_rule_delegate_traces.jsonl`은 runtime/tool 감사에는 포함됐지만, `agent_contract_validation`의 공식 trace schema 계약에는 아직 들어가지 않았다. 또한 attack event는 cross-contract에서 selected trace event id와 직접 대조했지만, defense event는 "방어 trace가 존재한다"는 수준의 약한 확인만 하고 있었다.
+
+이번 변경은 sidecar trace를 계약 검증 단계까지 올리고, defense event도 selected TSRA-R trace event id로 추적되는지 확인하도록 cross-contract를 강화했다.
+
+변경한 파일:
+
+```text
+src/experiments/validate_event_contracts.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AGENT_RUNTIME.md
+docs/process/FINAL_QA.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- `tsra_r_rule_delegate_traces.jsonl`이 존재하면 `tsra-r_rule_delegate_trace_schema` contract row를 생성한다.
+- E7 sidecar trace 47개가 표준 DecisionTrace 필드를 모두 만족해야 한다.
+- cross-contract는 `defense_events.jsonl`의 모든 defense event id가 `tsra_r_decision_traces.jsonl` 또는 `tsra_r_rule_delegate_traces.jsonl`의 selected event로 나타나는지 확인한다.
+- final verifier는 `agent_contract_validation rows=50`, E7 sidecar schema 47 rows, E7 cross-contract sidecar file inclusion을 요구한다.
+
+검증 의미:
+
+```text
+agent_contract_validation rows: 50 pass
+E7 tsra-r_rule_delegate_trace_schema checked_rows: 47
+E7 agent_cross_contract required_files includes tsra_r_rule_delegate_traces.jsonl
+```
+
+이 보강의 의미는 E7 rule delegate sidecar가 보조 로그가 아니라 공식 AgentRuntime trace contract의 일부라는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace-contract evidence만 강화한다.

@@ -488,7 +488,7 @@ outputs/report_tables/agent_contract_validation.md
 완료 기준:
 
 - 완료. `python3 -m src.experiments.validate_event_contracts --fail-on-error` 명령으로 재생성 가능하다.
-- 완료. E1~E7 전체에서 49개 contract check가 모두 통과한다.
+- 완료. E1~E7 전체에서 50개 contract check가 모두 통과한다.
 - 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
 
 검증:
@@ -500,11 +500,12 @@ python3 -m src.experiments.validate_event_contracts --fail-on-error
 검증 결과:
 
 ```text
-agent_contract_validation.csv: 49 contract checks
+agent_contract_validation.csv: 50 contract checks
 status: all pass
 contracts: attack_event_schema, defense_event_schema, metric_snapshot_schema,
            mission_event_schema, aura_decision_trace_schema,
-           tsra-r_decision_trace_schema, agent_cross_contract
+           tsra-r_decision_trace_schema, tsra-r_rule_delegate_trace_schema,
+           agent_cross_contract
 ```
 
 해석:
@@ -3701,3 +3702,52 @@ candidate_feedback_mismatches: 0
 - TSRA-R-ML의 후보 판단값은 최종 feedback까지 같은 의미로 보존된다.
 - 이 변경은 방어 ML 에이전트의 observe-tool-candidate-feedback 연결성을 강화한다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation ML-defense trace evidence만 강화한다.
+
+## P70. Rule Delegate Trace Schema Contract
+
+상태: 완료
+
+문제:
+
+- E7의 `tsra_r_rule_delegate_traces.jsonl`는 runtime/tool 감사에는 포함됐지만, `agent_contract_validation`의 공식 DecisionTrace schema contract에는 포함되지 않았다.
+- 기존 cross-contract는 attack event id는 selected AURA trace와 직접 대조했지만, defense event는 selected TSRA-R trace가 하나 이상 존재하는지만 확인했다.
+- sidecar trace를 에이전트 구조 증거로 쓰려면 schema contract와 event-id coverage까지 같은 기준으로 검증해야 한다.
+
+구현:
+
+```text
+src/experiments/validate_event_contracts.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AGENT_RUNTIME.md
+docs/process/FINAL_QA.md
+```
+
+설계:
+
+- `tsra_r_rule_delegate_traces.jsonl`가 있는 실험에는 `tsra-r_rule_delegate_trace_schema` row를 추가한다.
+- E7 sidecar의 47개 trace가 표준 DecisionTrace 필드를 만족해야 한다.
+- cross-contract는 defense event id가 `tsra_r_decision_traces.jsonl` 또는 sidecar trace의 selected events에 존재하는지 확인한다.
+- final verifier는 50개 contract row와 E7 sidecar schema/cross-contract inclusion을 요구한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.validate_event_contracts --fail-on-error
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+agent_contract_validation rows: 50 pass
+E7 tsra-r_rule_delegate_trace_schema checked_rows: 47
+E7 agent_cross_contract required_files includes tsra_r_rule_delegate_traces.jsonl
+```
+
+해석:
+
+- E7 rule delegate sidecar가 공식 AgentRuntime trace contract에 포함된다.
+- defense event도 attack event처럼 selected trace event id coverage를 갖는다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation trace-contract evidence만 강화한다.

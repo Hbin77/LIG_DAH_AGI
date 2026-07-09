@@ -342,7 +342,7 @@ def check_csv_outputs() -> list[str]:
     checks.append(f"agent_decision_trace_summary rows={len(trace_rows)}")
 
     contract_rows = read_csv("outputs/report_tables/agent_contract_validation.csv")
-    require(len(contract_rows) == 49, f"expected 49 contract checks, got {len(contract_rows)}")
+    require(len(contract_rows) == 50, f"expected 50 contract checks, got {len(contract_rows)}")
     failed_contracts = [
         f"{row['experiment']}:{row['contract']}"
         for row in contract_rows
@@ -356,6 +356,7 @@ def check_csv_outputs() -> list[str]:
         "mission_event_schema",
         "aura_decision_trace_schema",
         "tsra-r_decision_trace_schema",
+        "tsra-r_rule_delegate_trace_schema",
         "agent_cross_contract",
     }
     observed_contracts = {row["contract"] for row in contract_rows}
@@ -363,7 +364,27 @@ def check_csv_outputs() -> list[str]:
         required_contracts.issubset(observed_contracts),
         f"agent contract validation missing contracts: {sorted(required_contracts - observed_contracts)}",
     )
-    checks.append("agent_contract_validation rows=49 pass")
+    require(
+        any(
+            row["experiment"] == "E7_ml_aura_ml_tsra_r"
+            and row["contract"] == "tsra-r_rule_delegate_trace_schema"
+            and row["status"] == "pass"
+            and int(float(row["checked_rows"])) == 47
+            for row in contract_rows
+        ),
+        "agent contract validation missing E7 rule delegate trace schema",
+    )
+    require(
+        any(
+            row["experiment"] == "E7_ml_aura_ml_tsra_r"
+            and row["contract"] == "agent_cross_contract"
+            and "tsra_r_rule_delegate_traces.jsonl" in row["required_files"]
+            and row["status"] == "pass"
+            for row in contract_rows
+        ),
+        "agent cross-contract missing E7 rule delegate trace file",
+    )
+    checks.append("agent_contract_validation rows=50 pass")
 
     trace_quality_rows = read_csv("outputs/report_tables/decision_trace_quality_audit.csv")
     require(

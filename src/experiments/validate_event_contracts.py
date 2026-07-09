@@ -147,6 +147,15 @@ def validate_experiment(exp_dir: Path) -> list[dict[str, str]]:
     rows.append(validate_mission_event_contract(exp_dir))
     rows.append(validate_trace_contract(exp_dir, "aura_decision_traces.jsonl", "AURA"))
     rows.append(validate_trace_contract(exp_dir, "tsra_r_decision_traces.jsonl", "TSRA-R"))
+    if (exp_dir / "tsra_r_rule_delegate_traces.jsonl").exists():
+        rows.append(
+            validate_trace_contract(
+                exp_dir,
+                "tsra_r_rule_delegate_traces.jsonl",
+                "TSRA-R",
+                contract_name="tsra-r_rule_delegate_trace_schema",
+            )
+        )
     rows.append(validate_cross_contract(exp_dir))
     return rows
 
@@ -220,7 +229,12 @@ def validate_mission_event_contract(exp_dir: Path) -> dict[str, str]:
     return result(exp_dir, "mission_event_schema", rows, ["mission_events.jsonl"], issues)
 
 
-def validate_trace_contract(exp_dir: Path, filename: str, agent_prefix: str) -> dict[str, str]:
+def validate_trace_contract(
+    exp_dir: Path,
+    filename: str,
+    agent_prefix: str,
+    contract_name: str | None = None,
+) -> dict[str, str]:
     path = exp_dir / filename
     rows = read_jsonl(path)
     required_files = [filename]
@@ -245,7 +259,13 @@ def validate_trace_contract(exp_dir: Path, filename: str, agent_prefix: str) -> 
             issues.append(f"row {idx}: selected_action must be an object")
     if rows and not is_monotonic(rows, "time_sec"):
         issues.append("time_sec is not monotonic")
-    return result(exp_dir, f"{agent_prefix.lower()}_decision_trace_schema", rows, required_files, issues)
+    return result(
+        exp_dir,
+        contract_name or f"{agent_prefix.lower()}_decision_trace_schema",
+        rows,
+        required_files,
+        issues,
+    )
 
 
 def validate_cross_contract(exp_dir: Path) -> dict[str, str]:
@@ -254,6 +274,7 @@ def validate_cross_contract(exp_dir: Path) -> dict[str, str]:
     metric_rows = read_jsonl(exp_dir / "metric_snapshots.jsonl")
     aura_traces = read_jsonl(exp_dir / "aura_decision_traces.jsonl")
     tsra_traces = read_jsonl(exp_dir / "tsra_r_decision_traces.jsonl")
+    delegate_traces = read_jsonl(exp_dir / "tsra_r_rule_delegate_traces.jsonl")
     issues = []
 
     attack_ids = {row.get("event_id") for row in attack_rows}
@@ -271,6 +292,17 @@ def validate_cross_contract(exp_dir: Path) -> dict[str, str]:
     ]
     if defense_rows and not defense_event_traces:
         issues.append("defense events exist but no TSRA-R trace selected defense_events")
+    defense_ids = {row.get("event_id") for row in defense_rows}
+    traced_defense_ids = {
+        event.get("event_id")
+        for trace in tsra_traces + delegate_traces
+        if trace.get("selected_action", {}).get("type") == "defense_events"
+        for event in trace.get("selected_action", {}).get("events", [])
+        if isinstance(event, dict)
+    }
+    missing_defense_traces = sorted(str(event_id) for event_id in defense_ids - traced_defense_ids if event_id)
+    if missing_defense_traces:
+        issues.append(f"defense events without TSRA-R trace: {', '.join(missing_defense_traces[:5])}")
 
     if attack_rows and metric_rows:
         first_attack_time = min(as_float(row.get("selected_at")) for row in attack_rows)
@@ -294,6 +326,11 @@ def validate_cross_contract(exp_dir: Path) -> dict[str, str]:
             "metric_snapshots.jsonl",
             "aura_decision_traces.jsonl",
             "tsra_r_decision_traces.jsonl",
+            *(
+                ["tsra_r_rule_delegate_traces.jsonl"]
+                if (exp_dir / "tsra_r_rule_delegate_traces.jsonl").exists()
+                else []
+            ),
         ],
         issues,
     )

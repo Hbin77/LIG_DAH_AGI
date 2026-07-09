@@ -163,6 +163,7 @@ outputs/report_tables/agent_contract_validation.md
 - metric snapshot schema
 - AURA DecisionTrace schema
 - TSRA-R DecisionTrace schema
+- E7 TSRA-R rule delegate sidecar DecisionTrace schema
 - attack/defense event와 trace의 cross-contract
 
 ## 품질 감사

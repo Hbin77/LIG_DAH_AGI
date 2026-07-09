@@ -449,7 +449,7 @@ outputs/report_tables/agent_contract_validation.md
 검증 결과:
 
 ```text
-agent_contract_validation checks: 49
+agent_contract_validation checks: 50
 status: all pass
 safety boundary: closed simulation only
 ```

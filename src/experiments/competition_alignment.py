@@ -213,6 +213,10 @@ ALIGNMENT_SPECS = [
                 "tsra_r_rule_delegate_traces.jsonl",
             ),
             ContentCheck(
+                "outputs/report_tables/agent_contract_validation.csv",
+                "E7_ml_aura_ml_tsra_r,tsra-r_rule_delegate_trace_schema,pass,47",
+            ),
+            ContentCheck(
                 "outputs/report_tables/decision_trace_quality_audit.csv",
                 "E7_ml_aura_ml_tsra_r,TSRA-R,rule_defense_full,47",
             ),
@@ -223,7 +227,7 @@ ALIGNMENT_SPECS = [
         ],
         row_checks=[
             RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 200),
-            RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 49),
+            RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 50),
             RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_runtime_invariant_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_quality_gate_audit.csv", 6),
