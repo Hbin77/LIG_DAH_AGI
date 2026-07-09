@@ -63,6 +63,14 @@ conda run -n base python -m src.tsra_agent.cli \
 conda run -n base python -m unittest discover -s tests -v
 ```
 
+최종 제출 전 DEV 브랜치 품질 게이트:
+
+```bash
+conda run -n base python scripts/verify_submission_state.py --require-dev --require-clean
+```
+
+이 검증은 unit test뿐 아니라 CLI smoke run, DecisionTrace schema, 모델/예시 수치, 안전 경계, 제출 ZIP 포함 파일까지 함께 확인합니다. GitHub Actions의 `DEV Submission Quality Gate`도 같은 검증기를 실행합니다.
+
 현재 검증 기준 결과는 `examples/summary_multi_seed.json`에 고정했습니다.
 
 핵심 평균값:
@@ -88,7 +96,7 @@ conda run -n base python -m unittest discover -s tests -v
 
 ## 브랜치 비교 통합 결과
 
-`origin/GubikoDev`는 실행 안정성, CLI, 훈련된 모델, 테스트가 강하고 `origin/hbin`은 AgentRuntime/DecisionTrace 기반 설명 가능성이 강합니다. 최종 통합본은 `GubikoDev`를 실행 베이스로 유지하고, `hbin`의 핵심 장점인 판단 trace 구조를 `src/tsra_agent/runtime.py`와 simulator 산출물로 이식했습니다.
+`origin/GubikoDev`는 실행 안정성, CLI, 훈련된 모델, 테스트가 강하고 `origin/hbin`은 AgentRuntime/DecisionTrace 기반 설명 가능성과 제출 검증 게이트가 강합니다. 최종 DEV 통합본은 `GubikoDev` 계열의 실행 베이스를 유지하고, `hbin`의 핵심 장점인 판단 trace 구조와 최종 검증 관점을 `src/tsra_agent/runtime.py`, simulator 산출물, `scripts/verify_submission_state.py`, GitHub Actions 품질 게이트로 이식했습니다.
 
 상세 비교는 `docs/agent_branch_comparison.md`에 기록했습니다.
 

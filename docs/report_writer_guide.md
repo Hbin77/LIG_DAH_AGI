@@ -205,6 +205,14 @@ conda run -n base python -m src.tsra_agent.cli \
 conda run -n base python scripts/build_submission_zip.py
 ```
 
+최종 제출 전 전체 검증:
+
+```bash
+conda run -n base python scripts/verify_submission_state.py --require-dev --require-clean
+```
+
+이 검증은 unit test, CLI smoke run, DecisionTrace schema, canonical example metrics, model report metrics, 안전 경계 문구, 제출 ZIP 구성, DEV 브랜치 상태를 함께 확인합니다.
+
 ## 산출물 읽는 법
 
 CLI 실행 후 `outputs/report_check` 안에 아래 파일이 생깁니다.
