@@ -66,10 +66,10 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 ### A06 ML contribution
 
 - Goal: Use ML where it changes a bounded agent decision, not as decoration.
-- Mechanism: AURA uses impact prediction for candidate ranking; ML TSRA-R opens reactive defense windows from anomaly probability; GPU MPS training is kept as a separate scale experiment.
-- Evidence: src/ml/train_aura_impact_model.py | src/ml/train_tsra_detector.py | src/ml/train_aura_mps_mlp.py | outputs/models/aura_impact_model_metrics.json | outputs/models/tsra_detector_metrics.json | outputs/models/aura_mps_mlp_metrics.json
+- Mechanism: AURA uses impact prediction for candidate ranking; ML TSRA-R opens reactive defense windows from anomaly probability; ML contribution audit ties model quality, tool invocation, E6/E7 closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together.
+- Evidence: src/ml/train_aura_impact_model.py | src/ml/train_tsra_detector.py | src/ml/train_aura_mps_mlp.py | src/experiments/ml_contribution_audit.py | outputs/models/aura_impact_model_metrics.json | outputs/models/tsra_detector_metrics.json | outputs/models/aura_mps_mlp_metrics.json | outputs/report_tables/ml_contribution_audit.csv | outputs/report_tables/ml_contribution_audit.md | outputs/report_tables/agent_tool_usage_audit.csv | outputs/report_tables/metric_gate_summary.csv
 - Status: verified
-- Notes: all evidence files present
+- Notes: outputs/report_tables/ml_contribution_audit.csv rows=7
 - Next gate: ML claims must state task, metric, model role, and whether the model changes closed-loop behavior.
 
 ### A07 Repeatable evidence

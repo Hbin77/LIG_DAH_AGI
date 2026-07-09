@@ -2035,3 +2035,47 @@ unexpected automation network/shell hits: 0
 - `src/agents`, `src/aura`, `src/tsra_r`, `src/simulator`, `src/shared`, `src/ml`에는 live-network나 shell execution primitive가 없음을 별도 증거로 남겼다.
 - `scripts/verify_external_package_link.py`의 `urllib`은 제출 ZIP 링크 검증용으로만 허용하고, release/Git 검증의 `subprocess`도 allowlist로 분리했다.
 - 실제 공격 기능은 추가하지 않았다.
+
+### 51. ML Contribution Audit를 추가한 이유
+
+ML 모델 성능 파일, tool usage audit, metric gate, E7 event log가 각각 존재해도 그것만으로는 "ML이 실제 에이전트 판단에 기여했는가"를 한 번에 확인하기 어렵다. 특히 AURA-ML은 후보 impact 예측을 ranking에 넣고, TSRA-R-ML은 anomaly probability로 reactive defense window를 여는 구조라서 모델 품질과 agent loop 증거를 함께 봐야 한다.
+
+이번 변경은 ML 기여도를 하나의 audit로 묶었다.
+
+추가한 것:
+
+```text
+src/experiments/ml_contribution_audit.py
+outputs/report_tables/ml_contribution_audit.csv
+outputs/report_tables/ml_contribution_audit.md
+```
+
+검증 항목:
+
+```text
+AURA-ML model quality
+TSRA-R-ML detector quality
+AURA-ML predict_candidate_impact tool invocation
+TSRA-R-ML predict_attack_probability tool invocation
+E6/E7 closed-loop separation
+E7 ML attack diversity and ml_attack_alert actions
+Mac MPS sample-pass scale framing
+```
+
+검증 결과:
+
+```text
+ml_contribution_audit rows: 7
+status: pass=7
+AURA-ML predict_candidate_impact invocations: 52
+TSRA-R-ML predict_attack_probability invocations: 61
+E6/E7 mission impact gap: 0.0167761
+Mac MPS sample_passes: 20000000
+```
+
+해석:
+
+- ML은 offline metric으로만 남아 있지 않고 AURA-ML과 TSRA-R-ML의 DecisionTrace tool call에 연결된다.
+- E7은 E6와 다른 폐루프 결과를 만들기 때문에 ML TSRA-R이 no-op copy가 아님을 확인한다.
+- Mac GPU 실험은 "서로 다른 2천만 후보"가 아니라 "100만 샘플 x 20 epoch = 2천만 sample-pass"로 기록한다.
+- 실제 공격 기능은 추가하지 않고 closed simulation log와 metrics만 감사한다.

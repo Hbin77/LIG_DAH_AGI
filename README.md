@@ -369,6 +369,19 @@ This writes:
 
 The gate checks whether the generated metrics still support the intended AURA/TSRA-R direction: AURA impact, TSRA-R resilience, action ablation value, adaptive memory improvement, ML defender separation, and repeated-run stability.
 
+## Audit ML Contribution
+
+```bash
+python3 -m src.experiments.ml_contribution_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/ml_contribution_audit.csv`
+- `outputs/report_tables/ml_contribution_audit.md`
+
+The audit verifies that ML is used inside bounded agent decisions: AURA-ML model quality, TSRA-R-ML detector quality, ML tool invocations in DecisionTrace, E6/E7 closed-loop separation, E7 ML action evidence, and the Mac MPS scale experiment framing.
+
 ## Generate Attack-Defense Coverage
 
 ```bash
@@ -638,6 +651,7 @@ python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
+python3 -m src.experiments.ml_contribution_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay

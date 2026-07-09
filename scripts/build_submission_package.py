@@ -58,6 +58,7 @@ REQUIRED_PATHS = [
     "src/experiments/pace_transition_audit.py",
     "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
+    "src/experiments/ml_contribution_audit.py",
     "src/experiments/safety_boundary_audit.py",
     "src/experiments/submission_readiness_audit.py",
     "docs/process/COMPETITION_DIRECTION.md",
@@ -102,11 +103,13 @@ REQUIRED_PATHS = [
     "outputs/report_tables/pace_transition_audit.md",
     "outputs/report_tables/mission_impact_decomposition.md",
     "outputs/report_tables/metric_gate_summary.md",
+    "outputs/report_tables/ml_contribution_audit.md",
     "outputs/report_tables/safety_boundary_audit.md",
     "outputs/report_tables/submission_readiness_audit.md",
     "outputs/report_tables/aura_coa_cards.md",
     "outputs/models/aura_impact_model_metrics.json",
     "outputs/models/tsra_detector_metrics.json",
+    "outputs/models/aura_mps_mlp_metrics.json",
 ]
 
 EXCLUDED_PREFIXES = [
@@ -203,7 +206,7 @@ def write_manifest(files: list[Path], zip_path: Path | None = None) -> Path:
         "- `docs/`: 시나리오, 에이전트, 개발 판단 근거",
         "- `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약",
         "- `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림",
-        "- `outputs/report_tables/*`: trace/COA/readiness/모델 비교 요약표",
+        "- `outputs/report_tables/*`: trace/COA/readiness/ML contribution/모델 비교 요약표",
         "- `outputs/models/*_metrics.json`: 모델 성능 메트릭",
         "",
         "## 제외 기준",

@@ -1905,6 +1905,54 @@ operational core shell_hits: 0
 - 안전 경계가 문구뿐 아니라 코드 구조와 제출 패키지 정책으로도 검증된다.
 - 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
 
+## P38. ML Contribution Audit
+
+상태: 완료
+
+문제:
+
+- ML 모델 성능, tool usage, metric gate, E7 event log가 분리되어 있어 ML이 실제 에이전트 판단에 들어갔는지 한 번에 확인하기 어렵다.
+- Mac MPS 실험은 sample-pass scale evidence로 정확히 표현해야 하며, deployed AURA selector와 혼동되면 안 된다.
+
+구현:
+
+```text
+src/experiments/ml_contribution_audit.py
+outputs/report_tables/ml_contribution_audit.csv
+outputs/report_tables/ml_contribution_audit.md
+```
+
+검증 기준:
+
+- AURA-ML impact predictor는 MAE, R2, top-1 action match gate를 통과한다.
+- TSRA-R-ML detector는 precision, recall, F1 gate를 통과한다.
+- AURA-ML은 `predict_candidate_impact` tool을 DecisionTrace 안에서 호출한다.
+- TSRA-R-ML은 `predict_attack_probability` tool을 DecisionTrace 안에서 호출한다.
+- E6/E7 mission impact gap이 존재해 ML TSRA-R이 no-op copy가 아니다.
+- E7에는 `queue_pressure`, `failover_chasing`, `ml_attack_alert`가 실제 event log로 존재한다.
+- Mac MPS run은 `sample_passes=20000000`로 기록하고 top-1 비교를 함께 남긴다.
+
+검증:
+
+```bash
+python3 -m src.experiments.ml_contribution_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+ml_contribution_audit rows: 7
+status: pass=7
+predict_candidate_impact invocations: 52
+predict_attack_probability invocations: 61
+```
+
+해석:
+
+- ML은 별도 모델 파일이 아니라 AURA-ML/TSRA-R-ML agent loop에 연결된 decision input이다.
+- 실제 공격 기능은 추가하지 않고 closed simulation metric, trace, event log만 읽는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

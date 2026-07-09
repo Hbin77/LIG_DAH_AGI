@@ -872,6 +872,26 @@ unexpected automation primitive hits: 0
 package excluded artifact hits: 0
 ```
 
+### P28. ML Contribution Audit
+
+목적:
+
+- ML을 단순 성능표가 아니라 AURA-ML/TSRA-R-ML 의사결정에 실제로 들어간 근거로 고정한다.
+- E6와 E7이 같은 코드 경로가 아니라는 점을 폐루프 metric gap과 event log로 확인한다.
+- Mac MPS 실험은 "100만 샘플 x 20 epoch" sample-pass scale evidence로 정확히 표현한다.
+
+검증 기준:
+
+```text
+ml_contribution_audit rows: 7 pass
+AURA-ML predict_candidate_impact invocations: 52
+TSRA-R-ML predict_attack_probability invocations: 61
+E6/E7 mission impact gap: 0.0167761
+E7 attack types: failover_chasing, queue_pressure
+E7 ML alert count: 9
+Mac MPS sample_passes: 20000000
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

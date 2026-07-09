@@ -9,7 +9,7 @@
 - `docs/`: 시나리오, 에이전트, 개발 판단 근거
 - `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약
 - `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림
-- `outputs/report_tables/*`: trace/COA/readiness/모델 비교 요약표
+- `outputs/report_tables/*`: trace/COA/readiness/ML contribution/모델 비교 요약표
 - `outputs/models/*_metrics.json`: 모델 성능 메트릭
 
 ## 제외 기준
@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 173
-- total_payload_bytes: 3308257
+- payload_file_count: 176
+- total_payload_bytes: 3343101
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 174
-- zip_bytes: 1741406
-- zip_sha256: `c988d24958e9ce05f3b6881cedeb66687610b4bcd6ea071165047d2b4445e3ac`
+- zip_file_count: 177
+- zip_bytes: 1751126
+- zip_sha256: `d1c7961b376aecf67390744f399c61af36d0870bc66675ed553c1814949ade6b`
 
 ## 포함 파일
 
@@ -127,6 +127,8 @@
 - `outputs/report_tables/metric_gate_summary.md`
 - `outputs/report_tables/mission_impact_decomposition.csv`
 - `outputs/report_tables/mission_impact_decomposition.md`
+- `outputs/report_tables/ml_contribution_audit.csv`
+- `outputs/report_tables/ml_contribution_audit.md`
 - `outputs/report_tables/ml_model_comparison.csv`
 - `outputs/report_tables/ml_model_comparison.md`
 - `outputs/report_tables/operator_alerts.csv`
@@ -176,6 +178,7 @@
 - `src/experiments/incident_summary.py`
 - `src/experiments/metric_gate.py`
 - `src/experiments/mission_impact_decomposition.py`
+- `src/experiments/ml_contribution_audit.py`
 - `src/experiments/operator_alerts.py`
 - `src/experiments/pace_transition_audit.py`
 - `src/experiments/report_assets.py`

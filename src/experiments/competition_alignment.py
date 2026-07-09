@@ -239,18 +239,30 @@ ALIGNMENT_SPECS = [
         competition_goal="Use ML where it changes a bounded agent decision, not as decoration.",
         implemented_mechanism=(
             "AURA uses impact prediction for candidate ranking; ML TSRA-R opens reactive defense windows "
-            "from anomaly probability; GPU MPS training is kept as a separate scale experiment."
+            "from anomaly probability; ML contribution audit ties model quality, tool invocation, E6/E7 "
+            "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together."
         ),
         agent_or_component="AURA ML / TSRA-R ML",
         evidence_files=[
             "src/ml/train_aura_impact_model.py",
             "src/ml/train_tsra_detector.py",
             "src/ml/train_aura_mps_mlp.py",
+            "src/experiments/ml_contribution_audit.py",
             "outputs/models/aura_impact_model_metrics.json",
             "outputs/models/tsra_detector_metrics.json",
             "outputs/models/aura_mps_mlp_metrics.json",
+            "outputs/report_tables/ml_contribution_audit.csv",
+            "outputs/report_tables/ml_contribution_audit.md",
+            "outputs/report_tables/agent_tool_usage_audit.csv",
+            "outputs/report_tables/metric_gate_summary.csv",
         ],
         next_gate="ML claims must state task, metric, model role, and whether the model changes closed-loop behavior.",
+        content_checks=[
+            ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "sample_passes=20000000"),
+            ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_candidate_impact_invocations"),
+            ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_attack_probability_invocations"),
+        ],
+        row_checks=[RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7)],
     ),
     AlignmentSpec(
         alignment_id="A07",

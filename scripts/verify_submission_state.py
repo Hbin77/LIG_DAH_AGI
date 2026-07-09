@@ -55,6 +55,7 @@ REQUIRED_FILES = [
     "src/experiments/pace_transition_audit.py",
     "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
+    "src/experiments/ml_contribution_audit.py",
     "src/experiments/safety_boundary_audit.py",
     "src/experiments/submission_readiness_audit.py",
     "outputs/experiments/experiment_summary.csv",
@@ -109,6 +110,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/mission_impact_decomposition.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
+    "outputs/report_tables/ml_contribution_audit.csv",
+    "outputs/report_tables/ml_contribution_audit.md",
     "outputs/report_tables/safety_boundary_audit.csv",
     "outputs/report_tables/safety_boundary_audit.md",
     "outputs/report_tables/submission_readiness_audit.csv",
@@ -119,6 +122,7 @@ REQUIRED_FILES = [
     "outputs/figures/adaptive_memory_comparison.png",
     "outputs/models/aura_impact_model_metrics.json",
     "outputs/models/tsra_detector_metrics.json",
+    "outputs/models/aura_mps_mlp_metrics.json",
 ]
 
 ZIP_REQUIRED_FILES = REQUIRED_FILES + [
@@ -730,6 +734,69 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("metric_gate_summary rows=11 pass")
 
+    ml_rows = read_csv("outputs/report_tables/ml_contribution_audit.csv")
+    require(len(ml_rows) == 7, f"expected 7 ML contribution rows, got {len(ml_rows)}")
+    failed_ml_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in ml_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_ml_rows, f"failed ML contribution rows: {failed_ml_rows[:8]}")
+    required_ml_areas = {
+        "AURA-ML model quality",
+        "TSRA-R-ML detector quality",
+        "AURA-ML tool invocation",
+        "TSRA-R-ML tool invocation",
+        "Closed-loop ML separation",
+        "E7 ML closed-loop actions",
+        "Mac MPS scale experiment",
+    }
+    observed_ml_areas = {row["area"] for row in ml_rows}
+    require(
+        required_ml_areas == observed_ml_areas,
+        f"ML contribution audit has unexpected areas: {sorted(observed_ml_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in ml_rows),
+        "ML contribution audit missing safety boundary",
+    )
+    require(
+        any(
+            "predict_candidate_impact_invocations=" in row["observed"]
+            and "errors=0" in row["observed"]
+            for row in ml_rows
+            if row["check_id"] == "M03"
+        ),
+        "ML contribution audit missing AURA-ML tool invocation evidence",
+    )
+    require(
+        any(
+            "predict_attack_probability_invocations=" in row["observed"]
+            and "errors=0" in row["observed"]
+            for row in ml_rows
+            if row["check_id"] == "M04"
+        ),
+        "ML contribution audit missing TSRA-R-ML tool invocation evidence",
+    )
+    require(
+        any(
+            "abs_e7_minus_e6=" in row["observed"]
+            for row in ml_rows
+            if row["check_id"] == "M05"
+        ),
+        "ML contribution audit missing E6/E7 separation evidence",
+    )
+    require(
+        any(
+            "sample_passes=20000000" in row["observed"]
+            and "histgb_top1_action_match_rate=" in row["observed"]
+            for row in ml_rows
+            if row["check_id"] == "M07"
+        ),
+        "ML contribution audit missing MPS sample-pass and top-1 comparison evidence",
+    )
+    checks.append("ml_contribution_audit rows=7 pass")
+
     safety_rows = read_csv("outputs/report_tables/safety_boundary_audit.csv")
     require(len(safety_rows) == 5, f"expected 5 safety boundary rows, got {len(safety_rows)}")
     failed_safety = [
@@ -1270,6 +1337,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,
         "manifest missing metric gate summary",
+    )
+    require(
+        "outputs/report_tables/ml_contribution_audit.md" in manifest_text,
+        "manifest missing ML contribution audit",
     )
     require(
         "outputs/report_tables/safety_boundary_audit.md" in manifest_text,
