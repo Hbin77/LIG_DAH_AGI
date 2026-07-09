@@ -367,8 +367,8 @@ def check_csv_outputs() -> list[str]:
 
     trace_quality_rows = read_csv("outputs/report_tables/decision_trace_quality_audit.csv")
     require(
-        len(trace_quality_rows) == 9,
-        f"expected 9 trace quality audit rows, got {len(trace_quality_rows)}",
+        len(trace_quality_rows) == 10,
+        f"expected 10 trace quality audit rows, got {len(trace_quality_rows)}",
     )
     failed_trace_quality = [
         f"{row['experiment']}:{row['agent']}:{row['policy']}"
@@ -388,7 +388,17 @@ def check_csv_outputs() -> list[str]:
         all(float(row["reason_coverage"]) == 1.0 for row in trace_quality_rows),
         "trace quality audit has incomplete reason coverage",
     )
-    checks.append("decision_trace_quality_audit rows=9 pass")
+    require(
+        any(
+            row["experiment"] == "E7_ml_aura_ml_tsra_r"
+            and row["agent"] == "TSRA-R"
+            and row["policy"] == "rule_defense_full"
+            and int(float(row["trace_count"])) == 47
+            for row in trace_quality_rows
+        ),
+        "trace quality audit missing E7 TSRA-R rule delegate traces",
+    )
+    checks.append("decision_trace_quality_audit rows=10 pass")
 
     quality_gate_rows = read_csv("outputs/report_tables/agent_quality_gate_audit.csv")
     require(
@@ -453,8 +463,8 @@ def check_csv_outputs() -> list[str]:
 
     runtime_rows = read_csv("outputs/report_tables/agent_runtime_invariant_audit.csv")
     require(
-        len(runtime_rows) == 9,
-        f"expected 9 runtime invariant audit rows, got {len(runtime_rows)}",
+        len(runtime_rows) == 10,
+        f"expected 10 runtime invariant audit rows, got {len(runtime_rows)}",
     )
     failed_runtime_rows = [
         f"{row['experiment']}:{row['agent']}:{row['policy']}"
@@ -503,7 +513,20 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in runtime_rows),
         "runtime invariant audit missing safety boundary",
     )
-    checks.append("agent_runtime_invariant_audit rows=9 pass")
+    require(
+        any(
+            row["experiment"] == "E7_ml_aura_ml_tsra_r"
+            and row["trace_file"] == "tsra_r_rule_delegate_traces.jsonl"
+            and row["agent"] == "TSRA-R"
+            and row["policy"] == "rule_defense_full"
+            and int(float(row["trace_count"])) == 47
+            and int(float(row["tool_invocation_count"])) > 0
+            and int(float(row["selected_event_count"])) > 0
+            for row in runtime_rows
+        ),
+        "runtime invariant audit missing E7 TSRA-R rule delegate trace file",
+    )
+    checks.append("agent_runtime_invariant_audit rows=10 pass")
 
     replay_rows = read_csv("outputs/report_tables/agent_loop_replay.csv")
     require(len(replay_rows) == 8, f"expected 8 agent loop replay rows, got {len(replay_rows)}")
@@ -1215,7 +1238,7 @@ def check_csv_outputs() -> list[str]:
     checks.append("defense_priority_decision_path_audit rows=6 pass")
 
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
-    require(len(tool_rows) == 34, f"expected 34 agent tool audit rows, got {len(tool_rows)}")
+    require(len(tool_rows) == 37, f"expected 37 agent tool audit rows, got {len(tool_rows)}")
     failed_tool_rows = [
         f"{row['experiment']}:{row['agent']}:{row['tool_name']}"
         for row in tool_rows
@@ -1264,7 +1287,23 @@ def check_csv_outputs() -> list[str]:
         all("closed simulation" in row["safety_boundary"] for row in tool_rows),
         "agent tool audit missing safety boundary",
     )
-    checks.append("agent_tool_usage_audit rows=34 pass")
+    e7_delegate_tools = {
+        row["tool_name"]
+        for row in tool_rows
+        if row["experiment"] == "E7_ml_aura_ml_tsra_r"
+        and row["agent"] == "TSRA-R"
+        and row["policy"] == "rule_defense_full"
+    }
+    expected_delegate_tools = {
+        "evaluate_defense_conditions",
+        "select_fallback_link",
+        "summarize_attack_context",
+    }
+    require(
+        expected_delegate_tools.issubset(e7_delegate_tools),
+        f"agent tool audit missing E7 delegate tools: {sorted(expected_delegate_tools - e7_delegate_tools)}",
+    )
+    checks.append("agent_tool_usage_audit rows=37 pass")
 
     interface_rows = read_csv("outputs/report_tables/agent_interface_manifest.csv")
     require(len(interface_rows) == 4, f"expected 4 agent interface rows, got {len(interface_rows)}")

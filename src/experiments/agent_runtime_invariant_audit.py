@@ -15,6 +15,7 @@ DEFAULT_OUTPUT_MD = Path("outputs/report_tables/agent_runtime_invariant_audit.md
 TRACE_FILES = [
     "aura_decision_traces.jsonl",
     "tsra_r_decision_traces.jsonl",
+    "tsra_r_rule_delegate_traces.jsonl",
 ]
 
 MEMORY_CAP = 24

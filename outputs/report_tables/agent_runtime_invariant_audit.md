@@ -5,8 +5,8 @@ Safety boundary: closed simulation agent-runtime invariant audit only; no RF, ex
 
 ## Summary
 
-- Audit rows: 9
-- Status counts: pass=9
+- Audit rows: 10
+- Status counts: pass=10
 
 ## Runtime Invariants
 
@@ -21,3 +21,4 @@ Safety boundary: closed simulation agent-runtime invariant audit only; no RF, ex
 | E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | 61 | true | true | 0 | pass |  |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | 31 | true | true | 0 | pass |  |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | 61 | true | true | 0 | pass |  |
+| E7_ml_aura_ml_tsra_r | TSRA-R | rule_defense_full | 47 | true | true | 0 | pass |  |

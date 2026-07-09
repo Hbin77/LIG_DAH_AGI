@@ -15,3 +15,4 @@ Safety boundary: closed simulation trace-quality audit only; no RF, exploit, or 
 | E6_ml_aura_tsra_r | TSRA-R | rule_defense_full | 61 | 1 | 1 | 21 | 24 | pass |  |
 | E7_ml_aura_ml_tsra_r | AURA-ML | ml_impact_predictor | 31 | 1 | 0.16129 | 5 | 5 | pass |  |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | 61 | 1 | 1 | 20 | 30 | pass |  |
+| E7_ml_aura_ml_tsra_r | TSRA-R | rule_defense_full | 47 | 1 | 1 | 16 | 22 | pass |  |

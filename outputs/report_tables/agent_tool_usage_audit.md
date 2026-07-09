@@ -5,8 +5,8 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 
 ## Summary
 
-- Audit rows: 34
-- Status counts: pass=34
+- Audit rows: 37
+- Status counts: pass=37
 - Tools: assess_mission_risk_guard, estimate_candidate_effect, estimate_detectability, evaluate_defense_conditions, execute_rule_defense_actions, generate_attack_candidates, predict_attack_probability, predict_candidate_impact, select_fallback_link, summarize_attack_context, summarize_defense_context
 
 ## Tool Table
@@ -47,6 +47,9 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | execute_rule_defense_actions | 47 | 0.770492 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | predict_attack_probability | 61 | 1 | pass |
 | E7_ml_aura_ml_tsra_r | TSRA-R-ML | ml_anomaly_detector | summarize_attack_context | 61 | 1 | pass |
+| E7_ml_aura_ml_tsra_r | TSRA-R | rule_defense_full | evaluate_defense_conditions | 47 | 1 | pass |
+| E7_ml_aura_ml_tsra_r | TSRA-R | rule_defense_full | select_fallback_link | 3 | 0.0638298 | pass |
+| E7_ml_aura_ml_tsra_r | TSRA-R | rule_defense_full | summarize_attack_context | 47 | 1 | pass |
 
 ## By Tool
 
@@ -77,9 +80,9 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 ### evaluate_defense_conditions
 
 - Role: TSRA-R defense condition evaluation
-- Rows: 3
-- Total invocations: 183
-- Status: pass=3
+- Rows: 4
+- Total invocations: 230
+- Status: pass=4
 - Decision link: condition outputs drive TSRA-R defense action candidates
 
 ### execute_rule_defense_actions
@@ -117,17 +120,17 @@ Safety boundary: closed simulation agent-tool audit only; no RF, exploit, or liv
 ### select_fallback_link
 
 - Role: TSRA-R PACE fallback selection
-- Rows: 2
-- Total invocations: 4
-- Status: pass=2
+- Rows: 3
+- Total invocations: 7
+- Status: pass=3
 - Decision link: PACE fallback selection drives TSRA-R pace_switch details
 
 ### summarize_attack_context
 
 - Role: TSRA-R cross-agent AURA attack context summary
-- Rows: 4
-- Total invocations: 244
-- Status: pass=4
+- Rows: 5
+- Total invocations: 291
+- Status: pass=5
 - Decision link: AURA attack context feeds TSRA-R memory, candidates, feedback, and event details
 
 ### summarize_defense_context

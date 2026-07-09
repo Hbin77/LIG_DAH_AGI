@@ -138,6 +138,8 @@ outputs/experiments/<experiment>/tsra_r_rule_delegate_traces.jsonl
 
 `tsra_r_rule_delegate_traces.jsonl`은 `TSRA-R-ML`이 방어 window 안에서 `execute_rule_defense_actions` tool을 호출할 때 내부 `RuleTSRAR` 판단을 별도로 남기는 sidecar trace다. 상위 `TSRA-R-ML` trace는 detector/window/tool 선택을 보여주고, sidecar trace는 하위 rule defense 후보 점수와 selected defense events를 보여준다.
 
+공통 runtime 감사도 이 sidecar를 입력으로 읽는다. 따라서 E7의 ML 방어자 판단은 상위 `TSRA-R-ML / ml_anomaly_detector` trace뿐 아니라, 47개 `TSRA-R / rule_defense_full` delegate trace까지 `decision_trace_quality_audit`, `agent_runtime_invariant_audit`, `agent_tool_usage_audit`에서 함께 검증된다.
+
 ## 계약 검증
 
 AURA, TSRA-R, MissionSimulator가 공유하는 JSONL 인터페이스는 다음 명령으로 검증한다.
@@ -185,6 +187,7 @@ outputs/report_tables/decision_trace_quality_audit.md
 - candidate action coverage
 - non-no-op selected action count
 - selected attack/defense event count
+- E7 `tsra_r_rule_delegate_traces.jsonl` sidecar의 `TSRA-R / rule_defense_full` 판단 trace 포함 여부
 
 ## 루프 리플레이
 
@@ -507,6 +510,7 @@ outputs/report_tables/agent_tool_usage_audit.md
 - output_summary coverage
 - tool status/error count
 - tool role과 decision link
+- E7 rule delegate sidecar의 `evaluate_defense_conditions`, `select_fallback_link`, `summarize_attack_context` 호출 포함 여부
 
 ## Operator Alerts
 

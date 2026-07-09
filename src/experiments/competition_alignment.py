@@ -143,7 +143,9 @@ ALIGNMENT_SPECS = [
             "AgentRuntime wraps observe, memory summary, tool calls, candidate scoring, selected action, "
             "DecisionTrace, and feedback updates; memory belief audit verifies evolving belief state "
             "and previous-action carryover across decision loops; tool usage audit verifies actual "
-            "tool invocations with input and output summaries; causality audit verifies selected "
+            "tool invocations with input and output summaries; runtime invariant audit verifies "
+            "trace ordering, memory counters, selected-event links, and E7 rule-delegate sidecar coverage; "
+            "causality audit verifies selected "
             "actions against candidate, tool, and score/threshold evidence; margin audit records "
             "top-score, threshold, eligible-ready, and no-op decision support; goal-alignment audit "
             "checks that attack and defense decisions match their stated objectives and observed risks; "
@@ -167,6 +169,7 @@ ALIGNMENT_SPECS = [
             "src/agents/schema.py",
             "src/experiments/validate_event_contracts.py",
             "src/experiments/trace_quality_audit.py",
+            "src/experiments/agent_runtime_invariant_audit.py",
             "src/experiments/agent_quality_gate_audit.py",
             "src/experiments/agent_loop_replay.py",
             "src/experiments/agent_decision_causality_audit.py",
@@ -179,11 +182,13 @@ ALIGNMENT_SPECS = [
             "src/experiments/cross_agent_context_audit.py",
             "src/experiments/defense_priority_decision_path_audit.py",
             "src/experiments/agent_tool_usage_audit.py",
+            "outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl",
             "src/experiments/agent_interface_manifest.py",
             "src/experiments/agent_capability_matrix.py",
             "outputs/report_tables/agent_decision_trace_summary.csv",
             "outputs/report_tables/agent_contract_validation.csv",
             "outputs/report_tables/decision_trace_quality_audit.csv",
+            "outputs/report_tables/agent_runtime_invariant_audit.csv",
             "outputs/report_tables/agent_quality_gate_audit.csv",
             "outputs/report_tables/agent_loop_replay.csv",
             "outputs/report_tables/agent_decision_causality_audit.csv",
@@ -202,10 +207,25 @@ ALIGNMENT_SPECS = [
         next_gate=(
             "Agent changes must keep attack/defense interfaces and capabilities explicit."
         ),
+        content_checks=[
+            ContentCheck(
+                "outputs/report_tables/agent_runtime_invariant_audit.csv",
+                "tsra_r_rule_delegate_traces.jsonl",
+            ),
+            ContentCheck(
+                "outputs/report_tables/decision_trace_quality_audit.csv",
+                "E7_ml_aura_ml_tsra_r,TSRA-R,rule_defense_full,47",
+            ),
+            ContentCheck(
+                "outputs/report_tables/agent_tool_usage_audit.csv",
+                "E7_ml_aura_ml_tsra_r,TSRA-R,rule_defense_full,evaluate_defense_conditions",
+            ),
+        ],
         row_checks=[
             RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 200),
             RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 49),
-            RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 9),
+            RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 10),
+            RowCountCheck("outputs/report_tables/agent_runtime_invariant_audit.csv", 10),
             RowCountCheck("outputs/report_tables/agent_quality_gate_audit.csv", 6),
             RowCountCheck("outputs/report_tables/agent_loop_replay.csv", 8),
             RowCountCheck("outputs/report_tables/agent_decision_causality_audit.csv", 399),
@@ -217,7 +237,7 @@ ALIGNMENT_SPECS = [
             RowCountCheck("outputs/report_tables/aura_attack_decision_path_audit.csv", 6),
             RowCountCheck("outputs/report_tables/cross_agent_context_audit.csv", 8),
             RowCountCheck("outputs/report_tables/defense_priority_decision_path_audit.csv", 6),
-            RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 34),
+            RowCountCheck("outputs/report_tables/agent_tool_usage_audit.csv", 37),
             RowCountCheck("outputs/report_tables/agent_interface_manifest.csv", 4),
             RowCountCheck("outputs/report_tables/agent_capability_matrix.csv", 10),
         ],

@@ -3423,3 +3423,40 @@ defense_priority_decision_path_audit DPR06 pace_reason_mismatches: 0
 ```
 
 이 보강의 의미는 TSRA-R이 condition tool output을 숨은 내부 상태로 소비하는 것이 아니라, 후보 row와 selected event로 이어지는 검증 가능한 방어 에이전트 루프를 갖는다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense-condition evidence만 강화한다.
+
+### 83. Rule Delegate Sidecar를 공통 Runtime 감사에 포함한 이유
+
+E7의 `TSRA-R-ML`은 ML anomaly detector가 방어 window를 열고, 그 window 안에서 `execute_rule_defense_actions` tool을 통해 내부 `RuleTSRAR` 판단을 실행한다. 이 내부 판단은 이미 `tsra_r_rule_delegate_traces.jsonl` sidecar로 저장되어 있었지만, 공통 `trace_quality`, `agent_runtime_invariant`, `agent_tool_usage` 감사는 `aura_decision_traces.jsonl`과 `tsra_r_decision_traces.jsonl`만 읽고 있었다.
+
+이번 변경은 E7 ML 방어자의 하위 rule delegate까지 공통 AgentRuntime 증거로 끌어올렸다.
+
+변경한 파일:
+
+```text
+src/experiments/trace_quality_audit.py
+src/experiments/agent_runtime_invariant_audit.py
+src/experiments/agent_tool_usage_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AGENT_RUNTIME.md
+docs/process/FINAL_QA.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- `decision_trace_quality_audit`는 E7의 `TSRA-R / rule_defense_full` 47개 delegate trace를 포함해야 한다.
+- `agent_runtime_invariant_audit`는 `tsra_r_rule_delegate_traces.jsonl` 파일 row를 포함해야 한다.
+- `agent_tool_usage_audit`는 E7 delegate의 `evaluate_defense_conditions`, `select_fallback_link`, `summarize_attack_context` tool row를 포함해야 한다.
+- final verifier는 위 증거가 없으면 실패한다.
+
+검증 의미:
+
+```text
+decision_trace_quality_audit rows: 10 pass
+agent_runtime_invariant_audit rows: 10 pass
+agent_tool_usage_audit rows: 37 pass
+E7 TSRA-R rule delegate traces: 47
+```
+
+이 보강의 의미는 E7의 ML 방어자를 상위 detector trace만으로 설명하지 않고, 내부 rule-defense 위임까지 AgentRuntime/Memory/Tool/DecisionTrace 구조로 감사한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation evidence만 강화한다.

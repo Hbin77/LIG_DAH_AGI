@@ -3595,3 +3595,58 @@ pace_reason_mismatches: 0
 - TSRA-R의 방어 후보는 condition tool output과 같은 needed/ready 판단을 보존한다.
 - 이 변경은 방어 에이전트의 observe-tool-candidate-selected_event 연결성을 강화한다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation defense-condition evidence만 강화한다.
+
+## P68. Rule Delegate Sidecar Common Runtime Audits
+
+상태: 완료
+
+문제:
+
+- E7의 `TSRA-R-ML`은 ML anomaly detector가 방어 window를 열고, window 안에서는 `execute_rule_defense_actions` tool을 통해 내부 `RuleTSRAR` 판단을 위임한다.
+- 이 내부 rule-defense 판단은 `outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl`로 남아 있었지만, 공통 `trace_quality`, `runtime_invariant`, `tool_usage` 감사 입력에는 포함되지 않았다.
+- 결과적으로 ML 방어자의 상위 판단은 감사되지만, 하위 delegate의 AgentRuntime/Memory/Tool/DecisionTrace 증거는 일부 전문 감사에만 묶여 있었다.
+
+구현:
+
+```text
+src/experiments/trace_quality_audit.py
+src/experiments/agent_runtime_invariant_audit.py
+src/experiments/agent_tool_usage_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/AGENT_RUNTIME.md
+docs/process/FINAL_QA.md
+```
+
+설계:
+
+- 세 공통 감사의 `TRACE_FILES`에 `tsra_r_rule_delegate_traces.jsonl`을 추가했다.
+- final verifier는 E7 sidecar의 `TSRA-R / rule_defense_full` 47개 trace가 quality/runtime 감사에 존재해야 통과한다.
+- final verifier는 E7 delegate tool row에 `evaluate_defense_conditions`, `select_fallback_link`, `summarize_attack_context`가 모두 있어야 통과한다.
+- competition alignment는 sidecar trace file과 세 감사 산출물을 AI agent architecture evidence로 묶는다.
+
+검증:
+
+```bash
+python3 -m src.experiments.trace_quality_audit --fail-on-error
+python3 -m src.experiments.agent_runtime_invariant_audit --fail-on-error
+python3 -m src.experiments.agent_tool_usage_audit
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+decision_trace_quality_audit rows: 10 pass
+agent_runtime_invariant_audit rows: 10 pass
+agent_tool_usage_audit rows: 37 pass
+E7 TSRA-R rule delegate traces: 47
+E7 TSRA-R rule delegate tools: evaluate_defense_conditions, select_fallback_link, summarize_attack_context
+```
+
+해석:
+
+- E7의 ML 방어자는 detector/window trace와 delegate rule-defense trace를 모두 AgentRuntime evidence로 제시한다.
+- 이 변경은 방어 에이전트가 단순 Python 함수 호출이 아니라 tool 위임, sidecar trace, selected event까지 남기는 구조임을 강화한다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation evidence만 강화한다.

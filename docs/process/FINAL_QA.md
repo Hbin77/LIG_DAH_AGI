@@ -101,8 +101,10 @@ ml_threshold_sweep_summary rows: 5
 tsra_detector_calibration_audit rows: 6 pass
 agent_decision_trace_summary rows: 215
 agent_contract_validation rows: 49 pass
-decision_trace_quality_audit rows: 9 pass
-agent_runtime_invariant_audit rows: 9 pass
+decision_trace_quality_audit rows: 10 pass
+decision_trace_quality_audit includes E7 TSRA-R rule delegate traces: 47
+agent_runtime_invariant_audit rows: 10 pass
+agent_runtime_invariant_audit includes tsra_r_rule_delegate_traces.jsonl: 47
 agent_loop_replay rows: 8
 agent_decision_causality_audit rows: 399 pass
 agent_decision_margin_audit rows: 399 pass
@@ -129,7 +131,8 @@ defense_priority_decision_path_audit condition_candidate_matches: 671
 defense_priority_decision_path_audit condition_candidate_mismatches: 0
 defense_priority_decision_path_audit ordered_core_defense_traces: 12/12
 defense_priority_decision_path_audit no_op_ready_violations: 0
-agent_tool_usage_audit rows: 34 pass
+agent_tool_usage_audit rows: 37 pass
+agent_tool_usage_audit includes E7 TSRA-R rule delegate tools: evaluate_defense_conditions, select_fallback_link, summarize_attack_context
 agent_interface_manifest rows: 4
 agent_capability_matrix rows: 10
 attack_defense_coverage rows: 4 covered
