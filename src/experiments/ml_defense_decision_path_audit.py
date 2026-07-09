@@ -184,6 +184,60 @@ def bool_text(value: bool) -> str:
     return "true" if value else "false"
 
 
+def open_window_candidate(trace: dict[str, Any]) -> dict[str, Any] | None:
+    candidates = [
+        item
+        for item in trace.get("candidate_actions") or []
+        if isinstance(item, dict) and item.get("action") == "open_defense_window"
+    ]
+    if len(candidates) != 1:
+        return None
+    return candidates[0]
+
+
+def rounded_equal(left: Any, right: Any, digits: int = 6) -> bool:
+    return abs(as_float(left) - round(as_float(right), digits)) <= 10 ** (-digits)
+
+
+def candidate_feedback_parity(traces: list[dict[str, Any]]) -> dict[str, int]:
+    result = {
+        "candidate_traces": 0,
+        "missing_or_duplicate_candidates": 0,
+        "checks": 0,
+        "matches": 0,
+        "mismatches": 0,
+    }
+    for trace in traces:
+        candidate = open_window_candidate(trace)
+        feedback = trace.get("feedback") or {}
+        if not candidate:
+            result["missing_or_duplicate_candidates"] += 1
+            continue
+        result["candidate_traces"] += 1
+
+        attack_context = feedback.get("attack_context") or {}
+        checks = [
+            rounded_equal(candidate.get("probability"), feedback.get("probability")),
+            rounded_equal(candidate.get("threshold"), feedback.get("threshold")),
+            bool(candidate.get("detector_triggered")) == bool(feedback.get("detector_triggered")),
+            bool(candidate.get("mission_guard_triggered")) == bool(feedback.get("mission_guard_triggered")),
+            bool(candidate.get("early_guard_triggered")) == bool(feedback.get("early_guard_triggered")),
+            bool(candidate.get("expiry_guard_triggered")) == bool(feedback.get("expiry_guard_triggered")),
+            str(candidate.get("mission_guard_reason")) == str(feedback.get("mission_guard_reason")),
+            rounded_equal(candidate.get("mission_guard_score"), feedback.get("mission_guard_score")),
+            rounded_equal(candidate.get("active_defense_until"), feedback.get("active_defense_until")),
+            bool(candidate.get("eligible")) == bool(feedback.get("opened_window")),
+            candidate.get("cross_agent_attack_context") == attack_context,
+            bool(candidate.get("cross_agent_attack_context_used"))
+            == bool(attack_context.get("attack_context_seen")),
+        ]
+        result["checks"] += len(checks)
+        matches = sum(1 for item in checks if item)
+        result["matches"] += matches
+        result["mismatches"] += len(checks) - matches
+    return result
+
+
 def row(
     *,
     check_id: str,
@@ -355,6 +409,7 @@ def build_rows() -> list[dict[str, str]]:
     threshold_window_nondecreasing = all(
         b >= a for a, b in zip(threshold_windows, threshold_windows[1:])
     )
+    candidate_parity = candidate_feedback_parity(traces)
 
     e7_coordination = [
         item for item in coordination_rows if item.get("experiment") == E7
@@ -574,6 +629,35 @@ def build_rows() -> list[dict[str, str]]:
             interpretation=(
                 "The ML decision path reaches closed-loop evidence: response latency is bounded and "
                 "post-peak mission impact decreases."
+            ),
+        ),
+        row(
+            check_id="MDP08",
+            area="Candidate-feedback parity",
+            requirement=(
+                "Every TSRA-R-ML decision should preserve the open-defense-window candidate values "
+                "through final trace feedback before downstream audits consume them."
+            ),
+            evidence=[TRACE_PATH],
+            observed=(
+                f"trace_count={len(traces)}; "
+                f"open_window_candidate_traces={candidate_parity['candidate_traces']}; "
+                f"missing_or_duplicate_candidates={candidate_parity['missing_or_duplicate_candidates']}; "
+                f"candidate_feedback_checks={candidate_parity['checks']}; "
+                f"candidate_feedback_matches={candidate_parity['matches']}; "
+                f"candidate_feedback_mismatches={candidate_parity['mismatches']}"
+            ),
+            ok=(
+                bool(traces)
+                and candidate_parity["candidate_traces"] == len(traces)
+                and candidate_parity["missing_or_duplicate_candidates"] == 0
+                and candidate_parity["checks"] > 0
+                and candidate_parity["checks"] == candidate_parity["matches"]
+                and candidate_parity["mismatches"] == 0
+            ),
+            interpretation=(
+                "The ML defense trace keeps probability, threshold, guard flags, active window, "
+                "and attack context consistent from candidate evaluation to final feedback."
             ),
         ),
     ]

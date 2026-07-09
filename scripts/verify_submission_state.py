@@ -1684,8 +1684,8 @@ def check_csv_outputs() -> list[str]:
 
     ml_path_rows = read_csv("outputs/report_tables/ml_defense_decision_path_audit.csv")
     require(
-        len(ml_path_rows) == 7,
-        f"expected 7 ML defense decision path rows, got {len(ml_path_rows)}",
+        len(ml_path_rows) == 8,
+        f"expected 8 ML defense decision path rows, got {len(ml_path_rows)}",
     )
     failed_ml_path_rows = [
         f"{row['check_id']}:{row['area']}"
@@ -1701,6 +1701,7 @@ def check_csv_outputs() -> list[str]:
         "Rule-defense tool execution",
         "Memory continuity",
         "Closed-loop coordination effect",
+        "Candidate-feedback parity",
     }
     observed_ml_path_areas = {row["area"] for row in ml_path_rows}
     require(
@@ -1773,7 +1774,18 @@ def check_csv_outputs() -> list[str]:
         ),
         "ML defense path audit missing memory continuity evidence",
     )
-    checks.append("ml_defense_decision_path_audit rows=7 pass")
+    require(
+        any(
+            observed_int(row, "open_window_candidate_traces") == 61
+            and observed_int(row, "missing_or_duplicate_candidates") == 0
+            and observed_int(row, "candidate_feedback_checks") == observed_int(row, "candidate_feedback_matches")
+            and observed_int(row, "candidate_feedback_mismatches") == 0
+            for row in ml_path_rows
+            if row["check_id"] == "MDP08"
+        ),
+        "ML defense path audit missing candidate-feedback parity evidence",
+    )
+    checks.append("ml_defense_decision_path_audit rows=8 pass")
 
     ml_interaction_rows = read_csv("outputs/report_tables/ml_red_blue_interaction_audit.csv")
     require(

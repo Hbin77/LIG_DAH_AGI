@@ -433,6 +433,7 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "delegate_trace_count="),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "tool_name=execute_rule_defense_actions"),
             ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "threshold_window_nondecreasing=true"),
+            ContentCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", "candidate_feedback_mismatches=0"),
             ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "first_ml_alert_latency_sec"),
             ContentCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", "ml_triggered_after_attack"),
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_pre_first_defense_events=0"),
@@ -447,7 +448,7 @@ ALIGNMENT_SPECS = [
         row_checks=[
             RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7),
             RowCountCheck("outputs/report_tables/ml_attack_decision_path_audit.csv", 6),
-            RowCountCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", 7),
+            RowCountCheck("outputs/report_tables/ml_defense_decision_path_audit.csv", 8),
             RowCountCheck("outputs/report_tables/ml_red_blue_interaction_audit.csv", 5),
             RowCountCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", 7),
             RowCountCheck("outputs/batch/ml_threshold_sweep_summary.csv", 5),

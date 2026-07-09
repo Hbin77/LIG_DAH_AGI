@@ -141,6 +141,8 @@ outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_rule_delegate_traces.jsonl
 
 이 sidecar trace는 `execute_rule_defense_actions` tool output과 최종 selected rule-defense event가 같은지 검증하는 데 사용된다.
 
+ML 방어자의 `open_defense_window` 후보도 최종 feedback과 직접 대조한다. `ml_defense_decision_path_audit`의 MDP08은 probability, threshold, detector/guard flags, active window, attack context가 candidate row에서 feedback까지 같은 값으로 유지되는지 검사한다.
+
 성능:
 
 ```text

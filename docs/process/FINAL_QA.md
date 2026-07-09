@@ -91,9 +91,10 @@ ml_attack_decision_path_audit generated_candidate_payload_mismatches: 0
 ml_attack_decision_path_audit payload_selected_matches: 5
 ml_attack_decision_path_audit counter_defense_bonus_candidates: 7
 ml_attack_decision_path_audit selected_counter_defense_bonus_count: 3
-ml_defense_decision_path_audit rows: 7 pass
+ml_defense_decision_path_audit rows: 8 pass
 ml_defense_decision_path_audit delegate_trace_count == active_window_traces
 ml_defense_decision_path_audit rule_tool_delegate_event_mismatches: 0
+ml_defense_decision_path_audit candidate_feedback_mismatches: 0
 ml_red_blue_interaction_audit rows: 5 pass
 agent_stress_scenario_audit rows: 6 seeds: 5 pass
 reactive_defense_tradeoff_audit rows: 7 pass

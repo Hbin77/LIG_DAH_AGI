@@ -3650,3 +3650,54 @@ E7 TSRA-R rule delegate tools: evaluate_defense_conditions, select_fallback_link
 - E7의 ML 방어자는 detector/window trace와 delegate rule-defense trace를 모두 AgentRuntime evidence로 제시한다.
 - 이 변경은 방어 에이전트가 단순 Python 함수 호출이 아니라 tool 위임, sidecar trace, selected event까지 남기는 구조임을 강화한다.
 - 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation evidence만 강화한다.
+
+## P69. TSRA-R-ML Candidate-to-Feedback Parity
+
+상태: 완료
+
+문제:
+
+- `ml_defense_decision_path_audit`는 TSRA-R-ML의 threshold transition, cooldown, rule delegate, memory continuity를 검증했다.
+- 하지만 `open_defense_window` 후보 row에 기록된 probability, threshold, guard flags, active window, attack context가 최종 `feedback`까지 같은 값으로 보존되는지는 직접 비교하지 않았다.
+- ML 방어자를 에이전트로 설명하려면 후보 평가값과 최종 판단 trace가 같은 계약을 따라야 한다.
+
+구현:
+
+```text
+src/experiments/ml_defense_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+docs/process/FINAL_QA.md
+```
+
+설계:
+
+- MDP08 `Candidate-feedback parity` row를 추가했다.
+- E7의 61개 TSRA-R-ML trace마다 `open_defense_window` 후보가 정확히 1개 있는지 검사한다.
+- candidate와 feedback 사이의 probability, threshold, detector/guard flags, mission guard reason/score, active defense window, attack context를 비교한다.
+- final verifier는 `candidate_feedback_mismatches=0`을 요구한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.ml_defense_decision_path_audit --fail-on-error
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/verify_submission_state.py
+```
+
+예상 검증 결과:
+
+```text
+ml_defense_decision_path_audit rows: 8 pass
+open_window_candidate_traces: 61
+candidate_feedback_checks: 732
+candidate_feedback_matches: 732
+candidate_feedback_mismatches: 0
+```
+
+해석:
+
+- TSRA-R-ML의 후보 판단값은 최종 feedback까지 같은 의미로 보존된다.
+- 이 변경은 방어 ML 에이전트의 observe-tool-candidate-feedback 연결성을 강화한다.
+- 실제 RF, exploit, live network action은 추가하지 않고 closed simulation ML-defense trace evidence만 강화한다.

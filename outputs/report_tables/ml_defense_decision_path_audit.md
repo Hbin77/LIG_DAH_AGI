@@ -12,6 +12,7 @@ Safety boundary: closed simulation ML defense decision-path audit only; no RF, e
 | MDP05 | Rule-defense tool execution | pass | trace_count=61; active_window_traces=47; rule_tool_traces=47; delegate_trace_count=47; selected_defense_traces=20; selected_defense_traces_with_rule_tool=20; rule_tool_invocations=47; rule_tool_error_count=0; rule_tool_output_count=47; rule_tool_event_pairs=22; selected_rule_event_pairs=22; delegate_rule_event_pairs=22; rule_tool_selected_event_mismatches=0; active_window_delegate_misses=0; rule_tool_delegate_event_mismatches=0; tool_name=execute_rule_defense_actions | The ML defender does not hide rule-action fanout behind an untraced method call; the delegation appears in TSRA-R-ML DecisionTrace tool calls and the tool output matches both the final selected rule-defense events and the delegated TSRA-R rule-policy trace. |
 | MDP06 | Memory continuity | pass | memory_mismatches=0; threshold_window_nondecreasing=true; first_active_until=150; last_active_until=370 | The window is agent memory, not a stateless if-branch; trace feedback and memory stay aligned across the E7 run. |
 | MDP07 | Closed-loop coordination effect | pass | e7_coordination_rows=5; ml_reactive_rows=1; max_ml_reactive_defense_latency_sec=10; min_ml_reactive_impact_reduction_from_peak=0.251649 | The ML decision path reaches closed-loop evidence: response latency is bounded and post-peak mission impact decreases. |
+| MDP08 | Candidate-feedback parity | pass | trace_count=61; open_window_candidate_traces=61; missing_or_duplicate_candidates=0; candidate_feedback_checks=732; candidate_feedback_matches=732; candidate_feedback_mismatches=0 | The ML defense trace keeps probability, threshold, guard flags, active window, and attack context consistent from candidate evaluation to final feedback. |
 
 ## Detail
 
@@ -76,4 +77,13 @@ Safety boundary: closed simulation ML defense decision-path audit only; no RF, e
 - Observed: e7_coordination_rows=5; ml_reactive_rows=1; max_ml_reactive_defense_latency_sec=10; min_ml_reactive_impact_reduction_from_peak=0.251649
 - Status: pass
 - Interpretation: The ML decision path reaches closed-loop evidence: response latency is bounded and post-peak mission impact decreases.
+- Safety boundary: closed simulation ML defense decision-path audit only; no RF, exploit, or live network action
+
+### MDP08 Candidate-feedback parity
+
+- Requirement: Every TSRA-R-ML decision should preserve the open-defense-window candidate values through final trace feedback before downstream audits consume them.
+- Evidence: outputs/experiments/E7_ml_aura_ml_tsra_r/tsra_r_decision_traces.jsonl
+- Observed: trace_count=61; open_window_candidate_traces=61; missing_or_duplicate_candidates=0; candidate_feedback_checks=732; candidate_feedback_matches=732; candidate_feedback_mismatches=0
+- Status: pass
+- Interpretation: The ML defense trace keeps probability, threshold, guard flags, active window, and attack context consistent from candidate evaluation to final feedback.
 - Safety boundary: closed simulation ML defense decision-path audit only; no RF, exploit, or live network action

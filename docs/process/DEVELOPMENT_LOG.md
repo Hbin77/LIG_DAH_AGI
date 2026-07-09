@@ -3460,3 +3460,39 @@ E7 TSRA-R rule delegate traces: 47
 ```
 
 이 보강의 의미는 E7의 ML 방어자를 상위 detector trace만으로 설명하지 않고, 내부 rule-defense 위임까지 AgentRuntime/Memory/Tool/DecisionTrace 구조로 감사한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation rule-delegation evidence만 강화한다.
+
+### 84. TSRA-R-ML Candidate-to-Feedback Parity를 추가한 이유
+
+TSRA-R-ML은 매 tick마다 `open_defense_window` 후보를 만들고, 그 후보에 detector probability, threshold, guard trigger, active window, attack context를 기록한다. 기존 `ml_defense_decision_path_audit`는 threshold transition, cooldown, rule delegate, memory continuity를 검증했지만, 후보 row에 기록한 판단값이 최종 `feedback`에 같은 값으로 보존되는지는 직접 비교하지 않았다.
+
+이번 변경은 ML 방어자의 후보 평가와 최종 trace feedback 사이를 직접 묶었다.
+
+변경한 파일:
+
+```text
+src/experiments/ml_defense_decision_path_audit.py
+scripts/verify_submission_state.py
+src/experiments/competition_alignment.py
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+docs/process/FINAL_QA.md
+docs/process/NEXT_DEVELOPMENT_QUEUE.md
+```
+
+검증 기준:
+
+- E7의 61개 TSRA-R-ML trace마다 `open_defense_window` 후보가 정확히 1개 있어야 한다.
+- candidate의 probability, threshold, detector/guard flags, mission guard reason/score, active defense window가 feedback과 일치해야 한다.
+- candidate의 attack context와 `cross_agent_attack_context_used`가 feedback의 attack context와 일치해야 한다.
+- final verifier는 `candidate_feedback_mismatches=0`을 요구한다.
+
+검증 의미:
+
+```text
+ml_defense_decision_path_audit rows: 8 pass
+open_window_candidate_traces: 61
+candidate_feedback_checks: 732
+candidate_feedback_matches: 732
+candidate_feedback_mismatches: 0
+```
+
+이 보강의 의미는 TSRA-R-ML이 확률을 계산한 뒤 임의로 feedback을 적는 구조가 아니라, 후보 판단값이 최종 DecisionTrace feedback까지 보존되는 검증 가능한 방어 에이전트 루프를 갖는다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation ML-defense trace evidence만 강화한다.
