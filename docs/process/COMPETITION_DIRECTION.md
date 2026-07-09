@@ -131,8 +131,9 @@ Metrics
 3. AURA/TSRA-R/MissionSimulator 사이의 event contract가 깨지지 않는지 검증한다.
 4. DecisionTrace가 reason, memory, tool, candidate, selected action을 충분히 남기는지 검증한다.
 5. 대표 agent loop replay로 observe-memory-tool-candidate-decision-feedback 흐름을 확인한다.
-6. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-7. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+6. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
+7. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+8. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -427,6 +428,33 @@ outputs/report_tables/agent_loop_replay.md
 agent_loop_replay rows: 8
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 cases: no_op, action
+```
+
+### P12. Metric Gate Summary
+
+상태: 완료
+
+목적:
+
+- 핵심 실험 숫자가 프로젝트 방향을 실제로 지지하는지 자동 검사한다.
+- AURA 공격 효과, TSRA-R resilience, action ablation, adaptive memory, ML defender separation, repeated-run stability를 gate로 확인한다.
+- 파일이 존재해도 metric 방향이 무너지면 최종 검증에서 실패하게 한다.
+
+산출물:
+
+```text
+src/experiments/metric_gate.py
+outputs/report_tables/metric_gate_summary.csv
+outputs/report_tables/metric_gate_summary.md
+```
+
+검증 결과:
+
+```text
+metric gates: 11
+status: all pass
+key gates: E5 resilience >= 0.80, E5/E3 impact ratio <= 0.20,
+           E6/E7 separation >= 0.005
 ```
 
 ## 최종 판단 기준

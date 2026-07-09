@@ -11,7 +11,7 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 | A04 | AI agent architecture | AgentRuntime / AgentMemory / ToolRegistry / DecisionTrace | verified | Agent changes must leave replayable DecisionTrace evidence and pass contract plus trace-quality validation. |
 | A05 | Attack-defense cooperation | Battle timeline / Incident summary | verified | New experiments must preserve attack events, defense events, trace reasons, and metric snapshots. |
 | A06 | ML contribution | AURA ML / TSRA-R ML | verified | ML claims must state task, metric, model role, and whether the model changes closed-loop behavior. |
-| A07 | Repeatable evidence | Experiment runners | verified | Metric claims must point to batch CSV or a dedicated ablation/adaptive experiment. |
+| A07 | Repeatable evidence | Experiment runners | verified | Metric claims must pass metric_gate_summary and point to batch or dedicated experiments. |
 | A08 | Adaptive defense | AdaptiveTSRA-R | verified | Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive_memory_summary. |
 | A09 | Safety boundary | Safety guardrails | verified | Reject any change that adds operational RF parameters, exploit code, or live network actions. |
 | A10 | Team handoff and reproducibility | README / packaging / QA scripts | verified | Before handoff, rebuild the package and run verify_submission_state on branch hbin. |
@@ -76,10 +76,10 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 
 - Goal: Avoid single-seed claims by keeping repeated experiments and resilience metrics.
 - Mechanism: E1-E7 experiments are run as 30-seed batches with mission impact, latency, stale exposure, priority inversion, and resilience gain summaries.
-- Evidence: src/experiments/run_all.py | src/experiments/run_batch.py | outputs/batch/repeated_experiment_summary.csv | outputs/batch/resilience_gain_summary.csv
+- Evidence: src/experiments/run_all.py | src/experiments/run_batch.py | src/experiments/metric_gate.py | outputs/batch/repeated_experiment_summary.csv | outputs/batch/resilience_gain_summary.csv | outputs/report_tables/metric_gate_summary.csv
 - Status: verified
-- Notes: outputs/batch/repeated_experiment_summary.csv rows=7; outputs/batch/resilience_gain_summary.csv rows=4
-- Next gate: Metric claims must point to batch CSV or a dedicated ablation/adaptive experiment.
+- Notes: outputs/batch/repeated_experiment_summary.csv rows=7; outputs/batch/resilience_gain_summary.csv rows=4; outputs/report_tables/metric_gate_summary.csv rows=11
+- Next gate: Metric claims must pass metric_gate_summary and point to batch or dedicated experiments.
 
 ### A08 Adaptive defense
 

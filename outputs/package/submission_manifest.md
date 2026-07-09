@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 112
-- total_payload_bytes: 2251257
+- payload_file_count: 115
+- total_payload_bytes: 2272312
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 113
-- zip_bytes: 1555541
-- zip_sha256: `6bf94e3ba70ea753bc1af8bba2e236ab7a9c7253aeaf46de35ddf40e29bb716f`
+- zip_file_count: 116
+- zip_bytes: 1562084
+- zip_sha256: `8fec4b1cb948d247c696f25e62209844e9b7b839f53ba9d44727afea0cb63048`
 
 ## 포함 파일
 
@@ -96,6 +96,8 @@
 - `outputs/report_tables/decision_trace_quality_audit.md`
 - `outputs/report_tables/incident_summary.csv`
 - `outputs/report_tables/incident_summary.md`
+- `outputs/report_tables/metric_gate_summary.csv`
+- `outputs/report_tables/metric_gate_summary.md`
 - `outputs/report_tables/ml_model_comparison.csv`
 - `outputs/report_tables/ml_model_comparison.md`
 - `requirements-gpu.txt`
@@ -119,6 +121,7 @@
 - `src/experiments/battle_timeline.py`
 - `src/experiments/competition_alignment.py`
 - `src/experiments/incident_summary.py`
+- `src/experiments/metric_gate.py`
 - `src/experiments/report_assets.py`
 - `src/experiments/run_adaptive_memory.py`
 - `src/experiments/run_all.py`

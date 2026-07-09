@@ -825,6 +825,56 @@ missing fields: 0
 - AURA의 공격 후보 평가와 TSRA-R의 방어 후보 평가를 같은 형식으로 비교할 수 있다.
 - `verify_submission_state.py`와 `competition_alignment.py`에 연결해 필수 산출물로 만들었다.
 
+### 23. Metric Gate Summary를 추가한 이유
+
+지금까지의 검증은 파일 존재, 로그 계약, trace 품질, replay를 확인했다. 하지만 실험 숫자가 프로젝트 방향을 실제로 지지하는지도 자동 확인해야 한다. 예를 들어 AURA impact가 약해지거나, TSRA-R resilience가 낮아지거나, E6/E7이 다시 동일해지는 문제가 생기면 row count 검증만으로는 잡기 어렵다.
+
+그래서 metric gate summary를 추가했다.
+
+구현:
+
+```text
+src/experiments/metric_gate.py
+outputs/report_tables/metric_gate_summary.csv
+outputs/report_tables/metric_gate_summary.md
+```
+
+Gate 범위:
+
+- AURA attack effectiveness
+- AURA adaptive selection
+- TSRA-R resilience
+- TSRA-R impact containment
+- trusted stale protection
+- priority reroute ablation
+- stale badge ablation
+- adaptive memory improvement
+- adaptive memory action economy
+- ML defender separation
+- repeated-run stability
+
+검증:
+
+```text
+python3 -m src.experiments.metric_gate --fail-on-error
+```
+
+결과:
+
+```text
+metric_gate_summary.csv: 11 gates
+status: all pass
+E3-E1 impact delta: 0.456259
+E5 resilience gain: 0.864293
+E5/E3 impact ratio: 0.135523
+E6/E7 impact separation: 0.0151044
+```
+
+해석:
+
+- 이 산출물은 공방 효과가 숫자로 유지되는지 확인하는 품질 게이트다.
+- 이후 정책이나 실험을 바꿔 핵심 결과가 약해지면 최종 검증에서 실패한다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

@@ -615,7 +615,57 @@ missing loop fields: 0
 - 이 산출물은 에이전트 구조를 사람이 바로 읽을 수 있는 단위로 압축한다.
 - 새 정책을 넣더라도 observe-memory-tool-candidate-decision-feedback 흐름이 유지되는지 확인할 기준으로 쓴다.
 
-## P12. 제출 직전 브랜치/패키지 동결
+## P12. Metric Gate Summary
+
+상태: 완료
+
+문제:
+
+- 파일, 이벤트 계약, trace 품질은 확인하고 있지만 핵심 metric이 실제로 프로젝트 방향을 지지하는지는 별도 검증이 필요하다.
+- 공격 효과가 약해지거나, TSRA-R resilience가 무너지거나, E6/E7이 다시 동일해져도 row count만으로는 잡기 어렵다.
+- ablation/adaptive 결과가 방향과 맞는지도 자동으로 확인해야 한다.
+
+구현:
+
+```text
+src/experiments/metric_gate.py
+outputs/report_tables/metric_gate_summary.csv
+outputs/report_tables/metric_gate_summary.md
+```
+
+구현 방식:
+
+- 30-seed batch summary, resilience gain, TSRA-R action ablation, adaptive memory summary를 읽는다.
+- 공격 효과, 방어 containment, stale protection, priority reroute 가치, stale badge 가치, adaptive 개선, ML defender 분리, 반복 안정성을 gate로 검사한다.
+- 각 gate는 observed value, threshold, pass/fail, interpretation을 남긴다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.metric_gate --fail-on-error` 명령으로 재생성 가능하다.
+- 완료. 11개 metric gate가 모두 pass다.
+- 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.metric_gate --fail-on-error
+```
+
+검증 결과:
+
+```text
+metric_gate_summary.csv: 11 gates
+status: all pass
+checked: AURA impact, TSRA-R resilience, action ablation,
+         adaptive memory, ML defender separation, repeated-run stability
+```
+
+해석:
+
+- 이 산출물은 "결과가 좋아 보인다"가 아니라, 핵심 방향을 자동 gate로 통과한다는 증거다.
+- 이후 실험을 다시 돌려도 공방 효과가 무너지면 final verifier에서 실패한다.
+
+## P13. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

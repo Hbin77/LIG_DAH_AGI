@@ -21,6 +21,7 @@ python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
 python3 -m src.experiments.run_batch
+python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py
@@ -38,6 +39,7 @@ repeated_experiment_summary rows: 7
 resilience_gain_summary rows: 4
 tsra_action_ablation_summary rows: 5
 adaptive_memory_summary conditions: full_tsra_r, adaptive_tsra_r
+metric_gate_summary rows: 11 pass
 agent_decision_trace_summary rows: 215
 agent_contract_validation rows: 49 pass
 decision_trace_quality_audit rows: 9 pass
@@ -51,7 +53,7 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 113
+package_zip entries: 116
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

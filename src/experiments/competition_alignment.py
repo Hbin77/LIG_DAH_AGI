@@ -192,13 +192,16 @@ ALIGNMENT_SPECS = [
         evidence_files=[
             "src/experiments/run_all.py",
             "src/experiments/run_batch.py",
+            "src/experiments/metric_gate.py",
             "outputs/batch/repeated_experiment_summary.csv",
             "outputs/batch/resilience_gain_summary.csv",
+            "outputs/report_tables/metric_gate_summary.csv",
         ],
-        next_gate="Metric claims must point to batch CSV or a dedicated ablation/adaptive experiment.",
+        next_gate="Metric claims must pass metric_gate_summary and point to batch or dedicated experiments.",
         row_checks=[
             RowCountCheck("outputs/batch/repeated_experiment_summary.csv", 7),
             RowCountCheck("outputs/batch/resilience_gain_summary.csv", 4),
+            RowCountCheck("outputs/report_tables/metric_gate_summary.csv", 11),
         ],
     ),
     AlignmentSpec(

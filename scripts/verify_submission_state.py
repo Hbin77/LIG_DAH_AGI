@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "src/experiments/validate_event_contracts.py",
     "src/experiments/trace_quality_audit.py",
     "src/experiments/agent_loop_replay.py",
+    "src/experiments/metric_gate.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
@@ -49,6 +50,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/decision_trace_quality_audit.md",
     "outputs/report_tables/agent_loop_replay.csv",
     "outputs/report_tables/agent_loop_replay.md",
+    "outputs/report_tables/metric_gate_summary.csv",
+    "outputs/report_tables/metric_gate_summary.md",
     "outputs/figures/aura_tsra_architecture.png",
     "outputs/figures/batch_resilience_gain.png",
     "outputs/figures/tsra_action_ablation.png",
@@ -200,6 +203,28 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("agent_loop_replay rows=8 agents/cases=complete")
 
+    metric_gate_rows = read_csv("outputs/report_tables/metric_gate_summary.csv")
+    require(len(metric_gate_rows) == 11, f"expected 11 metric gate rows, got {len(metric_gate_rows)}")
+    failed_metric_gates = [
+        f"{row['gate_id']}:{row['area']}"
+        for row in metric_gate_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_metric_gates, f"failed metric gates: {failed_metric_gates[:8]}")
+    required_metric_gate_areas = {
+        "AURA attack effectiveness",
+        "TSRA-R resilience",
+        "Priority reroute ablation",
+        "Adaptive memory improvement",
+        "ML defender separation",
+    }
+    observed_metric_gate_areas = {row["area"] for row in metric_gate_rows}
+    require(
+        required_metric_gate_areas.issubset(observed_metric_gate_areas),
+        f"metric gate missing required areas: {sorted(required_metric_gate_areas - observed_metric_gate_areas)}",
+    )
+    checks.append("metric_gate_summary rows=11 pass")
+
     coa_rows = read_csv("outputs/report_tables/aura_coa_cards.csv")
     require(len(coa_rows) >= 10, f"COA cards too small: {len(coa_rows)} rows")
     require(
@@ -315,6 +340,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_loop_replay.md" in manifest_text,
         "manifest missing agent loop replay",
+    )
+    require(
+        "outputs/report_tables/metric_gate_summary.md" in manifest_text,
+        "manifest missing metric gate summary",
     )
     return [f"package_zip entries={len(names)}", "package exclusions=passed"]
 
