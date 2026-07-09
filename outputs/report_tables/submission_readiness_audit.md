@@ -92,7 +92,7 @@ Safety boundary: closed simulation readiness audit only; no RF, exploit, or live
 ### R08 Package inputs
 
 - Requirement: Package builder, final verifier, manifest, and Git ignore rules must be present.
-- Evidence: scripts/build_submission_package.py | scripts/verify_submission_state.py | scripts/verify_external_package_link.py | outputs/package/submission_manifest.md | .gitignore
+- Evidence: scripts/build_submission_package.py | scripts/generate_release_handoff.py | scripts/verify_submission_state.py | scripts/verify_external_package_link.py | outputs/package/submission_manifest.md | outputs/package/release_handoff.md | .gitignore
 - Observed: package_inputs_present=True; manifest_has_zip_sha256=True; zip_ignored=True
 - Status: pass
 - Handoff value: The source ZIP can be regenerated locally without committing the binary ZIP file.

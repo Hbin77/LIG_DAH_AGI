@@ -1613,7 +1613,7 @@ submission_readiness_audit.csv: 10 rows
 status: pass=10
 agent_collaboration_graph.csv: 17 edges
 competition_alignment_matrix.csv: 10 rows verified
-package_zip entries: 160
+package_zip entries: 161
 branch: hbin
 origin main/hbin refs: present
 ```
@@ -1667,8 +1667,9 @@ submission_manifest.md
 검증 결과:
 
 ```text
-package_zip entries: 160
+package_zip entries: 161
 package_manifest_integrity: passed
+release_handoff: repo-only/current
 package exclusions: passed
 tracked_worktree: clean
 ```
@@ -1725,3 +1726,51 @@ python3 scripts/verify_external_package_link.py \
 - URL 안에 username/password가 들어간 credential-embedded URL은 거부한다.
 - 다운로드된 ZIP의 SHA-256, byte count, ZIP entry count가 manifest와 일치해야 통과한다.
 - 이 도구는 업로드 자체를 대신하지 않는다. 업로드 후 비로그인 링크를 받아 검증하는 단계에서 사용한다.
+
+### 43. Release Candidate Handoff를 추가한 이유
+
+제출 직전 인계에는 ZIP SHA-256, byte count, file count, 검증 명령, 남은 외부 업로드 작업이 한 장에 있어야 한다. 하지만 이 정보를 수동으로 문서에 쓰면 오래된 값을 복사할 위험이 있다.
+
+그래서 manifest에서 값을 읽어 release candidate handoff 문서를 생성하는 도구를 추가했다.
+
+추가한 것:
+
+```text
+scripts/generate_release_handoff.py
+outputs/package/release_handoff.md
+```
+
+중요한 설계 판단:
+
+```text
+release_handoff.md는 repo-side 문서다.
+제출 ZIP 안에는 넣지 않는다.
+```
+
+이유:
+
+- handoff 문서는 ZIP SHA-256을 기록한다.
+- 이 문서가 다시 ZIP 안에 들어가면 ZIP SHA가 자기 자신을 참조하게 된다.
+- 따라서 `outputs/package/release_handoff.md`는 GitHub `hbin` 브랜치에서 확인하는 인계 문서로 두고, 제출 ZIP에는 포함하지 않는다.
+
+검증 방식:
+
+```text
+scripts/verify_submission_state.py
+-> release_handoff.md 존재 확인
+-> 현재 manifest의 zip_sha256 / zip_bytes / zip_file_count가 handoff에 있는지 확인
+-> release_handoff.md가 ZIP 내부에 있으면 실패
+```
+
+검증 결과:
+
+```text
+release_handoff: repo-only/current
+package_manifest_integrity: passed
+tracked_worktree: clean
+```
+
+해석:
+
+- release handoff는 외부 업로드 담당자가 마지막으로 볼 기준 문서다.
+- ZIP 자체의 무결성은 `submission_manifest.md`와 final verifier가 책임지고, 외부 링크 검증은 `verify_external_package_link.py`가 책임진다.

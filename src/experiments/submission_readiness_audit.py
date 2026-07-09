@@ -146,9 +146,11 @@ def build_rows() -> list[dict[str, str]]:
 
     package_inputs = [
         "scripts/build_submission_package.py",
+        "scripts/generate_release_handoff.py",
         "scripts/verify_submission_state.py",
         "scripts/verify_external_package_link.py",
         "outputs/package/submission_manifest.md",
+        "outputs/package/release_handoff.md",
         ".gitignore",
     ]
     model_metrics = [

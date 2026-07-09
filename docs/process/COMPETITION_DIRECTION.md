@@ -660,8 +660,9 @@ outputs/report_tables/submission_readiness_audit.md
 ```text
 submission_readiness_audit rows: 10 pass
 agent_collaboration_graph edges: 17 verified
-package_zip entries: 160
+package_zip entries: 161
 package_manifest_integrity: passed
+release_handoff: repo-only/current
 branch: hbin
 origin main/hbin refs: present
 ```
@@ -689,6 +690,30 @@ local file-url self-test: pass
 downloaded sha256: manifest zip_sha256와 일치
 downloaded bytes: manifest zip_bytes와 일치
 downloaded zip_file_count: manifest zip_file_count와 일치
+```
+
+### P20. Release Candidate Handoff
+
+상태: 완료
+
+목적:
+
+- 제출 ZIP의 SHA-256, byte count, entry count와 검증 명령을 한 장짜리 인계 문서로 고정한다.
+- ZIP SHA를 기록하는 handoff 문서는 제출 ZIP 밖에 둬 self-reference를 피한다.
+- 외부 업로드 담당자가 마지막으로 확인할 기준을 `hbin` 브랜치에 남긴다.
+
+산출물:
+
+```text
+scripts/generate_release_handoff.py
+outputs/package/release_handoff.md
+```
+
+검증 결과:
+
+```text
+release_handoff: repo-only/current
+package_manifest_integrity: passed
 ```
 
 ## 최종 판단 기준

@@ -1425,7 +1425,7 @@ python3 scripts/verify_submission_state.py
 submission_readiness_audit.csv: 10 rows
 status: pass=10
 agent_collaboration_graph.csv: 17 edges
-package_zip entries: 160
+package_zip entries: 161
 branch: hbin
 origin main/hbin refs: present
 ```
@@ -1475,8 +1475,9 @@ python3 scripts/verify_submission_state.py --require-clean
 검증 결과:
 
 ```text
-package_zip entries: 160
+package_zip entries: 161
 package_manifest_integrity: passed
+release_handoff: repo-only/current
 package exclusions: passed
 tracked_worktree: clean
 ```
@@ -1532,7 +1533,52 @@ zip_file_count: manifest zip_file_count와 일치
 - 외부 업로드 후에는 같은 명령의 URL만 실제 제출 링크로 바꾸면 된다.
 - 이 도구는 업로드 자체를 대신하지 않는다. 업로드와 비로그인 환경 확인은 다음 운영 단계로 남긴다.
 
-## P29. 외부 제출 ZIP 업로드와 비로그인 다운로드 확인
+## P29. Release Candidate Handoff
+
+상태: 완료
+
+문제:
+
+- ZIP SHA, byte count, entry count, 검증 명령, 남은 외부 작업을 사람이 수동으로 전달하면 누락되거나 오래된 값을 복사할 수 있다.
+- 단, ZIP SHA를 적은 문서를 ZIP 안에 넣으면 해시가 자기 자신을 참조하게 되므로 handoff 문서는 repo-side로 분리해야 한다.
+
+구현:
+
+```text
+scripts/generate_release_handoff.py
+outputs/package/release_handoff.md
+```
+
+구현 방식:
+
+- `outputs/package/submission_manifest.md`에서 ZIP path, SHA-256, byte count, entry count를 읽는다.
+- `outputs/package/release_handoff.md`를 생성한다.
+- handoff 문서는 제출 ZIP 밖에 둔다.
+- `scripts/verify_submission_state.py`가 handoff 문서에 현재 ZIP SHA/bytes/entry count가 들어 있는지 확인한다.
+- verifier는 `release_handoff.md`가 제출 ZIP 안에 들어가면 실패한다.
+
+검증:
+
+```bash
+python3 scripts/build_submission_package.py
+python3 scripts/generate_release_handoff.py
+python3 scripts/verify_submission_state.py --require-clean
+```
+
+검증 결과:
+
+```text
+release_handoff: repo-only/current
+package_manifest_integrity: passed
+tracked_worktree: clean
+```
+
+해석:
+
+- 이 문서는 팀 인계용 release candidate sheet다.
+- 실제 제출 ZIP에는 들어가지 않고, repo에서 ZIP SHA와 외부 링크 검증 명령을 확인하는 기준으로 사용한다.
+
+## P30. 외부 제출 ZIP 업로드와 비로그인 다운로드 확인
 
 상태: 다음 작업
 

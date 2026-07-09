@@ -15,12 +15,13 @@ python3 scripts/build_submission_package.py
 ```text
 outputs/package/DAH2026_source_LIG_DAH_AGI.zip
 outputs/package/submission_manifest.md
+outputs/package/release_handoff.md
 ```
 
 ## 포함하는 것
 
 - `README.md`, `requirements.txt`, `requirements-gpu.txt`
-- `scripts/`: 패키지 생성, 최종 상태 검증, 외부 링크 검증 도구
+- `scripts/`: 패키지 생성, release handoff 생성, 최종 상태 검증, 외부 링크 검증 도구
 - `src/`: AURA, TSRA-R, Agent Runtime, 시뮬레이터, ML, 실험 코드
 - `docs/`: 시나리오, 에이전트 구조, 개발 판단 근거
 - `outputs/experiments/experiment_summary.csv`
@@ -38,17 +39,19 @@ outputs/package/submission_manifest.md
 - `outputs/models/*.pkl`
 - `outputs/models/*.pt`
 - `outputs/package/*.zip`은 Git에 커밋하지 않는다.
+- `outputs/package/release_handoff.md`는 ZIP 안에 넣지 않는 repo-side handoff 문서로 둔다.
 
 ## 현재 검증 결과
 
 패키지 생성 검증:
 
 ```text
-payload_file_count: 159
-zip_file_count: 160
+payload_file_count: 160
+zip_file_count: 161
 zip_bytes: 재생성 시 outputs/package/submission_manifest.md 기준 확인
 zip_sha256: 재생성 시 outputs/package/submission_manifest.md 기준 확인
 manifest_integrity: zip_sha256, zip_bytes, zip_file_count, 포함 파일 목록, worktree payload parity 검증
+release_handoff: repo-only/current
 external_link_verifier: included
 metric_gate_summary: included
 agent_interface_manifest: included

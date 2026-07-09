@@ -18,6 +18,7 @@ REQUIRED_FILES = [
     "README.md",
     "requirements.txt",
     "scripts/build_submission_package.py",
+    "scripts/generate_release_handoff.py",
     "scripts/verify_submission_state.py",
     "scripts/verify_external_package_link.py",
     "docs/process/COMPETITION_DIRECTION.md",
@@ -110,6 +111,10 @@ ZIP_REQUIRED_FILES = REQUIRED_FILES + [
     "outputs/package/submission_manifest.md",
 ]
 
+REPO_ONLY_REQUIRED_FILES = [
+    "outputs/package/release_handoff.md",
+]
+
 
 def run(command: list[str]) -> str:
     result = subprocess.run(
@@ -168,7 +173,7 @@ def manifest_file_list(manifest_text: str) -> set[str]:
 
 def check_required_files() -> list[str]:
     checked = []
-    for rel in REQUIRED_FILES:
+    for rel in [*REQUIRED_FILES, *REPO_ONLY_REQUIRED_FILES]:
         path = ROOT / rel
         require(path.exists(), f"missing required file: {rel}")
         require(path.stat().st_size > 0, f"empty required file: {rel}")
@@ -924,6 +929,27 @@ def check_zip() -> list[str]:
         expected_zip_files == names,
         "manifest included-file list does not match package ZIP contents",
     )
+    require(
+        "outputs/package/release_handoff.md" not in names,
+        "release handoff is repo-side only and must not be embedded in the package ZIP",
+    )
+    handoff_text = (ROOT / "outputs/package/release_handoff.md").read_text(encoding="utf-8")
+    require(
+        manifest_zip_sha256 in handoff_text,
+        "release handoff missing current zip_sha256",
+    )
+    require(
+        str(manifest_zip_bytes) in handoff_text,
+        "release handoff missing current zip_bytes",
+    )
+    require(
+        str(manifest_zip_file_count) in handoff_text,
+        "release handoff missing current zip_file_count",
+    )
+    require(
+        "not embedded inside the submission ZIP" in handoff_text,
+        "release handoff missing repo-side/non-embedded boundary",
+    )
     stale_payload_files = []
     with zipfile.ZipFile(ZIP_PATH) as zf:
         for rel in sorted(manifest_files):
@@ -1017,6 +1043,7 @@ def check_zip() -> list[str]:
     return [
         f"package_zip entries={len(names)}",
         "package_manifest_integrity=passed",
+        "release_handoff=repo-only/current",
         "package exclusions=passed",
     ]
 

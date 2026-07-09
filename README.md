@@ -500,13 +500,25 @@ This writes:
 
 The package includes code, docs, curated CSV summaries, figures, report tables, and model metric JSON files. It excludes regenerated temporary logs, seed-level batch directories, synthetic datasets, Python caches, and model binaries such as `.pkl` or `.pt`.
 
+## Generate Release Handoff
+
+```bash
+python3 scripts/generate_release_handoff.py
+```
+
+This writes:
+
+- `outputs/package/release_handoff.md`
+
+The handoff is intentionally repo-side only and not embedded inside the submission ZIP. It records the ZIP SHA-256, byte count, entry count, local freeze commands, and the external-link verification command.
+
 ## Verify Submission State
 
 ```bash
 python3 scripts/verify_submission_state.py
 ```
 
-This checks required files, core CSV row counts, safety-boundary text, package contents, manifest ZIP SHA-256/byte-count/file-count integrity, ZIP payload parity with the current worktree, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
+This checks required files, core CSV row counts, safety-boundary text, package contents, manifest ZIP SHA-256/byte-count/file-count integrity, ZIP payload parity with the current worktree, repo-only release handoff currency, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
 
 ## Verify External Package Link
 
@@ -573,5 +585,6 @@ python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
 python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
+python3 scripts/generate_release_handoff.py
 python3 scripts/verify_submission_state.py
 ```
