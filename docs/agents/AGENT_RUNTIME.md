@@ -260,6 +260,23 @@ outputs/report_tables/attack_defense_response_audit.md
 
 이 audit는 E5/E7의 공격 이벤트마다 required defense가 공격 시점에 이미 active였는지, 또는 40초 response window 안에 나왔는지 확인한다. required defense가 누락되면 실패로 보고, support defense 누락은 residual risk로 남긴다.
 
+## PACE Transition Audit
+
+`pace_switch` 전환의 이유와 tradeoff는 다음 명령으로 감사한다.
+
+```bash
+python3 -m src.experiments.pace_transition_audit
+```
+
+산출물:
+
+```text
+outputs/report_tables/pace_transition_audit.csv
+outputs/report_tables/pace_transition_audit.md
+```
+
+이 audit는 각 PACE 전환을 inferred source link, target link, active attack context, near-future attack, metric snapshot, recovery instability와 연결한다.
+
 예시:
 
 ```json

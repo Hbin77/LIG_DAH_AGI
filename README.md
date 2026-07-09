@@ -291,6 +291,19 @@ This writes:
 
 The response audit checks E5/E7 attack events against active or timely TSRA-R defenses. It distinguishes missed required defenses from support-partial residual risk.
 
+## Audit PACE Transitions
+
+```bash
+python3 -m src.experiments.pace_transition_audit
+```
+
+This writes:
+
+- `outputs/report_tables/pace_transition_audit.csv`
+- `outputs/report_tables/pace_transition_audit.md`
+
+The PACE audit explains each TSRA-R `pace_switch` event with inferred source/target links, active or near-future attacks, metric snapshot context, and residual risk.
+
 ## Generate Competition Alignment Matrix
 
 ```bash
@@ -412,6 +425,7 @@ python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
+python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/verify_submission_state.py

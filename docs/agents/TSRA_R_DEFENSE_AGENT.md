@@ -187,6 +187,19 @@ no_pace_switch:           0.107  delta -0.051
 - `pace_switch`는 fallback chasing 대응성을 높이지만 전환 횟수가 recovery instability 성분을 키울 수 있다. 따라서 단일 점수 최소화가 아니라 PACE 운용 복원력으로 분리해서 해석한다.
 - `video_throttle`은 현재 scalar mission impact만 보면 항상 이득으로 나타나지 않지만, critical traffic capacity 보호용 운용 기능으로 유지한다.
 
+PACE 전환별 근거는 다음 산출물에서 확인한다.
+
+```bash
+python3 -m src.experiments.pace_transition_audit
+```
+
+```text
+outputs/report_tables/pace_transition_audit.csv
+outputs/report_tables/pace_transition_audit.md
+```
+
+현재 감사 결과는 6개 PACE 전환을 `satcom_to_fallback` 2개, `fallback_reselect` 4개로 구분한다.
+
 ## 10. Adaptive Memory TSRA-R
 
 AdaptiveTSRA-R은 기본 TSRA-R을 대체하지 않는다. 기본 E1~E7 baseline은 그대로 두고, AgentMemory가 다음 방어 판단에 영향을 주는 별도 실험 모드로 구현했다.

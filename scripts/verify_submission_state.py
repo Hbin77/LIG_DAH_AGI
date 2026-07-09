@@ -36,6 +36,7 @@ REQUIRED_FILES = [
     "src/experiments/agent_capability_matrix.py",
     "src/experiments/attack_defense_coverage.py",
     "src/experiments/attack_defense_response_audit.py",
+    "src/experiments/pace_transition_audit.py",
     "src/experiments/metric_gate.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -62,6 +63,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/attack_defense_coverage.md",
     "outputs/report_tables/attack_defense_response_audit.csv",
     "outputs/report_tables/attack_defense_response_audit.md",
+    "outputs/report_tables/pace_transition_audit.csv",
+    "outputs/report_tables/pace_transition_audit.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -329,6 +332,35 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("attack_defense_response_audit rows=10 no missed required")
 
+    pace_rows = read_csv("outputs/report_tables/pace_transition_audit.csv")
+    require(len(pace_rows) == 6, f"expected 6 PACE transition audit rows, got {len(pace_rows)}")
+    pace_experiments = {row["experiment"] for row in pace_rows}
+    require(
+        pace_experiments == {"E5_rule_aura_tsra_r", "E7_ml_aura_ml_tsra_r"},
+        f"unexpected PACE audit experiments: {sorted(pace_experiments)}",
+    )
+    pace_status_counts = {
+        status: sum(1 for row in pace_rows if row.get("audit_status") == status)
+        for status in {"satcom_to_fallback", "fallback_reselect"}
+    }
+    require(
+        pace_status_counts == {"satcom_to_fallback": 2, "fallback_reselect": 4},
+        f"unexpected PACE audit status counts: {pace_status_counts}",
+    )
+    require(
+        all(row["target_link"] != row["from_link_inferred"] for row in pace_rows),
+        "PACE audit contains self transition",
+    )
+    require(
+        all(row["move_critical"] == "true" for row in pace_rows),
+        "PACE audit contains transition without critical traffic movement",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in pace_rows),
+        "PACE transition audit missing safety boundary",
+    )
+    checks.append("pace_transition_audit rows=6 status=2 initial/4 fallback")
+
     metric_gate_rows = read_csv("outputs/report_tables/metric_gate_summary.csv")
     require(len(metric_gate_rows) == 11, f"expected 11 metric gate rows, got {len(metric_gate_rows)}")
     failed_metric_gates = [
@@ -482,6 +514,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/attack_defense_response_audit.md" in manifest_text,
         "manifest missing attack-defense response audit",
+    )
+    require(
+        "outputs/report_tables/pace_transition_audit.md" in manifest_text,
+        "manifest missing PACE transition audit",
     )
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,

@@ -136,9 +136,10 @@ Metrics
 7. 에이전트 capability를 runtime action, observed effect, validation gate에 연결한다.
 8. 공격 capability가 어떤 TSRA-R 방어 capability로 커버되는지 coverage matrix로 검증한다.
 9. 실제 E5/E7 로그에서 required defense가 active 또는 response window 안에 나오는지 감사한다.
-10. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
-11. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-12. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+10. PACE 전환의 reason, target link, 공격 context, recovery instability tradeoff를 감사한다.
+11. 핵심 metric gate가 공격 효과, 방어 효과, adaptive 개선, ML 분리를 통과하는지 확인한다.
+12. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+13. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -564,6 +565,33 @@ outputs/report_tables/attack_defense_response_audit.md
 attack_defense_response_audit rows: 10
 missed required defenses: 0
 support partial residual risk: 0 rows
+```
+
+### P17. PACE Transition Audit
+
+상태: 완료
+
+목적:
+
+- `pace_switch`가 언제, 왜, 어느 link로 전환했는지 명시한다.
+- PACE 전환이 공격 context와 어떤 관계인지 보여준다.
+- fallback 재선택의 복원력 이득과 recovery instability tradeoff를 함께 남긴다.
+
+산출물:
+
+```text
+src/experiments/pace_transition_audit.py
+outputs/report_tables/pace_transition_audit.csv
+outputs/report_tables/pace_transition_audit.md
+```
+
+검증 결과:
+
+```text
+pace_transition_audit rows: 6
+satcom_to_fallback: 2
+fallback_reselect: 4
+self_transition: 0
 ```
 
 ## 최종 판단 기준

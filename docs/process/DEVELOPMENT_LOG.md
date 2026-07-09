@@ -1113,6 +1113,46 @@ metric gates: 11 pass
 - 이 변경은 수치 개선보다 방어 정책의 의미적 정확도를 높이는 수정이다.
 - SATCOM과 fallback link의 임계값을 분리했기 때문에 이후 PACE tuning을 더 안전하게 할 수 있다.
 
+### 31. PACE Transition Audit를 추가한 이유
+
+Fallback PACE 재선택은 response audit에서 required/support coverage를 완성했지만, 전환 횟수가 늘면서 recovery instability 성분도 커졌다. 따라서 단순히 "PACE가 늘었다"가 아니라 각 전환이 어떤 공격 context에서 발생했는지 설명할 별도 산출물이 필요했다.
+
+구현:
+
+```text
+src/experiments/pace_transition_audit.py
+outputs/report_tables/pace_transition_audit.csv
+outputs/report_tables/pace_transition_audit.md
+```
+
+감사 기준:
+
+```text
+E5/E7 pace_switch event
+-> inferred from_link
+-> target_link
+-> active attack at switch
+-> near future attack within 40 sec
+-> metric snapshot at switch
+-> audit_status
+```
+
+검증 결과:
+
+```text
+pace_transition_audit.csv: 6 rows
+satcom_to_fallback: 2
+fallback_reselect: 4
+self_transition: 0
+```
+
+해석:
+
+- 초기 `SATCOM -> LTE` 전환은 SATCOM 저하 대응이다.
+- 이후 `LTE -> MESH`, `MESH -> LTE` 전환은 fallback link가 공격받는 상황의 재선택이다.
+- recovery instability tradeoff를 숨기지 않고 각 row에 남긴다.
+- `verify_submission_state.py`와 `competition_alignment.py`에 연결해 PACE 전환 근거가 빠지면 최종 검증에서 실패하게 만들었다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

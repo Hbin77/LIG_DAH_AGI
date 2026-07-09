@@ -867,7 +867,58 @@ required_covered_support_partial: 0
 - 이 산출물은 정적 coverage와 실제 event timeline 사이를 연결한다.
 - 공격/방어 에이전트를 따로 개발해도 required response timing이 깨지면 final verifier에서 잡히게 된다.
 
-## P17. 제출 직전 브랜치/패키지 동결
+## P17. PACE Transition Audit
+
+상태: 완료
+
+문제:
+
+- fallback PACE 재선택은 response audit에서 효과가 보이지만, 각 전환이 어떤 공격 context에서 왜 발생했는지 별도 표가 없다.
+- PACE 전환은 mission impact의 recovery instability 성분을 키울 수 있으므로, 전환 근거와 tradeoff를 같이 남겨야 한다.
+
+구현:
+
+```text
+src/experiments/pace_transition_audit.py
+outputs/report_tables/pace_transition_audit.csv
+outputs/report_tables/pace_transition_audit.md
+```
+
+구현 방식:
+
+- E5/E7 `defense_events.jsonl`에서 `pace_switch`만 추출한다.
+- 이전 active link를 추론해 `from_link -> target_link`를 만든다.
+- 전환 시점의 active attack, 40초 내 near-future attack, metric snapshot을 붙인다.
+- `satcom_to_fallback`, `fallback_reselect` 상태를 구분한다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.pace_transition_audit` 명령으로 재생성 가능하다.
+- 완료. E5/E7 PACE 전환 6개가 감사된다.
+- 완료. SATCOM 최초 fallback 2개, fallback 재선택 4개가 구분된다.
+- 완료. self transition은 없다.
+
+검증:
+
+```bash
+python3 -m src.experiments.pace_transition_audit
+```
+
+검증 결과:
+
+```text
+pace_transition_audit.csv: 6 rows
+satcom_to_fallback: 2
+fallback_reselect: 4
+self_transition: 0
+```
+
+해석:
+
+- PACE 전환은 단순 이벤트가 아니라 공격 context, target link, recovery instability tradeoff와 함께 해석된다.
+- 방어 담당이 PACE threshold를 조정할 때 이 표를 기준으로 과한 전환과 필요한 전환을 구분할 수 있다.
+
+## P18. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 
