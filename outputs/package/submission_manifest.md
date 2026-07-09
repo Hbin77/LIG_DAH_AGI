@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 184
-- total_payload_bytes: 3426464
+- payload_file_count: 188
+- total_payload_bytes: 3465377
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 185
-- zip_bytes: 1771850
-- zip_sha256: `dea08a15ce8450f4a66426f5d438c1884553d30eef11df78a26ccd62b64fe878`
+- zip_file_count: 189
+- zip_bytes: 1782441
+- zip_sha256: `d94ce6d6c305927a291f7e32ca6ec0e310754fe116c844ef754f9bf458dcbf82`
 
 ## 포함 파일
 
@@ -145,6 +145,9 @@
 - `outputs/report_tables/safety_boundary_audit.md`
 - `outputs/report_tables/submission_readiness_audit.csv`
 - `outputs/report_tables/submission_readiness_audit.md`
+- `outputs/report_tables/tsra_detector_calibration_audit.csv`
+- `outputs/report_tables/tsra_detector_calibration_audit.md`
+- `outputs/report_tables/tsra_detector_calibration_bins.csv`
 - `requirements-gpu.txt`
 - `requirements.txt`
 - `scripts/build_submission_package.py`
@@ -198,6 +201,7 @@
 - `src/experiments/submission_readiness_audit.py`
 - `src/experiments/trace_quality_audit.py`
 - `src/experiments/trace_summary.py`
+- `src/experiments/tsra_detector_calibration_audit.py`
 - `src/experiments/validate_event_contracts.py`
 - `src/ml/__init__.py`
 - `src/ml/build_dataset.py`

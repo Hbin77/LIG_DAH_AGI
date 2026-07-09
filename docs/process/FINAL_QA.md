@@ -34,6 +34,7 @@ python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.ml_contribution_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
 python3 -m src.experiments.run_ml_threshold_sweep
+python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
@@ -67,6 +68,7 @@ metric_gate_summary rows: 11 pass
 ml_contribution_audit rows: 7 pass
 reactive_defense_tradeoff_audit rows: 7 pass
 ml_threshold_sweep_summary rows: 5
+tsra_detector_calibration_audit rows: 6 pass
 agent_decision_trace_summary rows: 215
 agent_contract_validation rows: 49 pass
 decision_trace_quality_audit rows: 9 pass

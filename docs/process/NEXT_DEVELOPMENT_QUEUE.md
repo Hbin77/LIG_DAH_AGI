@@ -2058,6 +2058,58 @@ ml_threshold_sweep_summary rows: 5
 - 너무 높은 threshold는 방어창 개방을 늦춰 mission impact를 올린다.
 - threshold는 숨은 상수가 아니라 재실행 가능한 tuning parameter다.
 
+## P41. TSRA-R Detector Calibration Audit
+
+상태: 완료
+
+문제:
+
+- threshold sweep은 closed-loop 결과를 보여주지만, `predict_attack_probability` 확률 자체의 품질을 확인하지는 않는다.
+- TSRA-R-ML은 detector probability를 threshold에 넣어 defense window를 열기 때문에 probability calibration, class separation, threshold precision/recall 근거가 필요하다.
+
+구현:
+
+```text
+src/experiments/tsra_detector_calibration_audit.py
+outputs/report_tables/tsra_detector_calibration_audit.csv
+outputs/report_tables/tsra_detector_calibration_audit.md
+outputs/report_tables/tsra_detector_calibration_bins.csv
+```
+
+검증 기준:
+
+- 독립 deterministic holdout 4000개를 사용한다.
+- Brier score와 expected calibration error를 기록한다.
+- 0.75 threshold의 precision, recall, false-positive rate를 기록한다.
+- threshold 0.55, 0.75, 0.95의 precision/recall tradeoff가 단조 방향을 보여야 한다.
+- positive/negative class probability가 분리되어야 한다.
+- offline calibration과 closed-loop threshold sweep 결과가 같은 방향이어야 한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+tsra_detector_calibration_audit rows: 6
+tsra_detector_calibration_bins rows: 10
+brier_score: 0.0351619
+expected_calibration_error: 0.093589
+threshold 0.75 precision: 1.0
+threshold 0.75 recall: 0.833417
+threshold 0.75 false_positive_rate: 0.0
+```
+
+해석:
+
+- 확률이 완벽히 calibrated라고 주장하지 않는다.
+- 하지만 closed simulation thresholding 용도로는 Brier/ECE와 class separation이 충분하다.
+- 0.75 threshold는 false positive를 줄이는 보수적 방어창 개방 기준이다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

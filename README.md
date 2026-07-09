@@ -410,6 +410,20 @@ This writes:
 
 The sweep runs TSRA-R-ML thresholds `0.55`, `0.65`, `0.75`, `0.85`, and `0.95` across 10 deterministic seeds. It records mission impact, alert timing, no-op behavior, and watch/usable status so the anomaly threshold is a measured tuning parameter rather than a hidden constant.
 
+## Audit TSRA-R Detector Calibration
+
+```bash
+python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/tsra_detector_calibration_audit.csv`
+- `outputs/report_tables/tsra_detector_calibration_audit.md`
+- `outputs/report_tables/tsra_detector_calibration_bins.csv`
+
+The audit evaluates TSRA-R-ML detector probabilities on an independent deterministic holdout set. It records Brier score, expected calibration error, threshold precision/recall, probability separation, and consistency with the closed-loop threshold sweep.
+
 ## Generate Attack-Defense Coverage
 
 ```bash
@@ -682,6 +696,7 @@ python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.ml_contribution_audit --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
 python3 -m src.experiments.run_ml_threshold_sweep
+python3 -m src.experiments.tsra_detector_calibration_audit --fail-on-error
 python3 -m src.experiments.attack_defense_coverage
 python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay

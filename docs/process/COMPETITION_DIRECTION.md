@@ -935,6 +935,29 @@ thresholds: 0.55, 0.65, 0.75, 0.85, 0.95
 0.95 mission impact mean: 0.232634
 ```
 
+### P31. TSRA-R Detector Calibration Audit
+
+목적:
+
+- `predict_attack_probability`를 threshold decision input으로 쓰는 근거를 남긴다.
+- 확률이 완벽하다고 과장하지 않고, Brier/ECE와 threshold precision/recall을 같이 제시한다.
+- offline calibration과 closed-loop threshold sweep이 같은 방향인지 확인한다.
+
+검증 기준:
+
+```text
+tsra_detector_calibration_audit rows: 6 pass
+tsra_detector_calibration_bins rows: 10
+holdout rows: 4000
+brier_score: 0.0351619
+expected_calibration_error: 0.093589
+threshold 0.75 precision: 1.0
+threshold 0.75 recall: 0.833417
+threshold 0.75 false_positive_rate: 0.0
+positive median probability: 0.956382
+negative median probability: 0.106435
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

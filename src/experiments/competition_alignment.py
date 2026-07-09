@@ -243,7 +243,8 @@ ALIGNMENT_SPECS = [
             "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together; "
             "reactive defense tradeoff audit explains E7's pre-attack suppression, alert overlap, "
             "first-response cost, and bounded mission-impact tradeoff versus E6; threshold sweep "
-            "makes the anomaly threshold a measured tuning parameter instead of a hidden constant."
+            "makes the anomaly threshold a measured tuning parameter instead of a hidden constant; "
+            "detector calibration audit checks Brier/ECE, threshold precision, and class probability separation."
         ),
         agent_or_component="AURA ML / TSRA-R ML",
         evidence_files=[
@@ -253,6 +254,7 @@ ALIGNMENT_SPECS = [
             "src/experiments/run_ml_threshold_sweep.py",
             "src/experiments/ml_contribution_audit.py",
             "src/experiments/reactive_defense_tradeoff_audit.py",
+            "src/experiments/tsra_detector_calibration_audit.py",
             "outputs/models/aura_impact_model_metrics.json",
             "outputs/models/tsra_detector_metrics.json",
             "outputs/models/aura_mps_mlp_metrics.json",
@@ -263,6 +265,9 @@ ALIGNMENT_SPECS = [
             "outputs/batch/ml_threshold_sweep_summary.csv",
             "outputs/report_tables/ml_threshold_sweep.csv",
             "outputs/report_tables/ml_threshold_sweep.md",
+            "outputs/report_tables/tsra_detector_calibration_audit.csv",
+            "outputs/report_tables/tsra_detector_calibration_audit.md",
+            "outputs/report_tables/tsra_detector_calibration_bins.csv",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             "outputs/report_tables/metric_gate_summary.csv",
         ],
@@ -276,11 +281,15 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_minus_e6=0.0167761"),
             ContentCheck("outputs/report_tables/ml_threshold_sweep.csv", "baseline threshold balances alert timing"),
             ContentCheck("outputs/report_tables/ml_threshold_sweep.csv", "watch"),
+            ContentCheck("outputs/report_tables/tsra_detector_calibration_audit.csv", "brier_score=0.0351619"),
+            ContentCheck("outputs/report_tables/tsra_detector_calibration_audit.csv", "threshold=0.75"),
+            ContentCheck("outputs/report_tables/tsra_detector_calibration_audit.csv", "false_positive_rate=0"),
         ],
         row_checks=[
             RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7),
             RowCountCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", 7),
             RowCountCheck("outputs/batch/ml_threshold_sweep_summary.csv", 5),
+            RowCountCheck("outputs/report_tables/tsra_detector_calibration_audit.csv", 6),
         ],
     ),
     AlignmentSpec(

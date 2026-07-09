@@ -2167,3 +2167,46 @@ ml_threshold_sweep_summary rows: 5
 - 0.95는 alert 수가 줄고 first alert latency가 늘며 mission impact가 올라간다.
 - 현재 E7 baseline threshold 0.75는 plateau 안에 있고, 너무 높은 0.95는 watch로 분리된다.
 - 실제 공격 기능은 추가하지 않고 closed simulation threshold tuning만 수행한다.
+
+### 54. TSRA-R Detector Calibration Audit를 추가한 이유
+
+threshold sweep은 어떤 threshold가 closed-loop에서 어떤 결과를 내는지 보여준다. 하지만 TSRA-R-ML은 `predict_attack_probability` 값을 직접 threshold에 넣기 때문에, 그 확률 자체가 threshold 의사결정에 쓸 만한지도 별도로 확인해야 한다.
+
+이번 변경은 detector probability calibration audit를 추가했다.
+
+추가한 것:
+
+```text
+src/experiments/tsra_detector_calibration_audit.py
+outputs/report_tables/tsra_detector_calibration_audit.csv
+outputs/report_tables/tsra_detector_calibration_audit.md
+outputs/report_tables/tsra_detector_calibration_bins.csv
+```
+
+검증 설정:
+
+```text
+holdout rows: 4000
+seed: 9100
+model: outputs/models/tsra_detector.pkl
+thresholds checked: 0.55, 0.65, 0.75, 0.85, 0.95
+```
+
+검증 결과:
+
+```text
+brier_score: 0.0351619
+expected_calibration_error: 0.093589
+threshold 0.75 precision: 1.0
+threshold 0.75 recall: 0.833417
+threshold 0.75 false_positive_rate: 0.0
+positive_median_probability: 0.956382
+negative_median_probability: 0.106435
+```
+
+해석:
+
+- Brier score는 강하고 ECE는 thresholding에 허용 가능한 수준이다.
+- 확률이 완벽히 calibrated truth라고 주장하지 않는다. 다만 고신뢰 threshold decision input으로는 충분한 근거가 있다.
+- 0.75는 false positive를 0으로 묶는 보수적 기준이며, 0.95는 recall이 0.532까지 떨어져 closed-loop sweep의 watch 결과와 일치한다.
+- 실제 공격 기능은 추가하지 않고 synthetic holdout과 closed simulation 결과만 감사한다.

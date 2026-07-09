@@ -58,6 +58,7 @@ REQUIRED_FILES = [
     "src/experiments/metric_gate.py",
     "src/experiments/ml_contribution_audit.py",
     "src/experiments/reactive_defense_tradeoff_audit.py",
+    "src/experiments/tsra_detector_calibration_audit.py",
     "src/experiments/safety_boundary_audit.py",
     "src/experiments/submission_readiness_audit.py",
     "outputs/experiments/experiment_summary.csv",
@@ -120,6 +121,9 @@ REQUIRED_FILES = [
     "outputs/report_tables/reactive_defense_tradeoff_audit.md",
     "outputs/report_tables/ml_threshold_sweep.csv",
     "outputs/report_tables/ml_threshold_sweep.md",
+    "outputs/report_tables/tsra_detector_calibration_audit.csv",
+    "outputs/report_tables/tsra_detector_calibration_audit.md",
+    "outputs/report_tables/tsra_detector_calibration_bins.csv",
     "outputs/report_tables/safety_boundary_audit.csv",
     "outputs/report_tables/safety_boundary_audit.md",
     "outputs/report_tables/submission_readiness_audit.csv",
@@ -903,6 +907,73 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("ml_threshold_sweep rows=5 raw=50 status=usable/watch")
 
+    calibration_rows = read_csv("outputs/report_tables/tsra_detector_calibration_audit.csv")
+    calibration_bins = read_csv("outputs/report_tables/tsra_detector_calibration_bins.csv")
+    require(
+        len(calibration_rows) == 6,
+        f"expected 6 TSRA detector calibration audit rows, got {len(calibration_rows)}",
+    )
+    require(
+        len(calibration_bins) == 10,
+        f"expected 10 TSRA detector calibration bins, got {len(calibration_bins)}",
+    )
+    failed_calibration = [
+        f"{row['check_id']}:{row['area']}"
+        for row in calibration_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_calibration, f"failed TSRA detector calibration rows: {failed_calibration[:8]}")
+    required_calibration_areas = {
+        "Holdout coverage",
+        "Probability calibration",
+        "Baseline threshold quality",
+        "Threshold sensitivity",
+        "Class probability separation",
+        "Closed-loop threshold consistency",
+    }
+    observed_calibration_areas = {row["area"] for row in calibration_rows}
+    require(
+        observed_calibration_areas == required_calibration_areas,
+        f"TSRA detector calibration audit has unexpected areas: {sorted(observed_calibration_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in calibration_rows),
+        "TSRA detector calibration audit missing safety boundary",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in calibration_bins),
+        "TSRA detector calibration bins missing safety boundary",
+    )
+    require(
+        any(
+            "brier_score=0.0351619" in row["observed"]
+            and "expected_calibration_error=0.093589" in row["observed"]
+            for row in calibration_rows
+            if row["check_id"] == "CAL02"
+        ),
+        "TSRA detector calibration audit missing Brier/ECE evidence",
+    )
+    require(
+        any(
+            "threshold=0.75" in row["observed"]
+            and "precision=1" in row["observed"]
+            and "false_positive_rate=0" in row["observed"]
+            for row in calibration_rows
+            if row["check_id"] == "CAL03"
+        ),
+        "TSRA detector calibration audit missing baseline threshold precision evidence",
+    )
+    require(
+        any(
+            "sweep_0.75_status=usable" in row["observed"]
+            and "sweep_0.95_status=watch" in row["observed"]
+            for row in calibration_rows
+            if row["check_id"] == "CAL06"
+        ),
+        "TSRA detector calibration audit missing closed-loop sweep consistency evidence",
+    )
+    checks.append("tsra_detector_calibration_audit rows=6 bins=10 pass")
+
     safety_rows = read_csv("outputs/report_tables/safety_boundary_audit.csv")
     require(len(safety_rows) == 5, f"expected 5 safety boundary rows, got {len(safety_rows)}")
     failed_safety = [
@@ -1459,6 +1530,14 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/ml_threshold_sweep.md" in manifest_text,
         "manifest missing ML threshold sweep report",
+    )
+    require(
+        "outputs/report_tables/tsra_detector_calibration_audit.md" in manifest_text,
+        "manifest missing TSRA detector calibration audit",
+    )
+    require(
+        "outputs/report_tables/tsra_detector_calibration_bins.csv" in manifest_text,
+        "manifest missing TSRA detector calibration bins",
     )
     require(
         "outputs/report_tables/safety_boundary_audit.md" in manifest_text,

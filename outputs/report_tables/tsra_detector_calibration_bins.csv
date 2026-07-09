@@ -1,0 +1,11 @@
+bin_id,probability_min,probability_max,sample_count,avg_probability,observed_attack_rate,absolute_gap,safety_boundary
+B01,0,0.1,928,0.0671688,0.00538793,0.0617808,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B02,0.1,0.2,810,0.138936,0.00493827,0.133998,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B03,0.2,0.3,186,0.242003,0.0698925,0.172111,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B04,0.3,0.4,103,0.349932,0.339806,0.0101257,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B05,0.4,0.5,106,0.451245,0.726415,0.27517,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B06,0.5,0.6,87,0.548399,0.873563,0.325164,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B07,0.6,0.7,85,0.658094,0.917647,0.259553,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B08,0.7,0.8,80,0.748254,0.975,0.226746,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B09,0.8,0.9,272,0.858915,1,0.141085,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
+B10,0.9,1,1343,0.970666,1,0.0293339,"closed simulation TSRA-R detector calibration audit only; no RF, exploit, or live network action"
