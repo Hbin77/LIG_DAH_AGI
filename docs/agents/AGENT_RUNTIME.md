@@ -329,6 +329,28 @@ outputs/report_tables/agent_memory_influence_audit.md
 - TSRA-R-ML active defense window memory가 reactive window를 유지하는지
 - Adaptive TSRA-R memory policy가 mission impact와 optional defense load를 줄이는지
 
+## Adaptive Defense Decision Path Audit
+
+Adaptive TSRA-R의 memory policy가 후보 action별 gate와 실제 emitted event로 이어지는지 확인한다.
+
+```bash
+python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/adaptive_defense_decision_path_audit.csv
+outputs/report_tables/adaptive_defense_decision_path_audit.md
+```
+
+감사 항목:
+
+- `update_adaptive_action_policy` tool이 모든 adaptive decision에서 호출되는지
+- `priority_reroute`, `stale_badge` core action이 항상 enabled인지
+- `video_throttle`, `pace_switch` optional action이 memory evidence 부족 시 보류되는지
+- emitted defense event가 enabled candidate gate와 일치하는지
+
 ## Tool Usage Audit
 
 AgentTool이 단순 등록 목록이 아니라 실제 판단 루프에서 호출되는지 확인한다.

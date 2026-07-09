@@ -2567,7 +2567,7 @@ outputs/report_tables/reproduction_order_audit.md
 검증 기준:
 
 ```text
-reproduction_order_audit rows: 13
+reproduction_order_audit rows: 14
 RO01 defense_action_attribution_audit prerequisites pass
 RO05 mission_thread_summary prerequisites pass
 RO06/RO07/RO08 ML path and red-blue interaction prerequisites pass
@@ -2836,3 +2836,56 @@ E7 resilience gain: 0.824367
 ```
 
 이 보강의 의미는 AURA-ML이 단순 모델 wrapper가 아니라 AgentMemory와 objective-aware score를 가진 공격 에이전트라는 점이다. 동시에 E7을 E6보다 무조건 좋다고 주장하지 않고, ML reactive 구조와 stale COP 전술 커버리지를 얻는 대신 bounded tradeoff가 남는다고 기록한다. 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+### 70. Adaptive TSRA-R Candidate-Level Memory Gate를 추가한 이유
+
+AURA-ML 쪽은 objective-aware selection score와 후보별 trace로 공격 선택 근거가 뚜렷해졌다. 방어 쪽에서 남은 약점은 TSRA-R이 좋은 action도 있지만, `video_throttle`과 `pace_switch` 같은 optional action의 비용이 mission impact에 남는다는 점이었다. 기존 Adaptive TSRA-R은 30-seed summary에서 이 비용을 줄였지만, 후보 action 단위로 왜 어떤 action을 보류했는지는 충분히 직접적이지 않았다.
+
+이번 변경은 Adaptive TSRA-R의 policy output을 action별 구조로 바꿨다.
+
+```text
+action_decisions[action]:
+  adaptive_enabled
+  gate_class
+  reason
+  memory_evidence
+```
+
+그리고 `RuleTSRAR.decide`가 각 `candidate_actions` row에 다음 필드를 붙이게 했다.
+
+```text
+adaptive_enabled
+adaptive_gate_class
+adaptive_gate_reason
+adaptive_memory_evidence
+```
+
+추가한 감사는 `src/experiments/adaptive_defense_decision_path_audit.py`다. 이 감사는 `run_adaptive_memory`가 만든 30개 seed의 adaptive trace를 읽어서 memory policy tool call, 후보 action 4개, core action 유지, optional action 보류, emitted event와 gate 일치 여부를 검증한다.
+
+검증 결과는 다음과 같다.
+
+```text
+adaptive_defense_decision_path_audit rows: 6 pass
+mission_improvement: 0.0307717
+defense_count_reduction: 3.93333
+video_throttle_reduction: 3.26667
+pace_switch_reduction: 1.06667
+trace_files: 30
+trace_count: 1830
+update_adaptive_action_policy: 1830
+candidate_total: 7320
+priority_enabled: 1830/1830
+stale_enabled: 1830/1830
+video_eligible_held: 1146
+pace_eligible_held: 154
+emission_gate_violations: 0
+```
+
+동반 수정:
+
+- README Full Reproduction에 adaptive defense path audit 명령을 추가했다.
+- `reproduction_order_audit`는 RO14 체계로 확장했다.
+- `submission_readiness_audit`, `competition_alignment`, `verify_submission_state`, package builder가 새 audit을 필수 증거로 보게 했다.
+- `docs/agents/TSRA_R_DEFENSE_AGENT.md`에 candidate-level memory gate 구조를 추가했다.
+
+이 보강의 의미는 방어 에이전트가 action을 실행한 이유만 설명하는 것이 아니라, action을 보류한 이유까지 AgentMemory와 DecisionTrace로 증명한다는 점이다. 실제 RF, exploit, live network action은 추가하지 않고 closed simulation 방어 정책과 감사 산출물만 바꾼다.

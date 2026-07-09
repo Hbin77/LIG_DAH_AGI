@@ -71,6 +71,7 @@ class RuleTSRAR:
                 "eligible": conditions["priority_reroute_needed"],
                 "ready": conditions["priority_reroute_ready"],
                 "reason": "critical traffic waiting behind video load",
+                **self._adaptive_candidate_context("priority_reroute", extra_feedback),
             }
         )
         if (
@@ -93,6 +94,7 @@ class RuleTSRAR:
                 "eligible": conditions["video_throttle_needed"],
                 "ready": conditions["video_throttle_ready"],
                 "reason": "protect critical traffic capacity",
+                **self._adaptive_candidate_context("video_throttle", extra_feedback),
             }
         )
         if (
@@ -115,6 +117,7 @@ class RuleTSRAR:
                 "eligible": conditions["stale_badge_needed"],
                 "ready": conditions["stale_badge_ready"],
                 "reason": "mark stale COP objects as lower trust",
+                **self._adaptive_candidate_context("stale_badge", extra_feedback),
             }
         )
         if (
@@ -148,6 +151,7 @@ class RuleTSRAR:
                 "eligible": conditions["pace_switch_needed"],
                 "ready": conditions["pace_switch_ready"],
                 "reason": conditions["pace_switch_reason"],
+                **self._adaptive_candidate_context("pace_switch", extra_feedback),
             }
         )
         if (
@@ -190,6 +194,23 @@ class RuleTSRAR:
         tool_calls: list[ToolCallRecord],
     ) -> dict:
         return {}
+
+    @staticmethod
+    def _adaptive_candidate_context(action: str, extra_feedback: dict | None) -> dict:
+        if not extra_feedback:
+            return {}
+        policy = extra_feedback.get("adaptive_policy")
+        if not isinstance(policy, dict):
+            return {}
+        decision = (policy.get("action_decisions") or {}).get(action)
+        if not isinstance(decision, dict):
+            return {}
+        return {
+            "adaptive_enabled": bool(decision.get("adaptive_enabled")),
+            "adaptive_gate_class": decision.get("gate_class", ""),
+            "adaptive_gate_reason": decision.get("reason", ""),
+            "adaptive_memory_evidence": decision.get("memory_evidence", {}),
+        }
 
     def _evaluate_conditions(self, state: MissionState) -> dict[str, Any]:
         now = state.time_sec

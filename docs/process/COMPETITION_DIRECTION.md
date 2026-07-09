@@ -272,7 +272,9 @@ outputs/figures/tsra_action_ablation.png
 ```text
 src/tsra_r/adaptive_defender.py
 src/experiments/run_adaptive_memory.py
+src/experiments/adaptive_defense_decision_path_audit.py
 outputs/batch/adaptive_memory_summary.csv
+outputs/report_tables/adaptive_defense_decision_path_audit.csv
 outputs/figures/adaptive_memory_comparison.png
 ```
 
@@ -283,6 +285,10 @@ full TSRA-R impact:      0.140260
 adaptive TSRA-R impact:  0.109489
 priority inversion:      0.050609 -> 0.027455
 video throttle count:    6.4 -> 3.1
+adaptive defense path:   6 rows pass
+video eligible held:     1146
+pace eligible held:      154
+emission gate violations: 0
 E1-E7 baseline:          unchanged in run_all
 ```
 
@@ -1059,6 +1065,7 @@ event_link_status: linked for all rows
 
 - AgentMemory가 단순 기록이 아니라 decision gate라는 점을 검증한다.
 - AURA cadence, TSRA-R action cooldown, TSRA-R-ML active defense window, Adaptive TSRA-R memory policy를 한 표에서 확인한다.
+- Adaptive TSRA-R은 별도 decision-path audit에서 candidate-level memory gate와 emitted event 일치까지 확인한다.
 - "에이전트 구조" 주장에 Memory가 실제 행동에 영향을 준다는 근거를 추가한다.
 
 검증 기준:

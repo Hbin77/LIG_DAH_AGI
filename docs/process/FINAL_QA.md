@@ -32,6 +32,7 @@ python3 -m src.experiments.defense_effectiveness_ledger
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
+python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
@@ -75,6 +76,7 @@ repeated_experiment_summary rows: 7
 resilience_gain_summary rows: 4
 tsra_action_ablation_summary rows: 5
 adaptive_memory_summary conditions: full_tsra_r, adaptive_tsra_r
+adaptive_defense_decision_path_audit rows: 6 pass
 metric_gate_summary rows: 12 pass
 ml_contribution_audit rows: 7 pass
 ml_attack_decision_path_audit rows: 6 pass
@@ -103,7 +105,7 @@ attack_defense_response_audit rows: 10 no missed required
 pace_transition_audit rows: 4 status=2 initial/2 fallback
 mission_impact_decomposition rows: 35 components=5
 safety_boundary_audit rows: 5 pass
-reproduction_order_audit rows: 13 pass
+reproduction_order_audit rows: 14 pass
 submission_readiness_audit rows: 10 pass
 aura_coa_cards rows: 15
 battle_timeline rows: 47

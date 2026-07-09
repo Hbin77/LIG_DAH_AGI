@@ -12,7 +12,7 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 | A05 | Attack-defense cooperation | Battle timeline / Incident summary / Coverage / Response audit / Episode replay / Mission thread summary / Engagement scorecard / Collaboration graph | verified | New experiments must preserve attack events, defense events, trace reasons, metric snapshots, attack-to-defense capability coverage, and required response timing. |
 | A06 | ML contribution | AURA ML / TSRA-R ML | verified | ML claims must state task, metric, model role, and whether the model changes closed-loop behavior. |
 | A07 | Repeatable evidence | Experiment runners | verified | Metric claims must pass metric_gate_summary and point to batch or dedicated experiments. |
-| A08 | Adaptive defense | AdaptiveTSRA-R | verified | Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive_memory_summary. |
+| A08 | Adaptive defense | AdaptiveTSRA-R | verified | Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive memory summaries and path audit. |
 | A09 | Safety boundary | Safety guardrails | verified | Reject any change that adds operational RF parameters, exploit code, or live network actions. |
 | A10 | Team handoff and reproducibility | README / packaging / QA scripts | verified | Before handoff, rebuild the package and run verify_submission_state on branch hbin. |
 
@@ -84,11 +84,11 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 ### A08 Adaptive defense
 
 - Goal: Show memory-backed defense adaptation without changing the baseline experiments.
-- Mechanism: AdaptiveTSRA-R keeps core defenses enabled and gates optional actions from recent AgentMemory evidence.
-- Evidence: src/tsra_r/adaptive_defender.py | src/experiments/run_adaptive_memory.py | outputs/batch/adaptive_memory_summary.csv | outputs/figures/adaptive_memory_comparison.png
+- Mechanism: AdaptiveTSRA-R keeps core defenses enabled, gates optional actions from recent AgentMemory evidence, and records candidate-level gate reasons for action and restraint.
+- Evidence: src/tsra_r/adaptive_defender.py | src/experiments/run_adaptive_memory.py | src/experiments/adaptive_defense_decision_path_audit.py | outputs/batch/adaptive_memory_summary.csv | outputs/report_tables/adaptive_defense_decision_path_audit.csv | outputs/report_tables/adaptive_defense_decision_path_audit.md | outputs/figures/adaptive_memory_comparison.png
 - Status: verified
-- Notes: outputs/batch/adaptive_memory_summary.csv rows=2
-- Next gate: Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive_memory_summary.
+- Notes: outputs/batch/adaptive_memory_summary.csv rows=2; outputs/report_tables/adaptive_defense_decision_path_audit.csv rows=6
+- Next gate: Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive memory summaries and path audit.
 
 ### A09 Safety boundary
 
@@ -105,5 +105,5 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 - Mechanism: README commands, reproduction-order audit, package builder, manifest, final verifier, submission readiness audit, and process docs define the shared workflow.
 - Evidence: README.md | src/experiments/reproduction_order_audit.py | scripts/build_submission_package.py | scripts/verify_submission_state.py | src/experiments/submission_readiness_audit.py | docs/process/SUBMISSION_PACKAGE.md | docs/process/GITHUB_WORKFLOW.md | outputs/report_tables/reproduction_order_audit.csv | outputs/report_tables/submission_readiness_audit.csv
 - Status: verified
-- Notes: outputs/report_tables/reproduction_order_audit.csv rows=13; outputs/report_tables/submission_readiness_audit.csv rows=10
+- Notes: outputs/report_tables/reproduction_order_audit.csv rows=14; outputs/report_tables/submission_readiness_audit.csv rows=10
 - Next gate: Before handoff, rebuild the package and run verify_submission_state on branch hbin.

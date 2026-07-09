@@ -48,29 +48,63 @@ class AdaptiveTSRAR(RuleTSRAR):
         severe_queue_pressure = max(signal["total_queue_kb"] for signal in recent) > 9000
 
         enabled = {"priority_reroute", "stale_badge"}
-        reasons = [
-            "priority_reroute kept enabled because ablation showed it protects priority ordering",
-            "stale_badge kept enabled because ablation showed it reduces trusted stale exposure",
-        ]
+        action_decisions = {
+            "priority_reroute": self._action_decision(
+                enabled=True,
+                gate_class="core_always_on",
+                reason="priority_reroute kept enabled because ablation showed it protects priority ordering",
+                critical_video_pressure=critical_video_pressure,
+                satcom_degradation=satcom_degradation,
+                severe_queue_pressure=severe_queue_pressure,
+            ),
+            "stale_badge": self._action_decision(
+                enabled=True,
+                gate_class="core_always_on",
+                reason="stale_badge kept enabled because ablation showed it reduces trusted stale exposure",
+                critical_video_pressure=critical_video_pressure,
+                satcom_degradation=satcom_degradation,
+                severe_queue_pressure=severe_queue_pressure,
+            ),
+        }
 
         if critical_video_pressure >= 2:
             enabled.add("video_throttle")
-            reasons.append(
-                "video_throttle enabled after repeated critical/video pressure in memory"
+            action_decisions["video_throttle"] = self._action_decision(
+                enabled=True,
+                gate_class="optional_memory_enabled",
+                reason="video_throttle enabled after repeated critical/video pressure in memory",
+                critical_video_pressure=critical_video_pressure,
+                satcom_degradation=satcom_degradation,
+                severe_queue_pressure=severe_queue_pressure,
             )
         else:
-            reasons.append(
-                "video_throttle held back until memory shows repeated critical/video pressure"
+            action_decisions["video_throttle"] = self._action_decision(
+                enabled=False,
+                gate_class="optional_memory_held",
+                reason="video_throttle held back until memory shows repeated critical/video pressure",
+                critical_video_pressure=critical_video_pressure,
+                satcom_degradation=satcom_degradation,
+                severe_queue_pressure=severe_queue_pressure,
             )
 
         if satcom_degradation >= 2 and severe_queue_pressure:
             enabled.add("pace_switch")
-            reasons.append(
-                "pace_switch enabled only after persistent SATCOM degradation and severe queue pressure"
+            action_decisions["pace_switch"] = self._action_decision(
+                enabled=True,
+                gate_class="optional_memory_enabled",
+                reason="pace_switch enabled only after persistent SATCOM degradation and severe queue pressure",
+                critical_video_pressure=critical_video_pressure,
+                satcom_degradation=satcom_degradation,
+                severe_queue_pressure=severe_queue_pressure,
             )
         else:
-            reasons.append(
-                "pace_switch held back to avoid premature fallback-link congestion"
+            action_decisions["pace_switch"] = self._action_decision(
+                enabled=False,
+                gate_class="optional_memory_held",
+                reason="pace_switch held back to avoid premature fallback-link congestion",
+                critical_video_pressure=critical_video_pressure,
+                satcom_degradation=satcom_degradation,
+                severe_queue_pressure=severe_queue_pressure,
             )
 
         return {
@@ -79,7 +113,37 @@ class AdaptiveTSRAR(RuleTSRAR):
             "critical_video_pressure_count": critical_video_pressure,
             "satcom_degradation_count": satcom_degradation,
             "severe_queue_pressure": severe_queue_pressure,
-            "reasons": reasons,
+            "action_decisions": action_decisions,
+            "reasons": [
+                action_decisions[action]["reason"]
+                for action in [
+                    "priority_reroute",
+                    "stale_badge",
+                    "video_throttle",
+                    "pace_switch",
+                ]
+            ],
+        }
+
+    @staticmethod
+    def _action_decision(
+        *,
+        enabled: bool,
+        gate_class: str,
+        reason: str,
+        critical_video_pressure: int,
+        satcom_degradation: int,
+        severe_queue_pressure: bool,
+    ) -> dict:
+        return {
+            "adaptive_enabled": enabled,
+            "gate_class": gate_class,
+            "reason": reason,
+            "memory_evidence": {
+                "critical_video_pressure_count": critical_video_pressure,
+                "satcom_degradation_count": satcom_degradation,
+                "severe_queue_pressure": severe_queue_pressure,
+            },
         }
 
     def _recent_signal_windows(self, state: MissionState) -> list[dict]:

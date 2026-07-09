@@ -368,6 +368,7 @@ AdaptiveTSRA-R은 기본 TSRA-R을 대체하지 않는다. 기본 E1~E7 baseline
 ```text
 src/tsra_r/adaptive_defender.py
 src/experiments/run_adaptive_memory.py
+src/experiments/adaptive_defense_decision_path_audit.py
 ```
 
 동작 방식:
@@ -375,7 +376,8 @@ src/experiments/run_adaptive_memory.py
 - `priority_reroute`와 `stale_badge`는 항상 유지한다.
 - `video_throttle`은 최근 memory에서 critical traffic과 video queue pressure가 반복될 때만 켠다.
 - `pace_switch`는 SATCOM 저하와 심한 queue pressure가 같이 반복될 때만 켠다.
-- 판단마다 `feedback.adaptive_policy`에 enabled actions, memory counts, reasons를 남긴다.
+- 판단마다 `feedback.adaptive_policy`에 enabled actions, memory counts, action별 gate decision, reasons를 남긴다.
+- 각 `candidate_actions` row에는 `adaptive_enabled`, `adaptive_gate_class`, `adaptive_gate_reason`, `adaptive_memory_evidence`가 남는다.
 
 30-seed 비교 결과:
 
@@ -386,10 +388,26 @@ priority inversion:      0.050609 -> 0.027455
 video throttle count:    6.4 -> 3.1
 ```
 
+Decision path 감사:
+
+```bash
+python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error
+```
+
+```text
+adaptive_defense_decision_path_audit rows: 6 pass
+trace_count: 1830
+update_adaptive_action_policy: 1830
+video_eligible_held: 1146
+pace_eligible_held: 154
+emission_gate_violations: 0
+```
+
 해석:
 
 - AdaptiveTSRA-R은 방어 액션을 무조건 많이 쓰는 정책이 아니다.
 - Memory에 반복 증거가 있을 때만 optional action을 켜서 과한 video throttle을 줄인다.
+- 후보별 memory gate와 실제 emitted defense event가 일치하므로, action과 restraint를 모두 trace로 설명할 수 있다.
 - mission impact와 priority inversion이 같이 감소했으므로, Memory가 실제 방어 판단에 영향을 준 증거로 볼 수 있다.
 
 ## 11. 현재 구현 상태
@@ -407,6 +425,7 @@ video throttle count:    6.4 -> 3.1
 - ML anomaly detector
 - ML detector 기반 reactive defense window
 - Adaptive Memory 기반 optional action gating
+- Adaptive Defense Decision Path 감사
 - defense event JSONL 로그
 - 30-seed 반복 실험
 
@@ -466,6 +485,7 @@ AgentRuntime
     - select_fallback_link
   trace:
     - memory-based enabled action set
+    - candidate-level adaptive gate reason
     - repeated pressure/degradation counts
     - emitted defense events
     - selected no-op/action reason

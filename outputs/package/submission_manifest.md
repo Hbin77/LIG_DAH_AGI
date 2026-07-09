@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 221
-- total_payload_bytes: 4273480
+- payload_file_count: 224
+- total_payload_bytes: 4320788
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 222
-- zip_bytes: 1921952
-- zip_sha256: `594f4b989c2e18d2ce6d86bc41f4f9ffe4923e3234eeba2bb4e555a1954e09ce`
+- zip_file_count: 225
+- zip_bytes: 1933009
+- zip_sha256: `e12ad3cb73d0b07e31009477f6d39e5e516667a9811b5bd0495ae840fd64ccb8`
 
 ## 포함 파일
 
@@ -82,6 +82,8 @@
 - `outputs/models/tsra_detector_metrics.json`
 - `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.csv`
 - `outputs/report_tables/E5_rule_aura_tsra_r_event_timeline.md`
+- `outputs/report_tables/adaptive_defense_decision_path_audit.csv`
+- `outputs/report_tables/adaptive_defense_decision_path_audit.md`
 - `outputs/report_tables/agent_capability_matrix.csv`
 - `outputs/report_tables/agent_capability_matrix.md`
 - `outputs/report_tables/agent_collaboration_graph.csv`
@@ -189,6 +191,7 @@
 - `src/aura/ml_impact_predictor.py`
 - `src/aura/rule_decision_engine.py`
 - `src/experiments/__init__.py`
+- `src/experiments/adaptive_defense_decision_path_audit.py`
 - `src/experiments/agent_capability_matrix.py`
 - `src/experiments/agent_collaboration_graph.py`
 - `src/experiments/agent_coordination_latency_audit.py`

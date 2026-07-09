@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "src/aura/rule_decision_engine.py",
     "src/tsra_r/rule_defender.py",
     "src/tsra_r/adaptive_defender.py",
+    "src/experiments/adaptive_defense_decision_path_audit.py",
     "src/experiments/run_ml_threshold_sweep.py",
     "src/experiments/battle_timeline.py",
     "src/experiments/incident_summary.py",
@@ -77,6 +78,8 @@ REQUIRED_FILES = [
     "outputs/batch/resilience_gain_summary.csv",
     "outputs/batch/tsra_action_ablation_summary.csv",
     "outputs/batch/adaptive_memory_summary.csv",
+    "outputs/report_tables/adaptive_defense_decision_path_audit.csv",
+    "outputs/report_tables/adaptive_defense_decision_path_audit.md",
     "outputs/batch/ml_threshold_sweep_raw.csv",
     "outputs/batch/ml_threshold_sweep_summary.csv",
     "outputs/report_tables/agent_decision_trace_summary.csv",
@@ -690,6 +693,91 @@ def check_csv_outputs() -> list[str]:
         "agent memory influence audit missing safety boundary",
     )
     checks.append("agent_memory_influence_audit rows=6 pass")
+
+    adaptive_path_rows = read_csv("outputs/report_tables/adaptive_defense_decision_path_audit.csv")
+    require(
+        len(adaptive_path_rows) == 6,
+        f"expected 6 adaptive defense decision path rows, got {len(adaptive_path_rows)}",
+    )
+    failed_adaptive_path_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in adaptive_path_rows
+        if row.get("status") != "pass"
+    ]
+    require(
+        not failed_adaptive_path_rows,
+        f"failed adaptive defense decision path rows: {failed_adaptive_path_rows[:8]}",
+    )
+    required_adaptive_path_areas = {
+        "Batch-level adaptive effect",
+        "Adaptive policy tool path",
+        "Core defense preservation",
+        "Video throttle memory gate",
+        "PACE switch memory gate",
+        "Gate-to-event consistency",
+    }
+    observed_adaptive_path_areas = {row["area"] for row in adaptive_path_rows}
+    require(
+        observed_adaptive_path_areas == required_adaptive_path_areas,
+        f"adaptive defense path audit has unexpected areas: {sorted(observed_adaptive_path_areas)}",
+    )
+    require(
+        any(
+            float(observed_value(row, "mission_improvement")) >= 0.02
+            and float(observed_value(row, "defense_count_reduction")) >= 2.0
+            and float(observed_value(row, "video_throttle_reduction")) >= 2.0
+            for row in adaptive_path_rows
+            if row["check_id"] == "ADP01"
+        ),
+        "adaptive defense path audit missing batch-level effect evidence",
+    )
+    require(
+        any(
+            observed_int(row, "trace_files") >= 30
+            and observed_int(row, "trace_count") >= 1830
+            and observed_int(row, "update_adaptive_action_policy") == observed_int(row, "trace_count")
+            and observed_int(row, "candidate_total") == observed_int(row, "trace_count") * 4
+            and observed_int(row, "tool_errors") == 0
+            for row in adaptive_path_rows
+            if row["check_id"] == "ADP02"
+        ),
+        "adaptive defense path audit missing tool-path evidence",
+    )
+    require(
+        any(
+            observed_int(row, "video_held") > observed_int(row, "video_enabled")
+            and observed_int(row, "video_eligible_held") > 0
+            and observed_int(row, "video_gate_reasons") == observed_int(row, "video_candidates")
+            for row in adaptive_path_rows
+            if row["check_id"] == "ADP04"
+        ),
+        "adaptive defense path audit missing video gate evidence",
+    )
+    require(
+        any(
+            observed_int(row, "pace_held") > observed_int(row, "pace_enabled")
+            and observed_int(row, "pace_eligible_held") > 0
+            and observed_int(row, "pace_gate_reasons") == observed_int(row, "pace_candidates")
+            for row in adaptive_path_rows
+            if row["check_id"] == "ADP05"
+        ),
+        "adaptive defense path audit missing PACE gate evidence",
+    )
+    require(
+        any(
+            observed_int(row, "emission_gate_violations") == 0
+            and observed_int(row, "memory_evidence_candidates") >= 7000
+            and observed_int(row, "selected_optional_events") > 0
+            for row in adaptive_path_rows
+            if row["check_id"] == "ADP06"
+        ),
+        "adaptive defense path audit missing gate-to-event consistency evidence",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in adaptive_path_rows),
+        "adaptive defense path audit missing safety boundary",
+    )
+    checks.append("adaptive_defense_decision_path_audit rows=6 pass")
 
     tool_rows = read_csv("outputs/report_tables/agent_tool_usage_audit.csv")
     require(len(tool_rows) == 24, f"expected 24 agent tool audit rows, got {len(tool_rows)}")
@@ -1473,8 +1561,8 @@ def check_csv_outputs() -> list[str]:
 
     reproduction_order_rows = read_csv("outputs/report_tables/reproduction_order_audit.csv")
     require(
-        len(reproduction_order_rows) == 13,
-        f"expected 13 reproduction order rows, got {len(reproduction_order_rows)}",
+        len(reproduction_order_rows) == 14,
+        f"expected 14 reproduction order rows, got {len(reproduction_order_rows)}",
     )
     failed_reproduction_order = [
         f"{row['check_id']}:{row['order_status']}:{row['output_status']}"
@@ -1487,7 +1575,7 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         {row["check_id"] for row in reproduction_order_rows}
-        == {f"RO{index:02d}" for index in range(1, 14)},
+        == {f"RO{index:02d}" for index in range(1, 15)},
         "reproduction order audit check ids are incomplete",
     )
     require(
@@ -1513,7 +1601,15 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO10"
+            row["check_id"] == "RO09"
+            and "run_adaptive_memory" in row["required_before"]
+            for row in reproduction_order_rows
+        ),
+        "reproduction order audit missing adaptive defense path prerequisite",
+    )
+    require(
+        any(
+            row["check_id"] == "RO11"
             and "agent_stress_scenario_audit" in row["required_before"]
             and "reproduction_order_audit" in row["required_before"]
             for row in reproduction_order_rows
@@ -1522,14 +1618,14 @@ def check_csv_outputs() -> list[str]:
     )
     require(
         any(
-            row["check_id"] == "RO11"
+            row["check_id"] == "RO12"
             and "submission_readiness_audit" in row["required_before"]
             and "competition_alignment" in row["required_before"]
             for row in reproduction_order_rows
         ),
         "reproduction order audit missing package prerequisites",
     )
-    checks.append("reproduction_order_audit rows=13 pass")
+    checks.append("reproduction_order_audit rows=14 pass")
 
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(

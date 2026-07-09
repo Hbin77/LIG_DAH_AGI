@@ -189,6 +189,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.mission_thread_summary --fail-on-error",
         "python3 -m src.experiments.safety_boundary_audit",
         "python3 -m src.experiments.run_batch",
+        "python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error",
         "python3 scripts/build_submission_package.py",
         "python3 scripts/verify_submission_state.py",
         "python3 -m src.experiments.ml_contribution_audit --fail-on-error",
@@ -243,7 +244,7 @@ def build_rows() -> list[dict[str, str]]:
                 + f"; reproduction_order_rows={reproduction_order_rows}"
             ),
             ok=all(command in readme for command in reproduction_commands)
-            and reproduction_order_rows == 13,
+            and reproduction_order_rows == 14,
             handoff_value="The next developer can rebuild the same evidence without reverse-engineering command order.",
             next_gate="Any new experiment generator must be added to the Full Reproduction block.",
         ),

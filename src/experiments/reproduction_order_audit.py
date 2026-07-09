@@ -173,6 +173,21 @@ SPECS = [
     ),
     OrderSpec(
         check_id="RO09",
+        command="python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error",
+        required_before=(
+            "python3 -m src.experiments.run_adaptive_memory",
+        ),
+        output_files=(
+            "outputs/report_tables/adaptive_defense_decision_path_audit.csv",
+            "outputs/report_tables/adaptive_defense_decision_path_audit.md",
+        ),
+        interpretation=(
+            "The adaptive defense path audit reads adaptive-memory trace outputs, so it must run "
+            "after the adaptive memory comparison regenerates those traces."
+        ),
+    ),
+    OrderSpec(
+        check_id="RO10",
         command="python3 -m src.experiments.agent_stress_scenario_audit --fail-on-error",
         required_before=(
             "python3 -m src.ml.train_tsra_detector --rows 5000",
@@ -189,7 +204,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO10",
+        check_id="RO11",
         command="python3 -m src.experiments.competition_alignment --fail-on-incomplete",
         required_before=(
             "python3 -m src.experiments.agent_collaboration_graph",
@@ -207,7 +222,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO11",
+        check_id="RO12",
         command="python3 scripts/build_submission_package.py",
         required_before=(
             "python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete",
@@ -222,7 +237,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO12",
+        check_id="RO13",
         command="python3 scripts/generate_release_handoff.py",
         required_before=(
             "python3 scripts/build_submission_package.py",
@@ -235,7 +250,7 @@ SPECS = [
         ),
     ),
     OrderSpec(
-        check_id="RO13",
+        check_id="RO14",
         command="python3 scripts/verify_submission_state.py",
         required_before=(
             "python3 scripts/freeze_release_candidate.py",

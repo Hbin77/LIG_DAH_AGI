@@ -391,6 +391,19 @@ This writes:
 
 The comparison keeps baseline E1-E7 behavior unchanged and runs a separate `AdaptiveTSRAR` mode where AgentMemory gates optional defense actions. Core actions, `priority_reroute` and `stale_badge`, stay enabled; `video_throttle` and `pace_switch` require repeated memory evidence before activation.
 
+## Audit Adaptive Defense Decision Path
+
+```bash
+python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/adaptive_defense_decision_path_audit.csv`
+- `outputs/report_tables/adaptive_defense_decision_path_audit.md`
+
+The audit follows Adaptive TSRA-R from AgentMemory policy tool calls to candidate-level core/optional action gates, emitted defense events, and batch-level mission impact improvement.
+
 ## Run 30-Seed Repeated Experiments
 
 ```bash
@@ -837,6 +850,7 @@ python3 -m src.experiments.defense_effectiveness_ledger
 python3 -m src.experiments.aura_coa_cards
 python3 -m src.experiments.run_tsra_ablation
 python3 -m src.experiments.run_adaptive_memory
+python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error
 python3 -m src.experiments.run_batch
 python3 -m src.experiments.metric_gate --fail-on-error
 python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error

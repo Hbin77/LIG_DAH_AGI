@@ -2621,9 +2621,9 @@ python3 scripts/verify_submission_state.py
 완료 기준:
 
 ```text
-reproduction_order_audit rows: 13
-status: pass=13
-RO01-RO13 present
+reproduction_order_audit rows: 14
+status: pass=14
+RO01-RO14 present
 order_status: pass for all rows
 output_status: pass for all rows
 ```
@@ -2821,3 +2821,68 @@ E7 resilience gain: 0.824367
 - ML 예측, 탐지 가능성, 반복 전술 memory, mission objective coverage가 selection score로 합쳐진다.
 - stale COP 전술은 마지막 예산 구간에서 objective bonus가 trace에 남은 상태로 선택되므로, 사후 표기용이 아니라 decision loop의 실제 결과다.
 - 이 변경은 closed simulation 안의 공격 효과 선택 정책과 감사 기준만 바꾸며 RF, exploit, live network action은 추가하지 않는다.
+
+## P55. Adaptive TSRA-R Candidate-Level Memory Gate
+
+상태: 완료
+
+문제:
+
+- Adaptive TSRA-R은 30-seed 요약에서 mission impact와 optional action 수를 낮췄지만, 후보 action 단위로 왜 `video_throttle`이나 `pace_switch`를 보류했는지 바로 보이진 않았다.
+- 방어 에이전트의 품질을 높이려면 action을 실행한 이유뿐 아니라 실행하지 않은 이유도 DecisionTrace에 남아야 한다.
+- 특히 E5/E6/E7에서 남은 약점은 방어 action 비용이므로, optional action restraint를 검증 가능한 에이전트 판단으로 승격해야 한다.
+
+구현:
+
+```text
+src/tsra_r/adaptive_defender.py
+src/tsra_r/rule_defender.py
+src/experiments/adaptive_defense_decision_path_audit.py
+src/experiments/reproduction_order_audit.py
+src/experiments/submission_readiness_audit.py
+scripts/verify_submission_state.py
+docs/agents/TSRA_R_DEFENSE_AGENT.md
+```
+
+설계:
+
+- `AdaptiveTSRAR._adaptive_action_policy`가 action별 `action_decisions`를 만든다.
+- 각 action decision에는 `adaptive_enabled`, `gate_class`, `reason`, `memory_evidence`가 들어간다.
+- `RuleTSRAR.decide`는 이 adaptive context를 각 `candidate_actions` row에 붙인다.
+- `priority_reroute`, `stale_badge`는 `core_always_on`으로 유지한다.
+- `video_throttle`, `pace_switch`는 `optional_memory_enabled` 또는 `optional_memory_held`로 구분한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.run_adaptive_memory
+python3 -m src.experiments.adaptive_defense_decision_path_audit --fail-on-error
+python3 -m src.experiments.reproduction_order_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+현재 검증 결과:
+
+```text
+adaptive_defense_decision_path_audit rows: 6 pass
+mission_improvement: 0.0307717
+defense_count_reduction: 3.93333
+video_throttle_reduction: 3.26667
+pace_switch_reduction: 1.06667
+trace_files: 30
+trace_count: 1830
+update_adaptive_action_policy: 1830
+candidate_total: 7320
+priority_enabled: 1830/1830
+stale_enabled: 1830/1830
+video_eligible_held: 1146
+pace_eligible_held: 154
+emission_gate_violations: 0
+```
+
+해석:
+
+- Adaptive TSRA-R은 방어 action을 많이 내는 정책이 아니라, memory evidence가 부족한 optional action을 보류하는 방어 에이전트다.
+- core protection은 유지하면서 video throttle과 PACE switch 비용을 줄인다.
+- emitted defense event가 candidate-level enabled gate와 일치하므로, action과 no-action 모두 trace로 설명된다.
+- 이 변경은 closed simulation 안의 방어 정책과 감사 기준만 바꾸며 RF, exploit, live network action은 추가하지 않는다.

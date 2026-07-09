@@ -405,17 +405,29 @@ ALIGNMENT_SPECS = [
         scoring_area="Adaptive defense",
         competition_goal="Show memory-backed defense adaptation without changing the baseline experiments.",
         implemented_mechanism=(
-            "AdaptiveTSRA-R keeps core defenses enabled and gates optional actions from recent AgentMemory evidence."
+            "AdaptiveTSRA-R keeps core defenses enabled, gates optional actions from recent "
+            "AgentMemory evidence, and records candidate-level gate reasons for action and restraint."
         ),
         agent_or_component="AdaptiveTSRA-R",
         evidence_files=[
             "src/tsra_r/adaptive_defender.py",
             "src/experiments/run_adaptive_memory.py",
+            "src/experiments/adaptive_defense_decision_path_audit.py",
             "outputs/batch/adaptive_memory_summary.csv",
+            "outputs/report_tables/adaptive_defense_decision_path_audit.csv",
+            "outputs/report_tables/adaptive_defense_decision_path_audit.md",
             "outputs/figures/adaptive_memory_comparison.png",
         ],
-        next_gate="Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive_memory_summary.",
-        row_checks=[RowCountCheck("outputs/batch/adaptive_memory_summary.csv", 2)],
+        next_gate="Adaptive changes must be isolated from E1-E7 baseline and checked in adaptive memory summaries and path audit.",
+        content_checks=[
+            ContentCheck("outputs/report_tables/adaptive_defense_decision_path_audit.csv", "mission_improvement=0.0307717"),
+            ContentCheck("outputs/report_tables/adaptive_defense_decision_path_audit.csv", "video_eligible_held=1146"),
+            ContentCheck("outputs/report_tables/adaptive_defense_decision_path_audit.csv", "emission_gate_violations=0"),
+        ],
+        row_checks=[
+            RowCountCheck("outputs/batch/adaptive_memory_summary.csv", 2),
+            RowCountCheck("outputs/report_tables/adaptive_defense_decision_path_audit.csv", 6),
+        ],
     ),
     AlignmentSpec(
         alignment_id="A09",
