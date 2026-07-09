@@ -56,6 +56,7 @@ REQUIRED_FILES = [
     "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
     "src/experiments/ml_contribution_audit.py",
+    "src/experiments/reactive_defense_tradeoff_audit.py",
     "src/experiments/safety_boundary_audit.py",
     "src/experiments/submission_readiness_audit.py",
     "outputs/experiments/experiment_summary.csv",
@@ -112,6 +113,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/metric_gate_summary.md",
     "outputs/report_tables/ml_contribution_audit.csv",
     "outputs/report_tables/ml_contribution_audit.md",
+    "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
+    "outputs/report_tables/reactive_defense_tradeoff_audit.md",
     "outputs/report_tables/safety_boundary_audit.csv",
     "outputs/report_tables/safety_boundary_audit.md",
     "outputs/report_tables/submission_readiness_audit.csv",
@@ -797,6 +800,63 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("ml_contribution_audit rows=7 pass")
 
+    tradeoff_rows = read_csv("outputs/report_tables/reactive_defense_tradeoff_audit.csv")
+    require(
+        len(tradeoff_rows) == 7,
+        f"expected 7 reactive defense tradeoff rows, got {len(tradeoff_rows)}",
+    )
+    failed_tradeoff_rows = [
+        f"{row['check_id']}:{row['area']}"
+        for row in tradeoff_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_tradeoff_rows, f"failed reactive defense tradeoff rows: {failed_tradeoff_rows[:8]}")
+    required_tradeoff_areas = {
+        "Policy separation",
+        "Pre-attack defense suppression",
+        "First-response latency cost",
+        "ML alert attack overlap",
+        "Core defense preservation",
+        "Bounded impact tradeoff",
+        "Detector threshold evidence",
+    }
+    observed_tradeoff_areas = {row["area"] for row in tradeoff_rows}
+    require(
+        required_tradeoff_areas == observed_tradeoff_areas,
+        f"reactive defense tradeoff audit has unexpected areas: {sorted(observed_tradeoff_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in tradeoff_rows),
+        "reactive defense tradeoff audit missing safety boundary",
+    )
+    require(
+        any(
+            "e6_pre_first_defense_events=2" in row["observed"]
+            and "e7_pre_first_defense_events=0" in row["observed"]
+            for row in tradeoff_rows
+            if row["check_id"] == "RDT02"
+        ),
+        "reactive defense tradeoff audit missing pre-attack suppression evidence",
+    )
+    require(
+        any(
+            "ml_attack_alerts=9" in row["observed"]
+            and "active_attack_overlap=9" in row["observed"]
+            for row in tradeoff_rows
+            if row["check_id"] == "RDT04"
+        ),
+        "reactive defense tradeoff audit missing alert overlap evidence",
+    )
+    require(
+        any(
+            "e7_minus_e6=0.0167761" in row["observed"]
+            for row in tradeoff_rows
+            if row["check_id"] == "RDT06"
+        ),
+        "reactive defense tradeoff audit missing bounded impact tradeoff evidence",
+    )
+    checks.append("reactive_defense_tradeoff_audit rows=7 pass")
+
     safety_rows = read_csv("outputs/report_tables/safety_boundary_audit.csv")
     require(len(safety_rows) == 5, f"expected 5 safety boundary rows, got {len(safety_rows)}")
     failed_safety = [
@@ -1341,6 +1401,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/ml_contribution_audit.md" in manifest_text,
         "manifest missing ML contribution audit",
+    )
+    require(
+        "outputs/report_tables/reactive_defense_tradeoff_audit.md" in manifest_text,
+        "manifest missing reactive defense tradeoff audit",
     )
     require(
         "outputs/report_tables/safety_boundary_audit.md" in manifest_text,

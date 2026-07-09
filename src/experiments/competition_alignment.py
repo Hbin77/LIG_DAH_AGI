@@ -240,7 +240,9 @@ ALIGNMENT_SPECS = [
         implemented_mechanism=(
             "AURA uses impact prediction for candidate ranking; ML TSRA-R opens reactive defense windows "
             "from anomaly probability; ML contribution audit ties model quality, tool invocation, E6/E7 "
-            "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together."
+            "closed-loop separation, E7 ML actions, and Mac MPS sample-pass scale evidence together; "
+            "reactive defense tradeoff audit explains E7's pre-attack suppression, alert overlap, "
+            "first-response cost, and bounded mission-impact tradeoff versus E6."
         ),
         agent_or_component="AURA ML / TSRA-R ML",
         evidence_files=[
@@ -248,11 +250,14 @@ ALIGNMENT_SPECS = [
             "src/ml/train_tsra_detector.py",
             "src/ml/train_aura_mps_mlp.py",
             "src/experiments/ml_contribution_audit.py",
+            "src/experiments/reactive_defense_tradeoff_audit.py",
             "outputs/models/aura_impact_model_metrics.json",
             "outputs/models/tsra_detector_metrics.json",
             "outputs/models/aura_mps_mlp_metrics.json",
             "outputs/report_tables/ml_contribution_audit.csv",
             "outputs/report_tables/ml_contribution_audit.md",
+            "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
+            "outputs/report_tables/reactive_defense_tradeoff_audit.md",
             "outputs/report_tables/agent_tool_usage_audit.csv",
             "outputs/report_tables/metric_gate_summary.csv",
         ],
@@ -261,8 +266,14 @@ ALIGNMENT_SPECS = [
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "sample_passes=20000000"),
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_candidate_impact_invocations"),
             ContentCheck("outputs/report_tables/ml_contribution_audit.csv", "predict_attack_probability_invocations"),
+            ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_pre_first_defense_events=0"),
+            ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "active_attack_overlap=9"),
+            ContentCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", "e7_minus_e6=0.0167761"),
         ],
-        row_checks=[RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7)],
+        row_checks=[
+            RowCountCheck("outputs/report_tables/ml_contribution_audit.csv", 7),
+            RowCountCheck("outputs/report_tables/reactive_defense_tradeoff_audit.csv", 7),
+        ],
     ),
     AlignmentSpec(
         alignment_id="A07",

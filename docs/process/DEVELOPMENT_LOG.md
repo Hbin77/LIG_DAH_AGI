@@ -2079,3 +2079,48 @@ Mac MPS sample_passes: 20000000
 - E7은 E6와 다른 폐루프 결과를 만들기 때문에 ML TSRA-R이 no-op copy가 아님을 확인한다.
 - Mac GPU 실험은 "서로 다른 2천만 후보"가 아니라 "100만 샘플 x 20 epoch = 2천만 sample-pass"로 기록한다.
 - 실제 공격 기능은 추가하지 않고 closed simulation log와 metrics만 감사한다.
+
+### 52. Reactive Defense Tradeoff Audit를 추가한 이유
+
+E7은 E6보다 mission impact가 낮다고 주장하면 안 된다. E6는 full rule TSRA-R이고 E7은 ML detector가 threshold를 넘을 때 reactive defense window를 여는 구조다. 따라서 E7의 가치는 "항상 더 낮은 impact"가 아니라 "탐지 기반 개입의 장점과 비용을 투명하게 보여주는 것"으로 잡아야 한다.
+
+이번 변경은 E6/E7 차이를 tradeoff audit로 분리했다.
+
+추가한 것:
+
+```text
+src/experiments/reactive_defense_tradeoff_audit.py
+outputs/report_tables/reactive_defense_tradeoff_audit.csv
+outputs/report_tables/reactive_defense_tradeoff_audit.md
+```
+
+검증 항목:
+
+```text
+E6/E7 policy separation
+pre-attack defense suppression
+first-response latency cost
+ML alert overlap with active attack windows
+core defense action preservation
+bounded mission-impact tradeoff
+below/above-threshold detector trace evidence
+```
+
+검증 결과:
+
+```text
+reactive_defense_tradeoff_audit rows: 7
+status: pass=7
+E6 pre-first defense events: 2
+E7 pre-first defense events: 0
+E7 first ML alert latency: 20 sec
+ML alerts overlapping active attack: 9/9
+E7 minus E6 mission impact mean: 0.0167761
+```
+
+해석:
+
+- E7은 pre-attack 방어 이벤트를 억제하고, 탐지 확률이 높아진 뒤 방어창을 연다.
+- 그 비용으로 첫 alert가 20초 늦고, repeated metric에서 E7 impact가 E6보다 0.0167761 높다.
+- core defense action은 유지되므로 E7은 방어 기능 축소가 아니라 reactive trigger 구조의 차이를 보여준다.
+- 실제 공격 기능은 추가하지 않고 closed simulation trace, event log, batch metric만 읽는다.

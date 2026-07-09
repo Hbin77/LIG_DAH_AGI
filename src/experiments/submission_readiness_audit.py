@@ -146,6 +146,7 @@ def build_rows() -> list[dict[str, str]]:
         "decomposition": count_csv_rows("outputs/report_tables/mission_impact_decomposition.csv"),
         "gates": count_csv_rows("outputs/report_tables/metric_gate_summary.csv"),
         "ml_contribution": count_csv_rows("outputs/report_tables/ml_contribution_audit.csv"),
+        "reactive_tradeoff": count_csv_rows("outputs/report_tables/reactive_defense_tradeoff_audit.csv"),
     }
 
     package_inputs = [
@@ -174,6 +175,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 scripts/build_submission_package.py",
         "python3 scripts/verify_submission_state.py",
         "python3 -m src.experiments.ml_contribution_audit --fail-on-error",
+        "python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error",
     ]
     forbidden_team_phrases = ["나 혼자", "solo work", "one-person"]
     docs_text = "\n".join(read_text(path) for path in ["README.md", *process_docs])
@@ -310,7 +312,7 @@ def build_rows() -> list[dict[str, str]]:
         row(
             check_id="R07",
             area="Metric and ML evidence",
-            requirement="Repeated metrics, action ablation, adaptive memory, decomposition, gates, ML contribution, and ML metrics must exist.",
+            requirement="Repeated metrics, action ablation, adaptive memory, decomposition, gates, ML contribution, reactive tradeoff, and ML metrics must exist.",
             evidence=[
                 "outputs/batch/repeated_experiment_summary.csv",
                 "outputs/batch/resilience_gain_summary.csv",
@@ -319,6 +321,7 @@ def build_rows() -> list[dict[str, str]]:
                 "outputs/report_tables/mission_impact_decomposition.csv",
                 "outputs/report_tables/metric_gate_summary.csv",
                 "outputs/report_tables/ml_contribution_audit.csv",
+                "outputs/report_tables/reactive_defense_tradeoff_audit.csv",
                 *model_metrics,
             ],
             observed=(
@@ -333,10 +336,11 @@ def build_rows() -> list[dict[str, str]]:
                 and metric_counts["decomposition"] == 35
                 and metric_counts["gates"] == 11
                 and metric_counts["ml_contribution"] == 7
+                and metric_counts["reactive_tradeoff"] == 7
                 and all_files_present(model_metrics)
             ),
-            handoff_value="Quantitative and ML-agent claims are backed by batch, ablation, adaptive, gate, model metric, and ML contribution artifacts.",
-            next_gate="Metric or ML-agent changes must update metric gates, ML contribution audit, and package manifest before push.",
+            handoff_value="Quantitative and ML-agent claims are backed by batch, ablation, adaptive, gate, model metric, ML contribution, and reactive tradeoff artifacts.",
+            next_gate="Metric or ML-agent changes must update metric gates, ML contribution audit, reactive tradeoff audit, and package manifest before push.",
         ),
         row(
             check_id="R08",

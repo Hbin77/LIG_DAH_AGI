@@ -1953,6 +1953,59 @@ predict_attack_probability invocations: 61
 - ML은 별도 모델 파일이 아니라 AURA-ML/TSRA-R-ML agent loop에 연결된 decision input이다.
 - 실제 공격 기능은 추가하지 않고 closed simulation metric, trace, event log만 읽는다.
 
+## P39. Reactive Defense Tradeoff Audit
+
+상태: 완료
+
+문제:
+
+- E7을 E6보다 "더 강한 방어"라고 단순 주장하면 현재 metric과 맞지 않는다.
+- E7은 항상 방어하는 full rule TSRA-R이 아니라, detector threshold에 따라 defense window를 여는 reactive 구조다.
+- 따라서 E7의 가치와 비용을 별도 표로 드러내야 한다.
+
+구현:
+
+```text
+src/experiments/reactive_defense_tradeoff_audit.py
+outputs/report_tables/reactive_defense_tradeoff_audit.csv
+outputs/report_tables/reactive_defense_tradeoff_audit.md
+```
+
+검증 기준:
+
+- E6 policy는 `rule_defense_full`, E7 policy는 `ml_anomaly_detector`다.
+- E7은 첫 AURA-ML 공격 전 defense event를 내지 않는다.
+- E7의 첫 ML alert latency를 명시한다.
+- E7의 `ml_attack_alert`는 active attack window와 겹친다.
+- E7은 PACE, priority reroute, stale badge, video throttle을 모두 유지한다.
+- E7의 mission-impact cost는 E6 대비 bounded tradeoff로 기록한다.
+- E7 trace는 below-threshold no-op과 above-threshold defense-window opening을 모두 포함한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.reactive_defense_tradeoff_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+reactive_defense_tradeoff_audit rows: 7
+status: pass=7
+E6 pre-first defense events: 2
+E7 pre-first defense events: 0
+E7 first ML alert latency: 20 sec
+ML alert active-attack overlap: 9/9
+E7 minus E6 mission impact mean: 0.0167761
+```
+
+해석:
+
+- E7은 낮은 mission impact 하나만으로 정당화하지 않는다.
+- 탐지 기반 reactive 방어라는 설계 차이를 사전 방어 억제, alert overlap, threshold trace, bounded cost로 설명한다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

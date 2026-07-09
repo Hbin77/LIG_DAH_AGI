@@ -892,6 +892,29 @@ E7 ML alert count: 9
 Mac MPS sample_passes: 20000000
 ```
 
+### P29. Reactive Defense Tradeoff Audit
+
+목적:
+
+- E7을 E6보다 무조건 더 낮은 impact라고 과장하지 않는다.
+- ML TSRA-R의 가치를 reactive defense 관점에서 분리한다.
+- 장점과 비용을 같은 산출물에서 확인한다.
+
+검증 기준:
+
+```text
+reactive_defense_tradeoff_audit rows: 7 pass
+E6 policy: rule_defense_full
+E7 policy: ml_anomaly_detector
+E6 pre-first defense events: 2
+E7 pre-first defense events: 0
+E7 first ML alert latency: 20 sec
+ML alert active-attack overlap: 9/9
+E7 minus E6 mission impact mean: 0.0167761
+E7 detector below_threshold traces: 16
+E7 detector above_threshold traces: 45
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.
