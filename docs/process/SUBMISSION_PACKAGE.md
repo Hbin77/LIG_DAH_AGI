@@ -33,7 +33,7 @@ outputs/package/release_handoff.md
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
-- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent memory belief audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, mission impact decomposition, metric gate, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
+- `outputs/report_tables/*`: trace, contract validation, trace quality audit, agent runtime invariant audit, agent loop replay, agent decision causality audit, agent decision margin audit, agent memory belief audit, agent tool usage audit, agent interface manifest, agent capability matrix, agent collaboration graph, closed-loop episode replay, agent engagement scorecard, attack-defense coverage, response audit, PACE transition audit, operator alerts, defense effectiveness ledger, mission impact decomposition, metric gate, safety boundary audit, submission readiness audit, COA, battle timeline, incident summary, competition alignment matrix
 - `outputs/models/*_metrics.json`
 
 ## 제외하는 것
@@ -80,6 +80,7 @@ agent_decision_causality_audit: included
 agent_decision_margin_audit: included
 agent_memory_belief_audit: included
 agent_tool_usage_audit: included
+safety_boundary_audit: included
 submission_readiness_audit: included
 competition_alignment_matrix: included
 ```

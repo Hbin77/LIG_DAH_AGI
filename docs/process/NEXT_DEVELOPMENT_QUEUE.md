@@ -1859,6 +1859,52 @@ agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 - 에이전트가 단순 Python 함수 묶음이 아니라 runtime loop, memory, tool, trace contract를 유지한다는 증거를 추가했다.
 - 실제 공격 기능은 추가하지 않고 closed simulation trace audit만 수행한다.
 
+## P37. Safety Boundary Audit
+
+상태: 완료
+
+문제:
+
+- safety boundary 문구는 여러 산출물에 있지만, operational core source에 live-network/RF/exploit primitive가 없는지는 별도 기계 검증이 없었다.
+- 외부 링크 검증용 `urllib`, Git/release 검증용 `subprocess` 같은 정당한 자동화 예외와 실제 agent core primitive를 구분할 필요가 있다.
+
+구현:
+
+```text
+src/experiments/safety_boundary_audit.py
+outputs/report_tables/safety_boundary_audit.csv
+outputs/report_tables/safety_boundary_audit.md
+```
+
+검증 기준:
+
+- `src/agents`, `src/aura`, `src/tsra_r`, `src/simulator`, `src/shared`, `src/ml`에 network/shell primitive가 없다.
+- `urllib`은 `scripts/verify_external_package_link.py`에서만 허용한다.
+- `subprocess`는 release/Git 검증 자동화에서만 허용한다.
+- AURA는 `AttackCandidate`/`AttackEvent` 기반 simulated effect schema를 사용한다.
+- user-facing safety boundary와 package exclusion policy가 유지된다.
+
+검증:
+
+```bash
+python3 -m src.experiments.safety_boundary_audit --fail-on-error
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+safety_boundary_audit rows: 5
+status: pass=5
+operational core network_hits: 0
+operational core shell_hits: 0
+```
+
+해석:
+
+- 안전 경계가 문구뿐 아니라 코드 구조와 제출 패키지 정책으로도 검증된다.
+- 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
 ## 진행 원칙
 
 각 작업은 완료 시 다음을 만족해야 한다.

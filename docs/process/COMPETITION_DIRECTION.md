@@ -854,6 +854,24 @@ tool errors: 0
 agents: AURA, AURA-ML, TSRA-R, TSRA-R-ML
 ```
 
+### P27. Safety Boundary Audit
+
+목적:
+
+- 안전 경계가 설명 문구에만 머무르지 않고 코드 레벨 정적 감사로 검증되게 한다.
+- operational core source와 release/package automation exception을 구분한다.
+- AURA가 실제 공격 명령이 아니라 simulated effect schema만 사용한다는 증거를 남긴다.
+
+검증 기준:
+
+```text
+safety_boundary_audit rows: 5 pass
+operational core network_hits: 0
+operational core shell_hits: 0
+unexpected automation primitive hits: 0
+package excluded artifact hits: 0
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

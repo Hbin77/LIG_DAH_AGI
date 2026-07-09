@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 170
-- total_payload_bytes: 3276597
+- payload_file_count: 173
+- total_payload_bytes: 3308257
 - zip_path: `outputs/package/DAH2026_소스코드_LIG_DAH_AGI.zip`
-- zip_file_count: 171
-- zip_bytes: 1731929
-- zip_sha256: `0840337b115299be841c216f9ee5b0a1fccf9e9822d6d6c879657bc962d8fd0c`
+- zip_file_count: 174
+- zip_bytes: 1741406
+- zip_sha256: `c988d24958e9ce05f3b6881cedeb66687610b4bcd6ea071165047d2b4445e3ac`
 
 ## 포함 파일
 
@@ -133,6 +133,8 @@
 - `outputs/report_tables/operator_alerts.md`
 - `outputs/report_tables/pace_transition_audit.csv`
 - `outputs/report_tables/pace_transition_audit.md`
+- `outputs/report_tables/safety_boundary_audit.csv`
+- `outputs/report_tables/safety_boundary_audit.md`
 - `outputs/report_tables/submission_readiness_audit.csv`
 - `outputs/report_tables/submission_readiness_audit.md`
 - `requirements-gpu.txt`
@@ -181,6 +183,7 @@
 - `src/experiments/run_all.py`
 - `src/experiments/run_batch.py`
 - `src/experiments/run_tsra_ablation.py`
+- `src/experiments/safety_boundary_audit.py`
 - `src/experiments/submission_readiness_audit.py`
 - `src/experiments/trace_quality_audit.py`
 - `src/experiments/trace_summary.py`

@@ -94,9 +94,9 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 
 - Goal: Keep the prototype clearly separated from real-world offensive tooling.
 - Mechanism: All attack outputs are simulated effects inside a local mission simulator; safety text is repeated in COA, timeline, incident, and package artifacts.
-- Evidence: README.md | outputs/report_tables/aura_coa_cards.csv | outputs/report_tables/battle_timeline.csv | outputs/report_tables/incident_summary.csv
+- Evidence: README.md | outputs/report_tables/safety_boundary_audit.csv | outputs/report_tables/aura_coa_cards.csv | outputs/report_tables/battle_timeline.csv | outputs/report_tables/incident_summary.csv
 - Status: verified
-- Notes: all evidence files present
+- Notes: outputs/report_tables/safety_boundary_audit.csv rows=5
 - Next gate: Reject any change that adds operational RF parameters, exploit code, or live network actions.
 
 ### A10 Team handoff and reproducibility

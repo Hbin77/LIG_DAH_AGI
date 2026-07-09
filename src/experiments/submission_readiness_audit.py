@@ -168,6 +168,7 @@ def build_rows() -> list[dict[str, str]]:
         "python3 -m src.experiments.agent_runtime_invariant_audit",
         "python3 -m src.experiments.agent_decision_causality_audit",
         "python3 -m src.experiments.agent_decision_margin_audit",
+        "python3 -m src.experiments.safety_boundary_audit",
         "python3 -m src.experiments.run_batch",
         "python3 scripts/build_submission_package.py",
         "python3 scripts/verify_submission_state.py",
@@ -355,12 +356,14 @@ def build_rows() -> list[dict[str, str]]:
             requirement="Core user-facing artifacts must state the closed simulation boundary.",
             evidence=[
                 "README.md",
+                "outputs/report_tables/safety_boundary_audit.csv",
                 "outputs/report_tables/aura_coa_cards.csv",
                 "outputs/report_tables/incident_summary.csv",
                 "outputs/report_tables/agent_collaboration_graph.csv",
             ],
             observed=(
                 f"readme_sim_boundary={'does not attack real SATCOM' in readme}; "
+                f"safety_audit_rows={count_csv_rows('outputs/report_tables/safety_boundary_audit.csv')}; "
                 f"coa_no_rf={'no RF' in read_text('outputs/report_tables/aura_coa_cards.csv')}; "
                 f"coa_no_exploit={'no exploit' in read_text('outputs/report_tables/aura_coa_cards.csv')}; "
                 f"incident_closed_sim={'closed simulation' in read_text('outputs/report_tables/incident_summary.csv')}; "
@@ -368,6 +371,7 @@ def build_rows() -> list[dict[str, str]]:
             ),
             ok=(
                 "does not attack real SATCOM" in readme
+                and count_csv_rows("outputs/report_tables/safety_boundary_audit.csv") == 5
                 and "no RF" in read_text("outputs/report_tables/aura_coa_cards.csv")
                 and "no exploit" in read_text("outputs/report_tables/aura_coa_cards.csv")
                 and "closed simulation" in read_text("outputs/report_tables/incident_summary.csv")

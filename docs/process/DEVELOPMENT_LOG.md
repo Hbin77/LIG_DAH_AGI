@@ -1994,3 +1994,44 @@ tool_error_count: 0
 
 - AgentRuntime, AgentMemory, Tool, DecisionTrace가 실제 실험 로그에서 같은 loop contract로 움직였음을 별도 산출물로 증명한다.
 - 이 audit도 closed simulation log만 읽으며 실제 공격 기능, RF, exploit, live network action은 추가하지 않는다.
+
+### 50. Safety Boundary Audit를 추가한 이유
+
+안전 경계 문구는 README, agent docs, COA, incident, collaboration graph에 이미 있다. 하지만 제출 직전에는 "정말 operational core code에 네트워크/RF/exploit primitive가 없는가"를 기계적으로 확인하는 산출물이 있으면 더 명확하다.
+
+이번 변경은 Python AST 기반 정적 감사를 추가했다.
+
+추가한 것:
+
+```text
+src/experiments/safety_boundary_audit.py
+outputs/report_tables/safety_boundary_audit.csv
+outputs/report_tables/safety_boundary_audit.md
+```
+
+검증 항목:
+
+```text
+operational core source network primitive hits
+operational core source shell primitive hits
+automation exception allowlist
+AURA simulated AttackCandidate/AttackEvent schema
+safety-boundary text coverage
+submission package binary/cache exclusion policy
+```
+
+검증 결과:
+
+```text
+safety_boundary_audit rows: 5
+status: pass=5
+operational core network_hits: 0
+operational core shell_hits: 0
+unexpected automation network/shell hits: 0
+```
+
+해석:
+
+- `src/agents`, `src/aura`, `src/tsra_r`, `src/simulator`, `src/shared`, `src/ml`에는 live-network나 shell execution primitive가 없음을 별도 증거로 남겼다.
+- `scripts/verify_external_package_link.py`의 `urllib`은 제출 ZIP 링크 검증용으로만 허용하고, release/Git 검증의 `subprocess`도 allowlist로 분리했다.
+- 실제 공격 기능은 추가하지 않았다.

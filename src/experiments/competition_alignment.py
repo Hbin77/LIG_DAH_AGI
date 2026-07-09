@@ -307,6 +307,7 @@ ALIGNMENT_SPECS = [
         agent_or_component="Safety guardrails",
         evidence_files=[
             "README.md",
+            "outputs/report_tables/safety_boundary_audit.csv",
             "outputs/report_tables/aura_coa_cards.csv",
             "outputs/report_tables/battle_timeline.csv",
             "outputs/report_tables/incident_summary.csv",
@@ -314,9 +315,12 @@ ALIGNMENT_SPECS = [
         next_gate="Reject any change that adds operational RF parameters, exploit code, or live network actions.",
         content_checks=[
             ContentCheck("README.md", "does not attack real SATCOM"),
+            ContentCheck("outputs/report_tables/safety_boundary_audit.csv", "network_hits=0"),
+            ContentCheck("outputs/report_tables/safety_boundary_audit.csv", "unexpected_network_hits=0"),
             ContentCheck("outputs/report_tables/aura_coa_cards.csv", "no exploit"),
             ContentCheck("outputs/report_tables/incident_summary.csv", "no RF"),
         ],
+        row_checks=[RowCountCheck("outputs/report_tables/safety_boundary_audit.csv", 5)],
     ),
     AlignmentSpec(
         alignment_id="A10",

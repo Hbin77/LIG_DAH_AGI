@@ -55,6 +55,7 @@ REQUIRED_FILES = [
     "src/experiments/pace_transition_audit.py",
     "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
+    "src/experiments/safety_boundary_audit.py",
     "src/experiments/submission_readiness_audit.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
@@ -108,6 +109,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/mission_impact_decomposition.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
+    "outputs/report_tables/safety_boundary_audit.csv",
+    "outputs/report_tables/safety_boundary_audit.md",
     "outputs/report_tables/submission_readiness_audit.csv",
     "outputs/report_tables/submission_readiness_audit.md",
     "outputs/figures/aura_tsra_architecture.png",
@@ -727,6 +730,56 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("metric_gate_summary rows=11 pass")
 
+    safety_rows = read_csv("outputs/report_tables/safety_boundary_audit.csv")
+    require(len(safety_rows) == 5, f"expected 5 safety boundary rows, got {len(safety_rows)}")
+    failed_safety = [
+        f"{row['check_id']}:{row['area']}"
+        for row in safety_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_safety, f"failed safety boundary rows: {failed_safety[:8]}")
+    required_safety_areas = {
+        "Operational core source",
+        "Automation exceptions",
+        "Attack-effect schema",
+        "Safety-boundary text",
+        "Submission package safety",
+    }
+    observed_safety_areas = {row["area"] for row in safety_rows}
+    require(
+        required_safety_areas == observed_safety_areas,
+        f"safety boundary audit has unexpected areas: {sorted(observed_safety_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in safety_rows),
+        "safety boundary audit missing closed simulation text",
+    )
+    require(
+        any(
+            "network_hits=0" in row["observed"]
+            for row in safety_rows
+            if row["check_id"] == "S01"
+        ),
+        "safety boundary audit does not prove operational core network_hits=0",
+    )
+    require(
+        any(
+            "unexpected_network_hits=0" in row["observed"]
+            for row in safety_rows
+            if row["check_id"] == "S02"
+        ),
+        "safety boundary audit does not prove automation network exceptions are allowlisted",
+    )
+    require(
+        any(
+            "excluded_artifact_hits=0" in row["observed"]
+            for row in safety_rows
+            if row["check_id"] == "S05"
+        ),
+        "safety boundary audit does not prove package exclusion status",
+    )
+    checks.append("safety_boundary_audit rows=5 pass")
+
     readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
     require(
         len(readiness_rows) == 10,
@@ -1217,6 +1270,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,
         "manifest missing metric gate summary",
+    )
+    require(
+        "outputs/report_tables/safety_boundary_audit.md" in manifest_text,
+        "manifest missing safety boundary audit",
     )
     require(
         "outputs/report_tables/submission_readiness_audit.md" in manifest_text,

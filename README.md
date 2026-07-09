@@ -285,6 +285,19 @@ This writes:
 
 The matrix maps AURA/TSRA-R capabilities to runtime actions, decision sources, evidence counts, observed effects, and validation gates.
 
+## Audit Safety Boundary
+
+```bash
+python3 -m src.experiments.safety_boundary_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/safety_boundary_audit.csv`
+- `outputs/report_tables/safety_boundary_audit.md`
+
+The audit checks that operational core code does not import or call live-network or shell primitives, that automation exceptions are allowlisted, that AURA remains a simulated attack-effect agent, and that package exclusion policy is present.
+
 ## Generate AURA COA Cards
 
 ```bash
@@ -631,6 +644,7 @@ python3 -m src.experiments.closed_loop_episode_replay
 python3 -m src.experiments.agent_engagement_scorecard
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
+python3 -m src.experiments.safety_boundary_audit --fail-on-error
 python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
 python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
