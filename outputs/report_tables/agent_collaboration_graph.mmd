@@ -11,6 +11,7 @@ flowchart LR
   Ledger[Defense Effectiveness Ledger\nDefense action -> metric movement]
   Coverage[Capability Coverage\nAttack to defense mapping]
   Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
+  Readiness[Submission Readiness Audit\nBranch / package / handoff gates]
   Verifier[Verifier / Package\nReproducible evidence bundle]
   Runtime -->|E01 4 verified| Aura
   Runtime -->|memory state| Memory
@@ -32,6 +33,7 @@ flowchart LR
   Memory -->|E14 9 verified| Verifier
   Tools -->|E15 23 verified| Verifier
   Trace -->|E16 399 verified| Verifier
+  Readiness -->|E17 10 verified| Verifier
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier

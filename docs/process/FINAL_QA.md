@@ -34,6 +34,7 @@ python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
 python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
@@ -66,20 +67,21 @@ attack_defense_coverage rows: 4 covered
 attack_defense_response_audit rows: 10 no missed required
 pace_transition_audit rows: 6 status=2 initial/4 fallback
 mission_impact_decomposition rows: 35 components=5
+submission_readiness_audit rows: 10 pass
 aura_coa_cards rows: 15
 battle_timeline rows: 49
 incident_summary rows: 10
 operator_alerts rows: 56 actions=5
 defense_effectiveness_ledger rows: 56 actions=5
 closed_loop_episode_replay rows: 10 complete
-agent_collaboration_graph edges: 16 verified
+agent_collaboration_graph edges: 17 verified
 competition_alignment_matrix rows: 10 verified
 ```
 
 패키지 검증:
 
 ```text
-package_zip entries: 156
+package_zip entries: 159
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

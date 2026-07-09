@@ -60,7 +60,7 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 - Mechanism: Battle timeline and incident summary merge AURA events, TSRA-R events, trace reasons, and metric movement for E5 and E7; attack-defense coverage maps each AURA capability to the TSRA-R capabilities and validation gates that cover it; response audit checks whether required defenses are active or emitted within the response window; the collaboration graph summarizes the closed-loop agent cooperation evidence; episode replay joins attack, defense, alert, and metric movement per attack event; the defense effectiveness ledger adds event-level response-to-metric movement evidence.
 - Evidence: src/experiments/battle_timeline.py | src/experiments/incident_summary.py | src/experiments/closed_loop_episode_replay.py | src/experiments/defense_effectiveness_ledger.py | src/experiments/agent_collaboration_graph.py | src/experiments/attack_defense_coverage.py | src/experiments/attack_defense_response_audit.py | outputs/report_tables/battle_timeline.csv | outputs/report_tables/incident_summary.csv | outputs/report_tables/closed_loop_episode_replay.csv | outputs/report_tables/defense_effectiveness_ledger.csv | outputs/report_tables/agent_collaboration_graph.csv | outputs/report_tables/attack_defense_coverage.csv | outputs/report_tables/attack_defense_response_audit.csv
 - Status: verified
-- Notes: outputs/report_tables/battle_timeline.csv rows=49; outputs/report_tables/incident_summary.csv rows=10; outputs/report_tables/closed_loop_episode_replay.csv rows=10; outputs/report_tables/defense_effectiveness_ledger.csv rows=56; outputs/report_tables/agent_collaboration_graph.csv rows=16; outputs/report_tables/attack_defense_coverage.csv rows=4; outputs/report_tables/attack_defense_response_audit.csv rows=10
+- Notes: outputs/report_tables/battle_timeline.csv rows=49; outputs/report_tables/incident_summary.csv rows=10; outputs/report_tables/closed_loop_episode_replay.csv rows=10; outputs/report_tables/defense_effectiveness_ledger.csv rows=56; outputs/report_tables/agent_collaboration_graph.csv rows=17; outputs/report_tables/attack_defense_coverage.csv rows=4; outputs/report_tables/attack_defense_response_audit.csv rows=10
 - Next gate: New experiments must preserve attack events, defense events, trace reasons, metric snapshots, attack-to-defense capability coverage, and required response timing.
 
 ### A06 ML contribution
@@ -102,8 +102,8 @@ Each row maps a competition goal to concrete code, generated evidence, and the n
 ### A10 Team handoff and reproducibility
 
 - Goal: Make the shared branch reproducible for another teammate without using main for active work.
-- Mechanism: README commands, package builder, manifest, final verifier, and process docs define the shared workflow.
-- Evidence: README.md | scripts/build_submission_package.py | scripts/verify_submission_state.py | docs/process/SUBMISSION_PACKAGE.md | docs/process/GITHUB_WORKFLOW.md
+- Mechanism: README commands, package builder, manifest, final verifier, submission readiness audit, and process docs define the shared workflow.
+- Evidence: README.md | scripts/build_submission_package.py | scripts/verify_submission_state.py | src/experiments/submission_readiness_audit.py | docs/process/SUBMISSION_PACKAGE.md | docs/process/GITHUB_WORKFLOW.md | outputs/report_tables/submission_readiness_audit.csv
 - Status: verified
-- Notes: all evidence files present
+- Notes: outputs/report_tables/submission_readiness_audit.csv rows=10
 - Next gate: Before handoff, rebuild the package and run verify_submission_state on branch hbin.

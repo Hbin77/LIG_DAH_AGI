@@ -637,6 +637,34 @@ fallback_reselect: 4
 self_transition: 0
 ```
 
+### P18. Submission Readiness Audit
+
+상태: 완료
+
+목적:
+
+- `main` 보존, `hbin` 공유, 재현 명령, 에이전트 evidence, 패키지 입력, safety boundary, 팀 인계 문서를 한 번에 확인한다.
+- 제출 직전 상태를 사람 기억이 아니라 generated audit과 final verifier로 검증한다.
+- 외부 업로드/링크 검증처럼 로컬 코드로 끝낼 수 없는 운영 단계와 코드 산출물 준비 상태를 분리한다.
+
+산출물:
+
+```text
+src/experiments/submission_readiness_audit.py
+outputs/report_tables/submission_readiness_audit.csv
+outputs/report_tables/submission_readiness_audit.md
+```
+
+검증 결과:
+
+```text
+submission_readiness_audit rows: 10 pass
+agent_collaboration_graph edges: 17 verified
+package_zip entries: 159
+branch: hbin
+origin main/hbin refs: present
+```
+
 ## 최종 판단 기준
 
 이 프로젝트의 개발이 올바른 방향인지 판단하는 기준은 하나다.

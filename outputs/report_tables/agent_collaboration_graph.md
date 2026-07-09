@@ -18,6 +18,7 @@ flowchart LR
   Ledger[Defense Effectiveness Ledger\nDefense action -> metric movement]
   Coverage[Capability Coverage\nAttack to defense mapping]
   Replay[Closed-Loop Episode Replay\nAttack / defense / alert / metric episode]
+  Readiness[Submission Readiness Audit\nBranch / package / handoff gates]
   Verifier[Verifier / Package\nReproducible evidence bundle]
   Runtime -->|E01 4 verified| Aura
   Runtime -->|memory state| Memory
@@ -39,6 +40,7 @@ flowchart LR
   Memory -->|E14 9 verified| Verifier
   Tools -->|E15 23 verified| Verifier
   Trace -->|E16 399 verified| Verifier
+  Readiness -->|E17 10 verified| Verifier
   Tsra -->|response evidence| Replay
   Alerts -->|alert evidence| Replay
   Replay -->|episode evidence| Verifier
@@ -67,6 +69,7 @@ flowchart LR
 | E14 | AgentMemory | Verifier/Package | 9 | verified | outputs/report_tables/agent_memory_belief_audit.csv | Proves memory is active loop state, not just a static trace field. |
 | E15 | AgentTool | Verifier/Package | 23 | verified | outputs/report_tables/agent_tool_usage_audit.csv | Proves tools are invoked inside agent decision loops. |
 | E16 | DecisionTrace | Verifier/Package | 399 | verified | outputs/report_tables/agent_decision_causality_audit.csv | Proves selected actions are grounded in recorded decision evidence. |
+| E17 | Submission Readiness Audit | Verifier/Package | 10 | verified | outputs/report_tables/submission_readiness_audit.csv | Connects teammate handoff and packaging readiness to the same evidence bundle. |
 
 ## Interaction Detail
 
@@ -212,4 +215,13 @@ flowchart LR
 - Evidence count: 399
 - Validation status: verified
 - Purpose: Proves selected actions are grounded in recorded decision evidence.
+- Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action
+
+### E17 Submission Readiness Audit -> Verifier/Package
+
+- Interaction: Readiness audit verifies branch policy, reproduction commands, agent evidence, package inputs, and handoff docs
+- Evidence: outputs/report_tables/submission_readiness_audit.csv
+- Evidence count: 10
+- Validation status: verified
+- Purpose: Connects teammate handoff and packaging readiness to the same evidence bundle.
 - Safety boundary: closed simulation collaboration graph only; no RF, exploit, or live network action

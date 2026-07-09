@@ -9,7 +9,7 @@
 - `docs/`: 시나리오, 에이전트, 개발 판단 근거
 - `outputs/batch/*.csv`: 반복 실험과 ablation/adaptive 요약
 - `outputs/figures/*.png`: 핵심 그래프와 아키텍처 그림
-- `outputs/report_tables/*`: trace/COA/모델 비교 요약표
+- `outputs/report_tables/*`: trace/COA/readiness/모델 비교 요약표
 - `outputs/models/*_metrics.json`: 모델 성능 메트릭
 
 ## 제외 기준
@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 155
-- total_payload_bytes: 2950611
+- payload_file_count: 158
+- total_payload_bytes: 2999699
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 156
-- zip_bytes: 1677143
-- zip_sha256: `3b5bbe2aaf4f1159d6be1116a77580495eb5079da44874119b2eb74fc1fdce55`
+- zip_file_count: 159
+- zip_bytes: 1690412
+- zip_sha256: `8bcd219397b9f4adf3f7deff19e59d2463074132a6ce693e11d930d236586cc6`
 
 ## 포함 파일
 
@@ -127,6 +127,8 @@
 - `outputs/report_tables/operator_alerts.md`
 - `outputs/report_tables/pace_transition_audit.csv`
 - `outputs/report_tables/pace_transition_audit.md`
+- `outputs/report_tables/submission_readiness_audit.csv`
+- `outputs/report_tables/submission_readiness_audit.md`
 - `requirements-gpu.txt`
 - `requirements.txt`
 - `scripts/build_submission_package.py`
@@ -167,6 +169,7 @@
 - `src/experiments/run_all.py`
 - `src/experiments/run_batch.py`
 - `src/experiments/run_tsra_ablation.py`
+- `src/experiments/submission_readiness_audit.py`
 - `src/experiments/trace_quality_audit.py`
 - `src/experiments/trace_summary.py`
 - `src/experiments/validate_event_contracts.py`

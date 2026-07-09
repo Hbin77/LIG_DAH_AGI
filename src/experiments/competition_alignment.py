@@ -314,20 +314,24 @@ ALIGNMENT_SPECS = [
         scoring_area="Team handoff and reproducibility",
         competition_goal="Make the shared branch reproducible for another teammate without using main for active work.",
         implemented_mechanism=(
-            "README commands, package builder, manifest, final verifier, and process docs define the shared workflow."
+            "README commands, package builder, manifest, final verifier, submission readiness audit, "
+            "and process docs define the shared workflow."
         ),
         agent_or_component="README / packaging / QA scripts",
         evidence_files=[
             "README.md",
             "scripts/build_submission_package.py",
             "scripts/verify_submission_state.py",
+            "src/experiments/submission_readiness_audit.py",
             "docs/process/SUBMISSION_PACKAGE.md",
             "docs/process/GITHUB_WORKFLOW.md",
+            "outputs/report_tables/submission_readiness_audit.csv",
         ],
         next_gate="Before handoff, rebuild the package and run verify_submission_state on branch hbin.",
         content_checks=[
             ContentCheck("README.md", "Do not push directly to `main`"),
         ],
+        row_checks=[RowCountCheck("outputs/report_tables/submission_readiness_audit.csv", 10)],
     ),
 ]
 

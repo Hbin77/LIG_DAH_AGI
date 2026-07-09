@@ -1574,3 +1574,62 @@ score_or_threshold_support: pass=399
 - final verifier row/status/support checks
 - competition alignment matrix
 - agent collaboration graph E16 edge
+
+### 40. Submission Readiness Audit를 추가한 이유
+
+에이전트 구조와 공방 evidence는 충분히 쌓였지만, 팀 인계와 제출 직전 상태는 별도 관점이다. 파일이 많아질수록 `main` 보존, `hbin` 공유, README 재현 명령, package 입력, safety boundary, 팀 인계 문서 중 하나가 빠져도 사람이 눈으로 놓치기 쉽다.
+
+그래서 제출/협업 준비 상태를 별도 generated audit으로 만들었다.
+
+추가한 것:
+
+```text
+src/experiments/submission_readiness_audit.py
+outputs/report_tables/submission_readiness_audit.csv
+outputs/report_tables/submission_readiness_audit.md
+```
+
+감사 방식:
+
+```text
+branch policy
+-> origin/main, origin/hbin 존재와 README main push 금지 문구 확인
+reproduction
+-> README Full Reproduction 핵심 명령 확인
+agent evidence
+-> Runtime, Memory, Tool, DecisionTrace 산출물 row count 확인
+attack-defense evidence
+-> capability, coverage, response, closed-loop 산출물 확인
+package evidence
+-> package builder, verifier, manifest, ZIP ignore rule 확인
+safety / handoff
+-> closed simulation boundary와 팀 인계 문서 확인
+```
+
+검증 결과:
+
+```text
+submission_readiness_audit.csv: 10 rows
+status: pass=10
+agent_collaboration_graph.csv: 17 edges
+competition_alignment_matrix.csv: 10 rows verified
+package_zip entries: 159
+branch: hbin
+origin main/hbin refs: present
+```
+
+해석:
+
+- 이 산출물은 팀원이 이어받을 때 필요한 최소 상태를 한 표에서 확인하게 해준다.
+- readiness audit은 `HEAD == origin/hbin`처럼 커밋 전후에 바뀌는 값을 파일에 고정하지 않는다. 해당 동적 상태는 `verify_submission_state.py --require-clean` 실행 시점에 검증한다.
+- 외부 클라우드 업로드와 비로그인 다운로드 검증은 로컬 코드로 끝낼 수 없는 운영 단계라 P27로 분리했다.
+- 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 산출물만 감사한다.
+
+연결한 것:
+
+- README 실행 명령
+- package builder required paths
+- final verifier row/status/package manifest checks
+- competition alignment matrix A10 row
+- agent collaboration graph E17 edge
+- FINAL_QA와 SUBMISSION_PACKAGE count

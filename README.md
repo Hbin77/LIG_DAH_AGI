@@ -508,6 +508,19 @@ python3 scripts/verify_submission_state.py
 
 This checks required files, core CSV row counts, safety-boundary text, package contents, ZIP exclusion rules, and `origin/main` plus `origin/hbin` branch presence.
 
+## Submission Readiness Audit
+
+```bash
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
+```
+
+Outputs:
+
+- `outputs/report_tables/submission_readiness_audit.csv`
+- `outputs/report_tables/submission_readiness_audit.md`
+
+This checks branch policy, reproduction commands, agent evidence, closed-loop evidence, package inputs, safety-boundary text, and team handoff docs before the package is rebuilt.
+
 ## Full Reproduction
 
 ```bash
@@ -538,6 +551,7 @@ python3 -m src.experiments.attack_defense_response_audit
 python3 -m src.experiments.closed_loop_episode_replay
 python3 -m src.experiments.pace_transition_audit
 python3 -m src.experiments.mission_impact_decomposition
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
 python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py

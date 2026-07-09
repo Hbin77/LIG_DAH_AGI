@@ -46,6 +46,7 @@ REQUIRED_FILES = [
     "src/experiments/pace_transition_audit.py",
     "src/experiments/mission_impact_decomposition.py",
     "src/experiments/metric_gate.py",
+    "src/experiments/submission_readiness_audit.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
@@ -92,6 +93,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/mission_impact_decomposition.md",
     "outputs/report_tables/metric_gate_summary.csv",
     "outputs/report_tables/metric_gate_summary.md",
+    "outputs/report_tables/submission_readiness_audit.csv",
+    "outputs/report_tables/submission_readiness_audit.md",
     "outputs/figures/aura_tsra_architecture.png",
     "outputs/figures/batch_resilience_gain.png",
     "outputs/figures/tsra_action_ablation.png",
@@ -581,6 +584,40 @@ def check_csv_outputs() -> list[str]:
     )
     checks.append("metric_gate_summary rows=11 pass")
 
+    readiness_rows = read_csv("outputs/report_tables/submission_readiness_audit.csv")
+    require(
+        len(readiness_rows) == 10,
+        f"expected 10 submission readiness rows, got {len(readiness_rows)}",
+    )
+    failed_readiness = [
+        f"{row['check_id']}:{row['area']}"
+        for row in readiness_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_readiness, f"failed submission readiness rows: {failed_readiness[:8]}")
+    required_readiness_areas = {
+        "Branch policy",
+        "Reproduction commands",
+        "Agent runtime structure",
+        "Attack and defense separation",
+        "Decision evidence",
+        "Closed-loop evidence",
+        "Metric and ML evidence",
+        "Package inputs",
+        "Safety boundary",
+        "Team handoff docs",
+    }
+    observed_readiness_areas = {row["area"] for row in readiness_rows}
+    require(
+        required_readiness_areas == observed_readiness_areas,
+        f"submission readiness audit has unexpected areas: {sorted(observed_readiness_areas)}",
+    )
+    require(
+        all("closed simulation" in row["safety_boundary"] for row in readiness_rows),
+        "submission readiness audit missing safety boundary",
+    )
+    checks.append("submission_readiness_audit rows=10 pass")
+
     coa_rows = read_csv("outputs/report_tables/aura_coa_cards.csv")
     require(len(coa_rows) >= 10, f"COA cards too small: {len(coa_rows)} rows")
     require(
@@ -726,12 +763,12 @@ def check_csv_outputs() -> list[str]:
 
     collaboration_rows = read_csv("outputs/report_tables/agent_collaboration_graph.csv")
     require(
-        len(collaboration_rows) == 16,
-        f"expected 16 collaboration graph edges, got {len(collaboration_rows)}",
+        len(collaboration_rows) == 17,
+        f"expected 17 collaboration graph edges, got {len(collaboration_rows)}",
     )
     require(
         {row["edge_id"] for row in collaboration_rows}
-        == {f"E{index:02d}" for index in range(1, 17)},
+        == {f"E{index:02d}" for index in range(1, 18)},
         "agent collaboration graph edge ids are incomplete",
     )
     require(
@@ -755,7 +792,7 @@ def check_csv_outputs() -> list[str]:
     )
     require("flowchart LR" in collaboration_mmd, "agent collaboration Mermaid graph missing flowchart")
     require("AURA" in collaboration_mmd and "TSRA-R" in collaboration_mmd, "Mermaid graph missing agents")
-    checks.append("agent_collaboration_graph edges=16 verified")
+    checks.append("agent_collaboration_graph edges=17 verified")
 
     alignment_rows = read_csv("outputs/report_tables/competition_alignment_matrix.csv")
     require(len(alignment_rows) == 10, f"expected 10 alignment rows, got {len(alignment_rows)}")
@@ -888,6 +925,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/metric_gate_summary.md" in manifest_text,
         "manifest missing metric gate summary",
+    )
+    require(
+        "outputs/report_tables/submission_readiness_audit.md" in manifest_text,
+        "manifest missing submission readiness audit",
     )
     return [f"package_zip entries={len(names)}", "package exclusions=passed"]
 

@@ -1375,19 +1375,80 @@ score_or_threshold_support: pass=399
 - TSRA-R-ML 선택은 anomaly probability threshold와 reactive defense window 근거와 일치한다.
 - 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 trace만 감사한다.
 
-## P26. 제출 직전 브랜치/패키지 동결
+## P26. Submission Readiness Audit
+
+상태: 완료
+
+문제:
+
+- 기능 산출물은 많아졌지만, 제출 직전에는 "무엇이 준비됐는지"를 사람이 수동으로 기억하면 빠뜨리기 쉽다.
+- `main` 보존, `hbin` 공유, 재현 명령, 에이전트 구조 증거, closed-loop 증거, package 입력, safety boundary, 팀 인계 문서를 하나의 기계적 체크로 묶어야 한다.
+
+구현:
+
+```text
+src/experiments/submission_readiness_audit.py
+outputs/report_tables/submission_readiness_audit.csv
+outputs/report_tables/submission_readiness_audit.md
+```
+
+구현 방식:
+
+- `origin/main`, `origin/hbin` remote branch 존재와 README branch policy를 확인한다.
+- README Full Reproduction 명령이 핵심 생성기를 포함하는지 확인한다.
+- Agent Runtime, Memory, Tool, DecisionTrace 관련 code/docs/output row count를 확인한다.
+- AURA/TSRA-R 분리, capability coverage, response audit row count를 확인한다.
+- closed-loop episode, operator alert, defense effectiveness ledger, metric/ML evidence를 확인한다.
+- package builder, final verifier, manifest, `.gitignore` ZIP 제외 규칙을 확인한다.
+- safety boundary와 팀 인계 문서의 개인 중심 표현 금지 기준을 확인한다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete` 명령으로 재생성 가능하다.
+- 완료. 10개 readiness row가 모두 `pass`다.
+- 완료. README Full Reproduction, package builder, final verifier, competition alignment matrix, collaboration graph에 연결됐다.
+- 완료. `scripts/verify_submission_state.py`가 readiness audit 누락 또는 실패를 최종 검증 실패로 처리한다.
+
+검증:
+
+```bash
+python3 -m src.experiments.submission_readiness_audit --fail-on-incomplete
+python3 -m src.experiments.agent_collaboration_graph
+python3 -m src.experiments.competition_alignment --fail-on-incomplete
+python3 scripts/build_submission_package.py
+python3 scripts/verify_submission_state.py
+```
+
+검증 결과:
+
+```text
+submission_readiness_audit.csv: 10 rows
+status: pass=10
+agent_collaboration_graph.csv: 17 edges
+package_zip entries: 159
+branch: hbin
+origin main/hbin refs: present
+```
+
+해석:
+
+- 이 산출물은 팀원이 이어받을 때 필요한 "브랜치, 재현 명령, 에이전트 증거, 패키지 입력, 안전 경계"를 한 표에서 확인하게 해준다.
+- 코드와 산출물이 준비됐는지 검증하는 단계이며, 외부 클라우드 업로드나 제출 링크 권한 검증은 별도 운영 단계로 남긴다.
+- 실제 RF, exploit, live network action 없이 폐쇄형 시뮬레이션 산출물만 감사한다.
+
+## P27. 외부 제출 ZIP 링크 검증
 
 상태: 다음 작업
 
 문제:
 
-- 기능 산출물은 준비됐지만, 제출 직전에는 새 기능 추가보다 ZIP 업로드, 링크 권한, 브랜치 상태 확인이 더 중요하다.
+- 로컬 ZIP과 manifest는 준비됐지만, 외부 제출 링크는 업로드 위치와 권한 설정이 필요하다.
 
 구현 방향:
 
 - `python3 scripts/build_submission_package.py`
 - `python3 scripts/verify_submission_state.py --require-clean`
-- ZIP SHA-256 확인
+- `outputs/package/submission_manifest.md`의 ZIP SHA-256 확인
 - 외부 클라우드 업로드 후 비로그인 다운로드 검증
 
 완료 기준:

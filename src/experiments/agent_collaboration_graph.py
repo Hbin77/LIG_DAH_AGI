@@ -56,6 +56,9 @@ def evidence_counts(root: Path = Path(".")) -> dict[str, int]:
         "agent_tool_audit_rows": len(
             read_csv(root / "outputs/report_tables/agent_tool_usage_audit.csv")
         ),
+        "submission_readiness_rows": len(
+            read_csv(root / "outputs/report_tables/submission_readiness_audit.csv")
+        ),
         "decision_causality_rows": len(
             read_csv(root / "outputs/report_tables/agent_decision_causality_audit.csv")
         ),
@@ -248,6 +251,16 @@ def build_rows(root: Path = Path(".")) -> list[dict[str, str]]:
             counts["decision_causality_rows"] == 399,
             "Proves selected actions are grounded in recorded decision evidence.",
         ),
+        (
+            "E17",
+            "Submission Readiness Audit",
+            "Verifier/Package",
+            "Readiness audit verifies branch policy, reproduction commands, agent evidence, package inputs, and handoff docs",
+            "outputs/report_tables/submission_readiness_audit.csv",
+            counts["submission_readiness_rows"],
+            counts["submission_readiness_rows"] == 10,
+            "Connects teammate handoff and packaging readiness to the same evidence bundle.",
+        ),
     ]
     rows = []
     for edge_id, source, target, interaction, evidence, evidence_count, ok, purpose in specs:
@@ -293,6 +306,7 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             "  Ledger[Defense Effectiveness Ledger\\nDefense action -> metric movement]",
             "  Coverage[Capability Coverage\\nAttack to defense mapping]",
             "  Replay[Closed-Loop Episode Replay\\nAttack / defense / alert / metric episode]",
+            "  Readiness[Submission Readiness Audit\\nBranch / package / handoff gates]",
             "  Verifier[Verifier / Package\\nReproducible evidence bundle]",
             f"  Runtime -->|{line('E01')}| Aura",
             f"  Runtime -->|memory state| Memory",
@@ -314,6 +328,7 @@ def mermaid_graph(rows: list[dict[str, str]]) -> str:
             f"  Memory -->|{line('E14')}| Verifier",
             f"  Tools -->|{line('E15')}| Verifier",
             f"  Trace -->|{line('E16')}| Verifier",
+            f"  Readiness -->|{line('E17')}| Verifier",
             f"  Tsra -->|response evidence| Replay",
             f"  Alerts -->|alert evidence| Replay",
             f"  Replay -->|episode evidence| Verifier",
