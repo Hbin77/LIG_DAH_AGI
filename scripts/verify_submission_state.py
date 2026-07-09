@@ -950,6 +950,18 @@ def check_zip() -> list[str]:
         "not embedded inside the submission ZIP" in handoff_text,
         "release handoff missing repo-side/non-embedded boundary",
     )
+    require(
+        "- generated_branch: `hbin`" in handoff_text,
+        "release handoff missing generated_branch hbin",
+    )
+    require(
+        "Commit SHA is intentionally verified by command after final push" in handoff_text,
+        "release handoff missing Git commit verification boundary",
+    )
+    require(
+        "git ls-remote --heads origin main hbin" in handoff_text,
+        "release handoff missing remote branch verification command",
+    )
     stale_payload_files = []
     with zipfile.ZipFile(ZIP_PATH) as zf:
         for rel in sorted(manifest_files):

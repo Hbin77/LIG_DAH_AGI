@@ -510,7 +510,7 @@ This writes:
 
 - `outputs/package/release_handoff.md`
 
-The handoff is intentionally repo-side only and not embedded inside the submission ZIP. It records the ZIP SHA-256, byte count, entry count, local freeze commands, and the external-link verification command.
+The handoff is intentionally repo-side only and not embedded inside the submission ZIP. It records the ZIP SHA-256, byte count, entry count, branch rule, Git sync checks, local freeze commands, and the external-link verification command. It does not embed the current commit SHA because a tracked file cannot stably contain the hash of the commit that contains itself.
 
 ## Verify Submission State
 

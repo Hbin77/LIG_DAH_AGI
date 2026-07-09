@@ -700,6 +700,7 @@ downloaded zip_file_count: manifest zip_file_count와 일치
 
 - 제출 ZIP의 SHA-256, byte count, entry count와 검증 명령을 한 장짜리 인계 문서로 고정한다.
 - ZIP SHA를 기록하는 handoff 문서는 제출 ZIP 밖에 둬 self-reference를 피한다.
+- commit SHA는 tracked file에 고정하지 않고 push 후 Git sync command로 확인한다.
 - 외부 업로드 담당자가 마지막으로 확인할 기준을 `hbin` 브랜치에 남긴다.
 
 산출물:
@@ -713,6 +714,7 @@ outputs/package/release_handoff.md
 
 ```text
 release_handoff: repo-only/current
+generated_branch: hbin
 package_manifest_integrity: passed
 ```
 

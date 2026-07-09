@@ -1745,13 +1745,16 @@ outputs/package/release_handoff.md
 ```text
 release_handoff.md는 repo-side 문서다.
 제출 ZIP 안에는 넣지 않는다.
+commit SHA는 파일에 고정하지 않고 push 후 명령으로 확인한다.
 ```
 
 이유:
 
 - handoff 문서는 ZIP SHA-256을 기록한다.
 - 이 문서가 다시 ZIP 안에 들어가면 ZIP SHA가 자기 자신을 참조하게 된다.
+- commit SHA도 tracked file 내용 전체를 포함해 계산되므로, 파일 안에 자기 커밋 SHA를 안정적으로 넣을 수 없다.
 - 따라서 `outputs/package/release_handoff.md`는 GitHub `hbin` 브랜치에서 확인하는 인계 문서로 두고, 제출 ZIP에는 포함하지 않는다.
+- release commit이 원격에 올라갔는지는 `git status --short --branch`, `git ls-remote --heads origin main hbin`, `git log --oneline --decorate -3`로 확인한다.
 
 검증 방식:
 
@@ -1759,6 +1762,8 @@ release_handoff.md는 repo-side 문서다.
 scripts/verify_submission_state.py
 -> release_handoff.md 존재 확인
 -> 현재 manifest의 zip_sha256 / zip_bytes / zip_file_count가 handoff에 있는지 확인
+-> generated_branch가 hbin인지 확인
+-> Git sync 확인 명령이 handoff에 있는지 확인
 -> release_handoff.md가 ZIP 내부에 있으면 실패
 ```
 

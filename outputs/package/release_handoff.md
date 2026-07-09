@@ -5,19 +5,40 @@ It is a repo-side handoff file and is intentionally not embedded inside the subm
 
 ## Release Candidate
 
-- release_candidate_id: `6071680a8daa`
+- release_candidate_id: `786b3a28b2dc`
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_sha256: `6071680a8daa70e0a6db8f8c2047cac73a6c168caa3b183153da1fc838142325`
-- zip_bytes: 1699897
+- zip_sha256: `786b3a28b2dc8af019fad067246b81eac984b03a17eaaf82572796fec73f1bfc`
+- zip_bytes: 1700746
 - zip_file_count: 161
 - payload_file_count: 160
-- total_payload_bytes: 3029281
+- total_payload_bytes: 3032020
+- generated_branch: `hbin`
 
 ## Branch Rule
 
 - Work from `hbin`.
 - Keep `main` preserved as the protected/default branch.
 - Do not push development artifacts directly to `main`.
+- Commit SHA is intentionally verified by command after final push, not embedded in this tracked file.
+
+## Git Sync Check
+
+Run these after the release commit is pushed:
+
+```bash
+git status --short --branch
+git ls-remote --heads origin main hbin
+git log --oneline --decorate -3
+```
+
+Expected Git result:
+
+```text
+branch: hbin
+origin/main: present
+origin/hbin: present
+local hbin: not ahead/behind origin/hbin
+```
 
 ## Local Freeze Commands
 
@@ -52,9 +73,9 @@ The external link is acceptable only when the verifier reports:
 
 ```text
 status: pass
-sha256: 6071680a8daa70e0a6db8f8c2047cac73a6c168caa3b183153da1fc838142325
+sha256: 786b3a28b2dc8af019fad067246b81eac984b03a17eaaf82572796fec73f1bfc
 zip_file_count: 161
-bytes_read: 1699897
+bytes_read: 1700746
 ```
 
 ## Remaining External Action

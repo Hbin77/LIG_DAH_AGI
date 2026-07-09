@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -30,7 +31,23 @@ def read_manifest_values(path: Path) -> dict[str, str]:
     return {key: manifest_value(text, key) for key in keys}
 
 
-def render_handoff(values: dict[str, str]) -> str:
+def run_git(args: list[str]) -> str:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return result.stdout.strip()
+
+
+def current_branch() -> str:
+    return run_git(["branch", "--show-current"])
+
+
+def render_handoff(values: dict[str, str], branch: str) -> str:
     zip_path = values["zip_path"]
     zip_sha = values["zip_sha256"]
     release_id = zip_sha[:12]
@@ -50,12 +67,33 @@ def render_handoff(values: dict[str, str]) -> str:
             f"- zip_file_count: {values['zip_file_count']}",
             f"- payload_file_count: {values['payload_file_count']}",
             f"- total_payload_bytes: {values['total_payload_bytes']}",
+            f"- generated_branch: `{branch}`",
             "",
             "## Branch Rule",
             "",
             "- Work from `hbin`.",
             "- Keep `main` preserved as the protected/default branch.",
             "- Do not push development artifacts directly to `main`.",
+            "- Commit SHA is intentionally verified by command after final push, not embedded in this tracked file.",
+            "",
+            "## Git Sync Check",
+            "",
+            "Run these after the release commit is pushed:",
+            "",
+            "```bash",
+            "git status --short --branch",
+            "git ls-remote --heads origin main hbin",
+            "git log --oneline --decorate -3",
+            "```",
+            "",
+            "Expected Git result:",
+            "",
+            "```text",
+            "branch: hbin",
+            "origin/main: present",
+            "origin/hbin: present",
+            "local hbin: not ahead/behind origin/hbin",
+            "```",
             "",
             "## Local Freeze Commands",
             "",
@@ -115,11 +153,13 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     values = read_manifest_values(args.manifest)
+    branch = current_branch()
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(render_handoff(values), encoding="utf-8")
+    args.output.write_text(render_handoff(values, branch), encoding="utf-8")
     print(f"Wrote {args.output.relative_to(ROOT)}")
     print(f"release_candidate_id={values['zip_sha256'][:12]}")
     print(f"zip_sha256={values['zip_sha256']}")
+    print(f"generated_branch={branch}")
 
 
 if __name__ == "__main__":

@@ -1552,10 +1552,12 @@ outputs/package/release_handoff.md
 구현 방식:
 
 - `outputs/package/submission_manifest.md`에서 ZIP path, SHA-256, byte count, entry count를 읽는다.
+- 현재 branch를 기록한다.
 - `outputs/package/release_handoff.md`를 생성한다.
 - handoff 문서는 제출 ZIP 밖에 둔다.
 - `scripts/verify_submission_state.py`가 handoff 문서에 현재 ZIP SHA/bytes/entry count가 들어 있는지 확인한다.
 - verifier는 `release_handoff.md`가 제출 ZIP 안에 들어가면 실패한다.
+- 커밋 SHA는 tracked file에 고정하지 않고, push 후 Git sync command로 확인한다. 커밋 SHA는 파일 내용을 포함해 계산되므로 파일 안에 자기 커밋 SHA를 안정적으로 넣을 수 없다.
 
 검증:
 
@@ -1570,6 +1572,7 @@ python3 scripts/verify_submission_state.py --require-clean
 ```text
 release_handoff: repo-only/current
 package_manifest_integrity: passed
+generated_branch: hbin
 tracked_worktree: clean
 ```
 

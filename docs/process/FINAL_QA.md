@@ -86,6 +86,7 @@ competition_alignment_matrix rows: 10 verified
 package_zip entries: 161
 package_manifest_integrity: passed
 release_handoff: repo-only/current
+generated_branch: hbin
 package exclusions: passed
 external_package_link_self_test: pass
 excluded __pycache__: 0
