@@ -25,7 +25,7 @@ outputs/package/submission_manifest.md
 - `outputs/experiments/experiment_summary.csv`
 - `outputs/batch/*.csv`
 - `outputs/figures/*.png`
-- `outputs/report_tables/*`: trace, contract validation, COA, battle timeline, incident summary, competition alignment matrix
+- `outputs/report_tables/*`: trace, contract validation, trace quality audit, COA, battle timeline, incident summary, competition alignment matrix
 - `outputs/models/*_metrics.json`
 
 ## 제외하는 것
@@ -43,10 +43,11 @@ outputs/package/submission_manifest.md
 패키지 생성 검증:
 
 ```text
-payload_file_count: 106
-zip_file_count: 107
+payload_file_count: 109
+zip_file_count: 110
 zip_bytes: 재생성 시 manifest 기준 확인
 agent_contract_validation: included
+decision_trace_quality_audit: included
 competition_alignment_matrix: included
 ```
 

@@ -512,7 +512,59 @@ contracts: attack_event_schema, defense_event_schema, metric_snapshot_schema,
 - 공격 에이전트와 방어 에이전트를 따로 개발해도 공유 로그 계약이 깨지면 바로 실패한다.
 - 실제 공격 기능은 추가하지 않고, 폐쇄형 시뮬레이션 산출물의 신뢰성을 높이는 작업이다.
 
-## P10. 제출 직전 브랜치/패키지 동결
+## P10. DecisionTrace Quality Audit
+
+상태: 완료
+
+문제:
+
+- event contract validation은 로그 형식이 맞는지 확인하지만, DecisionTrace가 에이전트 판단 루프를 충분히 보여주는지는 별도로 봐야 한다.
+- AURA는 대기 구간에서 no-op을 선택하고 공격 시점에만 후보/도구를 평가한다.
+- TSRA-R은 매 판단마다 방어 조건과 후보 action을 평가한다.
+- 이 차이를 반영해 "정책별 trace 품질"을 자동 점검할 필요가 있다.
+
+구현:
+
+```text
+src/experiments/trace_quality_audit.py
+outputs/report_tables/decision_trace_quality_audit.csv
+outputs/report_tables/decision_trace_quality_audit.md
+```
+
+구현 방식:
+
+- agent/policy 단위로 trace를 묶는다.
+- reason, observation, memory, feedback, selected_action coverage를 계산한다.
+- tool_call coverage, candidate_action coverage, non-no-op count, selected event count를 계산한다.
+- AURA와 TSRA-R의 정책 차이를 반영해 실패 기준을 분리한다.
+
+완료 기준:
+
+- 완료. `python3 -m src.experiments.trace_quality_audit --fail-on-error` 명령으로 재생성 가능하다.
+- 완료. E3~E7의 active agent/policy 9개 그룹이 모두 pass다.
+- 완료. README, package builder, final verifier, competition alignment matrix에 연결됐다.
+
+검증:
+
+```bash
+python3 -m src.experiments.trace_quality_audit --fail-on-error
+```
+
+검증 결과:
+
+```text
+decision_trace_quality_audit.csv: 9 audit rows
+status: all pass
+AURA/AURA-ML: 5 selected attack events per active experiment
+TSRA-R/TSRA-R-ML: tool/candidate coverage 1.0
+```
+
+해석:
+
+- 이 산출물은 "Python 함수가 아니라 에이전트 판단 루프"라는 구조적 근거를 강화한다.
+- 이후 에이전트 정책을 바꿔도 reason, memory, tool, candidate, selected action 증거가 사라지면 검증에서 잡힌다.
+
+## P11. 제출 직전 브랜치/패키지 동결
 
 상태: 다음 작업
 

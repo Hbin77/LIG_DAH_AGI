@@ -13,6 +13,7 @@ python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
+python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards
@@ -38,6 +39,7 @@ tsra_action_ablation_summary rows: 5
 adaptive_memory_summary conditions: full_tsra_r, adaptive_tsra_r
 agent_decision_trace_summary rows: 215
 agent_contract_validation rows: 49 pass
+decision_trace_quality_audit rows: 9 pass
 aura_coa_cards rows: 15
 battle_timeline rows: 46
 incident_summary rows: 10
@@ -47,7 +49,7 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 107
+package_zip entries: 110
 package exclusions: passed
 excluded __pycache__: 0
 excluded *.pyc: 0

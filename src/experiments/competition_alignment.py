@@ -119,15 +119,18 @@ ALIGNMENT_SPECS = [
             "src/agents/tools.py",
             "src/agents/schema.py",
             "src/experiments/validate_event_contracts.py",
+            "src/experiments/trace_quality_audit.py",
             "outputs/report_tables/agent_decision_trace_summary.csv",
             "outputs/report_tables/agent_contract_validation.csv",
+            "outputs/report_tables/decision_trace_quality_audit.csv",
         ],
         next_gate=(
-            "Agent changes must leave DecisionTrace evidence and pass event/trace contract validation."
+            "Agent changes must leave DecisionTrace evidence and pass contract plus trace-quality validation."
         ),
         row_checks=[
             RowCountCheck("outputs/report_tables/agent_decision_trace_summary.csv", 200),
             RowCountCheck("outputs/report_tables/agent_contract_validation.csv", 49),
+            RowCountCheck("outputs/report_tables/decision_trace_quality_audit.csv", 9),
         ],
     ),
     AlignmentSpec(

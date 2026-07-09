@@ -142,6 +142,19 @@ This writes:
 
 The validator checks AURA attack events, TSRA-R defense events, mission events, metric snapshots, DecisionTrace logs, and cross-log relationships for the shared simulator contract.
 
+## Audit DecisionTrace Quality
+
+```bash
+python3 -m src.experiments.trace_quality_audit --fail-on-error
+```
+
+This writes:
+
+- `outputs/report_tables/decision_trace_quality_audit.csv`
+- `outputs/report_tables/decision_trace_quality_audit.md`
+
+The audit checks whether each active AURA/TSRA-R policy has complete reason, observation, memory, feedback, selected action, tool/candidate evaluation, and non-no-op event evidence.
+
 ## Generate AURA COA Cards
 
 ```bash
@@ -308,6 +321,7 @@ python3 -m src.ml.train_tsra_detector --rows 5000
 python3 -m src.experiments.run_all
 python3 -m src.experiments.trace_summary
 python3 -m src.experiments.validate_event_contracts --fail-on-error
+python3 -m src.experiments.trace_quality_audit --fail-on-error
 python3 -m src.experiments.battle_timeline
 python3 -m src.experiments.incident_summary
 python3 -m src.experiments.aura_coa_cards

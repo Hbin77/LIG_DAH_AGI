@@ -148,6 +148,29 @@ outputs/report_tables/agent_contract_validation.md
 - TSRA-R DecisionTrace schema
 - attack/defense event와 trace의 cross-contract
 
+## 품질 감사
+
+DecisionTrace가 에이전트 판단 루프 증거로 충분한지는 다음 명령으로 감사한다.
+
+```bash
+python3 -m src.experiments.trace_quality_audit --fail-on-error
+```
+
+산출물:
+
+```text
+outputs/report_tables/decision_trace_quality_audit.csv
+outputs/report_tables/decision_trace_quality_audit.md
+```
+
+감사 항목:
+
+- reason, observation, memory, feedback, selected action coverage
+- tool call coverage
+- candidate action coverage
+- non-no-op selected action count
+- selected attack/defense event count
+
 예시:
 
 ```json

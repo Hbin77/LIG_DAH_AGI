@@ -129,8 +129,9 @@ Metrics
 1. 새 기능이 DAH 대회 목표와 직접 연결되는지 alignment matrix로 먼저 확인한다.
 2. 공격, 방어, AI 에이전트 판단 루프 중 어디를 강화하는지 명시한다.
 3. AURA/TSRA-R/MissionSimulator 사이의 event contract가 깨지지 않는지 검증한다.
-4. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
-5. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
+4. DecisionTrace가 reason, memory, tool, candidate, selected action을 충분히 남기는지 검증한다.
+5. 실행 증거와 safety boundary가 함께 남는 산출물만 유지한다.
+6. 제출 전 실행 재현성과 산출물 구성을 안정화한다.
 
 ## 다음 작업 우선순위
 
@@ -373,6 +374,32 @@ outputs/report_tables/agent_contract_validation.md
 agent_contract_validation checks: 49
 status: all pass
 safety boundary: closed simulation only
+```
+
+### P10. DecisionTrace Quality Audit
+
+상태: 완료
+
+목적:
+
+- DecisionTrace가 단순 로그가 아니라 에이전트 판단 루프 증거로 충분한지 확인한다.
+- active AURA/TSRA-R policy별로 reason, observation, memory, feedback, selected action, tool/candidate evidence를 점검한다.
+- AURA의 공격 시점 후보 평가와 TSRA-R의 지속적 방어 후보 평가를 구분해 품질 기준을 적용한다.
+
+산출물:
+
+```text
+src/experiments/trace_quality_audit.py
+outputs/report_tables/decision_trace_quality_audit.csv
+outputs/report_tables/decision_trace_quality_audit.md
+```
+
+검증 결과:
+
+```text
+decision_trace_quality_audit rows: 9
+status: all pass
+checked: AURA, AURA-ML, TSRA-R, TSRA-R-ML active policies
 ```
 
 ## 최종 판단 기준

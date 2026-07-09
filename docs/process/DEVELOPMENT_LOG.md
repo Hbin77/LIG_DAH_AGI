@@ -727,6 +727,57 @@ status: all pass
 - 대신 두 에이전트가 분리 개발돼도 공유 인터페이스가 깨지지 않게 한다.
 - `verify_submission_state.py`와 `competition_alignment.py`에 연결해 최종 산출물의 필수 게이트로 만들었다.
 
+### 21. DecisionTrace Quality Audit을 추가한 이유
+
+Event contract validation은 로그 필드가 맞는지 확인한다. 하지만 AI 에이전트 아키텍처 관점에서는 "로그가 있다"만으로 충분하지 않다. 각 에이전트가 관측, 메모리, 도구 호출, 후보 평가, 선택 행동, 이유를 실제로 남기고 있는지 확인해야 한다.
+
+그래서 DecisionTrace 품질 감사기를 추가했다.
+
+구현:
+
+```text
+src/experiments/trace_quality_audit.py
+outputs/report_tables/decision_trace_quality_audit.csv
+outputs/report_tables/decision_trace_quality_audit.md
+```
+
+감사 기준:
+
+- reason coverage
+- observation coverage
+- memory coverage
+- feedback coverage
+- selected_action coverage
+- tool_call coverage
+- candidate_action coverage
+- non-no-op selected action count
+- selected attack/defense event count
+
+AURA와 TSRA-R은 운영 방식이 다르므로 기준을 분리했다.
+
+- AURA: 대기 구간은 no-op이고, 공격 시점에 candidate/tool evidence가 있어야 한다.
+- TSRA-R: 매 판단마다 defense condition tool과 candidate action evidence가 있어야 한다.
+
+검증:
+
+```text
+python3 -m src.experiments.trace_quality_audit --fail-on-error
+```
+
+결과:
+
+```text
+decision_trace_quality_audit.csv: 9 audit rows
+status: all pass
+AURA/AURA-ML selected events: 5 per active experiment
+TSRA-R/TSRA-R-ML tool_call_coverage: 1.0
+```
+
+해석:
+
+- 이 산출물은 "에이전트"라는 주장을 말이 아니라 trace 품질로 검증한다.
+- 이후 공격/방어 정책을 수정해도 DecisionTrace 품질이 낮아지면 final verifier에서 실패한다.
+
 ## 최신 핵심 결과
 
 30-seed 반복 실험:

@@ -22,12 +22,12 @@
 
 ## 패키지 요약
 
-- payload_file_count: 106
-- total_payload_bytes: 2196956
+- payload_file_count: 109
+- total_payload_bytes: 2216983
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_file_count: 107
-- zip_bytes: 1541202
-- zip_sha256: `f8c8de246f75f712fec71ce0176b1d16ac28d5b908356a35cd8ee71d5a51f77d`
+- zip_file_count: 110
+- zip_bytes: 1547106
+- zip_sha256: `7fb959c74887a8a55a45ccbf6d4d262a8fb808b021d426263915c2fee3fc147f`
 
 ## 포함 파일
 
@@ -90,6 +90,8 @@
 - `outputs/report_tables/battle_timeline.md`
 - `outputs/report_tables/competition_alignment_matrix.csv`
 - `outputs/report_tables/competition_alignment_matrix.md`
+- `outputs/report_tables/decision_trace_quality_audit.csv`
+- `outputs/report_tables/decision_trace_quality_audit.md`
 - `outputs/report_tables/incident_summary.csv`
 - `outputs/report_tables/incident_summary.md`
 - `outputs/report_tables/ml_model_comparison.csv`
@@ -119,6 +121,7 @@
 - `src/experiments/run_all.py`
 - `src/experiments/run_batch.py`
 - `src/experiments/run_tsra_ablation.py`
+- `src/experiments/trace_quality_audit.py`
 - `src/experiments/trace_summary.py`
 - `src/experiments/validate_event_contracts.py`
 - `src/ml/__init__.py`

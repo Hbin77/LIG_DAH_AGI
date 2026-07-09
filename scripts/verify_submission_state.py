@@ -30,6 +30,7 @@ REQUIRED_FILES = [
     "src/experiments/incident_summary.py",
     "src/experiments/competition_alignment.py",
     "src/experiments/validate_event_contracts.py",
+    "src/experiments/trace_quality_audit.py",
     "outputs/experiments/experiment_summary.csv",
     "outputs/batch/repeated_experiment_summary.csv",
     "outputs/batch/resilience_gain_summary.csv",
@@ -43,6 +44,8 @@ REQUIRED_FILES = [
     "outputs/report_tables/competition_alignment_matrix.md",
     "outputs/report_tables/agent_contract_validation.csv",
     "outputs/report_tables/agent_contract_validation.md",
+    "outputs/report_tables/decision_trace_quality_audit.csv",
+    "outputs/report_tables/decision_trace_quality_audit.md",
     "outputs/figures/aura_tsra_architecture.png",
     "outputs/figures/batch_resilience_gain.png",
     "outputs/figures/tsra_action_ablation.png",
@@ -146,6 +149,31 @@ def check_csv_outputs() -> list[str]:
         f"agent contract validation missing contracts: {sorted(required_contracts - observed_contracts)}",
     )
     checks.append("agent_contract_validation rows=49 pass")
+
+    trace_quality_rows = read_csv("outputs/report_tables/decision_trace_quality_audit.csv")
+    require(
+        len(trace_quality_rows) == 9,
+        f"expected 9 trace quality audit rows, got {len(trace_quality_rows)}",
+    )
+    failed_trace_quality = [
+        f"{row['experiment']}:{row['agent']}:{row['policy']}"
+        for row in trace_quality_rows
+        if row.get("status") != "pass"
+    ]
+    require(not failed_trace_quality, f"failed trace quality rows: {failed_trace_quality[:8]}")
+    require(
+        any(row["agent"].startswith("AURA") for row in trace_quality_rows),
+        "trace quality audit has no AURA rows",
+    )
+    require(
+        any(row["agent"].startswith("TSRA-R") for row in trace_quality_rows),
+        "trace quality audit has no TSRA-R rows",
+    )
+    require(
+        all(float(row["reason_coverage"]) == 1.0 for row in trace_quality_rows),
+        "trace quality audit has incomplete reason coverage",
+    )
+    checks.append("decision_trace_quality_audit rows=9 pass")
 
     coa_rows = read_csv("outputs/report_tables/aura_coa_cards.csv")
     require(len(coa_rows) >= 10, f"COA cards too small: {len(coa_rows)} rows")
@@ -254,6 +282,10 @@ def check_zip() -> list[str]:
     require(
         "outputs/report_tables/agent_contract_validation.md" in manifest_text,
         "manifest missing agent contract validation",
+    )
+    require(
+        "outputs/report_tables/decision_trace_quality_audit.md" in manifest_text,
+        "manifest missing decision trace quality audit",
     )
     return [f"package_zip entries={len(names)}", "package exclusions=passed"]
 
