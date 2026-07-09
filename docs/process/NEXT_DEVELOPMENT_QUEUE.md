@@ -1425,7 +1425,7 @@ python3 scripts/verify_submission_state.py
 submission_readiness_audit.csv: 10 rows
 status: pass=10
 agent_collaboration_graph.csv: 17 edges
-package_zip entries: 161
+package_zip entries: 162
 branch: hbin
 origin main/hbin refs: present
 ```
@@ -1475,7 +1475,7 @@ python3 scripts/verify_submission_state.py --require-clean
 검증 결과:
 
 ```text
-package_zip entries: 161
+package_zip entries: 162
 package_manifest_integrity: passed
 release_handoff: repo-only/current
 package exclusions: passed
@@ -1581,7 +1581,52 @@ tracked_worktree: clean
 - 이 문서는 팀 인계용 release candidate sheet다.
 - 실제 제출 ZIP에는 들어가지 않고, repo에서 ZIP SHA와 외부 링크 검증 명령을 확인하는 기준으로 사용한다.
 
-## P30. 외부 제출 ZIP 업로드와 비로그인 다운로드 확인
+## P30. Release Freeze Automation
+
+상태: 완료
+
+문제:
+
+- release candidate를 만들 때 `build_submission_package.py`, `generate_release_handoff.py`, `verify_submission_state.py`, `verify_external_package_link.py`를 정해진 순서로 실행해야 한다.
+- 사람이 수동으로 순서를 외우면 handoff가 오래되거나 link self-test가 빠질 수 있다.
+
+구현:
+
+```text
+scripts/freeze_release_candidate.py
+```
+
+구현 방식:
+
+- 제출 ZIP을 생성한다.
+- release handoff를 생성한다.
+- final verifier를 실행한다.
+- local `file://` link self-test를 실행한다.
+- manifest에서 ZIP path, file count, byte count, SHA-256을 읽어 요약한다.
+- 커밋 후에는 `--require-clean` 옵션으로 tracked worktree clean 상태까지 확인한다.
+
+검증:
+
+```bash
+python3 scripts/freeze_release_candidate.py
+python3 scripts/freeze_release_candidate.py --require-clean
+```
+
+검증 결과:
+
+```text
+freeze_status: pass
+package_manifest_integrity: passed
+release_handoff: repo-only/current
+external package link self-test status: pass
+```
+
+해석:
+
+- 이 스크립트는 최종 로컬 동결 절차의 표준 진입점이다.
+- 외부 제출 링크 자체는 업로드 이후에만 검증할 수 있으므로 다음 운영 단계로 남긴다.
+
+## P31. 외부 제출 ZIP 업로드와 비로그인 다운로드 확인
 
 상태: 다음 작업
 
@@ -1591,8 +1636,7 @@ tracked_worktree: clean
 
 구현 방향:
 
-- `python3 scripts/build_submission_package.py`
-- `python3 scripts/verify_submission_state.py --require-clean`
+- `python3 scripts/freeze_release_candidate.py --require-clean`
 - `outputs/package/submission_manifest.md`의 ZIP SHA-256 확인
 - 외부 클라우드 업로드 후 비로그인 다운로드 검증
 - `python3 scripts/verify_external_package_link.py "https://..."` 실행

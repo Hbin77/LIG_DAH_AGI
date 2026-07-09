@@ -1613,7 +1613,7 @@ submission_readiness_audit.csv: 10 rows
 status: pass=10
 agent_collaboration_graph.csv: 17 edges
 competition_alignment_matrix.csv: 10 rows verified
-package_zip entries: 161
+package_zip entries: 162
 branch: hbin
 origin main/hbin refs: present
 ```
@@ -1667,7 +1667,7 @@ submission_manifest.md
 검증 결과:
 
 ```text
-package_zip entries: 161
+package_zip entries: 162
 package_manifest_integrity: passed
 release_handoff: repo-only/current
 package exclusions: passed
@@ -1779,3 +1779,38 @@ tracked_worktree: clean
 
 - release handoff는 외부 업로드 담당자가 마지막으로 볼 기준 문서다.
 - ZIP 자체의 무결성은 `submission_manifest.md`와 final verifier가 책임지고, 외부 링크 검증은 `verify_external_package_link.py`가 책임진다.
+
+### 44. Release Freeze Automation을 추가한 이유
+
+최종 동결 절차는 순서가 중요하다. ZIP을 만든 뒤 handoff를 갱신하고, final verifier와 local link self-test까지 실행해야 한다. 이 순서를 사람이 매번 직접 기억하면 누락이 생길 수 있다.
+
+그래서 release freeze 자동화 스크립트를 추가했다.
+
+추가한 것:
+
+```text
+scripts/freeze_release_candidate.py
+```
+
+실행 순서:
+
+```text
+build_submission_package.py
+-> generate_release_handoff.py
+-> verify_submission_state.py
+-> verify_external_package_link.py file://... --allow-file-url
+-> manifest summary 출력
+```
+
+사용 방식:
+
+```bash
+python3 scripts/freeze_release_candidate.py
+python3 scripts/freeze_release_candidate.py --require-clean
+```
+
+판단:
+
+- 첫 번째 명령은 생성/검증 흐름을 재실행한다.
+- `--require-clean`은 커밋 후 최종 상태 확인에 사용한다.
+- 외부 다운로드 링크 검증은 업로드 후 `verify_external_package_link.py "https://..."`로 수행한다.

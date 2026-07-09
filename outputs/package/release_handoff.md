@@ -5,13 +5,13 @@ It is a repo-side handoff file and is intentionally not embedded inside the subm
 
 ## Release Candidate
 
-- release_candidate_id: `786b3a28b2dc`
+- release_candidate_id: `edcd77e4c246`
 - zip_path: `outputs/package/DAH2026_source_LIG_DAH_AGI.zip`
-- zip_sha256: `786b3a28b2dc8af019fad067246b81eac984b03a17eaaf82572796fec73f1bfc`
-- zip_bytes: 1700746
-- zip_file_count: 161
-- payload_file_count: 160
-- total_payload_bytes: 3032020
+- zip_sha256: `edcd77e4c246cd7cadd48fe904dafdc8a8f10eedeeb62afe7f917563f9f160fb`
+- zip_bytes: 1702849
+- zip_file_count: 162
+- payload_file_count: 161
+- total_payload_bytes: 3038036
 - generated_branch: `hbin`
 
 ## Branch Rule
@@ -45,20 +45,17 @@ local hbin: not ahead/behind origin/hbin
 Run these before uploading the ZIP:
 
 ```bash
-python3 scripts/build_submission_package.py
-python3 scripts/generate_release_handoff.py
-python3 scripts/verify_submission_state.py --require-clean
-python3 scripts/verify_external_package_link.py \
-  "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" \
-  --allow-file-url
+python3 scripts/freeze_release_candidate.py --require-clean
 ```
 
 Expected local result:
 
 ```text
 package_manifest_integrity=passed
+release_handoff=repo-only/current
 tracked_worktree=clean
 external package link self-test status=pass
+freeze_status=pass
 ```
 
 ## External Upload Check
@@ -73,9 +70,9 @@ The external link is acceptable only when the verifier reports:
 
 ```text
 status: pass
-sha256: 786b3a28b2dc8af019fad067246b81eac984b03a17eaaf82572796fec73f1bfc
-zip_file_count: 161
-bytes_read: 1700746
+sha256: edcd77e4c246cd7cadd48fe904dafdc8a8f10eedeeb62afe7f917563f9f160fb
+zip_file_count: 162
+bytes_read: 1702849
 ```
 
 ## Remaining External Action

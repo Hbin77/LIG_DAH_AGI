@@ -660,7 +660,7 @@ outputs/report_tables/submission_readiness_audit.md
 ```text
 submission_readiness_audit rows: 10 pass
 agent_collaboration_graph edges: 17 verified
-package_zip entries: 161
+package_zip entries: 162
 package_manifest_integrity: passed
 release_handoff: repo-only/current
 branch: hbin
@@ -716,6 +716,30 @@ outputs/package/release_handoff.md
 release_handoff: repo-only/current
 generated_branch: hbin
 package_manifest_integrity: passed
+```
+
+### P21. Release Freeze Automation
+
+상태: 완료
+
+목적:
+
+- 최종 동결 절차를 하나의 명령으로 실행한다.
+- package build, handoff 생성, final verifier, local link self-test 누락을 방지한다.
+- 커밋 후 `--require-clean`으로 hbin 작업 상태를 마지막으로 확인한다.
+
+산출물:
+
+```text
+scripts/freeze_release_candidate.py
+```
+
+검증 결과:
+
+```text
+freeze_status: pass
+package_manifest_integrity: passed
+release_handoff: repo-only/current
 ```
 
 ## 최종 판단 기준

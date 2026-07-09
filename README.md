@@ -512,6 +512,14 @@ This writes:
 
 The handoff is intentionally repo-side only and not embedded inside the submission ZIP. It records the ZIP SHA-256, byte count, entry count, branch rule, Git sync checks, local freeze commands, and the external-link verification command. It does not embed the current commit SHA because a tracked file cannot stably contain the hash of the commit that contains itself.
 
+## Freeze Release Candidate
+
+```bash
+python3 scripts/freeze_release_candidate.py --require-clean
+```
+
+This runs the final local freeze sequence in order: build the package, regenerate the release handoff, verify submission state, and run the local `file://` package-link self-test. Use `--require-clean` after committing generated files.
+
 ## Verify Submission State
 
 ```bash
@@ -586,5 +594,6 @@ python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/generate_release_handoff.py
+python3 scripts/freeze_release_candidate.py
 python3 scripts/verify_submission_state.py
 ```

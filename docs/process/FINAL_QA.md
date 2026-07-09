@@ -39,6 +39,7 @@ python3 -m src.experiments.agent_collaboration_graph
 python3 -m src.experiments.competition_alignment --fail-on-incomplete
 python3 scripts/build_submission_package.py
 python3 scripts/generate_release_handoff.py
+python3 scripts/freeze_release_candidate.py
 python3 scripts/verify_submission_state.py
 python3 scripts/verify_external_package_link.py "file://$(pwd)/outputs/package/DAH2026_source_LIG_DAH_AGI.zip" --allow-file-url
 ```
@@ -83,10 +84,11 @@ competition_alignment_matrix rows: 10 verified
 패키지 검증:
 
 ```text
-package_zip entries: 161
+package_zip entries: 162
 package_manifest_integrity: passed
 release_handoff: repo-only/current
 generated_branch: hbin
+freeze_status: pass
 package exclusions: passed
 external_package_link_self_test: pass
 excluded __pycache__: 0

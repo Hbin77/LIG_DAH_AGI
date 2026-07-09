@@ -18,6 +18,7 @@ REQUIRED_FILES = [
     "README.md",
     "requirements.txt",
     "scripts/build_submission_package.py",
+    "scripts/freeze_release_candidate.py",
     "scripts/generate_release_handoff.py",
     "scripts/verify_submission_state.py",
     "scripts/verify_external_package_link.py",
@@ -961,6 +962,10 @@ def check_zip() -> list[str]:
     require(
         "git ls-remote --heads origin main hbin" in handoff_text,
         "release handoff missing remote branch verification command",
+    )
+    require(
+        "python3 scripts/freeze_release_candidate.py --require-clean" in handoff_text,
+        "release handoff missing freeze release command",
     )
     stale_payload_files = []
     with zipfile.ZipFile(ZIP_PATH) as zf:
