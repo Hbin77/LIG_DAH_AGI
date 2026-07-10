@@ -311,6 +311,16 @@ def check_documented_numbers() -> list[str]:
     return ["documented_numbers=canonical"]
 
 
+def check_no_tracked_archives() -> list[str]:
+    tracked = run(["git", "ls-files", "dist"]).stdout.splitlines()
+    tracked_zips = [path for path in tracked if path.endswith(".zip")]
+    require(
+        not tracked_zips,
+        f"tracked dist ZIP files are stale-submission risks; generate ZIPs locally instead: {tracked_zips}",
+    )
+    return ["tracked_dist_archives=none"]
+
+
 def check_package_zip() -> list[str]:
     result = run([sys.executable, "scripts/build_submission_zip.py"])
     zip_path = Path(result.stdout.strip().splitlines()[-1])
@@ -350,6 +360,7 @@ def main() -> None:
     checks.extend(check_cli_smoke())
     checks.extend(check_safety_boundary())
     checks.extend(check_documented_numbers())
+    checks.extend(check_no_tracked_archives())
     checks.extend(check_package_zip())
 
     print("DEV submission verification passed")

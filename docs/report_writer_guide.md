@@ -207,6 +207,8 @@ conda run -n base python -m src.tsra_agent.cli \
 conda run -n base python scripts/build_submission_zip.py
 ```
 
+주의: `dist/*.zip`는 생성 산출물입니다. GitHub에 남아 있는 오래된 ZIP을 제출 대상으로 삼지 말고, 최종 검증 직전에 새로 생성된 ZIP을 사용해야 합니다.
+
 최종 제출 전 전체 검증:
 
 ```bash

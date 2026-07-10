@@ -6,5 +6,6 @@ __pycache__/
 # Local verification artifacts.
 outputs/
 
-# Generated submission archives. Existing tracked archives remain tracked.
+# Generated submission archives. Build them locally with scripts/build_submission_zip.py.
+# Do not track dist/*.zip; stale ZIPs can omit final verifier or docs.
 dist/*.zip

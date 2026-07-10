@@ -122,3 +122,5 @@ conda run -n base python scripts/verify_submission_state.py --require-dev --requ
 ```bash
 conda run -n base python scripts/build_submission_zip.py
 ```
+
+주의: `dist/*.zip`는 생성 산출물이므로 Git에 추적하지 않습니다. 최종 제출 직전에 위 명령으로 새 ZIP을 만들고, `scripts/verify_submission_state.py --require-dev --require-clean` 검증을 통과한 상태의 ZIP만 제출하세요.
