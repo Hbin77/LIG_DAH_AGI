@@ -191,6 +191,19 @@ class CliArtifactTests(unittest.TestCase):
                     self.assertTrue(tool_call["tool_name"])
                     self.assertTrue(tool_call["purpose"])
 
+        aura_traces = result.traces["aura"]
+        for trace in aura_traces:
+            self.assertGreaterEqual(len(trace["candidate_actions"]), 4)
+            selected_candidates = [candidate for candidate in trace["candidate_actions"] if candidate["selected"]]
+            self.assertEqual(len(selected_candidates), 1)
+            selected = selected_candidates[0]
+            max_score = max(candidate["score"] for candidate in trace["candidate_actions"])
+            self.assertEqual(selected["score"], max_score)
+            self.assertEqual(trace["selected_action"]["score"], selected["score"])
+            attack_tool = next(tool for tool in trace["tool_calls"] if tool["tool_name"] == "select_attack_effect")
+            self.assertEqual(attack_tool["output_summary"]["candidate_count"], len(trace["candidate_actions"]))
+            self.assertEqual(attack_tool["output_summary"]["selected_score"], selected["score"])
+
         ml_traces = result.traces["tsra"]
         prediction_tools = [
             tool_call

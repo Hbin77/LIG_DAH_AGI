@@ -109,8 +109,8 @@ class MissionSimulator:
         for tick in range(self.ticks):
             self._generate_messages(tick)
             state = self._state(tick)
-            attack = self.red.choose_action(state)
-            self._record_attack_decision(tick, state, attack)
+            attack, attack_candidates = self.red.choose_action_with_candidates(state)
+            self._record_attack_decision(tick, state, attack, attack_candidates)
             self._apply_attack(tick, attack)
 
             defense = DefenseAction(self.active_link, False, False, None, False)
@@ -235,23 +235,21 @@ class MissionSimulator:
             }
         )
 
-    def _record_attack_decision(self, tick: int, state: MissionState, attack) -> None:
+    def _record_attack_decision(
+        self,
+        tick: int,
+        state: MissionState,
+        attack,
+        candidate_actions: list[dict[str, Any]],
+    ) -> None:
         observation = self.aura_trace.observe(state)
-        candidate_actions = [
-            {
-                "action": attack.mode.value,
-                "target_link": attack.target_link.value,
-                "intensity": round(attack.intensity, 4),
-                "duration": attack.duration,
-                "eligible": attack.mode != AttackMode.NONE,
-                "reason": attack.rationale,
-            }
-        ]
+        selected_candidate = next(candidate for candidate in candidate_actions if candidate["selected"])
         self.aura_trace.memory.update_belief("last_attack_mode", attack.mode.value)
         self.aura_trace.memory.update_belief("last_target_link", attack.target_link.value)
+        self.aura_trace.memory.update_belief("last_attack_score", selected_candidate["score"])
         self.aura_trace.record_decision(
             tick=tick,
-            policy="aura_lite_hybrid_schedule",
+            policy="aura_lite_candidate_ranker",
             observation=observation,
             candidate_actions=candidate_actions,
             tool_calls=[
@@ -260,11 +258,14 @@ class MissionSimulator:
                         "scenario": self.attack_mode.value,
                         "tick": tick,
                         "active_link": state.active_link.value,
+                        "candidate_count": len(candidate_actions),
                     },
                     output_summary={
                         "mode": attack.mode.value,
                         "target_link": attack.target_link.value,
                         "intensity": round(attack.intensity, 4),
+                        "selected_score": selected_candidate["score"],
+                        "candidate_count": len(candidate_actions),
                     },
                 )
             ],
@@ -273,6 +274,8 @@ class MissionSimulator:
                 "mode": attack.mode.value,
                 "target_link": attack.target_link.value,
                 "intensity": round(attack.intensity, 4),
+                "score": selected_candidate["score"],
+                "predicted_effect": selected_candidate["predicted_effect"],
             },
             reason=attack.rationale,
             feedback={

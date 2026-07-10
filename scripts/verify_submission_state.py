@@ -294,6 +294,25 @@ def validate_trace(trace: dict[str, Any]) -> None:
         require(tool_call["tool_name"] and tool_call["purpose"], "tool call name and purpose must be non-empty")
     if trace["agent"] == "TSRA-ML":
         validate_ml_trace(trace)
+    if trace["agent"] == "AURA-lite":
+        validate_aura_trace(trace)
+
+
+def validate_aura_trace(trace: dict[str, Any]) -> None:
+    candidates = trace["candidate_actions"]
+    require(len(candidates) >= 4, "AURA-lite trace must include no-op plus attack candidates")
+    selected_candidates = [candidate for candidate in candidates if candidate.get("selected") is True]
+    require(len(selected_candidates) == 1, "AURA-lite trace must mark exactly one selected candidate")
+    selected = selected_candidates[0]
+    max_score = max(candidate["score"] for candidate in candidates)
+    require(selected["score"] == max_score, "AURA-lite selected candidate must have the highest score")
+    require(trace["selected_action"]["score"] == selected["score"], "AURA-lite selected_action score mismatch")
+
+    attack_tools = [tool for tool in trace["tool_calls"] if tool["tool_name"] == "select_attack_effect"]
+    require(len(attack_tools) == 1, "AURA-lite trace must include one select_attack_effect tool call")
+    output = attack_tools[0]["output_summary"]
+    require(output["candidate_count"] == len(candidates), "AURA-lite tool candidate_count mismatch")
+    require(output["selected_score"] == selected["score"], "AURA-lite tool selected_score mismatch")
 
 
 def validate_ml_trace(trace: dict[str, Any]) -> None:

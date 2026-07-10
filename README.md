@@ -6,7 +6,7 @@ DAH 2026 예선용 AI 공방 에이전트 부가자료입니다. 범위는 예�
 
 ## 구성
 
-- `src/tsra_agent/agents.py`: `AURA-lite` red scenario generator, `TSRA-R-lite` risk-fusion defense agent, `TSRA-ML` trained-policy agent
+- `src/tsra_agent/agents.py`: `AURA-lite` candidate-ranking red scenario agent, `TSRA-R-lite` risk-fusion defense agent, `TSRA-ML` trained-policy agent
 - `src/tsra_agent/ml_policy.py`: synthetic training-data generator, scikit-learn model loader, standard-library logistic fallback
 - `src/tsra_agent/simulator.py`: UAV/UGV/SATCOM/PACE mission event simulator
 - `src/tsra_agent/evaluator.py`: latency, stale ratio, priority inversion, backlog, false alarm, resilience gain 평가
@@ -71,7 +71,7 @@ conda run -n base python -m unittest discover -s tests -v
 conda run -n base python scripts/verify_submission_state.py --require-dev --require-clean
 ```
 
-이 검증은 unit test뿐 아니라 CLI smoke run, 모든 DecisionTrace의 structured tool-call schema, TSRA-ML의 model/heuristic/fused risk basis, 모델/예시 수치, 안전 경계, 제출 ZIP 포함 파일까지 함께 확인합니다. GitHub Actions의 `DEV Submission Quality Gate`도 같은 검증기를 실행합니다.
+이 검증은 unit test뿐 아니라 CLI smoke run, 모든 DecisionTrace의 structured tool-call schema, AURA 후보 점수화/선택 근거, TSRA-ML의 model/heuristic/fused risk basis, 모델/예시 수치, 안전 경계, 제출 ZIP 포함 파일까지 함께 확인합니다. GitHub Actions의 `DEV Submission Quality Gate`도 같은 검증기를 실행합니다.
 
 현재 검증 기준 결과는 `examples/summary_multi_seed.json`에 고정했습니다.
 

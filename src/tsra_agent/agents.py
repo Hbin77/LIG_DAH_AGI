@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
+from typing import Any
 
 from .models import AttackAction, AttackMode, DefenseAction, LinkName
 from .ml_policy import (
@@ -46,39 +47,128 @@ class AURALite:
     max_pulses: int = 3
 
     def choose_action(self, state: MissionState) -> AttackAction:
-        if self.scenario == AttackMode.NONE or state.tick < self.attack_start:
-            return AttackAction(AttackMode.NONE, LinkName.SATCOM, 0.0, 0, "baseline")
+        action, _ = self.choose_action_with_candidates(state)
+        return action
 
-        phase = (state.tick - self.attack_start) // self.cycle_width
-        if phase >= self.max_pulses:
-            return AttackAction(AttackMode.NONE, LinkName.SATCOM, 0.0, 0, "end of exercise")
-
-        offset = (state.tick - self.attack_start) % self.cycle_width
-        if offset >= self.pulse_width:
-            return AttackAction(AttackMode.NONE, LinkName.SATCOM, 0.0, 0, "cooldown")
-
-        if self.scenario == AttackMode.HYBRID:
-            mode = self._hybrid_mode(state)
-        else:
-            mode = self.scenario
-
-        target = LinkName.SATCOM
-        if mode == AttackMode.FAILOVER_CHASING and state.active_link != LinkName.SATCOM:
-            target = state.active_link
-
-        intensity = 0.34
-        if mode == AttackMode.MISSION_AWARE_DELAY and state.critical_queue_depth > 3:
-            intensity = 0.46
-        if mode == AttackMode.FAILOVER_CHASING:
-            intensity = 0.42
-
+    def choose_action_with_candidates(
+        self,
+        state: MissionState,
+    ) -> tuple[AttackAction, list[dict[str, Any]]]:
+        candidates = self.rank_candidates(state)
+        selected = next(candidate for candidate in candidates if candidate["selected"])
+        mode = AttackMode(selected["action"])
+        target = LinkName(selected["target_link"])
         return AttackAction(
             mode=mode,
             target_link=target,
-            intensity=intensity,
-            duration=30,
-            rationale=self._rationale(mode, target, state),
-        )
+            intensity=selected["intensity"],
+            duration=selected["duration"],
+            rationale=selected["reason"],
+        ), candidates
+
+    def rank_candidates(self, state: MissionState) -> list[dict[str, Any]]:
+        active, phase, window_reason = self._attack_window(state)
+        candidates = [self._candidate(AttackMode.NONE, LinkName.SATCOM, 0.0, 0, True, 0.0, window_reason, state)]
+
+        for mode in [AttackMode.LINK_DEGRADATION, AttackMode.MISSION_AWARE_DELAY, AttackMode.FAILOVER_CHASING]:
+            eligible = active and self._scenario_allows(mode)
+            target = self._target_for(mode, state)
+            intensity = self._intensity_for(mode, state)
+            score = self._score_candidate(mode, phase, state) if eligible else -1.0
+            candidates.append(
+                self._candidate(
+                    mode,
+                    target,
+                    intensity,
+                    30 if eligible else 0,
+                    eligible,
+                    score,
+                    self._rationale(mode, target, state) if eligible else window_reason,
+                    state,
+                )
+            )
+
+        no_op_score = 1.0 if not active else 0.02
+        candidates[0]["score"] = round(no_op_score, 4)
+        selected_index = max(range(len(candidates)), key=lambda index: candidates[index]["score"])
+        for index, candidate in enumerate(candidates):
+            candidate["selected"] = index == selected_index
+        return candidates
+
+    def _attack_window(self, state: MissionState) -> tuple[bool, int, str]:
+        if self.scenario == AttackMode.NONE:
+            return False, 0, "baseline"
+        if state.tick < self.attack_start:
+            return False, 0, "pre-attack observation window"
+
+        phase = (state.tick - self.attack_start) // self.cycle_width
+        if phase >= self.max_pulses:
+            return False, phase, "end of exercise"
+
+        offset = (state.tick - self.attack_start) % self.cycle_width
+        if offset >= self.pulse_width:
+            return False, phase, "cooldown"
+        return True, phase, "active bounded attack window"
+
+    def _scenario_allows(self, mode: AttackMode) -> bool:
+        return self.scenario == AttackMode.HYBRID or self.scenario == mode
+
+    @staticmethod
+    def _target_for(mode: AttackMode, state: MissionState) -> LinkName:
+        if mode == AttackMode.FAILOVER_CHASING and state.active_link != LinkName.SATCOM:
+            return state.active_link
+        return LinkName.SATCOM
+
+    @staticmethod
+    def _intensity_for(mode: AttackMode, state: MissionState) -> float:
+        if mode == AttackMode.MISSION_AWARE_DELAY and state.critical_queue_depth > 3:
+            return 0.46
+        if mode == AttackMode.FAILOVER_CHASING:
+            return 0.42
+        return 0.34
+
+    def _score_candidate(self, mode: AttackMode, phase: int, state: MissionState) -> float:
+        preferred = self._hybrid_mode(state) if self.scenario == AttackMode.HYBRID else self.scenario
+        phase_bias = 0.72 if mode == preferred else 0.25
+        queue_pressure = min(1.0, (state.queue_depth + 2 * state.critical_queue_depth) / 12.0)
+        stale_pressure = min(1.0, state.stale_ratio_window / 0.35)
+        link_pressure = max(0.0, 1.0 - state.satcom_health)
+        pace_pressure = 1.0 if state.active_link != LinkName.SATCOM else state.pace_instability_window
+
+        if mode == AttackMode.LINK_DEGRADATION:
+            score = phase_bias + 0.08 * (1.0 - link_pressure) + 0.03 * (1.0 if phase == 0 else 0.0)
+        elif mode == AttackMode.MISSION_AWARE_DELAY:
+            score = phase_bias + 0.07 * queue_pressure + 0.05 * stale_pressure
+        else:
+            score = phase_bias + 0.08 * pace_pressure + 0.03 * min(1.0, phase / max(1, self.max_pulses - 1))
+        return round(score, 4)
+
+    @staticmethod
+    def _candidate(
+        mode: AttackMode,
+        target: LinkName,
+        intensity: float,
+        duration: int,
+        eligible: bool,
+        score: float,
+        reason: str,
+        state: MissionState,
+    ) -> dict[str, Any]:
+        return {
+            "action": mode.value,
+            "target_link": target.value,
+            "intensity": round(intensity, 4),
+            "duration": duration,
+            "eligible": eligible,
+            "score": round(score, 4),
+            "predicted_effect": {
+                "queue_pressure": round(min(1.0, (state.queue_depth + 2 * state.critical_queue_depth) / 12.0), 4),
+                "satcom_health": round(state.satcom_health, 4),
+                "pace_instability": round(state.pace_instability_window, 4),
+            },
+            "reason": reason,
+            "selected": False,
+        }
 
     def _hybrid_mode(self, state: MissionState) -> AttackMode:
         phase = (state.tick - self.attack_start) // self.cycle_width
