@@ -191,6 +191,24 @@ class CliArtifactTests(unittest.TestCase):
                     self.assertTrue(tool_call["tool_name"])
                     self.assertTrue(tool_call["purpose"])
 
+        ml_traces = result.traces["tsra"]
+        prediction_tools = [
+            tool_call
+            for trace in ml_traces
+            for tool_call in trace["tool_calls"]
+            if tool_call["tool_name"] == "predict_mission_risk"
+        ]
+        self.assertEqual(len(prediction_tools), 48)
+        first_prediction = prediction_tools[0]
+        self.assertEqual(first_prediction["input_summary"]["model_backend"], "sklearn_ensemble")
+        for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
+            self.assertIn(key, first_prediction["output_summary"])
+            self.assertIsInstance(first_prediction["output_summary"][key], float)
+
+        first_ml_action = ml_traces[0]["selected_action"]
+        self.assertEqual(first_ml_action["decision_basis"]["policy_kind"], "ml_risk_fusion")
+        self.assertEqual(first_ml_action["decision_basis"]["model_backend"], "sklearn_ensemble")
+
 
 if __name__ == "__main__":
     unittest.main()

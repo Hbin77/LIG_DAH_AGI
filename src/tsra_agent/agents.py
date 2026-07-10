@@ -192,6 +192,16 @@ class TSRARLite:
             risk_score=round(risk_score, 4),
             quarantine=quarantine,
             pace_transition=pace_transition,
+            decision_basis={
+                "policy_kind": "heuristic_risk_fusion",
+                "heuristic_risk": round(risk_score, 4),
+                "fused_risk": round(risk_score, 4),
+                "degraded": degraded,
+                "stale_pressure": stale_pressure,
+                "critical_delay": critical_delay,
+                "traffic_manipulation": traffic_manipulation,
+                "access_pressure": access_pressure,
+            },
         )
 
     @staticmethod
@@ -281,6 +291,7 @@ class MLTSRARLite(TSRARLite):
         ml_risk = self._predict_ml_risk(features)
         heuristic_risk = self._risk_score(state)
         fused_risk = min(1.0, self.ml_weight * ml_risk + self.heuristic_weight * heuristic_risk)
+        model_backend = "sklearn_ensemble" if self.sklearn_model is not None else "logistic_fallback"
 
         degraded = state.satcom_health < self.detection_threshold
         stale_pressure = state.stale_ratio_window > self.stale_threshold
@@ -374,6 +385,25 @@ class MLTSRARLite(TSRARLite):
             risk_score=round(fused_risk, 4),
             quarantine=quarantine,
             pace_transition=pace_transition,
+            decision_basis={
+                "policy_kind": "ml_risk_fusion",
+                "model_backend": model_backend,
+                "ml_risk": round(ml_risk, 4),
+                "heuristic_risk": round(heuristic_risk, 4),
+                "fused_risk": round(fused_risk, 4),
+                "ml_weight": round(self.ml_weight, 4),
+                "heuristic_weight": round(self.heuristic_weight, 4),
+                "feature_count": len(features),
+                "ml_alert_threshold": self.ml_alert_threshold,
+                "ml_priority_threshold": self.ml_priority_threshold,
+                "ml_minimum_mode_threshold": self.ml_minimum_mode_threshold,
+                "ml_pace_threshold": self.ml_pace_threshold,
+                "degraded": degraded,
+                "stale_pressure": stale_pressure,
+                "critical_delay": critical_delay,
+                "traffic_manipulation": traffic_manipulation,
+                "access_pressure": access_pressure,
+            },
         )
 
     def _predict_ml_risk(self, features: list[float]) -> float:

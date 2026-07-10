@@ -292,6 +292,37 @@ def validate_trace(trace: dict[str, Any]) -> None:
         require(isinstance(tool_call["input_summary"], dict), "tool input_summary must be an object")
         require(isinstance(tool_call["output_summary"], dict), "tool output_summary must be an object")
         require(tool_call["tool_name"] and tool_call["purpose"], "tool call name and purpose must be non-empty")
+    if trace["agent"] == "TSRA-ML":
+        validate_ml_trace(trace)
+
+
+def validate_ml_trace(trace: dict[str, Any]) -> None:
+    selected = trace["selected_action"]
+    decision_basis = selected.get("decision_basis", {})
+    required_basis = {
+        "policy_kind",
+        "model_backend",
+        "ml_risk",
+        "heuristic_risk",
+        "fused_risk",
+        "ml_weight",
+        "heuristic_weight",
+        "feature_count",
+    }
+    missing_basis = required_basis - set(decision_basis)
+    require(not missing_basis, f"TSRA-ML decision_basis missing fields: {sorted(missing_basis)}")
+    require(decision_basis["policy_kind"] == "ml_risk_fusion", "TSRA-ML policy_kind mismatch")
+    require(decision_basis["model_backend"] == "sklearn_ensemble", "TSRA-ML must use bundled sklearn ensemble")
+    for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
+        require(isinstance(decision_basis[key], (int, float)), f"TSRA-ML {key} must be numeric")
+    require(decision_basis["feature_count"] > 0, "TSRA-ML feature_count must be positive")
+
+    prediction_tools = [tool for tool in trace["tool_calls"] if tool["tool_name"] == "predict_mission_risk"]
+    require(len(prediction_tools) == 1, "TSRA-ML trace must include one predict_mission_risk tool call")
+    output = prediction_tools[0]["output_summary"]
+    for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
+        require(key in output, f"predict_mission_risk output missing {key}")
+        require(isinstance(output[key], (int, float)), f"predict_mission_risk {key} must be numeric")
 
 
 def check_safety_boundary() -> list[str]:

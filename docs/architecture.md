@@ -48,9 +48,10 @@ The implemented agents use a lightweight runtime contract rather than only retur
 
 - `AgentMemory`: keeps recent observations, recent decisions, and compact belief state.
 - `AgentTool`: records a structured synthetic tool result with `tool_name`, `purpose`, `input_summary`, `output_summary`, `status`, and `safety_checked`.
-- `DecisionTrace`: persists observation, memory, candidate actions, tool results, selected action, reason, feedback, and safety boundary for each tick.
+- `DecisionTrace`: persists observation, memory, candidate actions, tool results, selected action, model-risk basis, reason, feedback, and safety boundary for each tick.
+- `TSRA-ML basis`: records the scikit-learn backend, ML risk probability, heuristic risk, fused risk, weights, and action-gate thresholds used by each ML defense decision.
 
-`scripts/verify_submission_state.py` validates this contract across the CLI smoke run, so missing tool fields or unsafe tool results fail the DEV quality gate.
+`scripts/verify_submission_state.py` validates this contract across the CLI smoke run, so missing tool fields, missing TSRA-ML risk decomposition, or unsafe tool results fail the DEV quality gate.
 
 ## Implemented scope
 

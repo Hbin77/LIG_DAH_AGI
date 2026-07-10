@@ -86,6 +86,7 @@ class DefenseAction:
     risk_score: float = 0.0
     quarantine: bool = False
     pace_transition: bool = False
+    decision_basis: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

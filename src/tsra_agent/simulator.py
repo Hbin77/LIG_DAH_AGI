@@ -96,6 +96,10 @@ class MissionSimulator:
             "fuse_mission_risk",
             "combine link, data freshness, critical latency, source trust, and PACE signals",
         )
+        self.ml_prediction_tool = AgentTool(
+            "predict_mission_risk",
+            "estimate synthetic mission-risk probability with the trained TSRA-ML model",
+        )
         self.pace_selector_tool = AgentTool(
             "select_pace_link",
             "select the mission transport path used by the blue defense action",
@@ -335,12 +339,26 @@ class MissionSimulator:
         selected_flags = [item["action"] for item in candidate_actions if item["selected"]]
         self.blue_trace.memory.update_belief("last_risk_score", defense.risk_score)
         self.blue_trace.memory.update_belief("last_active_link", defense.active_link.value)
-        self.blue_trace.record_decision(
-            tick=tick,
-            policy=f"{self.defense_mode}_risk_fusion",
-            observation=observation,
-            candidate_actions=candidate_actions,
-            tool_calls=[
+        self.blue_trace.memory.update_belief("last_decision_basis", defense.decision_basis)
+        tool_calls = []
+        if self.defense_mode == "ml":
+            tool_calls.append(
+                self.ml_prediction_tool.run(
+                    input_summary={
+                        "feature_count": defense.decision_basis.get("feature_count", 0),
+                        "model_backend": defense.decision_basis.get("model_backend", "unknown"),
+                    },
+                    output_summary={
+                        "ml_risk": defense.decision_basis.get("ml_risk"),
+                        "heuristic_risk": defense.decision_basis.get("heuristic_risk"),
+                        "fused_risk": defense.decision_basis.get("fused_risk"),
+                        "ml_weight": defense.decision_basis.get("ml_weight"),
+                        "heuristic_weight": defense.decision_basis.get("heuristic_weight"),
+                    },
+                )
+            )
+        tool_calls.extend(
+            [
                 self.risk_fusion_tool.run(
                     input_summary=observation["signals"],
                     output_summary={
@@ -348,6 +366,7 @@ class MissionSimulator:
                         "alert": defense.alert,
                         "priority_boost": defense.priority_boost,
                         "minimum_mode": defense.minimum_mode,
+                        "decision_basis": defense.decision_basis,
                     },
                 ),
                 self.pace_selector_tool.run(
@@ -363,13 +382,21 @@ class MissionSimulator:
                         "pace_transition": defense.pace_transition,
                     },
                 ),
-            ],
+            ]
+        )
+        self.blue_trace.record_decision(
+            tick=tick,
+            policy=f"{self.defense_mode}_risk_fusion",
+            observation=observation,
+            candidate_actions=candidate_actions,
+            tool_calls=tool_calls,
             selected_action={
                 "type": "defense_action" if selected_flags or defense.alert else "no_op",
                 "actions": selected_flags,
                 "active_link": defense.active_link.value,
                 "risk_score": defense.risk_score,
                 "alert": defense.alert,
+                "decision_basis": defense.decision_basis,
             },
             reason=defense.alert or "monitoring state; no defense action required",
             feedback={
@@ -417,6 +444,14 @@ class MissionSimulator:
             risk_score=round(risk_score, 4),
             quarantine=False,
             pace_transition=active_link != state.active_link,
+            decision_basis={
+                "policy_kind": "threshold_rule",
+                "heuristic_risk": round(risk_score, 4),
+                "fused_risk": round(risk_score, 4),
+                "degraded": degraded,
+                "critical_delay": critical_delay,
+                "stale_pressure": stale_pressure,
+            },
         )
 
     def _process_queue(self, tick: int, attack_mode: AttackMode, defense: DefenseAction) -> None:
