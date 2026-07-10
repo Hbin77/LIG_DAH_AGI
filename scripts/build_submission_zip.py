@@ -10,7 +10,7 @@ DIST = ROOT / "dist"
 PACKAGE_DIRS = ["src", "docs", "examples", "models", "scripts", "tests"]
 PACKAGE_FILES = ["README.md", "requirements.txt"]
 FIXED_ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
-SUBMISSION_FILENAME = "DAH2026_\uc18c\uc2a4\ucf54\ub4dc_TSRA-X.zip"
+SUBMISSION_FILENAME = "DAH2026_\uc18c\uc2a4\ucf54\ub4dc_AGI.zip"
 
 
 def main() -> None:

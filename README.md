@@ -152,7 +152,7 @@ DAH 2026 예선 안내서의 권장 파일명과 ZIP 구성을 따릅니다.
 python scripts/build_submission_zip.py
 ```
 
-생성 파일: `dist/DAH2026_소스코드_TSRA-X.zip`
+생성 파일: `dist/DAH2026_소스코드_AGI.zip`
 
 ZIP 최상위 구성:
 
