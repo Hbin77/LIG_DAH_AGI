@@ -1,25 +1,39 @@
 from __future__ import annotations
 
+import argparse
 from datetime import datetime
 from pathlib import Path
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 PACKAGE_DIRS = ["src", "docs", "examples", "models", "scripts", "tests"]
-PACKAGE_FILES = ["README.md", "requirements.txt", "requirements-gpu.txt"]
+PACKAGE_FILES = ["README.md", "requirements.txt"]
+FIXED_ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
 
 
 def main() -> None:
-    DIST.mkdir(exist_ok=True)
-    zip_path = DIST / f"DAH2026_sourcecode_TSRA-X_{datetime.now():%Y%m%d_%H%M%S}.zip"
+    parser = argparse.ArgumentParser(description="Build a deterministic TSRA-X submission ZIP.")
+    parser.add_argument("--output", default=None)
+    args = parser.parse_args()
+    zip_path = (
+        Path(args.output)
+        if args.output
+        else DIST / f"DAH2026_sourcecode_TSRA-X_{datetime.now():%Y%m%d_%H%M%S}.zip"
+    )
+    build_zip(zip_path)
+    print(zip_path)
+
+
+def build_zip(zip_path: Path) -> Path:
+    zip_path.parent.mkdir(parents=True, exist_ok=True)
     with ZipFile(zip_path, "w", compression=ZIP_DEFLATED) as archive:
         for filename in PACKAGE_FILES:
             add_file(archive, ROOT / filename)
         for dirname in PACKAGE_DIRS:
             add_tree(archive, ROOT / dirname)
-    print(zip_path)
+    return zip_path
 
 
 def add_tree(archive: ZipFile, directory: Path) -> None:
@@ -29,7 +43,11 @@ def add_tree(archive: ZipFile, directory: Path) -> None:
 
 
 def add_file(archive: ZipFile, path: Path) -> None:
-    archive.write(path, path.relative_to(ROOT))
+    info = ZipInfo(str(path.relative_to(ROOT)), date_time=FIXED_ZIP_TIMESTAMP)
+    info.create_system = 3
+    info.external_attr = (0o100644 & 0xFFFF) << 16
+    info.compress_type = ZIP_DEFLATED
+    archive.writestr(info, path.read_bytes(), compress_type=ZIP_DEFLATED, compresslevel=9)
 
 
 def should_include(path: Path) -> bool:

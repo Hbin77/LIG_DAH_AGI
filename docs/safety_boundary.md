@@ -11,6 +11,9 @@ This package is intentionally a safe DAH 2026 preliminary prototype.
 - C4ISR data freshness and urgency scoring.
 - Event logs and metrics for report evidence.
 - Synthetic ML training data, a trained counterfactual rollout attack ranker, a trained mission-risk classifier, and tuned bounded action gates.
+- Exact per-tool input-field allowlists plus `closed_synthetic_bounds/v1` validation before tool execution and after tool output; successful traces set `safety_checked=true` only when every check passes.
+- SHA-256 verification of bundled AURA-ML and TSRA-ML model bytes before joblib deserialization.
+- A red-agent observation contract that excludes defender-internal alert state.
 
 ## Excluded
 

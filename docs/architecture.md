@@ -6,7 +6,6 @@ TSRA-X is not an operational SATCOM attack tool. It is an AI agent architecture 
 
 - `AURA-lite`: bounded red-team mission-effect agent in `attack_agent.py`
 - `AURA-ML`: trained counterfactual-rollout candidate ranker behind the same attack runtime
-- `AURA MPS student`: optional GPU-trained ranking experiment; not promoted after closed-loop gate failure
 - `TSRA-R-lite`: blue-team C4ISR data trust agent in `defense_agent.py`
 - `TSRA-ML`: trained scikit-learn histogram gradient-boosting defense agent with mission guardrails
 - `MissionSimulator`: synthetic UAV/UGV/SATCOM/PACE event environment
@@ -55,13 +54,13 @@ The implemented agents use an executable runtime contract rather than only retur
 
 - `AgentRuntime`: owns cycle phase, tool registry, bounded memory, decision commit, and environment feedback attachment.
 - `AgentMemory`: keeps recent observations, recent decisions, previous feedback, and compact belief state.
-- `AgentTool`: executes a registered callable and derives `input_summary`, `output_summary`, `status`, and `safety_checked` from that invocation.
+- `AgentTool`: validates bounded synthetic inputs, executes a registered callable, validates its output, and records `input_summary`, `output_summary`, `status`, and the concrete `closed_synthetic_bounds/v1` safety result.
 - `DecisionTrace`: persists observation, prior memory, candidate actions, actual tool results, selected action, model-risk basis, reason, post-action feedback, and safety boundary for each tick.
 - `AURA-lite basis`: records no-op, link degradation, mission-aware delay, and failover-chasing candidates with eligibility, score, predicted effect, and selected candidate.
 - `AURA-ML basis`: records learned incremental impact, heuristic detectability, rule and zero-model counterfactual choices, model influence, and four-tick memory commitment.
 - `TSRA-ML basis`: records the scikit-learn backend, ML risk probability, heuristic risk, fused risk, weights, action-gate thresholds, model-influenced actions, and guardrail-triggered actions.
 
-The simulator exchanges only `MissionState`, `AttackAction`, and `DefenseAction` contracts with the separately owned attack and defense agents. It no longer constructs tool records after executing policy code.
+The simulator exchanges only `MissionState`, `AttackAction`, and `DefenseAction` contracts with the separately owned attack and defense agents. The red-agent contract excludes defender-internal alert state, and AURA-ML is restricted to its validated Hybrid/180-tick scope.
 
 `scripts/verify_submission_state.py` validates this contract through the local CLI smoke run. A trace fails when its runtime did not execute tools, its environment feedback was not attached, its AURA ranking is inconsistent, or its TSRA-ML risk/action attribution is incomplete.
 

@@ -6,7 +6,7 @@ from typing import Any
 from .agents import MissionState, MLTSRARLite, TSRARLite
 from .models import DefenseAction, LinkName
 from .ml_policy import sklearn_backend_name
-from .runtime import AgentRuntime
+from .runtime import AgentRuntime, closed_synthetic_tool_validator
 
 
 @dataclass(frozen=True)
@@ -164,6 +164,8 @@ class TSRAAgent:
                     "feature_count": len(features),
                     "feature_vector": [round(value, 4) for value in features],
                 },
+                safety_validator=closed_synthetic_tool_validator,
+                allowed_input_fields={"state"},
             )
             self.runtime.register_tool(
                 "predict_mission_risk",
@@ -178,6 +180,8 @@ class TSRAAgent:
                     "model_backend": prediction.model_backend,
                     "feature_count": prediction.feature_count,
                 },
+                safety_validator=closed_synthetic_tool_validator,
+                allowed_input_fields={"features"},
             )
 
         self.runtime.register_tool(
@@ -186,6 +190,8 @@ class TSRAAgent:
             self._assess_mission_risk,
             input_summarizer=self._risk_input_summary,
             output_summarizer=lambda assessment: assessment,
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields={"state", "prediction"},
         )
         self.runtime.register_tool(
             "select_defense_action",
@@ -197,6 +203,8 @@ class TSRAAgent:
                 "fused_risk": kwargs["assessment"]["fused_risk"],
             },
             output_summarizer=self._defense_output_summary,
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields={"state", "assessment"},
         )
 
     @property

@@ -56,7 +56,7 @@ Registered tools:
    - Produces no-op, link degradation, mission-aware delay, and failover-chasing candidates.
    - Marks candidates allowed by the configured scenario and bounded attack window.
 2. `predict_attack_impacts` (AURA-ML)
-   - Executes the bundled ExtraTrees rollout model over all four candidates.
+   - Executes the bundled ExtraTrees rollout model only when an active, uncommitted attack choice needs a fresh prediction.
    - Predicts incremental simulator mission impact versus a paired no-op commitment.
 3. `rank_attack_candidates`
    - Combines learned impact, heuristic detectability, minimum-impact threshold, and repeat cost.
@@ -70,14 +70,12 @@ contains queue depth, delivered/lost/stale counts, active path, SATCOM health, a
 critical latency observed after processing.
 
 `AURA-lite` remains the deterministic canonical comparator. `AURA-ML` uses a trained
-28-feature ExtraTrees rollout ranker and a four-tick bounded commitment stored in
-`AgentMemory`. A zero-impact model runs through the same ML path as the causal
-ablation. The MPS-trained student is retained as an experiment but is not the runtime
-backend because it failed the threshold-rule closed-loop promotion gate.
+27-feature ExtraTrees rollout ranker and a four-tick bounded commitment stored in
+`AgentMemory`. The feature contract explicitly excludes defender-internal alert state.
+A zero-impact model runs through the same ML path as the causal ablation.
 
 The complete attack-model data and holdout evidence is recorded in
-`docs/aura_ml_engineering_record.md`; GPU scale evidence is recorded in
-`docs/aura_mps_scale_experiment.md`.
+`docs/aura_ml_engineering_record.md`.
 
 ## Defense Agent: TSRA-R
 
@@ -199,14 +197,13 @@ fails:
 
 - attack and defense modules or runtime artifacts are missing;
 - a decision was not produced through registered callable tools;
-- tool input/output, status, or synthetic safety check is missing;
+- tool input fields differ from the registered allowlist, or input/output, status,
+  or synthetic safety checks are missing;
 - environment feedback was not attached to every smoke-run trace;
 - AURA selection differs from the highest ranked candidate;
 - AURA-ML model/config/evidence hashes, seed split, ranking metrics, or 30-seed
   defended-context intervals fail;
 - AURA-ML does not execute its prediction tool, memory commitment, or model attribution;
-- MPS scale evidence claims unique candidates, loses dataset provenance, or is
-  promoted despite the recorded closed-loop gate failure;
 - TSRA-ML prediction, risk fusion, action selection, or attribution is missing;
 - TSRA-ML has no model-influenced actions in the closed-loop smoke run;
 - TSRA-ML intervention count is not lower than TSRA-R in the fixed evaluation;
@@ -249,12 +246,13 @@ source-file entry set.
 
 Rejected the analytic-estimator imitation model and trained AURA-ML on paired
 simulator rollout deltas. Seed-grouped validation improved top-1 optimal selection
-from 0.3264 for the rule ranker to 0.7361, and a disjoint 30-seed closed-loop holdout
+from 0.326389 for the rule ranker to 0.736111, and a disjoint 30-seed closed-loop holdout
 showed positive intervals against rule, TSRA-R, and TSRA-ML defenses.
 
-### 2026-07-10: Mac MPS scale gate
+### 2026-07-10: Final leakage-free AURA contract
 
-Trained a listwise MLP for exactly 20,000,000 sample-passes on Apple MPS. It improved
-candidate validation but lost 37.193 impact points to ExtraTrees against threshold
-rule defense, so the runtime remained on ExtraTrees. This preserves a performance-
-based promotion rule instead of treating GPU use as automatic model quality.
+Removed defender-internal alert state from `MissionState`, the learned feature vector,
+detectability scoring, and DecisionTrace. AURA-ML now uses 27 observable features,
+runs only under the validated Hybrid/180-tick contract, verifies the model hash before
+deserialization, and skips inference during inactive or memory-commitment ticks. The
+previous unpromoted MPS experiment was removed from the final submission package.

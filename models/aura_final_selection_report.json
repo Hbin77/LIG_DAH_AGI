@@ -1,0 +1,81 @@
+{
+  "schema_version": "aura-final-selection/v1",
+  "selected_primary_agent": "AURA-ML",
+  "selected_runtime_backend": "sklearn_extra_trees_regressor",
+  "selection_basis": "Deterministic seed-grouped candidate validation, closed-loop development gating, and a fresh 30-seed final holdout under criteria fixed before the 4000-series execution after removing privileged defender state.",
+  "runtime_scope": {
+    "scenario": "hybrid",
+    "ticks": 180
+  },
+  "feature_contract": {
+    "schema_version": "aura-attack-features/v2",
+    "feature_count": 27,
+    "forbidden_observation_fields": [
+      "defense_alerted"
+    ]
+  },
+  "model_provenance": {
+    "path": "models/aura_rollout_policy.joblib",
+    "sha256": "ed42af9122be3b736da331c383c838413e6a14d47374ed840f7af35a26ce0d44",
+    "training_report": "models/aura_rollout_training_report.json",
+    "training_report_sha256": "a96e1dee9a44233e19c4d45ca637ecace49b9a20aad7f4b27e19fd8d7276d01c",
+    "policy_config": "models/aura_ml_policy_config.json",
+    "policy_config_sha256": "95b6f9ba105768c4f6b23d3dfb9a71375d9536a75e08cf183e112554bb50a9d9",
+    "deterministic_retraining_sha256_match": true
+  },
+  "candidate_validation": {
+    "aura_ml_top1_optimal_rate": 0.736111,
+    "rule_ranker_top1_optimal_rate": 0.326389,
+    "aura_ml_mean_selection_regret": 0.368333,
+    "rule_ranker_mean_selection_regret": 1.594653
+  },
+  "final_holdout": {
+    "path": "examples/aura_ml_holdout_30_seed_summary.json",
+    "sha256": "bfc42c693c70ab368e353f54b1fa9bd0ab860baa63cd1b455558e12fdcd38b0e",
+    "seed_count": 30,
+    "seed_series": "4000-series primes",
+    "closed_loop_holdout_pass": true,
+    "no_defense_negative_control": {
+      "mean_delta": 0.0373,
+      "bootstrap_95_ci": [-0.975, 0.919],
+      "noninferiority_margin": 1.0
+    },
+    "rule_defense": {
+      "mean_delta": 21.213,
+      "bootstrap_95_ci": [20.0533, 22.3977]
+    },
+    "tsra_r": {
+      "mean_delta": 3.0667,
+      "bootstrap_95_ci": [2.2703, 3.834]
+    },
+    "tsra_ml": {
+      "mean_delta": 5.1033,
+      "bootstrap_95_ci": [4.4097, 5.7633]
+    }
+  },
+  "retired_holdout": {
+    "path": "examples/aura_ml_retired_holdout_30_seed_summary.json",
+    "sha256": "a89382e08410b87af6935d4782a3ea29c4b78621d020444508ee3e5b6d43a6ee",
+    "reason": "The initial all-context positive-mean gate failed at -0.0017 in the no-defense negative control. The seeds are preserved and never reused."
+  },
+  "runtime_hardening": {
+    "model_hash_verified_before_deserialization": true,
+    "tool_safety_validator": "closed_synthetic_bounds/v1",
+    "inactive_and_commitment_inference_skipped": true,
+    "decision_trace_excludes_privileged_defender_state": true
+  },
+  "excluded_from_final": {
+    "mps_student": "Removed because it used the obsolete 28-feature contract and had failed closed-loop runtime promotion."
+  },
+  "limitations": [
+    "All labels and outcomes come from the closed synthetic mission-event simulator.",
+    "The final holdout establishes simulator-seed evidence, not operational SATCOM field performance.",
+    "No-defense evidence supports noninferiority within a 1.0 impact-point margin, not superiority."
+  ],
+  "safety_boundary": {
+    "synthetic_mission_effects_only": true,
+    "exploit_code": false,
+    "operational_rf_parameters": false,
+    "live_network_actions": false
+  }
+}

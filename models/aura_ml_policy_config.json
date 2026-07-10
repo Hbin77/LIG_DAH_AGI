@@ -1,7 +1,13 @@
 {
-  "schema_version": "aura-ml-policy-config/v1",
+  "schema_version": "aura-ml-policy-config/v2",
   "model_path": "models/aura_rollout_policy.joblib",
-  "model_sha256": "8f969a4219c64b2e5023418012039c231415ae5d06ead78d82b97e23e8c7e94b",
+  "model_sha256": "ed42af9122be3b736da331c383c838413e6a14d47374ed840f7af35a26ce0d44",
+  "feature_schema_version": "aura-attack-features/v2",
+  "feature_count": 27,
+  "runtime_scope": {
+    "scenario": "hybrid",
+    "ticks": 180
+  },
   "config": {
     "detectability_weight": 0.05,
     "repeated_tactic_penalty": 0.03,

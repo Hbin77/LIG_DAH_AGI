@@ -1,8 +1,8 @@
 {
-  "schema_version": "aura-rollout-training/v1",
-  "dataset_generator_version": "counterfactual-rollout-v1",
+  "schema_version": "aura-rollout-training/v2",
+  "dataset_generator_version": "counterfactual-rollout-v2-no-privileged-defense-state",
   "model_path": "models/aura_rollout_policy.joblib",
-  "model_sha256": "8f969a4219c64b2e5023418012039c231415ae5d06ead78d82b97e23e8c7e94b",
+  "model_sha256": "ed42af9122be3b736da331c383c838413e6a14d47374ed840f7af35a26ce0d44",
   "config_path": "models/aura_ml_policy_config.json",
   "selected_model": "extra_trees",
   "feature_names": [
@@ -19,7 +19,6 @@
     "terminal_risk",
     "source_trust_drop",
     "pace_instability",
-    "defense_alerted",
     "active_link_satcom",
     "active_link_radio",
     "active_link_lte",
@@ -35,10 +34,15 @@
     "intensity",
     "duration_pressure"
   ],
-  "feature_count": 28,
+  "feature_count": 27,
+  "feature_schema_version": "aura-attack-features/v2",
+  "forbidden_observation_fields": [
+    "defense_alerted"
+  ],
   "label_definition": "Paired mission-impact delta versus a four-tick no-op commitment from the same seed, defense context, prefix behavior, and decision tick.",
   "rollout_contract": {
     "scenario": "hybrid",
+    "ticks": 180,
     "horizon_ticks": 30,
     "commitment_ticks": 4,
     "target_ticks": [
@@ -88,8 +92,8 @@
     "model_selection": "GroupKFold by simulator seed on train split only"
   },
   "dataset": {
-    "train_sha256": "5d04c83541e5932dee7f6e954de60eabf1c34232c140f4648ce692d068e4bd7c",
-    "validation_sha256": "513e5813ad71061b383db7845eedf2da72ac7e86fa7b301655c141f6dc370879",
+    "train_sha256": "eabf67603bab907f4c71c9cd9f02319fe236a9353f1ce6f126934fd307dd6226",
+    "validation_sha256": "695c35e7526dfe91f3fde75ae049e23b918319657c0de6ddfee47b58221fd4e4",
     "train": {
       "grain": "one candidate action in one paired counterfactual rollout group",
       "rows": 1440,
@@ -106,7 +110,7 @@
         1051,
         1061
       ],
-      "feature_columns": 28,
+      "feature_columns": 27,
       "missing_value_count": 0,
       "out_of_range_feature_count": 0,
       "exact_duplicate_feature_rows": 440,
@@ -147,7 +151,7 @@
         1087,
         1091
       ],
-      "feature_columns": 28,
+      "feature_columns": 27,
       "missing_value_count": 0,
       "out_of_range_feature_count": 0,
       "exact_duplicate_feature_rows": 112,
@@ -184,41 +188,41 @@
   "model_selection_cv": {
     "hist_gradient_boosting": {
       "folds": 5.0,
-      "mae": 1.055309,
-      "top1_optimal_rate": 0.716667,
-      "mean_selection_regret": 0.54775
+      "mae": 1.048346,
+      "top1_optimal_rate": 0.722222,
+      "mean_selection_regret": 0.524556
     },
     "extra_trees": {
       "folds": 5.0,
-      "mae": 0.880762,
-      "top1_optimal_rate": 0.744445,
-      "mean_selection_regret": 0.419389
+      "mae": 0.884396,
+      "top1_optimal_rate": 0.75,
+      "mean_selection_regret": 0.427805
     }
   },
   "metrics": {
     "train": {
       "rows": 1440,
       "groups": 360,
-      "top1_optimal_rate": 0.861111,
-      "exact_top1_action_match_rate": 0.669444,
-      "mean_selection_regret": 0.130167,
+      "top1_optimal_rate": 0.866667,
+      "exact_top1_action_match_rate": 0.686111,
+      "mean_selection_regret": 0.129722,
       "p95_selection_regret": 0.76,
-      "selected_no_op_rate": 0.086111,
-      "mae": 0.473881,
-      "rmse": 1.136251,
-      "r2": 0.62875
+      "selected_no_op_rate": 0.088889,
+      "mae": 0.478662,
+      "rmse": 1.14047,
+      "r2": 0.625987
     },
     "validation": {
       "rows": 576,
       "groups": 144,
       "top1_optimal_rate": 0.736111,
-      "exact_top1_action_match_rate": 0.569444,
-      "mean_selection_regret": 0.346458,
-      "p95_selection_regret": 2.64,
-      "selected_no_op_rate": 0.083333,
-      "mae": 0.853815,
-      "rmse": 1.717567,
-      "r2": 0.176222
+      "exact_top1_action_match_rate": 0.576389,
+      "mean_selection_regret": 0.368333,
+      "p95_selection_regret": 2.71,
+      "selected_no_op_rate": 0.090278,
+      "mae": 0.854816,
+      "rmse": 1.716405,
+      "r2": 0.177337
     },
     "validation_rule_ranker": {
       "rows": 576,
@@ -246,9 +250,9 @@
     }
   },
   "runtime": {
-    "python": "3.14.4",
+    "python": "3.13.11",
     "scikit_learn": "1.9.0",
-    "numpy": "2.5.1",
+    "numpy": "2.3.5",
     "joblib": "1.5.3"
   },
   "limitations": [

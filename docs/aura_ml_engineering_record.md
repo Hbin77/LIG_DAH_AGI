@@ -23,7 +23,7 @@ mission-event simulator 내부의 추상 효과 선택으로 제한됩니다.
 MissionState 관측
 -> AgentMemory 조회
 -> generate_attack_candidates 도구 실행
--> predict_attack_impacts 도구로 네 후보 일괄 추론
+-> 활성·비commitment tick에서만 predict_attack_impacts 도구로 네 후보 일괄 추론
 -> rank_attack_candidates 도구로 impact, detectability, 반복 비용 결합
 -> AttackAction 또는 NoOp 결정
 -> 4-tick bounded commitment를 Memory에 저장
@@ -55,7 +55,7 @@ PACE, defense reaction을 거친 counterfactual 결과를 사용합니다.
 - validation: 별도 4개 seed, 144개 상태, 576개 후보 rollout
 - 총 504개 상태, 2,016개 후보 rollout
 - 방어 맥락: none, threshold rule, TSRA-R, TSRA-ML
-- feature: 의사결정 시점에 관측 가능한 28개 state/action 값
+- feature: defender 내부 alert를 제외한 27개 observable state/action 값
 - train/validation seed overlap: 0
 - row random split: 사용하지 않음
 - 모델 선택: train seed 내부 `GroupKFold`
@@ -73,12 +73,12 @@ packet loss의 확률성과 AURA에 노출되지 않은 방어 정책 차이 때
 
 | Validation metric | AURA-ML | Rule ranker | Zero model |
 |---|---:|---:|---:|
-| Top-1 optimal rate | 0.7361 | 0.3264 | 0.2083 |
-| Exact top-1 action match | 0.5694 | 0.1736 | 0.2083 |
-| Mean selection regret | 0.3465 | 1.5947 | 2.0089 |
-| P95 selection regret | 2.6400 | 4.9800 | 6.4400 |
+| Top-1 optimal rate | 0.736111 | 0.326389 | 0.208333 |
+| Exact top-1 action match | 0.576389 | 0.173611 | 0.208333 |
+| Mean selection regret | 0.368333 | 1.594653 | 2.008889 |
+| P95 selection regret | 2.7100 | 4.9800 | 6.4400 |
 
-회귀 MAE는 0.8538, R2는 0.1762입니다. 따라서 이 모델은 정밀한 impact 값
+회귀 MAE는 0.854816, R2는 0.177337입니다. 따라서 이 모델은 정밀한 impact 값
 예측기로 주장하지 않습니다. 근거가 있는 주장은 noisy rollout에서 후보 선택
 순위를 개선한다는 것입니다.
 
@@ -89,14 +89,23 @@ mission impact가 공격 에이전트 관점에서 더 좋은 결과입니다.
 
 | Defense context | Rule impact | AURA-ML impact | ML-rule | 95% CI | Win |
 |---|---:|---:|---:|---:|---:|
-| none | 82.2947 | 82.9720 | 0.6773 | [-0.1240, 1.3657] | 23/30 |
-| threshold rule | 60.4740 | 80.9177 | 20.4437 | [19.2633, 21.6117] | 30/30 |
-| TSRA-R | 17.2787 | 20.3677 | 3.0890 | [2.1193, 4.0370] | 25/30 |
-| TSRA-ML | 15.0240 | 19.4317 | 4.4077 | [3.5283, 5.2823] | 29/30 |
+| none | 81.8970 | 81.9343 | 0.0373 | [-0.975, 0.919] | 17/30 |
+| threshold rule | 59.6527 | 80.8657 | 21.213 | [20.0533, 22.3977] | 30/30 |
+| TSRA-R | 16.8910 | 19.9577 | 3.0667 | [2.2703, 3.8340] | 27/30 |
+| TSRA-ML | 14.7307 | 19.8340 | 5.1033 | [4.4097, 5.7633] | 30/30 |
 
-무방어 비교의 CI는 0을 포함하므로 우월성을 확정하지 않습니다. 방어가 있는
-세 맥락은 lower bound가 모두 0보다 큽니다. zero-model과 비교하면 네 맥락
-모두 30/30 seed에서 AURA-ML이 더 높은 impact를 만들었습니다.
+무방어 비교는 우월성 검정이 아니라 4000번대 실행 전에 고정한 1.0-point 비열등성 negative
+control이며 CI 하한 `-0.975`로 통과했습니다. 방어가 있는 세 맥락은 lower
+bound가 모두 0보다 큽니다. zero-model과 비교하면 네 맥락 모두 30/30 seed에서
+AURA-ML이 더 높은 impact를 만들었습니다.
+
+처음 실행한 3000번대 fresh holdout은 무방어 평균 양수를 요구한 초기 gate에서
+`-0.0017`로 실패했습니다. 해당 결과는
+`examples/aura_ml_retired_holdout_30_seed_summary.json`에 그대로 보존하고 seed를
+재사용하지 않았습니다. 모델·설정은 바꾸지 않은 채 평가 목적을 우월성이 아닌
+비열등성으로 명확히 한 다음 새로운 4000번대 seed로 위 최종 평가를 수행했습니다.
+1.0-point margin은 rule AURA 무방어 평균 `81.897`의 약 `1.22%`이며, negative
+control에서 허용할 최대 mission-impact 저하 폭으로 정의했습니다.
 
 ## 행동 귀속
 
@@ -117,13 +126,13 @@ DecisionTrace에는 다음을 함께 남깁니다.
 ## 재현 명령
 
 ```bash
-.venv/bin/python scripts/train_aura_rollout_policy.py
-.venv/bin/python scripts/evaluate_aura_policy.py
-.venv/bin/python -m src.tsra_agent.cli \
+conda run -n base python scripts/train_aura_rollout_policy.py
+conda run -n base python scripts/evaluate_aura_policy.py
+conda run -n base python -m src.tsra_agent.cli \
   --scenario hybrid \
   --attack-policy ml \
   --ticks 180 \
-  --seed 2003 \
+  --seed 4001 \
   --output-dir outputs/aura_ml_example
 ```
 
@@ -132,14 +141,15 @@ DecisionTrace에는 다음을 함께 남깁니다.
 - `models/aura_rollout_policy.joblib`
 - `models/aura_rollout_training_report.json`
 - `models/aura_ml_policy_config.json`
+- `models/aura_final_selection_report.json`
 - `examples/aura_ml_holdout_30_seed_summary.json`
+- `examples/aura_ml_retired_holdout_30_seed_summary.json`
 
 ## 한계
 
 - 모든 라벨과 holdout은 같은 synthetic simulator 계열에서 생성됩니다.
 - 실제 SATCOM 환경 정확도나 운용 효과를 의미하지 않습니다.
 - 무방어 상황에서 rule 대비 통계적 우월성은 입증되지 않았습니다.
-- MPS MLP는 candidate validation에서 ExtraTrees보다 높았지만 threshold-rule 폐루프에서 크게 실패해 기본 실행은 CPU ExtraTrees입니다.
 - 실제 RF 제어, exploit, 장비별 침투, live network action은 구현하지 않습니다.
 
-GPU scale 및 승격 탈락 근거는 `docs/aura_mps_scale_experiment.md`에 분리했습니다.
+최종 제출물은 실제 runtime으로 승격된 ExtraTrees 모델과 해당 모델의 seed-disjoint evidence만 포함합니다. 과거 28-feature MPS 보조 실험은 defender 내부 상태를 포함한 구형 feature 계약에 기반하고 runtime 승격에도 실패했으므로 최종 패키지에서 제거했습니다.

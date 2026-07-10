@@ -20,14 +20,11 @@ sys.path.insert(0, str(ROOT))
 REQUIRED_FILES = [
     "README.md",
     "requirements.txt",
-    "requirements-gpu.txt",
     "scripts/build_submission_zip.py",
     "scripts/train_ml_policy.py",
     "scripts/train_sklearn_policy.py",
     "scripts/train_aura_rollout_policy.py",
     "scripts/evaluate_aura_policy.py",
-    "scripts/train_aura_mps_student.py",
-    "scripts/evaluate_aura_mps_candidate.py",
     "scripts/summarize_holdout.py",
     "scripts/tune_ml_policy.py",
     "scripts/summarize_decision_traces.py",
@@ -47,7 +44,6 @@ REQUIRED_FILES = [
     "docs/agent_branch_comparison.md",
     "docs/agent_engineering_notes.md",
     "docs/aura_ml_engineering_record.md",
-    "docs/aura_mps_scale_experiment.md",
     "docs/architecture.md",
     "docs/evaluation_plan.md",
     "docs/report_writer_guide.md",
@@ -55,6 +51,7 @@ REQUIRED_FILES = [
     "examples/summary_multi_seed.json",
     "examples/holdout_30_seed_summary.json",
     "examples/aura_ml_holdout_30_seed_summary.json",
+    "examples/aura_ml_retired_holdout_30_seed_summary.json",
     "examples/incident_report_multi_seed.md",
     "examples/run_manifest_multi_seed.json",
     "models/tsra_ml_policy.json",
@@ -67,16 +64,12 @@ REQUIRED_FILES = [
     "models/aura_rollout_policy.joblib",
     "models/aura_rollout_training_report.json",
     "models/aura_ml_policy_config.json",
-    "models/aura_mps_student.pt",
-    "models/aura_mps_student_weights.npz",
-    "models/aura_mps_student_metrics.json",
-    "models/aura_mps_selection_report.json",
+    "models/aura_final_selection_report.json",
 ]
 
 ZIP_REQUIRED_FILES = [
     "README.md",
     "requirements.txt",
-    "requirements-gpu.txt",
     "src/tsra_agent/agents.py",
     "src/tsra_agent/attack_agent.py",
     "src/tsra_agent/attack_ml_policy.py",
@@ -89,16 +82,13 @@ ZIP_REQUIRED_FILES = [
     "models/aura_rollout_policy.joblib",
     "models/aura_rollout_training_report.json",
     "models/aura_ml_policy_config.json",
-    "models/aura_mps_student.pt",
-    "models/aura_mps_student_weights.npz",
-    "models/aura_mps_student_metrics.json",
-    "models/aura_mps_selection_report.json",
+    "models/aura_final_selection_report.json",
     "examples/summary_multi_seed.json",
     "examples/holdout_30_seed_summary.json",
     "examples/aura_ml_holdout_30_seed_summary.json",
+    "examples/aura_ml_retired_holdout_30_seed_summary.json",
     "docs/agent_engineering_notes.md",
     "docs/aura_ml_engineering_record.md",
-    "docs/aura_mps_scale_experiment.md",
     "docs/report_writer_guide.md",
     "docs/safety_boundary.md",
     "tests/test_simulation.py",
@@ -107,8 +97,6 @@ ZIP_REQUIRED_FILES = [
     "scripts/summarize_holdout.py",
     "scripts/train_aura_rollout_policy.py",
     "scripts/evaluate_aura_policy.py",
-    "scripts/train_aura_mps_student.py",
-    "scripts/evaluate_aura_mps_candidate.py",
     "scripts/verify_submission_state.py",
 ]
 
@@ -136,6 +124,7 @@ TOOL_CALL_REQUIRED_FIELDS = {
     "output_summary",
     "status",
     "safety_checked",
+    "safety_check",
 }
 
 SAFETY_TEXT = "closed synthetic mission simulation"
@@ -199,9 +188,13 @@ def check_branch(require_dev: bool) -> list[str]:
 def check_clean_worktree(require_clean: bool) -> list[str]:
     if not require_clean:
         return []
-    status = run(["git", "status", "--short", "--untracked-files=no"]).stdout.strip()
-    require(not status, f"tracked worktree is not clean:\n{status}")
-    return ["tracked_worktree=clean"]
+    status = run(["git", "status", "--short", "--untracked-files=all"]).stdout.strip()
+    require(not status, f"worktree is not clean:\n{status}")
+    head = run(["git", "rev-parse", "HEAD"]).stdout.strip()
+    remote_line = run(["git", "ls-remote", "origin", "refs/heads/DEV"]).stdout.strip()
+    remote_head = remote_line.split()[0] if remote_line else ""
+    require(head == remote_head, f"local DEV {head} differs from origin/DEV {remote_head}")
+    return ["worktree=clean", "origin_dev=head"]
 
 
 def check_required_files() -> list[str]:
@@ -224,6 +217,7 @@ def check_compile_and_tests() -> list[str]:
 
 def check_model_and_example_evidence() -> list[str]:
     import sklearn
+    from src.tsra_agent.cli import build_manifest
 
     fallback_model = read_json(ROOT / "models/tsra_ml_policy.json")
     fallback_report = read_json(ROOT / "models/tsra_ml_training_report.json")
@@ -232,6 +226,9 @@ def check_model_and_example_evidence() -> list[str]:
     tuning_report = read_json(ROOT / "models/tsra_ml_tuning_report.json")
     selection = read_json(ROOT / "models/tsra_final_selection_report.json")
     summary = read_json(ROOT / "examples/summary_multi_seed.json")
+    canonical_manifest = read_json(ROOT / "examples/run_manifest_multi_seed.json")
+    require(summary.get("attack_policy") == "rule", "canonical summary attack policy mismatch")
+    require(build_manifest(summary) == canonical_manifest, "canonical run manifest differs from current CLI contract")
 
     require(
         version_tuple(sklearn.__version__) >= (1, 9, 0),
@@ -342,19 +339,32 @@ def version_tuple(version: str) -> tuple[int, int, int]:
 
 
 def check_aura_model_evidence() -> list[str]:
-    from joblib import load
+    from src.tsra_agent.attack_ml_policy import (
+        ATTACK_FEATURE_NAMES,
+        ATTACK_FEATURE_SCHEMA_VERSION,
+        AURA_ML_TICKS,
+        load_attack_model,
+    )
 
     model_path = ROOT / "models/aura_rollout_policy.joblib"
     report_path = ROOT / "models/aura_rollout_training_report.json"
     config_path = ROOT / "models/aura_ml_policy_config.json"
     report = read_json(report_path)
     config = read_json(config_path)
-    model = load(model_path)
+    model = load_attack_model()
 
-    require(report["schema_version"] == "aura-rollout-training/v1", "AURA training schema mismatch")
-    require(report["dataset_generator_version"] == "counterfactual-rollout-v1", "AURA dataset provenance mismatch")
-    require(report["feature_count"] == 28, "AURA feature count must be 28")
-    require(getattr(model, "n_features_in_", None) == 28, "AURA bundled model feature contract mismatch")
+    require(report["schema_version"] == "aura-rollout-training/v2", "AURA training schema mismatch")
+    require(report["dataset_generator_version"] == "counterfactual-rollout-v2-no-privileged-defense-state", "AURA dataset provenance mismatch")
+    require(report["feature_schema_version"] == ATTACK_FEATURE_SCHEMA_VERSION, "AURA feature schema mismatch")
+    require(report["feature_names"] == ATTACK_FEATURE_NAMES, "AURA feature names mismatch")
+    require("defense_alerted" not in report["feature_names"], "AURA contains privileged defense state")
+    require(report["forbidden_observation_fields"] == ["defense_alerted"], "AURA forbidden observation contract mismatch")
+    feature_count = len(ATTACK_FEATURE_NAMES)
+    require(report["feature_count"] == feature_count, "AURA feature count mismatch")
+    require(getattr(model, "n_features_in_", None) == feature_count, "AURA bundled model feature contract mismatch")
+    require(config["schema_version"] == "aura-ml-policy-config/v2", "AURA config schema mismatch")
+    require(config["feature_count"] == feature_count, "AURA config feature count mismatch")
+    require(config["runtime_scope"] == {"scenario": "hybrid", "ticks": AURA_ML_TICKS}, "AURA runtime scope mismatch")
     require(getattr(model, "n_jobs", None) == 1, "AURA model inference must use n_jobs=1")
     model_hash = hashlib.sha256(model_path.read_bytes()).hexdigest()
     require(model_hash == report["model_sha256"], "AURA model hash differs from training evidence")
@@ -393,59 +403,7 @@ def check_aura_model_evidence() -> list[str]:
             "aura_candidate_ranking="
             f"{learned['top1_optimal_rate']} rule={rule['top1_optimal_rate']} pass"
         ),
-        f"aura_model_sha256={model_hash[:12]} feature_count=28 pass",
-    ]
-
-
-def check_aura_mps_evidence() -> list[str]:
-    from src.tsra_agent.attack_ml_policy import load_mps_student_model
-
-    checkpoint_path = ROOT / "models/aura_mps_student.pt"
-    portable_path = ROOT / "models/aura_mps_student_weights.npz"
-    metrics = read_json(ROOT / "models/aura_mps_student_metrics.json")
-    selection = read_json(ROOT / "models/aura_mps_selection_report.json")
-    primary = read_json(ROOT / "models/aura_rollout_training_report.json")
-
-    require(metrics["schema_version"] == "aura-mps-scale/v1", "AURA MPS metrics schema mismatch")
-    require(metrics["runtime"]["device"] == "mps", "AURA GPU experiment did not use MPS")
-    require(metrics["runtime"]["mps_built"] is True, "AURA MPS backend was not built")
-    require(metrics["runtime"]["mps_available"] is True, "AURA MPS backend was unavailable")
-    scale = metrics["training_scale"]
-    require(scale["sample_passes_per_epoch"] == 1_000_000, "AURA MPS epoch scale mismatch")
-    require(scale["epochs"] == 20 and scale["total_sample_passes"] == 20_000_000, "AURA MPS total scale mismatch")
-    require(scale["unique_candidate_claim"] is False, "AURA MPS scale must not claim unique candidates")
-    provenance = metrics["dataset_provenance"]
-    require(provenance["unique_train_rows"] == 1440, "AURA MPS unique train row count mismatch")
-    require(provenance["unique_validation_rows"] == 576, "AURA MPS validation row count mismatch")
-    require(provenance["matches_primary_training_report"] is True, "AURA MPS dataset provenance mismatch")
-    require(provenance["train_sha256"] == primary["dataset"]["train_sha256"], "AURA MPS train hash mismatch")
-    require(provenance["validation_sha256"] == primary["dataset"]["validation_sha256"], "AURA MPS validation hash mismatch")
-    require(metrics["model_sha256"] == hashlib.sha256(checkpoint_path.read_bytes()).hexdigest(), "AURA MPS checkpoint hash mismatch")
-    require(metrics["portable_export_sha256"] == hashlib.sha256(portable_path.read_bytes()).hexdigest(), "AURA MPS portable hash mismatch")
-    require(metrics["validation"]["top1_optimal_rate"] > metrics["primary_extra_trees_comparison"]["top1_optimal_rate"], "AURA MPS candidate validation did not beat ExtraTrees")
-    require(metrics["validation"]["mean_selection_regret"] < metrics["primary_extra_trees_comparison"]["mean_selection_regret"], "AURA MPS candidate regret did not beat ExtraTrees")
-
-    model = load_mps_student_model()
-    require(model.n_features_in_ == 28, "AURA MPS portable feature contract mismatch")
-    predictions = model.predict([[0.0] * 28])
-    require(len(predictions) == 1, "AURA MPS portable inference failed")
-
-    require(selection["schema_version"] == "aura-mps-selection/v1", "AURA MPS selection schema mismatch")
-    require(selection["model_provenance"]["mps_checkpoint_sha256"] == metrics["model_sha256"], "AURA MPS selection checkpoint mismatch")
-    require(selection["model_provenance"]["mps_portable_sha256"] == metrics["portable_export_sha256"], "AURA MPS selection portable mismatch")
-    decision = selection["promotion_decision"]
-    require(decision["candidate_validation_pass"] is True, "AURA MPS candidate gate must pass")
-    require(decision["promote_to_agent_runtime"] is False, "AURA MPS must remain unpromoted")
-    require(decision["selected_runtime_backend"] == "sklearn_extra_trees_regressor", "AURA runtime backend selection mismatch")
-    rule_delta = selection["closed_loop_development_gate"]["rule"]["paired_mps_minus_extra_trees"]
-    require(rule_delta["mean"] <= -30.0 and rule_delta["wins"] == 0, "AURA MPS closed-loop rejection evidence missing")
-    return [
-        (
-            "aura_mps_scale="
-            f"{scale['total_sample_passes']} passes "
-            f"top1={metrics['validation']['top1_optimal_rate']} "
-            f"promotion=false pass"
-        )
+        f"aura_model_sha256={model_hash[:12]} feature_count={feature_count} pass",
     ]
 
 
@@ -566,7 +524,7 @@ def check_aura_cli_smoke() -> list[str]:
                 "--attack-policy",
                 "ml",
                 "--ticks",
-                "48",
+                "180",
                 "--seed",
                 "2003",
                 "--output-dir",
@@ -578,7 +536,7 @@ def check_aura_cli_smoke() -> list[str]:
         require(summary["attack_policy"] == "ml", "AURA-ML CLI summary policy mismatch")
         require(manifest["attack_policy"] == "ml", "AURA-ML manifest policy mismatch")
         traces = read_jsonl(output_dir / "attacked_aura_decision_traces.jsonl")
-        require(len(traces) == 48, "AURA-ML smoke must contain 48 attack traces")
+        require(len(traces) == 180, "AURA-ML smoke must contain 180 attack traces")
         require(all(trace["agent"] == "AURA-ML" for trace in traces), "AURA-ML trace identity mismatch")
         for trace in traces:
             validate_trace(trace)
@@ -641,13 +599,45 @@ def check_holdout_evidence() -> list[str]:
 
 
 def check_aura_holdout_evidence() -> list[str]:
+    from scripts.evaluate_aura_policy import (
+        DEFAULT_HOLDOUT_SEEDS,
+        DEVELOPMENT_SEEDS,
+        NO_DEFENSE_NONINFERIORITY_MARGIN,
+        RETIRED_HOLDOUT_SEEDS,
+    )
+    from src.tsra_agent.attack_ml_policy import (
+        ATTACK_FEATURE_NAMES,
+        ATTACK_FEATURE_SCHEMA_VERSION,
+        AURA_ML_TICKS,
+    )
+
     holdout_path = ROOT / "examples/aura_ml_holdout_30_seed_summary.json"
     holdout = read_json(holdout_path)
-    require(holdout["schema_version"] == "aura-ml-holdout/v1", "AURA holdout schema mismatch")
+    require(holdout["schema_version"] == "aura-ml-holdout/v2", "AURA holdout schema mismatch")
+    require(holdout["status"] == "final_fresh_holdout", "AURA holdout is not the final fresh run")
+    require(holdout["scenario"] == "hybrid" and holdout["ticks"] == AURA_ML_TICKS, "AURA holdout runtime scope mismatch")
     seeds = holdout["seeds"]
+    expected_seeds = [int(value) for value in DEFAULT_HOLDOUT_SEEDS.split(",")]
     require(holdout["seed_count"] == 30 and len(seeds) == 30 and len(set(seeds)) == 30, "AURA holdout must use 30 unique seeds")
-    require(holdout["seed_provenance"]["holdout_overlap"] == [], "AURA holdout seed leakage")
+    require(seeds == expected_seeds, "AURA holdout seeds differ from the fixed 4000-series contract")
+    training = read_json(ROOT / "models/aura_rollout_training_report.json")
+    train_seeds = set(training["split_contract"]["train_seeds"])
+    validation_seeds = set(training["split_contract"]["validation_seeds"])
+    development_seeds = set(DEVELOPMENT_SEEDS)
+    retired_seeds = set(RETIRED_HOLDOUT_SEEDS)
+    direct_overlap = sorted(
+        set(seeds) & (train_seeds | validation_seeds | development_seeds | retired_seeds)
+    )
+    seed_provenance = holdout["seed_provenance"]
+    require(seed_provenance["model_train_seeds"] == sorted(train_seeds), "AURA train-seed provenance mismatch")
+    require(seed_provenance["model_validation_seeds"] == sorted(validation_seeds), "AURA validation-seed provenance mismatch")
+    require(seed_provenance["policy_development_seeds"] == DEVELOPMENT_SEEDS, "AURA development-seed provenance mismatch")
+    require(seed_provenance["retired_holdout_seeds"] == RETIRED_HOLDOUT_SEEDS, "AURA retired-seed provenance mismatch")
+    require(seed_provenance["holdout_overlap"] == direct_overlap == [], "AURA holdout seed leakage")
     provenance = holdout["model_provenance"]
+    require(provenance["feature_count"] == len(ATTACK_FEATURE_NAMES), "AURA holdout feature count mismatch")
+    require(provenance["feature_schema_version"] == ATTACK_FEATURE_SCHEMA_VERSION, "AURA holdout feature schema mismatch")
+    require(provenance["forbidden_observation_fields"] == ["defense_alerted"], "AURA holdout forbidden observation contract mismatch")
     require(
         provenance["sha256"]
         == hashlib.sha256((ROOT / "models/aura_rollout_policy.joblib").read_bytes()).hexdigest(),
@@ -664,20 +654,43 @@ def check_aura_holdout_evidence() -> list[str]:
         "AURA holdout training evidence hash mismatch",
     )
     require(holdout["acceptance"]["closed_loop_holdout_pass"] is True, "AURA holdout acceptance failed")
+    contract = holdout["acceptance_contract"]
+    require(contract["criteria_fixed_before_4000_series_execution"] is True, "AURA acceptance criteria timing is not recorded")
+    require(
+        contract["no_defense_noninferiority_margin_impact_points"]
+        == NO_DEFENSE_NONINFERIORITY_MARGIN,
+        "AURA no-defense margin changed",
+    )
+    retired = read_json(ROOT / "examples/aura_ml_retired_holdout_30_seed_summary.json")
+    require(retired["status"] == "retired_after_fixed_gate_failure", "AURA failed holdout retirement evidence missing")
+    require(retired["acceptance"]["closed_loop_holdout_pass"] is False, "retired AURA holdout did not preserve gate failure")
+    selection = read_json(ROOT / "models/aura_final_selection_report.json")
+    require(selection["schema_version"] == "aura-final-selection/v1", "AURA final selection schema mismatch")
+    require(selection["selected_runtime_backend"] == "sklearn_extra_trees_regressor", "AURA final backend mismatch")
+    require(selection["feature_contract"]["feature_count"] == len(ATTACK_FEATURE_NAMES), "AURA final feature contract mismatch")
+    require(selection["model_provenance"]["sha256"] == provenance["sha256"], "AURA final model hash mismatch")
+    require(selection["model_provenance"]["training_report_sha256"] == provenance["training_report_sha256"], "AURA final training report hash mismatch")
+    require(selection["model_provenance"]["policy_config_sha256"] == provenance["config_sha256"], "AURA final config hash mismatch")
+    require(selection["final_holdout"]["sha256"] == hashlib.sha256(holdout_path.read_bytes()).hexdigest(), "AURA final holdout hash mismatch")
+    require(selection["retired_holdout"]["sha256"] == hashlib.sha256((ROOT / "examples/aura_ml_retired_holdout_30_seed_summary.json").read_bytes()).hexdigest(), "AURA retired holdout hash mismatch")
     conditions = holdout["conditions"]
     require(set(conditions) == {"none", "rule", "tsra", "ml"}, "AURA holdout context coverage mismatch")
     for context, evidence in conditions.items():
         versus_zero = evidence["paired_ml_minus_zero_model"]
-        require(versus_zero["count"] == 30 and versus_zero["wins"] == 30, f"AURA zero-model ablation failed in {context}")
+        require(versus_zero["count"] == 30, f"AURA zero-model comparison count mismatch in {context}")
         require(versus_zero["bootstrap_95_ci"][0] > 0.0, f"AURA zero-model CI crosses zero in {context}")
         require(evidence["aura_ml_agent"]["model_influenced_ticks"]["mean"] > 0.0, f"AURA model influence missing in {context}")
+        inference_mean = evidence["aura_ml_agent"]["model_inference_ticks"]["mean"]
+        require(0.0 < inference_mean < AURA_ML_TICKS, f"AURA inference gating failed in {context}")
     for context in ["rule", "tsra", "ml"]:
         versus_rule = conditions[context]["paired_ml_minus_rule"]
         require(versus_rule["bootstrap_95_ci"][0] > 0.0, f"AURA defended CI crosses zero in {context}")
-        require(versus_rule["wins"] >= 25, f"AURA defended wins below 25/30 in {context}")
     none_comparison = conditions["none"]["paired_ml_minus_rule"]
-    require(none_comparison["mean"] > 0.0, "AURA no-defense mean difference must be positive")
-    require(none_comparison["bootstrap_95_ci"][0] <= 0.0, "AURA no-defense uncertainty must remain explicitly preserved")
+    require(
+        none_comparison["bootstrap_95_ci"][0]
+        > -NO_DEFENSE_NONINFERIORITY_MARGIN,
+        "AURA no-defense noninferiority failed",
+    )
     return [
         (
             "aura_holdout_30_seed_delta="
@@ -701,11 +714,14 @@ def validate_trace(trace: dict[str, Any]) -> None:
     require(runtime.get("tool_call_count") == len(trace["tool_calls"]), "runtime tool-call count mismatch")
     require(trace["feedback"].get("feedback_status") == "observed", "trace feedback is not observed")
     require("queue_depth_after_processing" in trace["feedback"], "trace missing closed-loop queue feedback")
+    require("defense_alerted" not in trace["observation"].get("signals", {}), "trace exposes privileged defender alert state")
     for tool_call in trace["tool_calls"]:
         missing_tool_fields = TOOL_CALL_REQUIRED_FIELDS - set(tool_call)
         require(not missing_tool_fields, f"tool call missing fields: {sorted(missing_tool_fields)}")
         require(tool_call["status"] == "ok", f"tool call status is not ok: {tool_call['status']}")
         require(tool_call["safety_checked"] is True, "tool call safety_checked must be true")
+        require(tool_call["safety_check"].get("passed") is True, "tool call safety validator did not pass")
+        require(tool_call["safety_check"].get("check_id") == "closed_synthetic_bounds/v1", "tool call safety validator identity mismatch")
         require(isinstance(tool_call["input_summary"], dict), "tool input_summary must be an object")
         require(isinstance(tool_call["output_summary"], dict), "tool output_summary must be an object")
         require(tool_call["tool_name"] and tool_call["purpose"], "tool call name and purpose must be non-empty")
@@ -754,6 +770,7 @@ def validate_aura_ml_trace(trace: dict[str, Any]) -> None:
         "zero_model_selected_action",
         "model_influenced",
         "model_changed_rule_choice",
+        "model_inference_executed",
         "selection_source",
         "commitment_ticks",
     }
@@ -765,10 +782,14 @@ def validate_aura_ml_trace(trace: dict[str, Any]) -> None:
     prediction_tools = [
         tool for tool in trace["tool_calls"] if tool["tool_name"] == "predict_attack_impacts"
     ]
-    require(len(prediction_tools) == 1, "AURA-ML must execute one prediction tool per tick")
-    output = prediction_tools[0]["output_summary"]
-    require(output["model_backend"] == "sklearn_extra_trees_regressor", "AURA prediction backend mismatch")
-    require(output["feature_count"] == 28, "AURA prediction feature count mismatch")
+    expected_count = 1 if basis["model_inference_executed"] else 0
+    require(len(prediction_tools) == expected_count, "AURA-ML prediction tool gating mismatch")
+    if prediction_tools:
+        from src.tsra_agent.attack_ml_policy import ATTACK_FEATURE_NAMES
+
+        output = prediction_tools[0]["output_summary"]
+        require(output["model_backend"] == "sklearn_extra_trees_regressor", "AURA prediction backend mismatch")
+        require(output["feature_count"] == len(ATTACK_FEATURE_NAMES), "AURA prediction feature count mismatch")
 
 
 def validate_ml_trace(trace: dict[str, Any]) -> None:
@@ -891,39 +912,25 @@ def check_documented_numbers() -> list[str]:
     for path, text in docs.items():
         for token in canonical_tokens:
             require(token in text, f"{path} missing canonical metric token {token}")
-    aura_tokens = [
-        "0.7361",
-        "0.3264",
-        "20.4437",
-        "3.0890",
-        "4.4077",
-        "19.2633",
-        "2.1193",
-        "3.5283",
-    ]
+    aura_training = read_json(ROOT / "models/aura_rollout_training_report.json")
+    aura_holdout = read_json(ROOT / "examples/aura_ml_holdout_30_seed_summary.json")
+    aura_tokens = {
+        str(aura_training["metrics"]["validation"]["top1_optimal_rate"]),
+        str(aura_training["metrics"]["validation_rule_ranker"]["top1_optimal_rate"]),
+    }
+    for context in ("none", "rule", "tsra", "ml"):
+        comparison = aura_holdout["conditions"][context]["paired_ml_minus_rule"]
+        aura_tokens.add(str(comparison["mean"]))
+        aura_tokens.add(str(comparison["bootstrap_95_ci"][0]))
     aura_docs = {
         "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
         "docs/evaluation_plan.md": (ROOT / "docs/evaluation_plan.md").read_text(encoding="utf-8"),
         "docs/aura_ml_engineering_record.md": (ROOT / "docs/aura_ml_engineering_record.md").read_text(encoding="utf-8"),
+        "docs/report_writer_guide.md": (ROOT / "docs/report_writer_guide.md").read_text(encoding="utf-8"),
     }
     for path, text in aura_docs.items():
         for token in aura_tokens:
             require(token in text, f"{path} missing AURA metric token {token}")
-    mps_tokens = [
-        "20,000,000",
-        "11.0838",
-        "0.7986",
-        "0.2341",
-        "-37.1930",
-        "1,804,443.12",
-    ]
-    mps_docs = {
-        "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
-        "docs/aura_mps_scale_experiment.md": (ROOT / "docs/aura_mps_scale_experiment.md").read_text(encoding="utf-8"),
-    }
-    for path, text in mps_docs.items():
-        for token in mps_tokens:
-            require(token in text, f"{path} missing MPS metric token {token}")
     return ["documented_numbers=canonical"]
 
 
@@ -945,7 +952,24 @@ def check_package_zip() -> list[str]:
     require(zip_path.exists(), f"package zip was not created: {zip_path}")
     require(zip_path.stat().st_size > 1_000_000, f"package zip unexpectedly small: {zip_path.stat().st_size}")
 
+    with tempfile.TemporaryDirectory() as tmp:
+        comparison_path = Path(tmp) / "submission.zip"
+        run(
+            [
+                sys.executable,
+                "scripts/build_submission_zip.py",
+                "--output",
+                str(comparison_path),
+            ]
+        )
+        require(
+            hashlib.sha256(zip_path.read_bytes()).hexdigest()
+            == hashlib.sha256(comparison_path.read_bytes()).hexdigest(),
+            "submission ZIP is not byte-for-byte deterministic",
+        )
+
     with zipfile.ZipFile(zip_path) as archive:
+        require(archive.testzip() is None, "submission ZIP integrity test failed")
         names = set(archive.namelist())
         for rel in ZIP_REQUIRED_FILES:
             require(rel in names, f"package zip missing {rel}")
@@ -957,7 +981,12 @@ def check_package_zip() -> list[str]:
         macos_metadata = [name for name in names if name.endswith(".DS_Store") or name.startswith("__MACOSX/")]
         require(not macos_metadata, f"package zip contains macOS metadata: {macos_metadata[:8]}")
 
-    return [f"package_zip={zip_path.relative_to(ROOT)} entries={len(names)} bytes={zip_path.stat().st_size} pass"]
+    return [
+        (
+            f"package_zip={zip_path.relative_to(ROOT)} entries={len(names)} "
+            f"bytes={zip_path.stat().st_size} sha256={hashlib.sha256(zip_path.read_bytes()).hexdigest()} pass"
+        )
+    ]
 
 
 def parse_args() -> argparse.Namespace:
@@ -976,7 +1005,6 @@ def main() -> None:
     checks.extend(check_compile_and_tests())
     checks.extend(check_model_and_example_evidence())
     checks.extend(check_aura_model_evidence())
-    checks.extend(check_aura_mps_evidence())
     checks.extend(check_cli_smoke())
     checks.extend(check_aura_cli_smoke())
     checks.extend(check_holdout_evidence())

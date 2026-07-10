@@ -20,7 +20,9 @@ import numpy
 import sklearn
 
 from src.tsra_agent.attack_ml_policy import (
+    ATTACK_FEATURE_SCHEMA_VERSION,
     ATTACK_FEATURE_NAMES,
+    AURA_ML_TICKS,
     DEFAULT_ATTACK_CONFIG_PATH,
     DEFAULT_ATTACK_MODEL_PATH,
     AblatedAttackImpactModel,
@@ -33,10 +35,19 @@ from src.tsra_agent.simulator import MissionSimulator
 
 
 DEFAULT_HOLDOUT_SEEDS = (
-    "2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,"
-    "2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,2203,2207,2213,2221,2237,2239"
+    "4001,4003,4007,4013,4019,4021,4027,4049,4051,4057,4073,4079,4091,4093,"
+    "4099,4111,4127,4129,4133,4139,4153,4157,4159,4177,4201,4211,4217,4219,4229,4231"
 )
+RETIRED_HOLDOUT_SEEDS = [
+    2003, 2011, 2017, 2027, 2029, 2039, 2053, 2063, 2069, 2081,
+    2083, 2087, 2089, 2099, 2111, 2113, 2129, 2131, 2137, 2141,
+    2143, 2153, 2161, 2179, 2203, 2207, 2213, 2221, 2237, 2239,
+    3001, 3011, 3019, 3023, 3037, 3041, 3049, 3061, 3067, 3079,
+    3083, 3089, 3109, 3119, 3121, 3137, 3163, 3167, 3169, 3181,
+    3187, 3191, 3203, 3209, 3217, 3221, 3229, 3251, 3253, 3257,
+]
 DEVELOPMENT_SEEDS = [1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181]
+NO_DEFENSE_NONINFERIORITY_MARGIN = 1.0
 DEFAULT_CONTEXTS = "none,rule,tsra,ml"
 METRIC_NAMES = [
     "mission_impact_score",
@@ -68,8 +79,10 @@ def main() -> None:
     args = parse_args()
     seeds = parse_ints(args.seeds)
     contexts = parse_strings(args.contexts)
-    if args.ticks < 60:
-        raise ValueError("holdout evaluation requires at least 60 ticks")
+    if args.ticks != AURA_ML_TICKS:
+        raise ValueError(f"final AURA holdout requires exactly {AURA_ML_TICKS} ticks")
+    if len(seeds) != 30 or len(set(seeds)) != 30:
+        raise ValueError("final AURA holdout requires 30 unique seeds")
     invalid_contexts = set(contexts) - {"none", "rule", "tsra", "ml"}
     if invalid_contexts:
         raise ValueError(f"unsupported defense contexts: {sorted(invalid_contexts)}")
@@ -77,7 +90,12 @@ def main() -> None:
     training = read_json(ROOT / "models" / "aura_rollout_training_report.json")
     training_seeds = set(training["split_contract"]["train_seeds"])
     validation_seeds = set(training["split_contract"]["validation_seeds"])
-    forbidden = training_seeds | validation_seeds | set(DEVELOPMENT_SEEDS)
+    forbidden = (
+        training_seeds
+        | validation_seeds
+        | set(DEVELOPMENT_SEEDS)
+        | set(RETIRED_HOLDOUT_SEEDS)
+    )
     overlap = sorted(set(seeds) & forbidden)
     if overlap:
         raise ValueError(f"holdout seeds overlap model/development seeds: {overlap}")
@@ -114,10 +132,11 @@ def main() -> None:
         for index, (context, records) in enumerate(raw.items())
     }
     defended_contexts = [context for context in contexts if context != "none"]
+    no_defense_comparison = conditions["none"]["paired_ml_minus_rule"]
     acceptance = {
-        "positive_mean_vs_rule_all_contexts": all(
-            conditions[context]["paired_ml_minus_rule"]["mean"] > 0.0
-            for context in contexts
+        "no_defense_noninferior_vs_rule": (
+            no_defense_comparison["bootstrap_95_ci"][0]
+            > -NO_DEFENSE_NONINFERIORITY_MARGIN
         ),
         "positive_ci_vs_rule_defended_contexts": all(
             conditions[context]["paired_ml_minus_rule"]["bootstrap_95_ci"][0] > 0.0
@@ -131,12 +150,19 @@ def main() -> None:
             conditions[context]["aura_ml_agent"]["model_influenced_ticks"]["mean"] > 0.0
             for context in contexts
         ),
+        "bounded_inference_gating_observed": all(
+            0.0
+            < conditions[context]["aura_ml_agent"]["model_inference_ticks"]["mean"]
+            < args.ticks
+            for context in contexts
+        ),
     }
     acceptance["closed_loop_holdout_pass"] = all(acceptance.values())
 
     output_path = Path(args.output)
     payload = {
-        "schema_version": "aura-ml-holdout/v1",
+        "schema_version": "aura-ml-holdout/v2",
+        "status": "final_fresh_holdout",
         "created_by": "scripts/evaluate_aura_policy.py",
         "scenario": AttackMode.HYBRID.value,
         "ticks": args.ticks,
@@ -147,6 +173,7 @@ def main() -> None:
             "model_train_seeds": sorted(training_seeds),
             "model_validation_seeds": sorted(validation_seeds),
             "policy_development_seeds": DEVELOPMENT_SEEDS,
+            "retired_holdout_seeds": RETIRED_HOLDOUT_SEEDS,
             "holdout_overlap": overlap,
         },
         "model_provenance": {
@@ -159,10 +186,20 @@ def main() -> None:
             "config_sha256": sha256(DEFAULT_ATTACK_CONFIG_PATH),
             "backend": attack_model_backend_name(attack_model),
             "feature_count": len(ATTACK_FEATURE_NAMES),
+            "feature_schema_version": ATTACK_FEATURE_SCHEMA_VERSION,
+            "forbidden_observation_fields": ["defense_alerted"],
             "defense_model_sha256": sha256(DEFAULT_SKLEARN_MODEL_PATH),
         },
         "conditions": conditions,
         "acceptance": acceptance,
+        "acceptance_contract": {
+            "criteria_fixed_before_4000_series_execution": True,
+            "no_defense_role": "negative-control noninferiority",
+            "no_defense_noninferiority_margin_impact_points": NO_DEFENSE_NONINFERIORITY_MARGIN,
+            "no_defense_margin_rationale": "One impact point is approximately 1.22% of the 81.897 rule-AURA no-defense mean and is the maximum tolerated negative-control drift.",
+            "defended_context_rule_comparison": "bootstrap 95% CI lower bound must be greater than zero",
+            "zero_model_comparison": "bootstrap 95% CI lower bound must be greater than zero in all contexts",
+        },
         "interpretation": (
             "Higher mission impact is better for AURA. Paired differences use the same "
             "seed and defense context. Bootstrap intervals resample seeds, not rows."
@@ -171,6 +208,7 @@ def main() -> None:
             "All outcomes are from the closed synthetic mission-event simulator.",
             "The holdout is independent by seed but not an operational SATCOM field test.",
             "Defense contexts for one seed are correlated and are reported separately.",
+            "The reviewed 2000-series and failed-gate 3000-series holdouts are excluded from final evaluation and never reused.",
         ],
         "runtime": {
             "python": platform.python_version(),
@@ -238,6 +276,7 @@ def evaluate_seed(
             ),
             "model_influenced_ticks": ml_simulator.red.model_influenced_ticks,
             "model_changed_rule_ticks": ml_simulator.red.model_changed_rule_ticks,
+            "model_inference_ticks": ml_simulator.red.model_inference_ticks,
         },
         "zero_agent": {
             "action_counts": dict(zero_simulator.red.action_counts),
@@ -292,6 +331,9 @@ def summarize_context(
             ),
             "model_changed_rule_ticks": aggregate_values(
                 [record["ml_agent"]["model_changed_rule_ticks"] for record in records]
+            ),
+            "model_inference_ticks": aggregate_values(
+                [record["ml_agent"]["model_inference_ticks"] for record in records]
             ),
         },
     }

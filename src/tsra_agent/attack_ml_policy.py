@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
+import io
 import json
 from pathlib import Path
 from typing import Any, Protocol
@@ -11,7 +14,9 @@ from .models import AttackMode, LinkName
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ATTACK_MODEL_PATH = ROOT / "models" / "aura_rollout_policy.joblib"
 DEFAULT_ATTACK_CONFIG_PATH = ROOT / "models" / "aura_ml_policy_config.json"
-DEFAULT_MPS_STUDENT_PATH = ROOT / "models" / "aura_mps_student_weights.npz"
+AURA_ML_SCENARIO = AttackMode.HYBRID
+AURA_ML_TICKS = 180
+ATTACK_FEATURE_SCHEMA_VERSION = "aura-attack-features/v2"
 
 ATTACK_FEATURE_NAMES = [
     "tick_progress",
@@ -27,7 +32,6 @@ ATTACK_FEATURE_NAMES = [
     "terminal_risk",
     "source_trust_drop",
     "pace_instability",
-    "defense_alerted",
     "active_link_satcom",
     "active_link_radio",
     "active_link_lte",
@@ -56,51 +60,15 @@ class AblatedAttackImpactModel:
         return [0.0 for _ in rows]
 
 
-class NumpyMLPImpactModel:
-    """Portable CPU inference for the MLP trained on Apple MPS."""
-
-    def __init__(self, weights: dict[str, Any]) -> None:
-        self.weights = weights
-        self.n_features_in_ = int(weights["input_dim"])
-        self.label_mean = float(weights["label_mean"])
-        self.label_scale = float(weights["label_scale"])
-
-    def predict(self, rows: list[list[float]]) -> Any:
-        import numpy
-        from scipy.special import ndtr
-
-        values = numpy.asarray(rows, dtype=numpy.float32)
-        values = self._linear(values, "network.0")
-        values = values * ndtr(values)
-        mean = values.mean(axis=-1, keepdims=True)
-        variance = values.var(axis=-1, keepdims=True)
-        values = (values - mean) / numpy.sqrt(variance + 1e-5)
-        values = (
-            values * self.weights["network.2.weight"]
-            + self.weights["network.2.bias"]
-        )
-        values = self._linear(values, "network.4")
-        values = values * ndtr(values)
-        values = self._linear(values, "network.7")
-        values = values * ndtr(values)
-        values = self._linear(values, "network.9").reshape(-1)
-        return values * self.label_scale + self.label_mean
-
-    def _linear(self, values: Any, prefix: str) -> Any:
-        return values @ self.weights[f"{prefix}.weight"].T + self.weights[f"{prefix}.bias"]
-
-
 def attack_candidate_features(
     state: MissionState,
     candidate: dict[str, Any],
-    *,
-    expected_ticks: int = 180,
 ) -> list[float]:
     action = AttackMode(str(candidate["action"]))
     target = LinkName(str(candidate["target_link"]))
     active_link = state.active_link
     return [
-        clamp(state.tick / max(1.0, float(expected_ticks))),
+        clamp(state.tick / float(AURA_ML_TICKS)),
         clamp(1.0 - state.satcom_health),
         clamp(state.radio_health),
         clamp(state.lte_health),
@@ -113,7 +81,6 @@ def attack_candidate_features(
         clamp(state.terminal_risk_window),
         clamp(state.source_trust_drop_window),
         clamp(state.pace_instability_window),
-        float(state.defense_alerted),
         float(active_link == LinkName.SATCOM),
         float(active_link == LinkName.RADIO),
         float(active_link == LinkName.LTE),
@@ -131,22 +98,26 @@ def attack_candidate_features(
     ]
 
 
-def load_attack_model(path: Path = DEFAULT_ATTACK_MODEL_PATH) -> AttackImpactModel:
+def load_attack_model(
+    path: Path = DEFAULT_ATTACK_MODEL_PATH,
+    *,
+    expected_sha256: str | None = None,
+    config_path: Path = DEFAULT_ATTACK_CONFIG_PATH,
+) -> AttackImpactModel:
     from joblib import load
 
-    return load(path)
-
-
-def load_mps_student_model(
-    path: Path = DEFAULT_MPS_STUDENT_PATH,
-) -> NumpyMLPImpactModel:
-    import numpy
-
-    with numpy.load(path, allow_pickle=False) as payload:
-        weights = {key: payload[key].copy() for key in payload.files}
-    model = NumpyMLPImpactModel(weights)
-    if model.n_features_in_ != len(ATTACK_FEATURE_NAMES):
-        raise ValueError("MPS student feature contract mismatch")
+    payload = path.read_bytes()
+    actual_sha256 = hashlib.sha256(payload).hexdigest()
+    if expected_sha256 is None:
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        expected_sha256 = str(config["model_sha256"])
+    if not hmac.compare_digest(actual_sha256, expected_sha256):
+        raise ValueError(
+            f"AURA model SHA-256 mismatch: expected {expected_sha256}, got {actual_sha256}"
+        )
+    model = load(io.BytesIO(payload))
+    if getattr(model, "n_features_in_", None) != len(ATTACK_FEATURE_NAMES):
+        raise ValueError("AURA model feature contract mismatch")
     return model
 
 
@@ -168,9 +139,15 @@ def attack_model_backend_name(model: object) -> str:
         return "sklearn_random_forest_regressor"
     if class_name == "AblatedAttackImpactModel":
         return "ablation_zero_impact_model"
-    if class_name == "NumpyMLPImpactModel":
-        return "mps_trained_numpy_mlp"
     return f"sklearn_{class_name.lower()}"
+
+
+def validate_attack_ml_scope(scenario: AttackMode, ticks: int) -> None:
+    if scenario != AURA_ML_SCENARIO or ticks != AURA_ML_TICKS:
+        raise ValueError(
+            "AURA-ML is validated only for scenario=hybrid and ticks=180; "
+            f"received scenario={scenario.value}, ticks={ticks}"
+        )
 
 
 def clamp(value: float, lower: float = 0.0, upper: float = 1.0) -> float:

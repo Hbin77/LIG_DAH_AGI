@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
+import io
 import json
 import math
 import random
@@ -45,6 +48,7 @@ INTERVENTION_LATENCY_THRESHOLD = 0.55
 
 DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "tsra_ml_policy.json"
 DEFAULT_SKLEARN_MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "tsra_sklearn_policy.joblib"
+DEFAULT_SKLEARN_REPORT_PATH = Path(__file__).resolve().parents[2] / "models" / "tsra_sklearn_training_report.json"
 DEFAULT_POLICY_CONFIG_PATH = Path(__file__).resolve().parents[2] / "models" / "tsra_ml_policy_config.json"
 
 
@@ -199,10 +203,24 @@ def load_model(path: Path = DEFAULT_MODEL_PATH) -> LogisticRiskModel:
     return LogisticRiskModel.from_dict(data)
 
 
-def load_sklearn_model(path: Path = DEFAULT_SKLEARN_MODEL_PATH):
+def load_sklearn_model(
+    path: Path = DEFAULT_SKLEARN_MODEL_PATH,
+    *,
+    expected_sha256: str | None = None,
+    report_path: Path = DEFAULT_SKLEARN_REPORT_PATH,
+):
     from joblib import load
 
-    return load(path)
+    payload = path.read_bytes()
+    actual_sha256 = hashlib.sha256(payload).hexdigest()
+    if expected_sha256 is None:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        expected_sha256 = str(report["model_sha256"])
+    if not hmac.compare_digest(actual_sha256, expected_sha256):
+        raise ValueError(
+            f"TSRA model SHA-256 mismatch: expected {expected_sha256}, got {actual_sha256}"
+        )
+    return load(io.BytesIO(payload))
 
 
 def sklearn_backend_name(model: object | None) -> str:

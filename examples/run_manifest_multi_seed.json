@@ -1,6 +1,7 @@
 {
   "schema_version": "tsra-run-manifest/v2",
   "scenario": "hybrid",
+  "attack_policy": "rule",
   "ticks": 180,
   "seeds": [
     7,
@@ -30,6 +31,12 @@
     "models/tsra_ml_policy_config.json",
     "models/tsra_ml_tuning_report.json",
     "models/tsra_final_selection_report.json",
+    "models/aura_rollout_policy.joblib",
+    "models/aura_rollout_training_report.json",
+    "models/aura_ml_policy_config.json",
+    "models/aura_final_selection_report.json",
+    "examples/aura_ml_holdout_30_seed_summary.json",
+    "examples/aura_ml_retired_holdout_30_seed_summary.json",
     "seed_<seed>/<experiment>_events.jsonl",
     "seed_<seed>/<experiment>_aura_decision_traces.jsonl",
     "seed_<seed>/<experiment>_tsra_decision_traces.jsonl",

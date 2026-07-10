@@ -3,6 +3,9 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum
+import math
+from pathlib import Path
+import re
 from typing import Any, Callable
 
 
@@ -13,6 +16,7 @@ TOOL_CALL_REQUIRED_FIELDS = {
     "output_summary",
     "status",
     "safety_checked",
+    "safety_check",
 }
 
 
@@ -22,8 +26,9 @@ class ToolCallResult:
     purpose: str
     input_summary: dict[str, Any]
     output_summary: dict[str, Any]
+    safety_checked: bool
+    safety_check: dict[str, Any]
     status: str = "ok"
-    safety_checked: bool = True
 
     def as_trace(self) -> dict[str, Any]:
         return {
@@ -33,6 +38,7 @@ class ToolCallResult:
             "output_summary": to_summary(self.output_summary),
             "status": self.status,
             "safety_checked": self.safety_checked,
+            "safety_check": to_plain(self.safety_check),
         }
 
 
@@ -59,6 +65,8 @@ class AgentTool:
         *,
         input_summarizer: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
         output_summarizer: Callable[[Any], dict[str, Any]] | None = None,
+        safety_validator: Callable[[str, Any], dict[str, Any]],
+        allowed_input_fields: frozenset[str],
     ) -> None:
         if not name or not purpose:
             raise ValueError("agent tools require a non-empty name and purpose")
@@ -69,13 +77,64 @@ class AgentTool:
         self.handler = handler
         self.input_summarizer = input_summarizer
         self.output_summarizer = output_summarizer
+        self.safety_validator = safety_validator
+        self.allowed_input_fields = allowed_input_fields
 
     def execute(self, **kwargs: Any) -> tuple[Any, dict[str, Any]]:
+        provided_fields = frozenset(kwargs)
+        unexpected_fields = sorted(provided_fields - self.allowed_input_fields)
+        missing_fields = sorted(self.allowed_input_fields - provided_fields)
+        if unexpected_fields or missing_fields:
+            schema_check = {
+                "check_id": "registered_tool_input_schema/v1",
+                "passed": False,
+                "allowed_fields": sorted(self.allowed_input_fields),
+                "unexpected_fields": unexpected_fields,
+                "missing_fields": missing_fields,
+            }
+            failed = ToolCallResult(
+                tool_name=self.name,
+                purpose=self.purpose,
+                input_summary=to_summary(kwargs),
+                output_summary={"message": "tool input fields differ from registered schema"},
+                safety_checked=False,
+                safety_check={
+                    "check_id": "closed_synthetic_bounds/v1",
+                    "input": schema_check,
+                    "passed": False,
+                },
+                status="error",
+            ).as_trace()
+            validate_tool_call(failed)
+            raise AgentToolExecutionError(
+                f"agent tool {self.name!r} rejected unregistered input fields",
+                failed,
+            )
         input_summary = (
             self.input_summarizer(kwargs)
             if self.input_summarizer is not None
             else to_summary(kwargs)
         )
+        input_check = self.safety_validator("input", kwargs)
+        if input_check.get("passed") is not True:
+            failed = ToolCallResult(
+                tool_name=self.name,
+                purpose=self.purpose,
+                input_summary=input_summary,
+                output_summary={"message": "tool input failed synthetic safety validation"},
+                safety_checked=False,
+                safety_check={
+                    "check_id": "closed_synthetic_bounds/v1",
+                    "input": input_check,
+                    "passed": False,
+                },
+                status="error",
+            ).as_trace()
+            validate_tool_call(failed)
+            raise AgentToolExecutionError(
+                f"agent tool {self.name!r} failed input safety validation",
+                failed,
+            )
         try:
             output = self.handler(**kwargs)
             output_summary = (
@@ -83,11 +142,38 @@ class AgentTool:
                 if self.output_summarizer is not None
                 else to_summary(output)
             )
+            output_check = self.safety_validator("output", output)
+            safety_check = {
+                "check_id": "closed_synthetic_bounds/v1",
+                "input": input_check,
+                "output": output_check,
+                "passed": bool(
+                    input_check.get("passed") is True
+                    and output_check.get("passed") is True
+                ),
+            }
+            if not safety_check["passed"]:
+                failed = ToolCallResult(
+                    tool_name=self.name,
+                    purpose=self.purpose,
+                    input_summary=input_summary,
+                    output_summary=output_summary,
+                    safety_checked=False,
+                    safety_check=safety_check,
+                    status="error",
+                ).as_trace()
+                validate_tool_call(failed)
+                raise AgentToolExecutionError(
+                    f"agent tool {self.name!r} failed output safety validation",
+                    failed,
+                )
             result = ToolCallResult(
                 tool_name=self.name,
                 purpose=self.purpose,
                 input_summary=input_summary,
                 output_summary=output_summary,
+                safety_checked=bool(safety_check["passed"]),
+                safety_check=safety_check,
             )
             trace = result.as_trace()
             validate_tool_call(trace)
@@ -102,6 +188,12 @@ class AgentTool:
                 output_summary={
                     "error_type": type(exc).__name__,
                     "message": str(exc),
+                },
+                safety_checked=False,
+                safety_check={
+                    "check_id": "closed_synthetic_bounds/v1",
+                    "input": input_check,
+                    "passed": False,
                 },
                 status="error",
             ).as_trace()
@@ -186,7 +278,6 @@ class AgentTraceRecorder:
                 "source_trust_drop_window": round(state.source_trust_drop_window, 4),
                 "pace_instability_window": round(state.pace_instability_window, 4),
                 "current_attack": enum_value(state.current_attack),
-                "defense_alerted": state.defense_alerted,
             },
         }
         self.memory.remember_observation(observation)
@@ -270,6 +361,8 @@ class AgentRuntime:
         *,
         input_summarizer: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
         output_summarizer: Callable[[Any], dict[str, Any]] | None = None,
+        safety_validator: Callable[[str, Any], dict[str, Any]],
+        allowed_input_fields: set[str] | frozenset[str],
     ) -> None:
         if name in self._tools:
             raise ValueError(f"duplicate agent tool: {name}")
@@ -279,6 +372,8 @@ class AgentRuntime:
             handler,
             input_summarizer=input_summarizer,
             output_summarizer=output_summarizer,
+            safety_validator=safety_validator,
+            allowed_input_fields=frozenset(allowed_input_fields),
         )
 
     def begin_cycle(self, state: Any) -> dict[str, Any]:
@@ -367,8 +462,135 @@ def validate_tool_call(tool_call: dict[str, Any]) -> None:
         raise ValueError("tool call requires non-empty tool_name and purpose")
     if not isinstance(tool_call["input_summary"], dict) or not isinstance(tool_call["output_summary"], dict):
         raise ValueError("tool call summaries must be dictionaries")
-    if tool_call["safety_checked"] is not True:
+    if not isinstance(tool_call["safety_check"], dict):
+        raise ValueError("tool call safety_check must be a dictionary")
+    if tool_call["status"] == "ok" and tool_call["safety_checked"] is not True:
         raise ValueError("synthetic agent tools must pass safety_checked=True")
+    if tool_call["status"] == "ok" and tool_call["safety_check"].get("passed") is not True:
+        raise ValueError("successful tool calls require a passed safety check")
+
+
+def closed_synthetic_tool_validator(stage: str, payload: Any) -> dict[str, Any]:
+    """Validate that a tool payload stays inside bounded synthetic mission data."""
+
+    if stage not in {"input", "output"}:
+        raise ValueError(f"unsupported safety validation stage: {stage}")
+    violations: list[str] = []
+    forbidden_key_tokens = {
+        "shell",
+        "subprocess",
+        "socket",
+        "endpoint",
+        "host",
+        "command",
+        "url",
+        "uri",
+        "payload",
+        "rf",
+        "destination",
+        "address",
+        "ip_address",
+        "frequency",
+        "exploit",
+        "network_action",
+    }
+    bounded_keys = {
+        "intensity",
+        "probability",
+        "risk_score",
+        "ml_risk",
+        "heuristic_risk",
+        "fused_risk",
+        "satcom_health",
+        "radio_health",
+        "lte_health",
+        "mesh_health",
+    }
+    integer_bounds = {
+        "duration": (0, 180),
+        # Rule-policy simulations may run longer than the final 180-tick AURA-ML
+        # scope. The ML scope is enforced independently at construction time.
+        "tick": (0, 10_000_000),
+        "queue_depth": (0, 100_000),
+        "critical_queue_depth": (0, 100_000),
+        "candidate_count": (0, 10_000),
+        "feature_count": (0, 10_000),
+    }
+
+    def visit(value: Any, path: str, key: str | None = None) -> None:
+        if isinstance(value, Path) or isinstance(value, (bytes, bytearray)) or callable(value):
+            violations.append(f"{path}: unsupported operational payload type")
+            return
+        if is_dataclass(value):
+            visit(asdict(value), path, key)
+            return
+        if isinstance(value, Enum):
+            return
+        if isinstance(value, dict):
+            for child_key, child_value in value.items():
+                normalized = str(child_key).lower()
+                key_tokens = set(re.split(r"[^a-z0-9]+", normalized))
+                if key_tokens & forbidden_key_tokens:
+                    violations.append(f"{path}.{normalized}: forbidden operational field")
+                visit(child_value, f"{path}.{normalized}", normalized)
+            return
+        if isinstance(value, (list, tuple)):
+            for index, item in enumerate(value):
+                visit(item, f"{path}[{index}]", key)
+            return
+        if isinstance(value, float) and not math.isfinite(value):
+            violations.append(f"{path}: non-finite numeric value")
+        if isinstance(value, str):
+            lowered = value.lower()
+            unsafe_string_patterns = {
+                "URL": r"(?:https?|ftp)://",
+                "IP address": r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
+                "RF parameter": r"\b\d+(?:\.\d+)?\s*(?:hz|khz|mhz|ghz)\b",
+                "shell command": r"(?:rm\s+-rf|/bin/|powershell|subprocess)",
+                "exploit instruction": r"\bexploit(?:\s+code)?\b",
+            }
+            for label, pattern in unsafe_string_patterns.items():
+                if re.search(pattern, lowered):
+                    violations.append(f"{path}: forbidden {label} content")
+        if key in bounded_keys and isinstance(value, (int, float)) and not 0.0 <= float(value) <= 1.0:
+            violations.append(f"{path}: bounded value outside [0, 1]")
+        if key in integer_bounds and isinstance(value, (int, float)):
+            lower, upper = integer_bounds[key]
+            if int(value) != value or not lower <= int(value) <= upper:
+                violations.append(f"{path}: integer value outside [{lower}, {upper}]")
+        if value is not None and not isinstance(value, (str, int, float, bool)):
+            violations.append(f"{path}: unsupported payload type {type(value).__name__}")
+
+    def validate_candidate_selection(value: Any, path: str) -> None:
+        if is_dataclass(value):
+            value = asdict(value)
+        if isinstance(value, dict):
+            for child_key, child_value in value.items():
+                validate_candidate_selection(child_value, f"{path}.{child_key}")
+            return
+        if isinstance(value, (list, tuple)):
+            candidate_rows = [
+                item
+                for item in value
+                if isinstance(item, dict) and "selected" in item
+            ]
+            if candidate_rows and sum(
+                item.get("selected") is True for item in candidate_rows
+            ) != 1:
+                violations.append(
+                    f"{path}: candidate set must mark exactly one selected row"
+                )
+            for index, item in enumerate(value):
+                validate_candidate_selection(item, f"{path}[{index}]")
+
+    visit(payload, stage)
+    validate_candidate_selection(payload, stage)
+    return {
+        "check_id": "closed_synthetic_bounds/v1",
+        "stage": stage,
+        "passed": not violations,
+        "violations": violations,
+    }
 
 
 def to_summary(value: Any, *, max_items: int = 20) -> dict[str, Any]:

@@ -1,5 +1,6 @@
 {
   "scenario": "hybrid",
+  "attack_policy": "rule",
   "ticks": 180,
   "seeds": [
     7,

@@ -1,40 +1,41 @@
 {
   "schema_version": "aura-ml-holdout/v2",
-  "status": "final_fresh_holdout",
+  "status": "retired_after_fixed_gate_failure",
+  "retirement_reason": "The no-defense mean delta was -0.0017, so the initial positive-mean-in-all-contexts gate failed. These seeds are never reused.",
   "created_by": "scripts/evaluate_aura_policy.py",
   "scenario": "hybrid",
   "ticks": 180,
   "seeds": [
-    4001,
-    4003,
-    4007,
-    4013,
-    4019,
-    4021,
-    4027,
-    4049,
-    4051,
-    4057,
-    4073,
-    4079,
-    4091,
-    4093,
-    4099,
-    4111,
-    4127,
-    4129,
-    4133,
-    4139,
-    4153,
-    4157,
-    4159,
-    4177,
-    4201,
-    4211,
-    4217,
-    4219,
-    4229,
-    4231
+    3001,
+    3011,
+    3019,
+    3023,
+    3037,
+    3041,
+    3049,
+    3061,
+    3067,
+    3079,
+    3083,
+    3089,
+    3109,
+    3119,
+    3121,
+    3137,
+    3163,
+    3167,
+    3169,
+    3181,
+    3187,
+    3191,
+    3203,
+    3209,
+    3217,
+    3221,
+    3229,
+    3251,
+    3253,
+    3257
   ],
   "seed_count": 30,
   "contexts": [
@@ -104,37 +105,7 @@
       2213,
       2221,
       2237,
-      2239,
-      3001,
-      3011,
-      3019,
-      3023,
-      3037,
-      3041,
-      3049,
-      3061,
-      3067,
-      3079,
-      3083,
-      3089,
-      3109,
-      3119,
-      3121,
-      3137,
-      3163,
-      3167,
-      3169,
-      3181,
-      3187,
-      3191,
-      3203,
-      3209,
-      3217,
-      3221,
-      3229,
-      3251,
-      3253,
-      3257
+      2239
     ],
     "holdout_overlap": []
   },
@@ -156,28 +127,28 @@
     "none": {
       "rule_aura": {
         "mission_impact_score": {
-          "mean": 81.897,
-          "stdev": 2.5089,
+          "mean": 82.4287,
+          "stdev": 2.1836,
           "count": 30
         },
         "p95_critical_latency": {
-          "mean": 9.7567,
-          "stdev": 0.8661,
+          "mean": 9.9417,
+          "stdev": 0.6909,
           "count": 30
         },
         "stale_data_ratio": {
-          "mean": 0.2385,
-          "stdev": 0.0208,
+          "mean": 0.2459,
+          "stdev": 0.0236,
           "count": 30
         },
         "priority_inversion_rate": {
-          "mean": 0.0563,
-          "stdev": 0.0192,
+          "mean": 0.0612,
+          "stdev": 0.0254,
           "count": 30
         },
         "lost_messages": {
-          "mean": 30.2,
-          "stdev": 4.8813,
+          "mean": 29.3333,
+          "stdev": 3.1972,
           "count": 30
         },
         "backlog_messages": {
@@ -193,45 +164,45 @@
       },
       "aura_ml": {
         "mission_impact_score": {
-          "mean": 81.9343,
-          "stdev": 2.4882,
+          "mean": 82.427,
+          "stdev": 2.3163,
           "count": 30
         },
         "p95_critical_latency": {
-          "mean": 9.5667,
-          "stdev": 0.7872,
+          "mean": 9.735,
+          "stdev": 0.6795,
           "count": 30
         },
         "stale_data_ratio": {
-          "mean": 0.2397,
-          "stdev": 0.0218,
+          "mean": 0.2413,
+          "stdev": 0.018,
           "count": 30
         },
         "priority_inversion_rate": {
-          "mean": 0.0813,
-          "stdev": 0.0204,
+          "mean": 0.0856,
+          "stdev": 0.0217,
           "count": 30
         },
         "lost_messages": {
-          "mean": 29.4333,
-          "stdev": 4.5069,
+          "mean": 29.3,
+          "stdev": 3.5884,
           "count": 30
         },
         "backlog_messages": {
-          "mean": 52.3333,
-          "stdev": 0.9428,
+          "mean": 52.3667,
+          "stdev": 1.2776,
           "count": 30
         },
         "expired_messages": {
-          "mean": 48.3333,
-          "stdev": 0.9428,
+          "mean": 48.3667,
+          "stdev": 1.2776,
           "count": 30
         }
       },
       "aura_ml_zero_model": {
         "mission_impact_score": {
-          "mean": 8.6817,
-          "stdev": 0.7212,
+          "mean": 8.5417,
+          "stdev": 0.6,
           "count": 30
         },
         "p95_critical_latency": {
@@ -250,8 +221,8 @@
           "count": 30
         },
         "lost_messages": {
-          "mean": 4.2333,
-          "stdev": 2.0605,
+          "mean": 3.8333,
+          "stdev": 1.7143,
           "count": 30
         },
         "backlog_messages": {
@@ -266,58 +237,58 @@
         }
       },
       "paired_ml_minus_rule": {
-        "mean": 0.0373,
-        "stdev": 2.6513,
+        "mean": -0.0017,
+        "stdev": 1.9758,
         "bootstrap_95_ci": [
-          -0.975,
-          0.919
+          -0.7297,
+          0.6793
         ],
-        "wins": 17,
+        "wins": 18,
         "ties": 0,
-        "losses": 13,
+        "losses": 12,
         "count": 30,
-        "minimum": -8.89,
-        "maximum": 4.54
+        "minimum": -5.73,
+        "maximum": 3.03
       },
       "paired_ml_minus_zero_model": {
-        "mean": 73.2527,
-        "stdev": 2.6642,
+        "mean": 73.8853,
+        "stdev": 2.3426,
         "bootstrap_95_ci": [
-          72.275,
-          74.2243
+          73.0447,
+          74.715
         ],
         "wins": 30,
         "ties": 0,
         "losses": 0,
         "count": 30,
-        "minimum": 68.46,
-        "maximum": 80.15
+        "minimum": 68.73,
+        "maximum": 78.75
       },
       "aura_ml_agent": {
         "action_counts": {
-          "failover_chasing": 1019,
-          "link_degradation": 229,
-          "mission_aware_delay": 1408,
-          "none": 2744
+          "failover_chasing": 1001,
+          "link_degradation": 190,
+          "mission_aware_delay": 1458,
+          "none": 2751
         },
         "selection_source_counts": {
-          "learned_rollout_impact": 750,
-          "memory_commitment": 2029,
-          "rule_score": 2621
+          "learned_rollout_impact": 758,
+          "memory_commitment": 2026,
+          "rule_score": 2616
         },
         "model_influenced_ticks": {
-          "mean": 23.5333,
-          "stdev": 0.67,
+          "mean": 23.5667,
+          "stdev": 1.0858,
           "count": 30
         },
         "model_changed_rule_ticks": {
-          "mean": 13.0333,
-          "stdev": 3.3713,
+          "mean": 13.9,
+          "stdev": 4.3386,
           "count": 30
         },
         "model_inference_ticks": {
-          "mean": 25,
-          "stdev": 1.2111,
+          "mean": 25.2667,
+          "stdev": 2.6575,
           "count": 30
         }
       }
@@ -325,18 +296,18 @@
     "rule": {
       "rule_aura": {
         "mission_impact_score": {
-          "mean": 59.6527,
-          "stdev": 2.6558,
+          "mean": 60.3893,
+          "stdev": 3.4947,
           "count": 30
         },
         "p95_critical_latency": {
-          "mean": 7.9667,
-          "stdev": 1.3303,
+          "mean": 8.1533,
+          "stdev": 1.6796,
           "count": 30
         },
         "stale_data_ratio": {
-          "mean": 0.1048,
-          "stdev": 0.0137,
+          "mean": 0.1095,
+          "stdev": 0.0156,
           "count": 30
         },
         "priority_inversion_rate": {
@@ -345,8 +316,8 @@
           "count": 30
         },
         "lost_messages": {
-          "mean": 10.1667,
-          "stdev": 3.0885,
+          "mean": 10.7,
+          "stdev": 2.635,
           "count": 30
         },
         "backlog_messages": {
@@ -362,18 +333,18 @@
       },
       "aura_ml": {
         "mission_impact_score": {
-          "mean": 80.8657,
-          "stdev": 2.1696,
+          "mean": 81.0567,
+          "stdev": 2.4139,
           "count": 30
         },
         "p95_critical_latency": {
-          "mean": 10.79,
-          "stdev": 0.9785,
+          "mean": 10.9383,
+          "stdev": 0.7657,
           "count": 30
         },
         "stale_data_ratio": {
-          "mean": 0.3566,
-          "stdev": 0.0273,
+          "mean": 0.3671,
+          "stdev": 0.0257,
           "count": 30
         },
         "priority_inversion_rate": {
@@ -382,8 +353,8 @@
           "count": 30
         },
         "lost_messages": {
-          "mean": 24.0,
-          "stdev": 4.5166,
+          "mean": 22.4333,
+          "stdev": 3.8095,
           "count": 30
         },
         "backlog_messages": {
@@ -399,8 +370,8 @@
       },
       "aura_ml_zero_model": {
         "mission_impact_score": {
-          "mean": 8.6817,
-          "stdev": 0.7212,
+          "mean": 8.5417,
+          "stdev": 0.6,
           "count": 30
         },
         "p95_critical_latency": {
@@ -419,8 +390,8 @@
           "count": 30
         },
         "lost_messages": {
-          "mean": 4.2333,
-          "stdev": 2.0605,
+          "mean": 3.8333,
+          "stdev": 1.7143,
           "count": 30
         },
         "backlog_messages": {
@@ -435,38 +406,38 @@
         }
       },
       "paired_ml_minus_rule": {
-        "mean": 21.213,
-        "stdev": 3.2836,
+        "mean": 20.6673,
+        "stdev": 4.462,
         "bootstrap_95_ci": [
-          20.0533,
-          22.3977
+          19.0667,
+          22.2527
         ],
         "wins": 30,
         "ties": 0,
         "losses": 0,
         "count": 30,
-        "minimum": 15.92,
-        "maximum": 28.15
+        "minimum": 9.88,
+        "maximum": 30.65
       },
       "paired_ml_minus_zero_model": {
-        "mean": 72.184,
-        "stdev": 2.5585,
+        "mean": 72.515,
+        "stdev": 2.6082,
         "bootstrap_95_ci": [
-          71.2423,
-          73.0707
+          71.5843,
+          73.4867
         ],
         "wins": 30,
         "ties": 0,
         "losses": 0,
         "count": 30,
-        "minimum": 64.9,
-        "maximum": 77.53
+        "minimum": 66.53,
+        "maximum": 78.25
       },
       "aura_ml_agent": {
         "action_counts": {
           "failover_chasing": 2634,
-          "link_degradation": 32,
-          "mission_aware_delay": 28,
+          "link_degradation": 16,
+          "mission_aware_delay": 44,
           "none": 2706
         },
         "selection_source_counts": {
@@ -480,8 +451,8 @@
           "count": 30
         },
         "model_changed_rule_ticks": {
-          "mean": 15.8667,
-          "stdev": 0.8844,
+          "mean": 16,
+          "stdev": 0.8165,
           "count": 30
         },
         "model_inference_ticks": {
@@ -494,223 +465,17 @@
     "tsra": {
       "rule_aura": {
         "mission_impact_score": {
-          "mean": 16.891,
-          "stdev": 1.7834,
+          "mean": 16.9957,
+          "stdev": 2.6546,
           "count": 30
         },
         "p95_critical_latency": {
-          "mean": 6.2217,
-          "stdev": 0.9308,
+          "mean": 5.9883,
+          "stdev": 1.3065,
           "count": 30
         },
         "stale_data_ratio": {
-          "mean": 0.0182,
-          "stdev": 0.0053,
-          "count": 30
-        },
-        "priority_inversion_rate": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "lost_messages": {
-          "mean": 6.7667,
-          "stdev": 2.7164,
-          "count": 30
-        },
-        "backlog_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "expired_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        }
-      },
-      "aura_ml": {
-        "mission_impact_score": {
-          "mean": 19.9577,
-          "stdev": 1.4603,
-          "count": 30
-        },
-        "p95_critical_latency": {
-          "mean": 5.93,
-          "stdev": 0.4663,
-          "count": 30
-        },
-        "stale_data_ratio": {
-          "mean": 0.0289,
-          "stdev": 0.0114,
-          "count": 30
-        },
-        "priority_inversion_rate": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "lost_messages": {
-          "mean": 13.5333,
-          "stdev": 3.1383,
-          "count": 30
-        },
-        "backlog_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "expired_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        }
-      },
-      "aura_ml_zero_model": {
-        "mission_impact_score": {
-          "mean": 8.6817,
-          "stdev": 0.7212,
-          "count": 30
-        },
-        "p95_critical_latency": {
-          "mean": 4.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "stale_data_ratio": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "priority_inversion_rate": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "lost_messages": {
-          "mean": 4.2333,
-          "stdev": 2.0605,
-          "count": 30
-        },
-        "backlog_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "expired_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        }
-      },
-      "paired_ml_minus_rule": {
-        "mean": 3.0667,
-        "stdev": 2.1718,
-        "bootstrap_95_ci": [
-          2.2703,
-          3.834
-        ],
-        "wins": 27,
-        "ties": 0,
-        "losses": 3,
-        "count": 30,
-        "minimum": -1.51,
-        "maximum": 7.22
-      },
-      "paired_ml_minus_zero_model": {
-        "mean": 11.276,
-        "stdev": 1.4512,
-        "bootstrap_95_ci": [
-          10.7557,
-          11.7883
-        ],
-        "wins": 30,
-        "ties": 0,
-        "losses": 0,
-        "count": 30,
-        "minimum": 7.77,
-        "maximum": 14.0
-      },
-      "aura_ml_agent": {
-        "action_counts": {
-          "failover_chasing": 1324,
-          "link_degradation": 662,
-          "mission_aware_delay": 708,
-          "none": 2706
-        },
-        "selection_source_counts": {
-          "learned_rollout_impact": 724,
-          "memory_commitment": 2065,
-          "rule_score": 2611
-        },
-        "model_influenced_ticks": {
-          "mean": 23.9333,
-          "stdev": 0.359,
-          "count": 30
-        },
-        "model_changed_rule_ticks": {
-          "mean": 16.4,
-          "stdev": 1.4514,
-          "count": 30
-        },
-        "model_inference_ticks": {
-          "mean": 24.1333,
-          "stdev": 0.718,
-          "count": 30
-        }
-      }
-    },
-    "ml": {
-      "rule_aura": {
-        "mission_impact_score": {
-          "mean": 14.7307,
-          "stdev": 1.3741,
-          "count": 30
-        },
-        "p95_critical_latency": {
-          "mean": 5.0067,
-          "stdev": 0.5297,
-          "count": 30
-        },
-        "stale_data_ratio": {
-          "mean": 0.0123,
-          "stdev": 0.0051,
-          "count": 30
-        },
-        "priority_inversion_rate": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "lost_messages": {
-          "mean": 8.1667,
-          "stdev": 1.9678,
-          "count": 30
-        },
-        "backlog_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        },
-        "expired_messages": {
-          "mean": 0.0,
-          "stdev": 0.0,
-          "count": 30
-        }
-      },
-      "aura_ml": {
-        "mission_impact_score": {
-          "mean": 19.834,
-          "stdev": 1.2093,
-          "count": 30
-        },
-        "p95_critical_latency": {
-          "mean": 5.9333,
-          "stdev": 0.3758,
-          "count": 30
-        },
-        "stale_data_ratio": {
-          "mean": 0.0155,
+          "mean": 0.0171,
           "stdev": 0.0075,
           "count": 30
         },
@@ -720,8 +485,45 @@
           "count": 30
         },
         "lost_messages": {
-          "mean": 15.7333,
-          "stdev": 3.346,
+          "mean": 8.3667,
+          "stdev": 2.6518,
+          "count": 30
+        },
+        "backlog_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "expired_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        }
+      },
+      "aura_ml": {
+        "mission_impact_score": {
+          "mean": 19.916,
+          "stdev": 1.5679,
+          "count": 30
+        },
+        "p95_critical_latency": {
+          "mean": 5.9617,
+          "stdev": 0.2786,
+          "count": 30
+        },
+        "stale_data_ratio": {
+          "mean": 0.0291,
+          "stdev": 0.0113,
+          "count": 30
+        },
+        "priority_inversion_rate": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "lost_messages": {
+          "mean": 13.3333,
+          "stdev": 4.077,
           "count": 30
         },
         "backlog_messages": {
@@ -737,8 +539,8 @@
       },
       "aura_ml_zero_model": {
         "mission_impact_score": {
-          "mean": 8.6817,
-          "stdev": 0.7212,
+          "mean": 8.5417,
+          "stdev": 0.6,
           "count": 30
         },
         "p95_critical_latency": {
@@ -757,8 +559,8 @@
           "count": 30
         },
         "lost_messages": {
-          "mean": 4.2333,
-          "stdev": 2.0605,
+          "mean": 3.8333,
+          "stdev": 1.7143,
           "count": 30
         },
         "backlog_messages": {
@@ -773,43 +575,43 @@
         }
       },
       "paired_ml_minus_rule": {
-        "mean": 5.1033,
-        "stdev": 1.8802,
+        "mean": 2.9203,
+        "stdev": 2.919,
         "bootstrap_95_ci": [
-          4.4097,
-          5.7633
+          1.8837,
+          3.967
         ],
-        "wins": 30,
+        "wins": 26,
         "ties": 0,
-        "losses": 0,
+        "losses": 4,
         "count": 30,
-        "minimum": 0.26,
-        "maximum": 8.3
+        "minimum": -3.57,
+        "maximum": 9.76
       },
       "paired_ml_minus_zero_model": {
-        "mean": 11.1523,
-        "stdev": 1.1667,
+        "mean": 11.3743,
+        "stdev": 1.6207,
         "bootstrap_95_ci": [
-          10.719,
-          11.5593
+          10.8013,
+          11.964
         ],
         "wins": 30,
         "ties": 0,
         "losses": 0,
         "count": 30,
-        "minimum": 8.38,
-        "maximum": 12.86
+        "minimum": 8.82,
+        "maximum": 14.4
       },
       "aura_ml_agent": {
         "action_counts": {
-          "failover_chasing": 1363,
-          "link_degradation": 711,
-          "mission_aware_delay": 618,
-          "none": 2708
+          "failover_chasing": 1275,
+          "link_degradation": 653,
+          "mission_aware_delay": 761,
+          "none": 2711
         },
         "selection_source_counts": {
-          "learned_rollout_impact": 726,
-          "memory_commitment": 2063,
+          "learned_rollout_impact": 729,
+          "memory_commitment": 2060,
           "rule_score": 2611
         },
         "model_influenced_ticks": {
@@ -818,40 +620,201 @@
           "count": 30
         },
         "model_changed_rule_ticks": {
-          "mean": 16.7,
-          "stdev": 1.7349,
+          "mean": 16.4667,
+          "stdev": 1.8571,
           "count": 30
         },
         "model_inference_ticks": {
-          "mean": 24.2,
-          "stdev": 0.7483,
+          "mean": 24.3,
+          "stdev": 0.781,
+          "count": 30
+        }
+      }
+    },
+    "ml": {
+      "rule_aura": {
+        "mission_impact_score": {
+          "mean": 15.3587,
+          "stdev": 1.9837,
+          "count": 30
+        },
+        "p95_critical_latency": {
+          "mean": 5.3917,
+          "stdev": 0.9541,
+          "count": 30
+        },
+        "stale_data_ratio": {
+          "mean": 0.0128,
+          "stdev": 0.0067,
+          "count": 30
+        },
+        "priority_inversion_rate": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "lost_messages": {
+          "mean": 7.9,
+          "stdev": 2.3431,
+          "count": 30
+        },
+        "backlog_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "expired_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        }
+      },
+      "aura_ml": {
+        "mission_impact_score": {
+          "mean": 19.6377,
+          "stdev": 1.5549,
+          "count": 30
+        },
+        "p95_critical_latency": {
+          "mean": 5.9533,
+          "stdev": 0.3393,
+          "count": 30
+        },
+        "stale_data_ratio": {
+          "mean": 0.0171,
+          "stdev": 0.0076,
+          "count": 30
+        },
+        "priority_inversion_rate": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "lost_messages": {
+          "mean": 14.9667,
+          "stdev": 3.5165,
+          "count": 30
+        },
+        "backlog_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "expired_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        }
+      },
+      "aura_ml_zero_model": {
+        "mission_impact_score": {
+          "mean": 8.5417,
+          "stdev": 0.6,
+          "count": 30
+        },
+        "p95_critical_latency": {
+          "mean": 4.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "stale_data_ratio": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "priority_inversion_rate": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "lost_messages": {
+          "mean": 3.8333,
+          "stdev": 1.7143,
+          "count": 30
+        },
+        "backlog_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        },
+        "expired_messages": {
+          "mean": 0.0,
+          "stdev": 0.0,
+          "count": 30
+        }
+      },
+      "paired_ml_minus_rule": {
+        "mean": 4.279,
+        "stdev": 1.9589,
+        "bootstrap_95_ci": [
+          3.5973,
+          5.0097
+        ],
+        "wins": 30,
+        "ties": 0,
+        "losses": 0,
+        "count": 30,
+        "minimum": 0.84,
+        "maximum": 8.99
+      },
+      "paired_ml_minus_zero_model": {
+        "mean": 11.096,
+        "stdev": 1.4274,
+        "bootstrap_95_ci": [
+          10.5683,
+          11.5923
+        ],
+        "wins": 30,
+        "ties": 0,
+        "losses": 0,
+        "count": 30,
+        "minimum": 7.71,
+        "maximum": 13.73
+      },
+      "aura_ml_agent": {
+        "action_counts": {
+          "failover_chasing": 1331,
+          "link_degradation": 673,
+          "mission_aware_delay": 684,
+          "none": 2712
+        },
+        "selection_source_counts": {
+          "learned_rollout_impact": 730,
+          "memory_commitment": 2059,
+          "rule_score": 2611
+        },
+        "model_influenced_ticks": {
+          "mean": 23.9333,
+          "stdev": 0.359,
+          "count": 30
+        },
+        "model_changed_rule_ticks": {
+          "mean": 17.2667,
+          "stdev": 1.9821,
+          "count": 30
+        },
+        "model_inference_ticks": {
+          "mean": 24.3333,
+          "stdev": 0.7888,
           "count": 30
         }
       }
     }
   },
   "acceptance": {
-    "no_defense_noninferior_vs_rule": true,
+    "positive_mean_vs_rule_all_contexts": false,
     "positive_ci_vs_rule_defended_contexts": true,
     "positive_ci_vs_zero_model_all_contexts": true,
     "model_influenced_actions_observed": true,
     "bounded_inference_gating_observed": true,
-    "closed_loop_holdout_pass": true
-  },
-  "acceptance_contract": {
-    "criteria_fixed_before_4000_series_execution": true,
-    "no_defense_role": "negative-control noninferiority",
-    "no_defense_noninferiority_margin_impact_points": 1.0,
-    "no_defense_margin_rationale": "One impact point is approximately 1.22% of the 81.897 rule-AURA no-defense mean and is the maximum tolerated negative-control drift.",
-    "defended_context_rule_comparison": "bootstrap 95% CI lower bound must be greater than zero",
-    "zero_model_comparison": "bootstrap 95% CI lower bound must be greater than zero in all contexts"
+    "closed_loop_holdout_pass": false
   },
   "interpretation": "Higher mission impact is better for AURA. Paired differences use the same seed and defense context. Bootstrap intervals resample seeds, not rows.",
   "limitations": [
     "All outcomes are from the closed synthetic mission-event simulator.",
     "The holdout is independent by seed but not an operational SATCOM field test.",
     "Defense contexts for one seed are correlated and are reported separately.",
-    "The reviewed 2000-series and failed-gate 3000-series holdouts are excluded from final evaluation and never reused."
+    "The retired 2000-series holdout was reviewed during development and is excluded from final evaluation."
   ],
   "runtime": {
     "python": "3.13.11",

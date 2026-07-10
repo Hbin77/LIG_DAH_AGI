@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .evaluator import resilience_gain
-from .attack_ml_policy import load_attack_model
+from .attack_ml_policy import load_attack_model, validate_attack_ml_scope
 from .ml_policy import AblatedRiskModel
 from .models import AttackMode
 from .simulator import MissionSimulator, write_result
@@ -65,10 +65,13 @@ def main() -> None:
         attack_policy=args.attack_policy,
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    (output_dir / "summary.json").write_text(
+        json.dumps(summary, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     (output_dir / "incident_report.md").write_text(build_report(summary), encoding="utf-8")
     (output_dir / "run_manifest.json").write_text(
-        json.dumps(build_manifest(summary), indent=2, ensure_ascii=False),
+        json.dumps(build_manifest(summary), indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
 
@@ -93,10 +96,16 @@ def run_suite(
     *,
     attack_policy: str = "rule",
 ) -> dict[str, Any]:
+    if attack_policy == "ml":
+        validate_attack_ml_scope(scenario, ticks)
     attack_model = load_attack_model() if attack_policy == "ml" else None
     attack_kwargs = {
         "attack_policy": attack_policy,
         "attack_model": attack_model,
+    }
+    control_attack_kwargs = {
+        "attack_policy": "rule",
+        "attack_model": None,
     }
     runs = []
     for seed in seeds:
@@ -106,7 +115,7 @@ def run_suite(
             seed,
             AttackMode.NONE,
             defense_enabled=False,
-            **attack_kwargs,
+            **control_attack_kwargs,
         ).run("baseline")
         attacked = MissionSimulator(
             ticks,
@@ -154,7 +163,7 @@ def run_suite(
             AttackMode.NONE,
             defense_enabled=True,
             defense_mode="tsra",
-            **attack_kwargs,
+            **control_attack_kwargs,
         ).run("guarded_baseline")
         ml_guarded_baseline = MissionSimulator(
             ticks,
@@ -162,7 +171,7 @@ def run_suite(
             AttackMode.NONE,
             defense_enabled=True,
             defense_mode="ml",
-            **attack_kwargs,
+            **control_attack_kwargs,
         ).run("ml_guarded_baseline")
         for result in (
             baseline,
@@ -192,7 +201,10 @@ def run_suite(
             "ml_ablated_resilience_gain_percent": resilience_gain(attacked.metrics, ml_ablated.metrics, baseline.metrics),
         }
         runs.append(run_summary)
-        (seed_dir / "summary.json").write_text(json.dumps(run_summary, indent=2, ensure_ascii=False), encoding="utf-8")
+        (seed_dir / "summary.json").write_text(
+            json.dumps(run_summary, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
 
     summary: dict[str, Any] = {
         "scenario": scenario.value,
@@ -282,7 +294,9 @@ def build_manifest(summary: dict[str, Any]) -> dict[str, Any]:
             "models/aura_rollout_policy.joblib",
             "models/aura_rollout_training_report.json",
             "models/aura_ml_policy_config.json",
+            "models/aura_final_selection_report.json",
             "examples/aura_ml_holdout_30_seed_summary.json",
+            "examples/aura_ml_retired_holdout_30_seed_summary.json",
             "seed_<seed>/<experiment>_events.jsonl",
             "seed_<seed>/<experiment>_aura_decision_traces.jsonl",
             "seed_<seed>/<experiment>_tsra_decision_traces.jsonl",

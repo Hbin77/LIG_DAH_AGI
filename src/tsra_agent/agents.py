@@ -34,7 +34,6 @@ class MissionState:
     source_trust_drop_window: float
     pace_instability_window: float
     current_attack: AttackMode
-    defense_alerted: bool
 
 
 @dataclass

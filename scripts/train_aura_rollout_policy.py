@@ -25,7 +25,9 @@ from sklearn.model_selection import GroupKFold
 
 from src.tsra_agent.agents import AURALite
 from src.tsra_agent.attack_ml_policy import (
+    ATTACK_FEATURE_SCHEMA_VERSION,
     ATTACK_FEATURE_NAMES,
+    AURA_ML_TICKS,
     DEFAULT_ATTACK_CONFIG_PATH,
     DEFAULT_ATTACK_MODEL_PATH,
     attack_candidate_features,
@@ -40,7 +42,7 @@ DEFAULT_VALIDATION_SEEDS = "1063,1069,1087,1091"
 DEFAULT_TARGET_TICKS = "35,45,55,77,87,97,119,129,139"
 DEFAULT_CONTEXTS = "none,rule,tsra,ml"
 DEFAULT_BEHAVIORS = "rule"
-DATASET_GENERATOR_VERSION = "counterfactual-rollout-v1"
+DATASET_GENERATOR_VERSION = "counterfactual-rollout-v2-no-privileged-defense-state"
 
 
 class CachedProbabilityModel:
@@ -74,7 +76,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--behaviors", default=DEFAULT_BEHAVIORS)
     parser.add_argument("--horizon", type=int, default=30)
     parser.add_argument("--commitment-ticks", type=int, default=4)
-    parser.add_argument("--expected-ticks", type=int, default=180)
     parser.add_argument("--output", default=str(DEFAULT_ATTACK_MODEL_PATH))
     parser.add_argument("--config", default=str(DEFAULT_ATTACK_CONFIG_PATH))
     parser.add_argument("--report", default="models/aura_rollout_training_report.json")
@@ -115,7 +116,6 @@ def main() -> None:
         behaviors,
         horizon=args.horizon,
         commitment_ticks=args.commitment_ticks,
-        expected_ticks=args.expected_ticks,
         defense_model=defense_model,
     )
     print("Generating validation counterfactual rollouts...", flush=True)
@@ -126,7 +126,6 @@ def main() -> None:
         behaviors,
         horizon=args.horizon,
         commitment_ticks=args.commitment_ticks,
-        expected_ticks=args.expected_ticks,
         defense_model=defense_model,
     )
 
@@ -171,9 +170,15 @@ def main() -> None:
     model_sha256 = sha256(output_path)
     config_path = Path(args.config)
     config_payload = {
-        "schema_version": "aura-ml-policy-config/v1",
+        "schema_version": "aura-ml-policy-config/v2",
         "model_path": display_path(output_path),
         "model_sha256": model_sha256,
+        "feature_schema_version": ATTACK_FEATURE_SCHEMA_VERSION,
+        "feature_count": len(ATTACK_FEATURE_NAMES),
+        "runtime_scope": {
+            "scenario": AttackMode.HYBRID.value,
+            "ticks": AURA_ML_TICKS,
+        },
         "config": {
             "detectability_weight": 0.05,
             "repeated_tactic_penalty": 0.03,
@@ -192,7 +197,7 @@ def main() -> None:
     train_hash = dataset_sha256(train_rows)
     validation_hash = dataset_sha256(validation_rows)
     report = {
-        "schema_version": "aura-rollout-training/v1",
+        "schema_version": "aura-rollout-training/v2",
         "dataset_generator_version": DATASET_GENERATOR_VERSION,
         "model_path": display_path(output_path),
         "model_sha256": model_sha256,
@@ -200,12 +205,15 @@ def main() -> None:
         "selected_model": best_name,
         "feature_names": ATTACK_FEATURE_NAMES,
         "feature_count": len(ATTACK_FEATURE_NAMES),
+        "feature_schema_version": ATTACK_FEATURE_SCHEMA_VERSION,
+        "forbidden_observation_fields": ["defense_alerted"],
         "label_definition": (
             "Paired mission-impact delta versus a four-tick no-op commitment from the "
             "same seed, defense context, prefix behavior, and decision tick."
         ),
         "rollout_contract": {
             "scenario": AttackMode.HYBRID.value,
+            "ticks": AURA_ML_TICKS,
             "horizon_ticks": args.horizon,
             "commitment_ticks": args.commitment_ticks,
             "target_ticks": target_ticks,
@@ -276,7 +284,6 @@ def generate_rollout_rows(
     *,
     horizon: int,
     commitment_ticks: int,
-    expected_ticks: int,
     defense_model: object | None,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
@@ -346,7 +353,6 @@ def generate_rollout_rows(
                                 "features": attack_candidate_features(
                                     state,
                                     candidate,
-                                    expected_ticks=expected_ticks,
                                 ),
                             }
                         )
@@ -643,6 +649,13 @@ def validate_inputs(
     horizon: int,
     commitment_ticks: int,
 ) -> None:
+    for label, values in (
+        ("train seeds", train_seeds),
+        ("validation seeds", validation_seeds),
+        ("target ticks", target_ticks),
+    ):
+        if len(values) != len(set(values)):
+            raise ValueError(f"{label} contain duplicates")
     overlap = set(train_seeds) & set(validation_seeds)
     if overlap:
         raise ValueError(f"train and validation seeds overlap: {sorted(overlap)}")

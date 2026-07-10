@@ -8,17 +8,17 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 from scripts.build_submission_zip import should_include
 from src.tsra_agent.attack_agent import AURAAgent
 from src.tsra_agent.attack_ml_policy import (
     ATTACK_FEATURE_NAMES,
+    AURA_ML_TICKS,
     DEFAULT_ATTACK_CONFIG_PATH,
     DEFAULT_ATTACK_MODEL_PATH,
-    DEFAULT_MPS_STUDENT_PATH,
     AblatedAttackImpactModel,
     load_attack_model,
-    load_mps_student_model,
 )
 from src.tsra_agent.defense_agent import TSRAAgent
 from src.tsra_agent.evaluator import resilience_gain
@@ -34,7 +34,12 @@ from src.tsra_agent.ml_policy import (
     load_sklearn_model,
 )
 from src.tsra_agent.models import AttackMode, LinkName
-from src.tsra_agent.runtime import AgentRuntime, TOOL_CALL_REQUIRED_FIELDS
+from src.tsra_agent.runtime import (
+    AgentRuntime,
+    AgentToolExecutionError,
+    TOOL_CALL_REQUIRED_FIELDS,
+    closed_synthetic_tool_validator,
+)
 from src.tsra_agent.simulator import MissionSimulator
 
 
@@ -173,6 +178,8 @@ class SimulationMetricTests(unittest.TestCase):
         model = load_attack_model()
 
         self.assertEqual(report["feature_names"], ATTACK_FEATURE_NAMES)
+        self.assertNotIn("defense_alerted", ATTACK_FEATURE_NAMES)
+        self.assertEqual(len(ATTACK_FEATURE_NAMES), 27)
         self.assertEqual(report["split_contract"]["seed_overlap"], [])
         self.assertFalse(report["split_contract"]["row_random_split"])
         self.assertEqual(
@@ -193,16 +200,16 @@ class SimulationMetricTests(unittest.TestCase):
 
     def test_aura_ml_executes_model_tool_and_beats_zero_model(self) -> None:
         learned = MissionSimulator(
-            48,
-            2003,
+            AURA_ML_TICKS,
+            1103,
             AttackMode.HYBRID,
             defense_enabled=True,
             defense_mode="tsra",
             attack_policy="ml",
         ).run("aura_ml")
         zero = MissionSimulator(
-            48,
-            2003,
+            AURA_ML_TICKS,
+            1103,
             AttackMode.HYBRID,
             defense_enabled=True,
             defense_mode="tsra",
@@ -214,7 +221,7 @@ class SimulationMetricTests(unittest.TestCase):
             learned.metrics.mission_impact_score,
             zero.metrics.mission_impact_score,
         )
-        self.assertEqual(len(learned.traces["aura"]), 48)
+        self.assertEqual(len(learned.traces["aura"]), AURA_ML_TICKS)
         self.assertTrue(all(trace["agent"] == "AURA-ML" for trace in learned.traces["aura"]))
         prediction_calls = [
             tool
@@ -222,13 +229,29 @@ class SimulationMetricTests(unittest.TestCase):
             for tool in trace["tool_calls"]
             if tool["tool_name"] == "predict_attack_impacts"
         ]
-        self.assertEqual(len(prediction_calls), 48)
+        self.assertEqual(len(prediction_calls), 25)
+        self.assertEqual(
+            len(prediction_calls),
+            sum(
+                trace["selected_action"]["decision_basis"]["model_inference_executed"]
+                for trace in learned.traces["aura"]
+            ),
+        )
         active_traces = [
             trace
             for trace in learned.traces["aura"]
             if trace["selected_action"]["mode"] != AttackMode.NONE.value
         ]
         self.assertTrue(active_traces)
+        self.assertTrue(
+            all(
+                not trace["selected_action"]["decision_basis"]["model_inference_executed"]
+                for trace in learned.traces["aura"]
+                if trace["tick"] < 35
+                or trace["selected_action"]["decision_basis"]["selection_source"]
+                == "memory_commitment"
+            )
+        )
         basis = active_traces[0]["selected_action"]["decision_basis"]
         self.assertEqual(basis["model_backend"], "sklearn_extra_trees_regressor")
         self.assertEqual(basis["commitment_ticks"], 4)
@@ -271,42 +294,26 @@ class SimulationMetricTests(unittest.TestCase):
                 0.0,
             )
 
-    def test_mps_scale_evidence_preserves_closed_loop_rejection(self) -> None:
-        metrics_path = Path("models/aura_mps_student_metrics.json")
-        selection_path = Path("models/aura_mps_selection_report.json")
-        self.assertTrue(DEFAULT_MPS_STUDENT_PATH.exists())
-        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
-        selection = json.loads(selection_path.read_text(encoding="utf-8"))
-        model = load_mps_student_model()
-
-        self.assertEqual(metrics["runtime"]["device"], "mps")
-        self.assertTrue(metrics["runtime"]["mps_available"])
-        self.assertEqual(metrics["training_scale"]["total_sample_passes"], 20_000_000)
-        self.assertFalse(metrics["training_scale"]["unique_candidate_claim"])
-        self.assertEqual(metrics["dataset_provenance"]["unique_train_rows"], 1440)
-        self.assertTrue(metrics["dataset_provenance"]["matches_primary_training_report"])
-        self.assertGreater(
-            metrics["validation"]["top1_optimal_rate"],
-            metrics["primary_extra_trees_comparison"]["top1_optimal_rate"],
-        )
-        self.assertEqual(
-            metrics["portable_export_sha256"],
-            hashlib.sha256(DEFAULT_MPS_STUDENT_PATH.read_bytes()).hexdigest(),
-        )
-        self.assertEqual(model.n_features_in_, len(ATTACK_FEATURE_NAMES))
-        self.assertEqual(len(model.predict([[0.0] * len(ATTACK_FEATURE_NAMES)])), 1)
-        decision = selection["promotion_decision"]
-        self.assertTrue(decision["candidate_validation_pass"])
-        self.assertFalse(decision["promote_to_agent_runtime"])
-        self.assertEqual(decision["selected_runtime_backend"], "sklearn_extra_trees_regressor")
-        self.assertLess(
-            selection["closed_loop_development_gate"]["rule"]
-            ["paired_mps_minus_extra_trees"]["mean"],
-            0.0,
-        )
-
-
 class CliArtifactTests(unittest.TestCase):
+    def test_cli_rejects_out_of_scope_aura_ml(self) -> None:
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "src.tsra_agent.cli",
+                "--scenario",
+                "hybrid",
+                "--attack-policy",
+                "ml",
+                "--ticks",
+                "80",
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("scenario=hybrid and ticks=180", result.stderr)
+
     def test_cli_writes_summary_report_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = Path(tmp) / "run"
@@ -398,6 +405,11 @@ class CliArtifactTests(unittest.TestCase):
                     self.assertTrue(TOOL_CALL_REQUIRED_FIELDS.issubset(tool_call), tool_call)
                     self.assertEqual(tool_call["status"], "ok")
                     self.assertIs(tool_call["safety_checked"], True)
+                    self.assertTrue(tool_call["safety_check"]["passed"])
+                    self.assertEqual(
+                        tool_call["safety_check"]["check_id"],
+                        "closed_synthetic_bounds/v1",
+                    )
                     self.assertIsInstance(tool_call["input_summary"], dict)
                     self.assertIsInstance(tool_call["output_summary"], dict)
                     self.assertTrue(tool_call["tool_name"])
@@ -460,7 +472,13 @@ class AgentRuntimeContractTests(unittest.TestCase):
             return {"score": value * 2}
 
         runtime = AgentRuntime("Test-Agent", "prove runtime execution")
-        runtime.register_tool("score_state", "score a synthetic state", score_state)
+        runtime.register_tool(
+            "score_state",
+            "score a synthetic state",
+            score_state,
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields={"value"},
+        )
         state = SimpleNamespace(
             tick=3,
             active_link=LinkName.SATCOM,
@@ -477,7 +495,6 @@ class AgentRuntimeContractTests(unittest.TestCase):
             source_trust_drop_window=0.0,
             pace_instability_window=0.0,
             current_attack=AttackMode.NONE,
-            defense_alerted=False,
         )
 
         runtime.begin_cycle(state)
@@ -497,6 +514,131 @@ class AgentRuntimeContractTests(unittest.TestCase):
         self.assertEqual(trace["tool_calls"][0]["output_summary"], {"score": 8})
         self.assertEqual(trace["feedback"]["outcome"], "stable")
         self.assertTrue(trace["runtime"]["feedback_attached"])
+        self.assertNotIn("defense_alerted", trace["observation"]["signals"])
+
+    def test_safety_validator_rejects_input_before_handler_execution(self) -> None:
+        invocations = []
+
+        def unsafe_handler(**kwargs):
+            invocations.append(kwargs)
+            return {"accepted": True}
+
+        runtime = AgentRuntime("Test-Agent", "reject operational payloads")
+        runtime.register_tool(
+            "unsafe",
+            "prove pre-execution safety validation",
+            unsafe_handler,
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields={"value"},
+        )
+        state = SimpleNamespace(
+            tick=1,
+            active_link=LinkName.SATCOM,
+            satcom_health=1.0,
+            radio_health=1.0,
+            lte_health=1.0,
+            mesh_health=1.0,
+            queue_depth=0,
+            critical_queue_depth=0,
+            stale_ratio_window=0.0,
+            critical_latency_window=0.0,
+            priority_inversion_window=0.0,
+            terminal_risk_window=0.0,
+            source_trust_drop_window=0.0,
+            pace_instability_window=0.0,
+            current_attack=AttackMode.NONE,
+        )
+        runtime.begin_cycle(state)
+        for kwargs in (
+            {"shell_command": "rm -rf /"},
+            {"command": "rm -rf /"},
+            {"url": "https://example.invalid"},
+            {"payload": "exploit code"},
+            {"rf": "2.4 GHz"},
+            {"destination": "10.0.0.1"},
+            {"value": "rm -rf /"},
+        ):
+            with self.assertRaises(AgentToolExecutionError):
+                runtime.call_tool("unsafe", **kwargs)
+        self.assertEqual(invocations, [])
+        for payload in (
+            {"payload": object()},
+            {"host_name": "10.0.0.1"},
+            {"command": "rm -rf /"},
+            {"url": "https://example.invalid"},
+            {"rf": "2.4 GHz"},
+            {"destination": "10.0.0.1"},
+            {"duration": 999_999},
+            [
+                {"action": "none", "selected": True},
+                {"action": "link_degradation", "selected": True},
+            ],
+        ):
+            self.assertFalse(
+                closed_synthetic_tool_validator("input", payload)["passed"],
+                payload,
+            )
+        output_runtime = AgentRuntime("Test-Agent", "reject unsafe tool output")
+        output_runtime.register_tool(
+            "invalid_output",
+            "prove post-execution safety validation",
+            lambda: {"duration": 999_999},
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields=set(),
+        )
+        output_runtime.begin_cycle(state)
+        with self.assertRaises(AgentToolExecutionError) as raised:
+            output_runtime.call_tool("invalid_output")
+        failed_trace = raised.exception.tool_call
+        self.assertEqual(failed_trace["status"], "error")
+        self.assertFalse(failed_trace["safety_checked"])
+        self.assertTrue(failed_trace["safety_check"]["output"]["violations"])
+
+    def test_aura_ml_rejects_out_of_scope_runtime(self) -> None:
+        with self.assertRaisesRegex(ValueError, "scenario=hybrid and ticks=180"):
+            MissionSimulator(
+                179,
+                1103,
+                AttackMode.HYBRID,
+                defense_enabled=False,
+                attack_policy="ml",
+            )
+        with self.assertRaisesRegex(ValueError, "scenario=hybrid and ticks=180"):
+            AURAAgent(
+                AttackMode.LINK_DEGRADATION,
+                policy_kind="ml",
+                impact_model=AblatedAttackImpactModel(),
+                episode_ticks=180,
+            )
+        with self.assertRaisesRegex(ValueError, "scenario=hybrid and ticks=180"):
+            AURAAgent(
+                AttackMode.HYBRID,
+                policy_kind="ml",
+                impact_model=AblatedAttackImpactModel(),
+            )
+        with self.assertRaisesRegex(ValueError, "scenario=hybrid and ticks=180"):
+            MissionSimulator(
+                180,
+                1103,
+                AttackMode.LINK_DEGRADATION,
+                defense_enabled=False,
+                attack_policy="ml",
+            )
+
+    def test_model_hash_mismatch_is_rejected_before_deserialization(self) -> None:
+        expected_aura = hashlib.sha256(DEFAULT_ATTACK_MODEL_PATH.read_bytes()).hexdigest()
+        expected_tsra = hashlib.sha256(DEFAULT_SKLEARN_MODEL_PATH.read_bytes()).hexdigest()
+        with tempfile.TemporaryDirectory() as tmp:
+            aura_path = Path(tmp) / "aura.joblib"
+            tsra_path = Path(tmp) / "tsra.joblib"
+            aura_path.write_bytes(DEFAULT_ATTACK_MODEL_PATH.read_bytes() + b"tampered")
+            tsra_path.write_bytes(DEFAULT_SKLEARN_MODEL_PATH.read_bytes() + b"tampered")
+            with mock.patch("joblib.load") as loader:
+                with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+                    load_attack_model(aura_path, expected_sha256=expected_aura)
+                with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+                    load_sklearn_model(tsra_path, expected_sha256=expected_tsra)
+                loader.assert_not_called()
 
     def test_attack_and_defense_agents_own_separate_runtimes(self) -> None:
         attack = AURAAgent(AttackMode.HYBRID)

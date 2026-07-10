@@ -12,9 +12,10 @@ from .attack_ml_policy import (
     attack_model_backend_name,
     load_attack_model,
     load_attack_policy_config,
+    validate_attack_ml_scope,
 )
 from .models import AttackAction, AttackMode, LinkName
-from .runtime import AgentRuntime
+from .runtime import AgentRuntime, closed_synthetic_tool_validator
 
 
 DEFAULT_ATTACK_POLICY_CONFIG = {
@@ -43,9 +44,12 @@ class AURAAgent:
         impact_model: AttackImpactModel | None = None,
         policy_config: dict[str, float] | None = None,
         retain_traces: bool = True,
+        episode_ticks: int | None = None,
     ) -> None:
         if policy_kind not in {"rule", "ml"}:
             raise ValueError(f"unsupported AURA policy kind: {policy_kind}")
+        if policy_kind == "ml":
+            validate_attack_ml_scope(scenario, episode_ticks or -1)
         self.policy = AURALite(scenario)
         self.policy_kind = policy_kind
         self.impact_model = (
@@ -68,6 +72,7 @@ class AURAAgent:
         self.selection_source_counts: Counter[str] = Counter()
         self.model_influenced_ticks = 0
         self.model_changed_rule_ticks = 0
+        self.model_inference_ticks = 0
         agent_name = "AURA-ML" if policy_kind == "ml" else "AURA-lite"
         self.runtime = AgentRuntime(
             agent_name=agent_name,
@@ -84,6 +89,8 @@ class AURAAgent:
                 "eligible_count": sum(1 for row in candidates if row["eligible"]),
                 "actions": [row["action"] for row in candidates],
             },
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields={"state"},
         )
         if self.impact_model is not None:
             self.runtime.register_tool(
@@ -98,6 +105,8 @@ class AURAAgent:
                     "model_backend": self.model_backend,
                     "feature_count": len(ATTACK_FEATURE_NAMES),
                 },
+                safety_validator=closed_synthetic_tool_validator,
+                allowed_input_fields={"state", "candidates"},
             )
         self.runtime.register_tool(
             "rank_attack_candidates",
@@ -105,6 +114,15 @@ class AURAAgent:
             self._rank_attack_candidates,
             input_summarizer=self._rank_input_summary,
             output_summarizer=self._rank_output_summary,
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields={
+                "state",
+                "candidates",
+                "predictions",
+                "memory_context",
+                "forced_mode",
+                "override_source",
+            },
         )
         self.runtime.register_tool(
             "select_attack_effect",
@@ -117,6 +135,8 @@ class AURAAgent:
                 ],
             },
             output_summarizer=self._selection_summary,
+            safety_validator=closed_synthetic_tool_validator,
+            allowed_input_fields={"candidates"},
         )
 
     @property
@@ -161,12 +181,22 @@ class AURAAgent:
             state=state,
         )
         predictions = None
-        if self.impact_model is not None:
+        model_inference_executed = bool(
+            self.impact_model is not None
+            and effective_forced_mode is None
+            and any(
+                candidate["eligible"]
+                and candidate["action"] != AttackMode.NONE.value
+                for candidate in raw_candidates
+            )
+        )
+        if model_inference_executed:
             predictions = self.runtime.call_tool(
                 "predict_attack_impacts",
                 state=state,
                 candidates=raw_candidates,
             )
+            self.model_inference_ticks += 1
         candidates = self.runtime.call_tool(
             "rank_attack_candidates",
             state=state,
@@ -219,6 +249,7 @@ class AURAAgent:
             "zero_model_selected_action": selected["zero_model_selected_action"],
             "model_influenced": bool(selected.get("model_influenced", False)),
             "model_changed_rule_choice": bool(selected.get("model_changed_rule_choice", False)),
+            "model_inference_executed": model_inference_executed,
             "selection_source": selected["selection_source"],
             "commitment_ticks": (
                 int(self.policy_config["commitment_ticks"])
@@ -405,8 +436,6 @@ class AURAAgent:
         if candidate["action"] == AttackMode.NONE.value:
             return 0.0
         score = 0.45 * float(candidate["intensity"])
-        if state.defense_alerted:
-            score += 0.20
         if candidate["target_link"] == state.active_link.value:
             score += 0.10
         if candidate["action"] == AttackMode.FAILOVER_CHASING.value:

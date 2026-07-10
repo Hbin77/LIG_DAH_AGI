@@ -9,6 +9,7 @@ from typing import Any
 
 from .agents import MissionState
 from .attack_agent import AURAAgent
+from .attack_ml_policy import validate_attack_ml_scope
 from .defense_agent import TSRAAgent
 from .evaluator import evaluate
 from .models import (
@@ -69,6 +70,8 @@ class MissionSimulator:
     observed_states: list[MissionState] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
+        if self.attack_policy == "ml":
+            validate_attack_ml_scope(self.attack_mode, self.ticks)
         self.rng = random.Random(self.seed)
         self.links = {
             LinkName.SATCOM: LinkState(LinkName.SATCOM, 1100, 2, 0.02, 2),
@@ -82,6 +85,7 @@ class MissionSimulator:
             impact_model=self.attack_model,
             policy_config=self.attack_config,
             retain_traces=self.retain_agent_traces,
+            episode_ticks=self.ticks,
         )
         self.blue = TSRAAgent(
             self.defense_mode if self.defense_enabled else "tsra",
@@ -205,7 +209,6 @@ class MissionSimulator:
             source_trust_drop_window=source_trust_drop,
             pace_instability_window=pace_instability,
             current_attack=self.attack_mode,
-            defense_alerted=self.blue.alert_tick is not None,
         )
 
     def _apply_attack(self, tick: int, attack) -> None:
