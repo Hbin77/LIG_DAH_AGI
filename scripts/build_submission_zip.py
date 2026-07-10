@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
@@ -11,6 +10,7 @@ DIST = ROOT / "dist"
 PACKAGE_DIRS = ["src", "docs", "examples", "models", "scripts", "tests"]
 PACKAGE_FILES = ["README.md", "requirements.txt"]
 FIXED_ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
+SUBMISSION_FILENAME = "DAH2026_\uc18c\uc2a4\ucf54\ub4dc_TSRA-X.zip"
 
 
 def main() -> None:
@@ -20,7 +20,7 @@ def main() -> None:
     zip_path = (
         Path(args.output)
         if args.output
-        else DIST / f"DAH2026_sourcecode_TSRA-X_{datetime.now():%Y%m%d_%H%M%S}.zip"
+        else DIST / SUBMISSION_FILENAME
     )
     build_zip(zip_path)
     print(zip_path)

@@ -100,6 +100,8 @@ conda activate tsra-x
 python -m pip install -r requirements.txt
 ```
 
+필수 환경변수, API key, 외부 서비스 credential은 없습니다. 모든 실행은 로컬 synthetic simulator 내부에서 완결됩니다.
+
 훈련된 모델은 `models/aura_rollout_policy.joblib`과 `models/tsra_sklearn_policy.joblib`에 포함되어 있으므로 일반 실행에는 재훈련이 필요하지 않습니다.
 
 ### 2. 기본 실험 실행
@@ -141,6 +143,26 @@ python scripts/verify_submission_state.py --require-dev --require-clean
 ```
 
 최종 검증기는 compile, unit test, CLI smoke run, 모델·canonical metric 해시, DecisionTrace 계약, 후보 행동과 실제 행동의 일치, 안전 경계 문서, 제출 ZIP 구성을 함께 확인합니다. canonical 30-seed 결과 전체를 매번 재실행하는 명령은 아니며 GitHub Actions 대신 로컬에서 직접 실행합니다.
+
+## 제출용 부가자료
+
+DAH 2026 예선 안내서의 권장 파일명과 ZIP 구성을 따릅니다.
+
+```bash
+python scripts/build_submission_zip.py
+```
+
+생성 파일: `dist/DAH2026_소스코드_TSRA-X.zip`
+
+ZIP 최상위 구성:
+
+- `README.md`: 실행 방법, 의존성, 환경 조건, 환경변수
+- `src/`: 공격·방어 에이전트와 simulator 코드
+- `requirements.txt`: Python 의존성
+- `docs/`: 아키텍처, 평가 계획, 안전 경계, 개발 기록
+- `models/`, `examples/`, `scripts/`, `tests/`: 학습 모델, 검증 근거, 재현 도구, 테스트
+
+생성된 ZIP을 Google Drive 또는 Dropbox 등 외부 클라우드에 올린 뒤, **링크가 있는 모든 사용자가 다운로드 가능**한 권한으로 공유하고 해당 URL을 보고서 제출 페이지에 입력합니다.
 
 ## 보고서 작성자를 위한 안내
 
