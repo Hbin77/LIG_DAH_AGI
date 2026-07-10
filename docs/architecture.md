@@ -5,6 +5,8 @@
 TSRA-X is not an operational SATCOM attack tool. It is an AI agent architecture and prototype for DAH 2026 preliminary review:
 
 - `AURA-lite`: bounded red-team mission-effect agent in `attack_agent.py`
+- `AURA-ML`: trained counterfactual-rollout candidate ranker behind the same attack runtime
+- `AURA MPS student`: optional GPU-trained ranking experiment; not promoted after closed-loop gate failure
 - `TSRA-R-lite`: blue-team C4ISR data trust agent in `defense_agent.py`
 - `TSRA-ML`: trained scikit-learn histogram gradient-boosting defense agent with mission guardrails
 - `MissionSimulator`: synthetic UAV/UGV/SATCOM/PACE event environment
@@ -14,7 +16,9 @@ TSRA-X is not an operational SATCOM attack tool. It is an AI agent architecture 
 
 ```mermaid
 flowchart LR
-    REDRT["AURA AgentRuntime<br/>Memory + Callable Tools + DecisionTrace"] --> RED["AURA-lite<br/>Mission-effect Red Agent"]
+    REDRT["AURA AgentRuntime<br/>Memory + Callable Tools + DecisionTrace"] --> RED["AURA-lite / AURA-ML<br/>Mission-effect Red Agent"]
+    REDRT --> REDML["AURA-ML Rollout Ranker<br/>ExtraTreesRegressor"]
+    REDML --> RED
     RED --> ENV["Synthetic C4ISR SATCOM Environment"]
     ENV --> OBS["TSRA-R Observer<br/>Link/Data/Terminal/PACE Signals"]
     OBS --> BLUERT["TSRA AgentRuntime<br/>Memory + Callable Tools + DecisionTrace"]
@@ -54,6 +58,7 @@ The implemented agents use an executable runtime contract rather than only retur
 - `AgentTool`: executes a registered callable and derives `input_summary`, `output_summary`, `status`, and `safety_checked` from that invocation.
 - `DecisionTrace`: persists observation, prior memory, candidate actions, actual tool results, selected action, model-risk basis, reason, post-action feedback, and safety boundary for each tick.
 - `AURA-lite basis`: records no-op, link degradation, mission-aware delay, and failover-chasing candidates with eligibility, score, predicted effect, and selected candidate.
+- `AURA-ML basis`: records learned incremental impact, heuristic detectability, rule and zero-model counterfactual choices, model influence, and four-tick memory commitment.
 - `TSRA-ML basis`: records the scikit-learn backend, ML risk probability, heuristic risk, fused risk, weights, action-gate thresholds, model-influenced actions, and guardrail-triggered actions.
 
 The simulator exchanges only `MissionState`, `AttackAction`, and `DefenseAction` contracts with the separately owned attack and defense agents. It no longer constructs tool records after executing policy code.
@@ -62,7 +67,7 @@ The simulator exchanges only `MissionState`, `AttackAction`, and `DefenseAction`
 
 ## Implemented scope
 
-- Implemented: separate attack/defense agent ownership, callable-tool AgentRuntime, bounded memory, post-action feedback, mission-event simulator, AURA-lite attack pulses, TSRA-R risk fusion, TSRA-ML histogram gradient-boosting classifier, tuned action-gate policy, model-versus-guardrail attribution, PACE path choice and SATCOM return hysteresis, EDF scheduling, adaptive UAV snapshot compression, priority inversion detection, stale noncritical backlog control, multi-seed evaluation, event logs, and tests.
-- Not implemented: trained attack policy in the DEV path, real RF control, real exploit execution, device-specific intrusion, live UAV/UGV integration, RAG/RL/XGBoost training.
+- Implemented: separate attack/defense agent ownership, callable-tool AgentRuntime, bounded memory, post-action feedback, mission-event simulator, AURA-lite rule policy, AURA-ML trained rollout ranker with zero-model ablation, TSRA-R risk fusion, TSRA-ML histogram gradient-boosting classifier, tuned action-gate policy, model attribution, PACE path choice, EDF scheduling, adaptive snapshot compression, priority inversion detection, multi-seed evaluation, event logs, and tests.
+- Not implemented: real RF control, real exploit execution, device-specific intrusion, live UAV/UGV integration, RAG/RL/XGBoost training.
 
 Unimplemented advanced models such as RAG/RL/XGBoost are future work, not claimed as current prototype behavior.

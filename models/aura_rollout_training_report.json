@@ -1,0 +1,266 @@
+{
+  "schema_version": "aura-rollout-training/v1",
+  "dataset_generator_version": "counterfactual-rollout-v1",
+  "model_path": "models/aura_rollout_policy.joblib",
+  "model_sha256": "8f969a4219c64b2e5023418012039c231415ae5d06ead78d82b97e23e8c7e94b",
+  "config_path": "models/aura_ml_policy_config.json",
+  "selected_model": "extra_trees",
+  "feature_names": [
+    "tick_progress",
+    "satcom_degradation",
+    "radio_health",
+    "lte_health",
+    "mesh_health",
+    "queue_pressure",
+    "critical_queue_pressure",
+    "stale_ratio",
+    "critical_latency_pressure",
+    "priority_inversion_pressure",
+    "terminal_risk",
+    "source_trust_drop",
+    "pace_instability",
+    "defense_alerted",
+    "active_link_satcom",
+    "active_link_radio",
+    "active_link_lte",
+    "active_link_mesh",
+    "action_none",
+    "action_link_degradation",
+    "action_mission_aware_delay",
+    "action_failover_chasing",
+    "target_link_satcom",
+    "target_link_radio",
+    "target_link_lte",
+    "target_link_mesh",
+    "intensity",
+    "duration_pressure"
+  ],
+  "feature_count": 28,
+  "label_definition": "Paired mission-impact delta versus a four-tick no-op commitment from the same seed, defense context, prefix behavior, and decision tick.",
+  "rollout_contract": {
+    "scenario": "hybrid",
+    "horizon_ticks": 30,
+    "commitment_ticks": 4,
+    "target_ticks": [
+      35,
+      45,
+      55,
+      77,
+      87,
+      97,
+      119,
+      129,
+      139
+    ],
+    "defense_contexts": [
+      "none",
+      "rule",
+      "tsra",
+      "ml"
+    ],
+    "prefix_behaviors": [
+      "rule"
+    ],
+    "common_random_seed_within_group": true
+  },
+  "split_contract": {
+    "split_unit": "simulator seed",
+    "train_seeds": [
+      1009,
+      1013,
+      1019,
+      1021,
+      1031,
+      1033,
+      1039,
+      1049,
+      1051,
+      1061
+    ],
+    "validation_seeds": [
+      1063,
+      1069,
+      1087,
+      1091
+    ],
+    "seed_overlap": [],
+    "row_random_split": false,
+    "model_selection": "GroupKFold by simulator seed on train split only"
+  },
+  "dataset": {
+    "train_sha256": "5d04c83541e5932dee7f6e954de60eabf1c34232c140f4648ce692d068e4bd7c",
+    "validation_sha256": "513e5813ad71061b383db7845eedf2da72ac7e86fa7b301655c141f6dc370879",
+    "train": {
+      "grain": "one candidate action in one paired counterfactual rollout group",
+      "rows": 1440,
+      "groups": 360,
+      "seeds": [
+        1009,
+        1013,
+        1019,
+        1021,
+        1031,
+        1033,
+        1039,
+        1049,
+        1051,
+        1061
+      ],
+      "feature_columns": 28,
+      "missing_value_count": 0,
+      "out_of_range_feature_count": 0,
+      "exact_duplicate_feature_rows": 440,
+      "duplicate_feature_groups": 220,
+      "conflicting_duplicate_feature_groups": 91,
+      "conflicting_duplicate_feature_rows": 311,
+      "conflicting_duplicate_feature_row_rate": 0.215972,
+      "maximum_conflicting_label_range": 13.59,
+      "duplicate_interpretation": "Identical observable state-action features can have different labels because future packet loss is stochastic and defense policy identity is not exposed to AURA.",
+      "group_size_counts": {
+        "4": 360
+      },
+      "action_counts": {
+        "failover_chasing": 360,
+        "link_degradation": 360,
+        "mission_aware_delay": 360,
+        "none": 360
+      },
+      "label": {
+        "minimum": -8.53,
+        "p05": -1.06,
+        "median": 0.0,
+        "p95": 3.51,
+        "maximum": 14.36,
+        "mean": 0.546847,
+        "zero_rate": 0.515278,
+        "positive_rate": 0.377778,
+        "negative_rate": 0.106944
+      }
+    },
+    "validation": {
+      "grain": "one candidate action in one paired counterfactual rollout group",
+      "rows": 576,
+      "groups": 144,
+      "seeds": [
+        1063,
+        1069,
+        1087,
+        1091
+      ],
+      "feature_columns": 28,
+      "missing_value_count": 0,
+      "out_of_range_feature_count": 0,
+      "exact_duplicate_feature_rows": 112,
+      "duplicate_feature_groups": 64,
+      "conflicting_duplicate_feature_groups": 32,
+      "conflicting_duplicate_feature_rows": 94,
+      "conflicting_duplicate_feature_row_rate": 0.163194,
+      "maximum_conflicting_label_range": 13.83,
+      "duplicate_interpretation": "Identical observable state-action features can have different labels because future packet loss is stochastic and defense policy identity is not exposed to AURA.",
+      "group_size_counts": {
+        "4": 144
+      },
+      "action_counts": {
+        "failover_chasing": 144,
+        "link_degradation": 144,
+        "mission_aware_delay": 144,
+        "none": 144
+      },
+      "label": {
+        "minimum": -6.01,
+        "p05": -1.2,
+        "median": 0.0,
+        "p95": 4.2,
+        "maximum": 13.55,
+        "mean": 0.563628,
+        "zero_rate": 0.526042,
+        "positive_rate": 0.355903,
+        "negative_rate": 0.118056
+      }
+    },
+    "generated_jsonl": "outputs/datasets/aura_counterfactual_rollouts.jsonl",
+    "generated_jsonl_tracked": false
+  },
+  "model_selection_cv": {
+    "hist_gradient_boosting": {
+      "folds": 5.0,
+      "mae": 1.055309,
+      "top1_optimal_rate": 0.716667,
+      "mean_selection_regret": 0.54775
+    },
+    "extra_trees": {
+      "folds": 5.0,
+      "mae": 0.880762,
+      "top1_optimal_rate": 0.744445,
+      "mean_selection_regret": 0.419389
+    }
+  },
+  "metrics": {
+    "train": {
+      "rows": 1440,
+      "groups": 360,
+      "top1_optimal_rate": 0.861111,
+      "exact_top1_action_match_rate": 0.669444,
+      "mean_selection_regret": 0.130167,
+      "p95_selection_regret": 0.76,
+      "selected_no_op_rate": 0.086111,
+      "mae": 0.473881,
+      "rmse": 1.136251,
+      "r2": 0.62875
+    },
+    "validation": {
+      "rows": 576,
+      "groups": 144,
+      "top1_optimal_rate": 0.736111,
+      "exact_top1_action_match_rate": 0.569444,
+      "mean_selection_regret": 0.346458,
+      "p95_selection_regret": 2.64,
+      "selected_no_op_rate": 0.083333,
+      "mae": 0.853815,
+      "rmse": 1.717567,
+      "r2": 0.176222
+    },
+    "validation_rule_ranker": {
+      "rows": 576,
+      "groups": 144,
+      "top1_optimal_rate": 0.326389,
+      "exact_top1_action_match_rate": 0.173611,
+      "mean_selection_regret": 1.594653,
+      "p95_selection_regret": 4.98,
+      "selected_no_op_rate": 0.0,
+      "mae": null,
+      "rmse": null,
+      "r2": null
+    },
+    "validation_zero_model": {
+      "rows": 576,
+      "groups": 144,
+      "top1_optimal_rate": 0.208333,
+      "exact_top1_action_match_rate": 0.208333,
+      "mean_selection_regret": 2.008889,
+      "p95_selection_regret": 6.44,
+      "selected_no_op_rate": 1.0,
+      "mae": null,
+      "rmse": null,
+      "r2": null
+    }
+  },
+  "runtime": {
+    "python": "3.14.4",
+    "scikit_learn": "1.9.0",
+    "numpy": "2.5.1",
+    "joblib": "1.5.3"
+  },
+  "limitations": [
+    "Labels come from the closed synthetic simulator, not operational SATCOM data.",
+    "Validation seeds are independent, but they use the same simulator implementation.",
+    "The model predicts a bounded four-tick macro-action effect, not an RF outcome.",
+    "Closed-loop policy value requires a separate post-training holdout experiment."
+  ],
+  "safety_boundary": {
+    "synthetic_mission_effects_only": true,
+    "exploit_code": false,
+    "operational_rf_parameters": false,
+    "live_network_actions": false
+  }
+}

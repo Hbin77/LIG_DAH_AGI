@@ -8,7 +8,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 PACKAGE_DIRS = ["src", "docs", "examples", "models", "scripts", "tests"]
-PACKAGE_FILES = ["README.md", "requirements.txt"]
+PACKAGE_FILES = ["README.md", "requirements.txt", "requirements-gpu.txt"]
 
 
 def main() -> None:

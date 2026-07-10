@@ -31,6 +31,28 @@
 | `priority_boost_ticks` | Ticks where critical-traffic priority control was active |
 | `model_influenced_ticks` | Ticks where model contribution was required for at least one ML action |
 
+## AURA-ML evaluation
+
+`scripts/evaluate_aura_policy.py` compares rule AURA, trained AURA-ML, and the same
+ML policy with predicted impact fixed to zero. The 30 holdout seeds do not overlap
+training, candidate validation, or policy-development seeds. Higher impact is better
+for the attack agent.
+
+The seed-grouped candidate validation top-1 optimal rate is 0.7361 for AURA-ML,
+versus 0.3264 for the rule ranker. Mean selection regret is 0.3465 versus 1.5947.
+
+| Defense context | ML minus rule impact | Bootstrap 95% CI | ML wins |
+|---|---:|---:|---:|
+| none | 0.6773 | [-0.1240, 1.3657] | 23/30 |
+| threshold rule | 20.4437 | [19.2633, 21.6117] | 30/30 |
+| TSRA-R | 3.0890 | [2.1193, 4.0370] | 25/30 |
+| TSRA-ML | 4.4077 | [3.5283, 5.2823] | 29/30 |
+
+The no-defense interval crosses zero, so only the defended-context improvements are
+treated as statistically supported. AURA-ML beats its zero-model ablation on 30/30
+seeds in every context. Evidence is fixed in
+`examples/aura_ml_holdout_30_seed_summary.json`.
+
 ## Current multi-seed result
 
 Command:

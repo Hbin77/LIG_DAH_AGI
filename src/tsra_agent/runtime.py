@@ -153,11 +153,19 @@ class AgentMemory:
 class AgentTraceRecorder:
     """Persists observe-memory-tool-candidate-decision-feedback loops."""
 
-    def __init__(self, agent_name: str, goal: str) -> None:
+    def __init__(
+        self,
+        agent_name: str,
+        goal: str,
+        *,
+        retain_traces: bool = True,
+    ) -> None:
         self.agent_name = agent_name
         self.goal = goal
         self.memory = AgentMemory()
+        self.retain_traces = retain_traces
         self.traces: list[dict[str, Any]] = []
+        self._trace_count = 0
 
     def observe(self, state: Any) -> dict[str, Any]:
         observation = {
@@ -200,8 +208,9 @@ class AgentTraceRecorder:
         for tool_call in plain_tool_calls:
             validate_tool_call(tool_call)
 
+        self._trace_count += 1
         trace = {
-            "trace_id": f"{slug(self.agent_name)}-{len(self.traces) + 1:05d}",
+            "trace_id": f"{slug(self.agent_name)}-{self._trace_count:05d}",
             "agent": self.agent_name,
             "tick": tick,
             "goal": self.goal,
@@ -215,7 +224,8 @@ class AgentTraceRecorder:
             "feedback": to_plain(feedback or {}),
             "safety_boundary": "closed synthetic mission simulation only; no RF parameters, exploit code, or live network action",
         }
-        self.traces.append(trace)
+        if self.retain_traces:
+            self.traces.append(trace)
         self.memory.remember_decision(trace)
         return trace
 
@@ -223,10 +233,20 @@ class AgentTraceRecorder:
 class AgentRuntime:
     """Owns one agent's observe-tool-decide-feedback execution lifecycle."""
 
-    def __init__(self, agent_name: str, goal: str) -> None:
+    def __init__(
+        self,
+        agent_name: str,
+        goal: str,
+        *,
+        retain_traces: bool = True,
+    ) -> None:
         self.agent_name = agent_name
         self.goal = goal
-        self.recorder = AgentTraceRecorder(agent_name, goal)
+        self.recorder = AgentTraceRecorder(
+            agent_name,
+            goal,
+            retain_traces=retain_traces,
+        )
         self.memory = self.recorder.memory
         self._tools: dict[str, AgentTool] = {}
         self._phase = "idle"

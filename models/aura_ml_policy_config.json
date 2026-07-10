@@ -1,0 +1,11 @@
+{
+  "schema_version": "aura-ml-policy-config/v1",
+  "model_path": "models/aura_rollout_policy.joblib",
+  "model_sha256": "8f969a4219c64b2e5023418012039c231415ae5d06ead78d82b97e23e8c7e94b",
+  "config": {
+    "detectability_weight": 0.05,
+    "repeated_tactic_penalty": 0.03,
+    "minimum_predicted_impact": 0.02,
+    "commitment_ticks": 4.0
+  }
+}

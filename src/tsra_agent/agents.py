@@ -81,7 +81,7 @@ class AURALite:
                     mode,
                     target,
                     intensity,
-                    30 if eligible else 0,
+                    1 if eligible else 0,
                     eligible,
                     score,
                     self._rationale(mode, target, state) if eligible else window_reason,

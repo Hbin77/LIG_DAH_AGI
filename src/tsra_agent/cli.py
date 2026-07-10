@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .evaluator import resilience_gain
+from .attack_ml_policy import load_attack_model
 from .ml_policy import AblatedRiskModel
 from .models import AttackMode
 from .simulator import MissionSimulator, write_result
@@ -25,6 +26,15 @@ EXPERIMENTS = {
 }
 
 
+def experiment_descriptions(attack_policy: str) -> dict[str, str]:
+    attack_name = "AURA-ML" if attack_policy == "ml" else "AURA-lite"
+    descriptions = dict(EXPERIMENTS)
+    descriptions["attacked"] = (
+        f"E2 hybrid {attack_name} mission-effect attack without defense"
+    )
+    return descriptions
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run TSRA-R / AURA-lite mission simulation.")
     parser.add_argument("--scenario", default="hybrid", choices=[mode.value for mode in AttackMode])
@@ -32,6 +42,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--seeds", default=None, help="Comma-separated seeds. Overrides --seed when provided.")
     parser.add_argument("--output-dir", default=None)
+    parser.add_argument(
+        "--attack-policy",
+        default="rule",
+        choices=["rule", "ml"],
+        help="Attack agent policy. The default preserves the canonical AURA-lite suite.",
+    )
     return parser.parse_args()
 
 
@@ -41,7 +57,13 @@ def main() -> None:
     scenario = AttackMode(args.scenario)
     seeds = parse_seeds(args.seeds, args.seed)
 
-    summary = run_suite(scenario, args.ticks, seeds, output_dir)
+    summary = run_suite(
+        scenario,
+        args.ticks,
+        seeds,
+        output_dir,
+        attack_policy=args.attack_policy,
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     (output_dir / "incident_report.md").write_text(build_report(summary), encoding="utf-8")
@@ -63,18 +85,43 @@ def parse_seeds(seed_arg: str | None, fallback_seed: int) -> list[int]:
     return seeds
 
 
-def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Path) -> dict[str, Any]:
+def run_suite(
+    scenario: AttackMode,
+    ticks: int,
+    seeds: list[int],
+    output_dir: Path,
+    *,
+    attack_policy: str = "rule",
+) -> dict[str, Any]:
+    attack_model = load_attack_model() if attack_policy == "ml" else None
+    attack_kwargs = {
+        "attack_policy": attack_policy,
+        "attack_model": attack_model,
+    }
     runs = []
     for seed in seeds:
         seed_dir = output_dir / f"seed_{seed}" if len(seeds) > 1 else output_dir
-        baseline = MissionSimulator(ticks, seed, AttackMode.NONE, defense_enabled=False).run("baseline")
-        attacked = MissionSimulator(ticks, seed, scenario, defense_enabled=False).run("attacked")
+        baseline = MissionSimulator(
+            ticks,
+            seed,
+            AttackMode.NONE,
+            defense_enabled=False,
+            **attack_kwargs,
+        ).run("baseline")
+        attacked = MissionSimulator(
+            ticks,
+            seed,
+            scenario,
+            defense_enabled=False,
+            **attack_kwargs,
+        ).run("attacked")
         rule_defended = MissionSimulator(
             ticks,
             seed,
             scenario,
             defense_enabled=True,
             defense_mode="rule",
+            **attack_kwargs,
         ).run("rule_defended")
         defended = MissionSimulator(
             ticks,
@@ -82,6 +129,7 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             scenario,
             defense_enabled=True,
             defense_mode="tsra",
+            **attack_kwargs,
         ).run("defended")
         ml_defended = MissionSimulator(
             ticks,
@@ -89,6 +137,7 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             scenario,
             defense_enabled=True,
             defense_mode="ml",
+            **attack_kwargs,
         ).run("ml_defended")
         ml_ablated = MissionSimulator(
             ticks,
@@ -97,6 +146,7 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             defense_enabled=True,
             defense_mode="ml",
             sklearn_model=AblatedRiskModel(),
+            **attack_kwargs,
         ).run("ml_ablated")
         guarded_baseline = MissionSimulator(
             ticks,
@@ -104,6 +154,7 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             AttackMode.NONE,
             defense_enabled=True,
             defense_mode="tsra",
+            **attack_kwargs,
         ).run("guarded_baseline")
         ml_guarded_baseline = MissionSimulator(
             ticks,
@@ -111,6 +162,7 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             AttackMode.NONE,
             defense_enabled=True,
             defense_mode="ml",
+            **attack_kwargs,
         ).run("ml_guarded_baseline")
         for result in (
             baseline,
@@ -144,9 +196,10 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
 
     summary: dict[str, Any] = {
         "scenario": scenario.value,
+        "attack_policy": attack_policy,
         "ticks": ticks,
         "seeds": seeds,
-        "experiments": EXPERIMENTS,
+        "experiments": experiment_descriptions(attack_policy),
         "runs": runs,
         "aggregate": aggregate_runs(runs),
     }
@@ -211,6 +264,7 @@ def build_manifest(summary: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": "tsra-run-manifest/v2",
         "scenario": summary["scenario"],
+        "attack_policy": summary.get("attack_policy", "rule"),
         "ticks": summary["ticks"],
         "seeds": summary["seeds"],
         "experiments": summary["experiments"],
@@ -225,6 +279,10 @@ def build_manifest(summary: dict[str, Any]) -> dict[str, Any]:
             "models/tsra_ml_policy_config.json",
             "models/tsra_ml_tuning_report.json",
             "models/tsra_final_selection_report.json",
+            "models/aura_rollout_policy.joblib",
+            "models/aura_rollout_training_report.json",
+            "models/aura_ml_policy_config.json",
+            "examples/aura_ml_holdout_30_seed_summary.json",
             "seed_<seed>/<experiment>_events.jsonl",
             "seed_<seed>/<experiment>_aura_decision_traces.jsonl",
             "seed_<seed>/<experiment>_tsra_decision_traces.jsonl",
@@ -259,6 +317,7 @@ def build_report(summary: dict) -> str:
     ml_gain = summary["aggregate"]["ml_resilience_gain_percent"]
     ml_ablated_gain = summary["aggregate"]["ml_ablated_resilience_gain_percent"]
     rule_gain = summary["aggregate"]["rule_resilience_gain_percent"]
+    attack_name = "AURA-ML" if summary.get("attack_policy") == "ml" else "AURA-lite"
     return f"""# TSRA-R / AURA-lite Incident Summary
 
 ## Scenario
@@ -269,7 +328,7 @@ def build_report(summary: dict) -> str:
 
 ## Key Findings
 
-- AURA-lite increased mean mission impact score to `{attacked["mission_impact_score"]["mean"]}` under the attack condition.
+- {attack_name} increased mean mission impact score to `{attacked["mission_impact_score"]["mean"]}` under the attack condition.
 - Rule defense reduced mean mission impact score to `{rule_defended["mission_impact_score"]["mean"]}` with `{rule_gain["mean"]}%` baseline-adjusted gain.
 - TSRA-R-lite reduced mean mission impact score to `{defended["mission_impact_score"]["mean"]}`.
 - Mean baseline-adjusted resilience gain was `{gain["mean"]}%`.
@@ -299,7 +358,7 @@ def build_report(summary: dict) -> str:
 
 ## Agent Actions
 
-- AURA-lite selected bounded, abstract COAs across link degradation, mission-aware delay, and failover chasing inside a synthetic mission-event simulator.
+- {attack_name} selected bounded, abstract COAs across link degradation, mission-aware delay, and failover chasing inside a synthetic mission-event simulator.
 - TSRA-R-lite applied risk fusion, critical traffic priority boosting, PACE routing, COP stale badge, terminal/source quarantine flags, and minimum mode.
 - TSRA-ML used a trained scikit-learn histogram gradient-boosting policy plus tuned guardrails for proactive priority boosting, adaptive UAV snapshot compression, EDF scheduling, SATCOM return hysteresis, and stale noncritical backlog control.
 

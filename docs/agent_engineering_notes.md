@@ -40,22 +40,28 @@ Every completed trace must end in `runtime.phase=feedback_attached`. A trace tha
 only records a decision but never observes the resulting environment state is
 considered incomplete by the DEV verifier.
 
-## Attack Agent: AURA-lite
+## Attack Agent: AURA-lite and AURA-ML
 
 Implementation: `src/tsra_agent/attack_agent.py`
 
 Policy primitive: `AURALite` in `src/tsra_agent/agents.py`
 
 Goal: select one bounded synthetic mission effect, including a valid no-op, from
-the current link, queue, freshness, and PACE state.
+the current link, queue, freshness, and PACE state. The CLI exposes `rule` and
+trained `ml` attack-policy modes behind the same runtime contract.
 
 Registered tools:
 
-1. `rank_attack_candidates`
+1. `generate_attack_candidates`
    - Produces no-op, link degradation, mission-aware delay, and failover-chasing candidates.
-   - Scores only candidates allowed by the configured scenario and attack window.
-   - Reads the previous attack mode from `AgentMemory` and applies a small, bounded repeat penalty.
-2. `select_attack_effect`
+   - Marks candidates allowed by the configured scenario and bounded attack window.
+2. `predict_attack_impacts` (AURA-ML)
+   - Executes the bundled ExtraTrees rollout model over all four candidates.
+   - Predicts incremental simulator mission impact versus a paired no-op commitment.
+3. `rank_attack_candidates`
+   - Combines learned impact, heuristic detectability, minimum-impact threshold, and repeat cost.
+   - Records rule and zero-model counterfactual choices for attribution.
+4. `select_attack_effect`
    - Materializes the highest-scored candidate as an `AttackAction`.
    - Returns the selected score and candidate count as part of the real tool result.
 
@@ -63,9 +69,15 @@ The selected effect is applied only to simulator state. The following tick feedb
 contains queue depth, delivered/lost/stale counts, active path, SATCOM health, and
 critical latency observed after processing.
 
-AURA-lite is currently a deterministic candidate-ranking agent. It is not described
-as a trained attack model. This distinction is intentional and must remain explicit
-until a trained attack-impact policy is integrated into this DEV execution path.
+`AURA-lite` remains the deterministic canonical comparator. `AURA-ML` uses a trained
+28-feature ExtraTrees rollout ranker and a four-tick bounded commitment stored in
+`AgentMemory`. A zero-impact model runs through the same ML path as the causal
+ablation. The MPS-trained student is retained as an experiment but is not the runtime
+backend because it failed the threshold-rule closed-loop promotion gate.
+
+The complete attack-model data and holdout evidence is recorded in
+`docs/aura_ml_engineering_record.md`; GPU scale evidence is recorded in
+`docs/aura_mps_scale_experiment.md`.
 
 ## Defense Agent: TSRA-R
 
@@ -190,6 +202,11 @@ fails:
 - tool input/output, status, or synthetic safety check is missing;
 - environment feedback was not attached to every smoke-run trace;
 - AURA selection differs from the highest ranked candidate;
+- AURA-ML model/config/evidence hashes, seed split, ranking metrics, or 30-seed
+  defended-context intervals fail;
+- AURA-ML does not execute its prediction tool, memory commitment, or model attribution;
+- MPS scale evidence claims unique candidates, loses dataset provenance, or is
+  promoted despite the recorded closed-loop gate failure;
 - TSRA-ML prediction, risk fusion, action selection, or attribution is missing;
 - TSRA-ML has no model-influenced actions in the closed-loop smoke run;
 - TSRA-ML intervention count is not lower than TSRA-R in the fixed evaluation;
@@ -227,3 +244,17 @@ despite taking different control paths.
 Excluded local `.DS_Store` and `__MACOSX` metadata from generated ZIP files and the
 package verifier. Local workspaces and fresh GitHub clones now produce the same
 source-file entry set.
+
+### 2026-07-10: Counterfactual rollout attack model
+
+Rejected the analytic-estimator imitation model and trained AURA-ML on paired
+simulator rollout deltas. Seed-grouped validation improved top-1 optimal selection
+from 0.3264 for the rule ranker to 0.7361, and a disjoint 30-seed closed-loop holdout
+showed positive intervals against rule, TSRA-R, and TSRA-ML defenses.
+
+### 2026-07-10: Mac MPS scale gate
+
+Trained a listwise MLP for exactly 20,000,000 sample-passes on Apple MPS. It improved
+candidate validation but lost 37.193 impact points to ExtraTrees against threshold
+rule defense, so the runtime remained on ExtraTrees. This preserves a performance-
+based promotion rule instead of treating GPU use as automatic model quality.

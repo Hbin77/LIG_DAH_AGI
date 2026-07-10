@@ -129,6 +129,7 @@ class TSRAAgent:
         *,
         policy_config: dict[str, float] | None = None,
         sklearn_model: object | None = None,
+        retain_traces: bool = True,
     ) -> None:
         if mode not in {"rule", "tsra", "ml"}:
             raise ValueError(f"unsupported defense agent mode: {mode}")
@@ -151,6 +152,7 @@ class TSRAAgent:
         self.runtime = AgentRuntime(
             agent_name=agent_name,
             goal="detect and mitigate synthetic C4ISR data-trust degradation",
+            retain_traces=retain_traces,
         )
         if mode == "ml":
             self.runtime.register_tool(

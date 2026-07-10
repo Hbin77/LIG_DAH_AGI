@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,15 @@ from types import SimpleNamespace
 
 from scripts.build_submission_zip import should_include
 from src.tsra_agent.attack_agent import AURAAgent
+from src.tsra_agent.attack_ml_policy import (
+    ATTACK_FEATURE_NAMES,
+    DEFAULT_ATTACK_CONFIG_PATH,
+    DEFAULT_ATTACK_MODEL_PATH,
+    DEFAULT_MPS_STUDENT_PATH,
+    AblatedAttackImpactModel,
+    load_attack_model,
+    load_mps_student_model,
+)
 from src.tsra_agent.defense_agent import TSRAAgent
 from src.tsra_agent.evaluator import resilience_gain
 from src.tsra_agent.ml_policy import (
@@ -153,6 +163,147 @@ class SimulationMetricTests(unittest.TestCase):
         self.assertEqual(labels.count(1), 100)
         self.assertTrue(all(len(sample.features) == 12 for sample in samples))
         self.assertNotIn("defense_alerted", FEATURE_NAMES)
+
+    def test_aura_rollout_model_uses_seed_split_and_improves_ranking(self) -> None:
+        report_path = Path("models/aura_rollout_training_report.json")
+        self.assertTrue(DEFAULT_ATTACK_MODEL_PATH.exists())
+        self.assertTrue(DEFAULT_ATTACK_CONFIG_PATH.exists())
+        self.assertTrue(report_path.exists())
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        model = load_attack_model()
+
+        self.assertEqual(report["feature_names"], ATTACK_FEATURE_NAMES)
+        self.assertEqual(report["split_contract"]["seed_overlap"], [])
+        self.assertFalse(report["split_contract"]["row_random_split"])
+        self.assertEqual(
+            hashlib.sha256(DEFAULT_ATTACK_MODEL_PATH.read_bytes()).hexdigest(),
+            report["model_sha256"],
+        )
+        self.assertEqual(model.n_jobs, 1)
+        self.assertEqual(model.n_features_in_, len(ATTACK_FEATURE_NAMES))
+        learned = report["metrics"]["validation"]
+        rule = report["metrics"]["validation_rule_ranker"]
+        self.assertGreaterEqual(learned["top1_optimal_rate"], 0.70)
+        self.assertGreater(learned["top1_optimal_rate"], rule["top1_optimal_rate"])
+        self.assertLess(learned["mean_selection_regret"], rule["mean_selection_regret"])
+        self.assertGreater(
+            report["dataset"]["validation"]["conflicting_duplicate_feature_row_rate"],
+            0.0,
+        )
+
+    def test_aura_ml_executes_model_tool_and_beats_zero_model(self) -> None:
+        learned = MissionSimulator(
+            48,
+            2003,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="tsra",
+            attack_policy="ml",
+        ).run("aura_ml")
+        zero = MissionSimulator(
+            48,
+            2003,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="tsra",
+            attack_policy="ml",
+            attack_model=AblatedAttackImpactModel(),
+        ).run("aura_zero")
+
+        self.assertGreater(
+            learned.metrics.mission_impact_score,
+            zero.metrics.mission_impact_score,
+        )
+        self.assertEqual(len(learned.traces["aura"]), 48)
+        self.assertTrue(all(trace["agent"] == "AURA-ML" for trace in learned.traces["aura"]))
+        prediction_calls = [
+            tool
+            for trace in learned.traces["aura"]
+            for tool in trace["tool_calls"]
+            if tool["tool_name"] == "predict_attack_impacts"
+        ]
+        self.assertEqual(len(prediction_calls), 48)
+        active_traces = [
+            trace
+            for trace in learned.traces["aura"]
+            if trace["selected_action"]["mode"] != AttackMode.NONE.value
+        ]
+        self.assertTrue(active_traces)
+        basis = active_traces[0]["selected_action"]["decision_basis"]
+        self.assertEqual(basis["model_backend"], "sklearn_extra_trees_regressor")
+        self.assertEqual(basis["commitment_ticks"], 4)
+        self.assertTrue(basis["model_influenced"])
+        self.assertTrue(
+            any(
+                trace["selected_action"]["decision_basis"]["selection_source"]
+                == "memory_commitment"
+                for trace in active_traces
+            )
+        )
+
+    def test_aura_holdout_is_disjoint_and_positive_against_defenses(self) -> None:
+        path = Path("examples/aura_ml_holdout_30_seed_summary.json")
+        self.assertTrue(path.exists())
+        holdout = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(holdout["seed_count"], 30)
+        self.assertEqual(holdout["seed_provenance"]["holdout_overlap"], [])
+        self.assertTrue(holdout["acceptance"]["closed_loop_holdout_pass"])
+        self.assertEqual(
+            holdout["model_provenance"]["sha256"],
+            hashlib.sha256(DEFAULT_ATTACK_MODEL_PATH.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(
+            holdout["model_provenance"]["config_sha256"],
+            hashlib.sha256(DEFAULT_ATTACK_CONFIG_PATH.read_bytes()).hexdigest(),
+        )
+        for context in ["rule", "tsra", "ml"]:
+            evidence = holdout["conditions"][context]
+            self.assertGreater(
+                evidence["paired_ml_minus_rule"]["bootstrap_95_ci"][0],
+                0.0,
+            )
+            self.assertGreater(
+                evidence["paired_ml_minus_zero_model"]["bootstrap_95_ci"][0],
+                0.0,
+            )
+            self.assertGreater(
+                evidence["aura_ml_agent"]["model_influenced_ticks"]["mean"],
+                0.0,
+            )
+
+    def test_mps_scale_evidence_preserves_closed_loop_rejection(self) -> None:
+        metrics_path = Path("models/aura_mps_student_metrics.json")
+        selection_path = Path("models/aura_mps_selection_report.json")
+        self.assertTrue(DEFAULT_MPS_STUDENT_PATH.exists())
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        selection = json.loads(selection_path.read_text(encoding="utf-8"))
+        model = load_mps_student_model()
+
+        self.assertEqual(metrics["runtime"]["device"], "mps")
+        self.assertTrue(metrics["runtime"]["mps_available"])
+        self.assertEqual(metrics["training_scale"]["total_sample_passes"], 20_000_000)
+        self.assertFalse(metrics["training_scale"]["unique_candidate_claim"])
+        self.assertEqual(metrics["dataset_provenance"]["unique_train_rows"], 1440)
+        self.assertTrue(metrics["dataset_provenance"]["matches_primary_training_report"])
+        self.assertGreater(
+            metrics["validation"]["top1_optimal_rate"],
+            metrics["primary_extra_trees_comparison"]["top1_optimal_rate"],
+        )
+        self.assertEqual(
+            metrics["portable_export_sha256"],
+            hashlib.sha256(DEFAULT_MPS_STUDENT_PATH.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(model.n_features_in_, len(ATTACK_FEATURE_NAMES))
+        self.assertEqual(len(model.predict([[0.0] * len(ATTACK_FEATURE_NAMES)])), 1)
+        decision = selection["promotion_decision"]
+        self.assertTrue(decision["candidate_validation_pass"])
+        self.assertFalse(decision["promote_to_agent_runtime"])
+        self.assertEqual(decision["selected_runtime_backend"], "sklearn_extra_trees_regressor")
+        self.assertLess(
+            selection["closed_loop_development_gate"]["rule"]
+            ["paired_mps_minus_extra_trees"]["mean"],
+            0.0,
+        )
 
 
 class CliArtifactTests(unittest.TestCase):

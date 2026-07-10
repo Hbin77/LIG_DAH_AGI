@@ -10,7 +10,7 @@ This package is intentionally a safe DAH 2026 preliminary prototype.
 - Adaptive UAV snapshot compression and traffic shaping inside the synthetic simulator.
 - C4ISR data freshness and urgency scoring.
 - Event logs and metrics for report evidence.
-- Synthetic ML training data, a trained scikit-learn mission-risk classifier, and tuned defensive action gates.
+- Synthetic ML training data, a trained counterfactual rollout attack ranker, a trained mission-risk classifier, and tuned bounded action gates.
 
 ## Excluded
 

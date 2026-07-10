@@ -49,6 +49,11 @@ class MissionSimulator:
     defense_mode: str = "tsra"
     defense_config: dict[str, float] | None = None
     sklearn_model: object | None = None
+    attack_policy: str = "rule"
+    attack_model: object | None = None
+    attack_config: dict[str, float] | None = None
+    attack_overrides: dict[int, AttackMode] | None = None
+    retain_agent_traces: bool = True
     rng: random.Random = field(init=False)
     queue: deque[MissionMessage] = field(default_factory=deque)
     msg_counter: int = 0
@@ -61,6 +66,7 @@ class MissionSimulator:
     source_trust_drop_window: deque[float] = field(default_factory=lambda: deque(maxlen=20))
     pace_instability_window: deque[float] = field(default_factory=lambda: deque(maxlen=20))
     max_noncritical_created_delivered: int = -1
+    observed_states: list[MissionState] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
         self.rng = random.Random(self.seed)
@@ -70,11 +76,18 @@ class MissionSimulator:
             LinkName.LTE: LinkState(LinkName.LTE, 420, 2, 0.05, 2),
             LinkName.MESH: LinkState(LinkName.MESH, 260, 4, 0.04, 2),
         }
-        self.red = AURAAgent(self.attack_mode)
+        self.red = AURAAgent(
+            self.attack_mode,
+            policy_kind=self.attack_policy,
+            impact_model=self.attack_model,
+            policy_config=self.attack_config,
+            retain_traces=self.retain_agent_traces,
+        )
         self.blue = TSRAAgent(
             self.defense_mode if self.defense_enabled else "tsra",
             policy_config=self.defense_config,
             sklearn_model=self.sklearn_model,
+            retain_traces=self.retain_agent_traces,
         )
 
     def run(self, name: str) -> SimulationResult:
@@ -83,7 +96,13 @@ class MissionSimulator:
             queue_depth_before = len(self.queue)
             self._generate_messages(tick)
             state = self._state(tick)
-            attack = self.red.decide(state)
+            self.observed_states.append(state)
+            forced_mode = (
+                self.attack_overrides.get(tick)
+                if self.attack_overrides is not None
+                else None
+            )
+            attack = self.red.decide(state, forced_mode=forced_mode)
             self._apply_attack(tick, attack)
 
             defense = DefenseAction(self.active_link, False, False, None, False)
