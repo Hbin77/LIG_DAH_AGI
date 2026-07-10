@@ -6,19 +6,24 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
+from src.tsra_agent.attack_agent import AURAAgent
+from src.tsra_agent.defense_agent import TSRAAgent
 from src.tsra_agent.evaluator import resilience_gain
 from src.tsra_agent.ml_policy import (
+    AblatedRiskModel,
     DEFAULT_MODEL_PATH,
     DEFAULT_POLICY_CONFIG_PATH,
     DEFAULT_SKLEARN_MODEL_PATH,
+    FEATURE_NAMES,
     generate_training_samples,
     load_model,
     load_policy_config,
     load_sklearn_model,
 )
-from src.tsra_agent.models import AttackMode
-from src.tsra_agent.runtime import TOOL_CALL_REQUIRED_FIELDS
+from src.tsra_agent.models import AttackMode, LinkName
+from src.tsra_agent.runtime import AgentRuntime, TOOL_CALL_REQUIRED_FIELDS
 from src.tsra_agent.simulator import MissionSimulator
 
 
@@ -83,7 +88,7 @@ class SimulationMetricTests(unittest.TestCase):
         model = load_model()
         policy_config = load_policy_config()
         sklearn_model = load_sklearn_model()
-        self.assertGreaterEqual(model.metrics["validation_f1"], 0.99)
+        self.assertGreaterEqual(model.metrics["validation_f1"], 0.97)
         self.assertLessEqual(policy_config["ml_priority_threshold"], 0.35)
         self.assertTrue(hasattr(sklearn_model, "predict_proba"))
 
@@ -91,7 +96,11 @@ class SimulationMetricTests(unittest.TestCase):
         tuning_report = Path("models/tsra_ml_tuning_report.json")
         report = json.loads(sklearn_report.read_text(encoding="utf-8"))
         tuning = json.loads(tuning_report.read_text(encoding="utf-8"))
-        self.assertGreaterEqual(report["metrics"]["validation_f1"], 0.99)
+        self.assertGreaterEqual(report["metrics"]["validation_f1"], 0.985)
+        self.assertGreaterEqual(
+            report["closed_loop_oracle_validation"]["conditions"]["attacked"]["f1"],
+            0.95,
+        )
         self.assertGreaterEqual(tuning["validation_result"]["metrics"]["resilience_gain_percent"], 70.0)
 
         baseline = MissionSimulator(180, 7, AttackMode.NONE, defense_enabled=False).run("baseline")
@@ -110,21 +119,39 @@ class SimulationMetricTests(unittest.TestCase):
             defense_enabled=True,
             defense_mode="ml",
         ).run("ml_defended")
+        ml_ablated = MissionSimulator(
+            180,
+            7,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="ml",
+            sklearn_model=AblatedRiskModel(),
+        ).run("ml_ablated")
 
         self.assertEqual(ml.metrics.priority_inversion_rate, 0)
         self.assertEqual(ml.metrics.expired_messages, 0)
         self.assertGreater(ml.metrics.compressed_messages, 0)
         self.assertLessEqual(ml.metrics.backlog_messages, tsra.metrics.backlog_messages)
         self.assertLessEqual(ml.metrics.recovery_time, tsra.metrics.recovery_time)
+        self.assertLess(ml.metrics.defense_intervention_ticks, tsra.metrics.defense_intervention_ticks)
+        self.assertLess(ml.metrics.priority_boost_ticks, tsra.metrics.priority_boost_ticks)
+        self.assertGreater(ml.metrics.model_influenced_ticks, 0)
+        self.assertEqual(ml_ablated.metrics.model_influenced_ticks, 0)
+        self.assertLess(ml.metrics.mission_impact_score, ml_ablated.metrics.mission_impact_score)
+        self.assertEqual(tsra.metrics.model_influenced_ticks, 0)
         self.assertGreater(
             resilience_gain(attacked.metrics, ml.metrics, baseline.metrics),
             85.0,
         )
 
     def test_training_data_contains_both_classes(self) -> None:
-        labels = [sample.label for sample in generate_training_samples(200, 1234)]
-        self.assertIn(0, labels)
-        self.assertIn(1, labels)
+        samples = generate_training_samples(200, 1234)
+        labels = [sample.label for sample in samples]
+
+        self.assertEqual(labels.count(0), 100)
+        self.assertEqual(labels.count(1), 100)
+        self.assertTrue(all(len(sample.features) == 12 for sample in samples))
+        self.assertNotIn("defense_alerted", FEATURE_NAMES)
 
 
 class CliArtifactTests(unittest.TestCase):
@@ -156,7 +183,9 @@ class CliArtifactTests(unittest.TestCase):
             self.assertEqual(summary["seeds"], [7, 11])
             self.assertIn("defended", summary["aggregate"])
             self.assertIn("ml_defended", summary["aggregate"])
-            self.assertEqual(manifest["schema_version"], "tsra-run-manifest/v1")
+            self.assertIn("ml_ablated", summary["aggregate"])
+            self.assertEqual(manifest["schema_version"], "tsra-run-manifest/v2")
+            self.assertTrue(manifest["agent_runtime_contract"]["post_action_feedback_required"])
             self.assertTrue((output_dir / "incident_report.md").exists())
             trace_csv = output_dir / "report_tables" / "decision_trace_summary.csv"
             trace_md = output_dir / "report_tables" / "decision_trace_summary.md"
@@ -208,6 +237,11 @@ class CliArtifactTests(unittest.TestCase):
             for trace in traces:
                 self.assertTrue(trace["candidate_actions"])
                 self.assertTrue(trace["tool_calls"])
+                self.assertEqual(trace["runtime"]["implementation"], "AgentRuntime")
+                self.assertEqual(trace["runtime"]["phase"], "feedback_attached")
+                self.assertTrue(trace["runtime"]["feedback_attached"])
+                self.assertEqual(trace["feedback"]["feedback_status"], "observed")
+                self.assertIn("queue_depth_after_processing", trace["feedback"])
                 for tool_call in trace["tool_calls"]:
                     self.assertTrue(TOOL_CALL_REQUIRED_FIELDS.issubset(tool_call), tool_call)
                     self.assertEqual(tool_call["status"], "ok")
@@ -239,14 +273,88 @@ class CliArtifactTests(unittest.TestCase):
         ]
         self.assertEqual(len(prediction_tools), 48)
         first_prediction = prediction_tools[0]
-        self.assertEqual(first_prediction["input_summary"]["model_backend"], "sklearn_ensemble")
-        for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
+        self.assertEqual(first_prediction["input_summary"]["model_backend"], "sklearn_hist_gradient_boosting")
+        for key in ["ml_risk", "model_backend", "feature_count"]:
             self.assertIn(key, first_prediction["output_summary"])
-            self.assertIsInstance(first_prediction["output_summary"][key], float)
+
+        fusion_tools = [
+            tool_call
+            for trace in ml_traces
+            for tool_call in trace["tool_calls"]
+            if tool_call["tool_name"] == "fuse_mission_risk"
+        ]
+        self.assertEqual(len(fusion_tools), 48)
+        for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
+            self.assertIn(key, fusion_tools[0]["output_summary"])
+            self.assertIsInstance(fusion_tools[0]["output_summary"][key], float)
 
         first_ml_action = ml_traces[0]["selected_action"]
         self.assertEqual(first_ml_action["decision_basis"]["policy_kind"], "ml_risk_fusion")
-        self.assertEqual(first_ml_action["decision_basis"]["model_backend"], "sklearn_ensemble")
+        self.assertEqual(first_ml_action["decision_basis"]["model_backend"], "sklearn_hist_gradient_boosting")
+        self.assertTrue(
+            any(
+                trace["selected_action"]["decision_basis"]["model_influenced_actions"]
+                for trace in ml_traces
+            )
+        )
+
+
+class AgentRuntimeContractTests(unittest.TestCase):
+    def test_runtime_executes_registered_tool_and_attaches_environment_feedback(self) -> None:
+        invocations = []
+
+        def score_state(*, value: int) -> dict[str, int]:
+            invocations.append(value)
+            return {"score": value * 2}
+
+        runtime = AgentRuntime("Test-Agent", "prove runtime execution")
+        runtime.register_tool("score_state", "score a synthetic state", score_state)
+        state = SimpleNamespace(
+            tick=3,
+            active_link=LinkName.SATCOM,
+            satcom_health=1.0,
+            radio_health=1.0,
+            lte_health=1.0,
+            mesh_health=1.0,
+            queue_depth=1,
+            critical_queue_depth=0,
+            stale_ratio_window=0.0,
+            critical_latency_window=0.0,
+            priority_inversion_window=0.0,
+            terminal_risk_window=0.0,
+            source_trust_drop_window=0.0,
+            pace_instability_window=0.0,
+            current_attack=AttackMode.NONE,
+            defense_alerted=False,
+        )
+
+        runtime.begin_cycle(state)
+        result = runtime.call_tool("score_state", value=4)
+        self.assertEqual(result, {"score": 8})
+        self.assertEqual(invocations, [4])
+        trace = runtime.commit_decision(
+            tick=3,
+            policy="test_policy",
+            candidate_actions=[{"action": "no_op", "selected": True}],
+            selected_action={"type": "no_op"},
+            reason="test",
+        )
+        runtime.attach_feedback({"outcome": "stable"})
+
+        self.assertEqual(trace["tool_calls"][0]["input_summary"], {"value": 4})
+        self.assertEqual(trace["tool_calls"][0]["output_summary"], {"score": 8})
+        self.assertEqual(trace["feedback"]["outcome"], "stable")
+        self.assertTrue(trace["runtime"]["feedback_attached"])
+
+    def test_attack_and_defense_agents_own_separate_runtimes(self) -> None:
+        attack = AURAAgent(AttackMode.HYBRID)
+        defense = TSRAAgent("ml")
+
+        self.assertIsNot(attack.runtime, defense.runtime)
+        self.assertEqual(attack.runtime.agent_name, "AURA-lite")
+        self.assertEqual(defense.runtime.agent_name, "TSRA-ML")
+        self.assertIn("rank_attack_candidates", attack.runtime.registered_tools)
+        self.assertIn("predict_mission_risk", defense.runtime.registered_tools)
 
     def test_tsra_selected_actions_match_selected_candidates(self) -> None:
         for defense_mode, expected_agent in [("tsra", "TSRA-R-lite"), ("ml", "TSRA-ML")]:
@@ -266,7 +374,11 @@ class CliArtifactTests(unittest.TestCase):
                     for candidate in trace["candidate_actions"]
                     if candidate.get("selected") is True
                 ]
-                expected_type = "defense_action" if selected_candidates else "no_op"
+                expected_type = (
+                    "defense_action"
+                    if selected_candidates or trace["selected_action"].get("alert")
+                    else "no_op"
+                )
                 self.assertEqual(trace["selected_action"]["type"], expected_type)
                 self.assertEqual(trace["selected_action"]["actions"], selected_candidates)
                 self.assertTrue(trace["reason"])

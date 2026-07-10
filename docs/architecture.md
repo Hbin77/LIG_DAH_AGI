@@ -4,9 +4,9 @@
 
 TSRA-X is not an operational SATCOM attack tool. It is an AI agent architecture and prototype for DAH 2026 preliminary review:
 
-- `AURA-lite`: bounded red-team mission-effect scenario generator
-- `TSRA-R-lite`: blue-team C4ISR data trust defense agent
-- `TSRA-ML`: trained scikit-learn ensemble risk defense agent with mission guardrails
+- `AURA-lite`: bounded red-team mission-effect agent in `attack_agent.py`
+- `TSRA-R-lite`: blue-team C4ISR data trust agent in `defense_agent.py`
+- `TSRA-ML`: trained scikit-learn histogram gradient-boosting defense agent with mission guardrails
 - `MissionSimulator`: synthetic UAV/UGV/SATCOM/PACE event environment
 - `Evaluator`: mission impact and resilience score generator
 
@@ -14,10 +14,12 @@ TSRA-X is not an operational SATCOM attack tool. It is an AI agent architecture 
 
 ```mermaid
 flowchart LR
-    RED["AURA-lite<br/>Mission-effect Red Scenario Generator"] --> ENV["Synthetic C4ISR SATCOM Environment"]
+    REDRT["AURA AgentRuntime<br/>Memory + Callable Tools + DecisionTrace"] --> RED["AURA-lite<br/>Mission-effect Red Agent"]
+    RED --> ENV["Synthetic C4ISR SATCOM Environment"]
     ENV --> OBS["TSRA-R Observer<br/>Link/Data/Terminal/PACE Signals"]
-    OBS --> RISK["Risk Fusion Core<br/>Link + Stale + Critical Delay + Source Trust + Priority Inversion"]
-    OBS --> ML["TSRA-ML Classifier<br/>Trained GradientBoosting/RandomForest Ensemble"]
+    OBS --> BLUERT["TSRA AgentRuntime<br/>Memory + Callable Tools + DecisionTrace"]
+    BLUERT --> RISK["Risk Fusion Core<br/>Link + Stale + Critical Delay + Source Trust + Priority Inversion"]
+    BLUERT --> ML["TSRA-ML Classifier<br/>HistGradientBoostingClassifier"]
     ML --> RISK
     RISK --> POLICY["Tuned Action Gate<br/>Alert + Priority + Minimum Mode"]
     POLICY --> ROUTE["Critical Traffic Router<br/>Priority Boost + EDF"]
@@ -36,27 +38,31 @@ flowchart LR
 
 1. Observe: link health, active path, queue depth, critical latency, stale ratio, source/terminal risk, priority inversion pressure.
 2. Score: compute a bounded risk score from normalized mission features.
-3. Predict: TSRA-ML estimates mission-risk probability from a trained scikit-learn soft-voting ensemble. A dependency-free logistic model is retained as fallback.
+3. Predict: TSRA-ML estimates proactive intervention probability from a trained scikit-learn histogram gradient-boosting model. A dependency-free logistic model is retained as fallback.
 4. Tune: search action-gate thresholds on the simulator and persist them in `models/tsra_ml_policy_config.json`.
 5. Act: alert, priority boost, EDF scheduling, minimum mode, PACE transition, SATCOM return hysteresis, adaptive UAV snapshot compression, stale badge, quarantine flag, stale noncritical backlog control.
 6. Guard: mission safety guardrails keep critical traffic priority even when the model is uncertain.
-7. Evaluate: compare no-defense, threshold-rule defense, TSRA-R defense, and TSRA-ML defense across multiple seeds.
+7. Feedback: attach post-action queue, delivery, stale, path, health, and latency evidence to the same trace.
+8. Evaluate: compare no-defense, threshold-rule defense, TSRA-R defense, and TSRA-ML defense across multiple seeds.
 
 ## Agent runtime contract
 
-The implemented agents use a lightweight runtime contract rather than only returning simulator actions:
+The implemented agents use an executable runtime contract rather than only returning simulator actions:
 
-- `AgentMemory`: keeps recent observations, recent decisions, and compact belief state.
-- `AgentTool`: records a structured synthetic tool result with `tool_name`, `purpose`, `input_summary`, `output_summary`, `status`, and `safety_checked`.
-- `DecisionTrace`: persists observation, memory, candidate actions, tool results, selected action, model-risk basis, reason, feedback, and safety boundary for each tick.
+- `AgentRuntime`: owns cycle phase, tool registry, bounded memory, decision commit, and environment feedback attachment.
+- `AgentMemory`: keeps recent observations, recent decisions, previous feedback, and compact belief state.
+- `AgentTool`: executes a registered callable and derives `input_summary`, `output_summary`, `status`, and `safety_checked` from that invocation.
+- `DecisionTrace`: persists observation, prior memory, candidate actions, actual tool results, selected action, model-risk basis, reason, post-action feedback, and safety boundary for each tick.
 - `AURA-lite basis`: records no-op, link degradation, mission-aware delay, and failover-chasing candidates with eligibility, score, predicted effect, and selected candidate.
-- `TSRA-ML basis`: records the scikit-learn backend, ML risk probability, heuristic risk, fused risk, weights, and action-gate thresholds used by each ML defense decision.
+- `TSRA-ML basis`: records the scikit-learn backend, ML risk probability, heuristic risk, fused risk, weights, action-gate thresholds, model-influenced actions, and guardrail-triggered actions.
 
-`scripts/verify_submission_state.py` validates this contract across the CLI smoke run, so missing tool fields, missing AURA candidate ranking, missing TSRA-ML risk decomposition, or unsafe tool results fail the DEV quality gate.
+The simulator exchanges only `MissionState`, `AttackAction`, and `DefenseAction` contracts with the separately owned attack and defense agents. It no longer constructs tool records after executing policy code.
+
+`scripts/verify_submission_state.py` validates this contract across the CLI smoke run. A trace fails when its runtime did not execute tools, its environment feedback was not attached, its AURA ranking is inconsistent, or its TSRA-ML risk/action attribution is incomplete.
 
 ## Implemented scope
 
-- Implemented: mission-event simulator, AURA-lite attack pulses, TSRA-R risk fusion, TSRA-ML scikit-learn ensemble classifier, tuned action-gate policy, structured AgentTool/DecisionTrace runtime, PACE path choice and SATCOM return hysteresis, EDF scheduling, adaptive UAV snapshot compression, priority inversion detection, stale noncritical backlog control, multi-seed evaluation, event logs, incident report, tests.
-- Not implemented: real RF control, real exploit execution, device-specific intrusion, live UAV/UGV integration, RAG/RL/XGBoost training.
+- Implemented: separate attack/defense agent ownership, callable-tool AgentRuntime, bounded memory, post-action feedback, mission-event simulator, AURA-lite attack pulses, TSRA-R risk fusion, TSRA-ML histogram gradient-boosting classifier, tuned action-gate policy, model-versus-guardrail attribution, PACE path choice and SATCOM return hysteresis, EDF scheduling, adaptive UAV snapshot compression, priority inversion detection, stale noncritical backlog control, multi-seed evaluation, event logs, and tests.
+- Not implemented: trained attack policy in the DEV path, real RF control, real exploit execution, device-specific intrusion, live UAV/UGV integration, RAG/RL/XGBoost training.
 
 Unimplemented advanced models such as RAG/RL/XGBoost are future work, not claimed as current prototype behavior.

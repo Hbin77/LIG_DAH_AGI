@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 import sys
@@ -12,7 +13,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.tsra_agent.evaluator import resilience_gain
-from src.tsra_agent.ml_policy import DEFAULT_POLICY_CONFIG_PATH, load_sklearn_model, save_policy_config
+from src.tsra_agent.ml_policy import (
+    DEFAULT_POLICY_CONFIG_PATH,
+    DEFAULT_SKLEARN_MODEL_PATH,
+    load_sklearn_model,
+    save_policy_config,
+)
 from src.tsra_agent.models import AttackMode, RunMetrics
 from src.tsra_agent.simulator import MissionSimulator
 
@@ -76,20 +82,33 @@ def main() -> None:
 
     assert best is not None
     validation = evaluate_config(best["config"], args.ticks, validation_refs, sklearn_model)
+    validation_metrics = validation["metrics"]
+    if validation_metrics["missing_model_influence_seed_count"] != 0:
+        raise RuntimeError("selected policy has a validation seed with no learned-model influence")
+    if validation_metrics["guarded_model_influenced_ticks"] != 0:
+        raise RuntimeError("selected policy has learned-model influence under no attack")
     output_path = Path(args.output)
     report_path = Path(args.report)
     save_policy_config(best["config"], output_path)
+    model_sha256 = hashlib.sha256(DEFAULT_SKLEARN_MODEL_PATH.read_bytes()).hexdigest()
+    config_sha256 = hashlib.sha256(output_path.read_bytes()).hexdigest()
 
     top_candidates = sorted(candidate_results, key=lambda item: item["objective"])[:10]
     report = {
-        "schema_version": "tsra-ml-policy-tuning/v1",
+        "schema_version": "tsra-ml-policy-tuning/v2",
         "method": "Randomized guardrail threshold search scored by mission-impact simulation.",
         "ticks": args.ticks,
         "random_seed": args.seed,
         "candidate_count": len(candidate_results),
         "tune_seeds": tune_seeds,
         "validation_seeds": validation_seeds,
-        "selected_policy_config_path": str(output_path),
+        "selected_policy_config_path": display_path(output_path),
+        "selected_policy_config_sha256": config_sha256,
+        "model_provenance": {
+            "path": display_path(DEFAULT_SKLEARN_MODEL_PATH),
+            "sha256": model_sha256,
+            "training_report": "models/tsra_sklearn_training_report.json",
+        },
         "selected_config": best["config"],
         "tune_result": {
             "objective": best["objective"],
@@ -108,6 +127,11 @@ def main() -> None:
                 "excessive video deferral penalty",
                 "excessive compressed snapshot penalty",
                 "planned stale noncritical shedding penalty",
+                "defense intervention cost",
+                "priority-boost control cost",
+                "no-attack intervention cost",
+                "missing closed-loop model influence penalty",
+                "no-attack model influence penalty",
             ],
         },
         "safety_boundary": {
@@ -129,6 +153,13 @@ def parse_seeds(value: str) -> list[int]:
     if not seeds:
         raise ValueError("seed list must contain at least one integer")
     return seeds
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def build_reference_runs(ticks: int, seeds: list[int]) -> dict[int, dict[str, RunMetrics]]:
@@ -268,6 +299,36 @@ def summarize_rows(rows: list[dict[str, Any]], guarded_rows: list[dict[str, Any]
         "false_alarm_rate": round(mean(metric.false_alarm_rate for metric in guarded), 4),
         "false_alarm_count": round(mean(metric.false_alarm_count for metric in guarded), 4),
         "resilience_gain_percent": round(mean(row["gain"] for row in rows), 4),
+        "defense_intervention_ticks": round(
+            mean(metric.defense_intervention_ticks for metric in defended),
+            4,
+        ),
+        "priority_boost_ticks": round(
+            mean(metric.priority_boost_ticks for metric in defended),
+            4,
+        ),
+        "model_influenced_ticks": round(
+            mean(metric.model_influenced_ticks for metric in defended),
+            4,
+        ),
+        "model_influenced_action_count": round(
+            mean(metric.model_influenced_action_count for metric in defended),
+            4,
+        ),
+        "minimum_model_influenced_ticks": min(
+            metric.model_influenced_ticks for metric in defended
+        ),
+        "missing_model_influence_seed_count": sum(
+            metric.model_influenced_ticks == 0 for metric in defended
+        ),
+        "guarded_intervention_ticks": round(
+            mean(metric.defense_intervention_ticks for metric in guarded),
+            4,
+        ),
+        "guarded_model_influenced_ticks": round(
+            mean(metric.model_influenced_ticks for metric in guarded),
+            4,
+        ),
     }
 
 
@@ -286,6 +347,7 @@ def objective_score(metrics: dict[str, Any]) -> float:
     excessive_deferral = max(0.0, float(metrics["deferred_messages"]) - 52.0)
     excessive_compression = max(0.0, float(metrics["compressed_messages"]) - 70.0)
     excessive_shedding = max(0.0, float(metrics["shed_messages"]) - 28.0)
+    missing_model_influence = float(metrics["missing_model_influence_seed_count"])
     return round(
         float(metrics["mission_impact_score"])
         + float(metrics["priority_inversion_rate"]) * 260.0
@@ -297,7 +359,12 @@ def objective_score(metrics: dict[str, Any]) -> float:
         + recovery_time * 0.25
         + excessive_deferral * 0.10
         + excessive_compression * 0.04
-        + excessive_shedding * 0.08,
+        + excessive_shedding * 0.08
+        + float(metrics["defense_intervention_ticks"]) * 0.003
+        + float(metrics["priority_boost_ticks"]) * 0.002
+        + float(metrics["guarded_intervention_ticks"]) * 0.004
+        + missing_model_influence * 8.0
+        + float(metrics["guarded_model_influenced_ticks"]) * 0.20,
         4,
     )
 

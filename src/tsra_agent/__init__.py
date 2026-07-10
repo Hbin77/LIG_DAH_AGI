@@ -2,8 +2,10 @@
 
 __all__ = [
     "agents",
+    "attack_agent",
+    "defense_agent",
     "evaluator",
     "models",
+    "runtime",
     "simulator",
 ]
-

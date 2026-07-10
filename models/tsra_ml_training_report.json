@@ -1,20 +1,56 @@
 {
-  "model_path": "/Users/kth88/Documents/LIG/models/tsra_ml_policy.json",
+  "schema_version": "tsra-logistic-fallback-training/v2",
+  "model_path": "models/tsra_ml_policy.json",
+  "model_sha256": "27732de1e1a9f7af271f8d9f7184fe42b58dc8287491ee449ed30c0ccdeca8b2",
   "report_path": "models/tsra_ml_training_report.json",
   "seed": 20260709,
   "samples": 10000,
   "epochs": 260,
   "metrics": {
-    "train_accuracy": 0.9965,
-    "train_precision": 0.9939,
-    "train_recall": 0.9998,
-    "train_f1": 0.9968,
-    "train_log_loss": 0.0162,
-    "validation_accuracy": 0.9968,
-    "validation_precision": 0.9939,
-    "validation_recall": 1.0,
-    "validation_f1": 0.9969,
-    "validation_log_loss": 0.0159,
+    "train_accuracy": 0.9744,
+    "train_precision": 0.9983,
+    "train_recall": 0.9502,
+    "train_f1": 0.9736,
+    "train_log_loss": 0.0823,
+    "validation_accuracy": 0.9764,
+    "validation_precision": 0.9992,
+    "validation_recall": 0.9543,
+    "validation_f1": 0.9762,
+    "validation_log_loss": 0.0748,
     "samples": 10000.0
+  },
+  "feature_names": [
+    "satcom_degradation",
+    "radio_health",
+    "lte_health",
+    "mesh_health",
+    "queue_pressure",
+    "critical_queue_pressure",
+    "stale_ratio",
+    "critical_latency_pressure",
+    "priority_inversion_pressure",
+    "terminal_risk",
+    "source_trust_drop",
+    "pace_instability"
+  ],
+  "feature_count": 12,
+  "dataset_generator_version": "overlap-balanced-v2",
+  "class_counts": {
+    "0": 5000,
+    "1": 5000
+  },
+  "label_thresholds": {
+    "weighted_mission_risk": 0.18,
+    "critical_latency_pressure": 0.55,
+    "stale_ratio": 0.3
+  },
+  "limitations": [
+    "Dependency-free fallback only; the primary runtime model is scikit-learn.",
+    "All labels are synthetic proactive-intervention oracle labels."
+  ],
+  "safety_boundary": {
+    "synthetic_training_data_only": true,
+    "exploit_code": false,
+    "operational_rf_parameters": false
   }
 }

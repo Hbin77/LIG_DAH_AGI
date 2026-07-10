@@ -20,10 +20,12 @@ The integration therefore keeps `GubikoDev` as the runnable package and ports th
 
 Implemented in this branch:
 
-- `src/tsra_agent/runtime.py`: lightweight AgentMemory and AgentTraceRecorder.
-- `src/tsra_agent/simulator.py`: AURA and TSRA-R decision traces for every simulation run.
+- `src/tsra_agent/runtime.py`: callable-tool `AgentRuntime`, bounded `AgentMemory`, lifecycle enforcement, and environment feedback.
+- `src/tsra_agent/attack_agent.py`: AURA-owned runtime, tools, memory, candidate selection, and traces.
+- `src/tsra_agent/defense_agent.py`: rule/TSRA-R/TSRA-ML runtime ownership and model-versus-guardrail action attribution.
+- `src/tsra_agent/simulator.py`: typed mission-state/action exchange and post-action feedback for every agent cycle.
 - `src/tsra_agent/cli.py`: run manifest now lists decision-trace artifacts.
-- `tests/test_simulation.py`: CLI regression now verifies TSRA decision trace structure.
+- `tests/test_simulation.py`: runtime invocation, attack/defense separation, feedback, ML attribution, and CLI regression.
 - `scripts/verify_submission_state.py`: DEV-specific final gate for tests, CLI smoke output, DecisionTrace schema, model metrics, safety boundary, package contents, and branch/worktree hygiene.
 - `.github/workflows/dev-quality.yml`: CI gate for pushes and pull requests targeting `DEV`.
 
@@ -61,14 +63,14 @@ The following `hbin` material remains intentionally excluded: its separate `src/
 ## Repro Commands
 
 ```bash
-conda run -n base python -m unittest discover -s tests -v
-conda run -n base python -m src.tsra_agent.cli \
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m src.tsra_agent.cli \
   --scenario hybrid \
   --ticks 180 \
   --seeds 7,11,19,23,31 \
   --output-dir outputs/integration_check
-conda run -n base python scripts/build_submission_zip.py
-conda run -n base python scripts/verify_submission_state.py --require-dev --require-clean
+.venv/bin/python scripts/build_submission_zip.py
+.venv/bin/python scripts/verify_submission_state.py --require-dev --require-clean
 ```
 
 Safety boundary: all attack effects remain closed synthetic mission simulation events only. No exploit code, operational RF parameter, live network action, or equipment-specific intrusion step is included.

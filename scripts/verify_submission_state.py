@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import re
@@ -22,12 +23,15 @@ REQUIRED_FILES = [
     "scripts/build_submission_zip.py",
     "scripts/train_ml_policy.py",
     "scripts/train_sklearn_policy.py",
+    "scripts/summarize_holdout.py",
     "scripts/tune_ml_policy.py",
     "scripts/summarize_decision_traces.py",
     "scripts/verify_submission_state.py",
     "src/tsra_agent/__init__.py",
     "src/tsra_agent/agents.py",
+    "src/tsra_agent/attack_agent.py",
     "src/tsra_agent/cli.py",
+    "src/tsra_agent/defense_agent.py",
     "src/tsra_agent/evaluator.py",
     "src/tsra_agent/ml_policy.py",
     "src/tsra_agent/models.py",
@@ -35,11 +39,13 @@ REQUIRED_FILES = [
     "src/tsra_agent/simulator.py",
     "tests/test_simulation.py",
     "docs/agent_branch_comparison.md",
+    "docs/agent_engineering_notes.md",
     "docs/architecture.md",
     "docs/evaluation_plan.md",
     "docs/report_writer_guide.md",
     "docs/safety_boundary.md",
     "examples/summary_multi_seed.json",
+    "examples/holdout_30_seed_summary.json",
     "examples/incident_report_multi_seed.md",
     "examples/run_manifest_multi_seed.json",
     "models/tsra_ml_policy.json",
@@ -55,17 +61,22 @@ ZIP_REQUIRED_FILES = [
     "README.md",
     "requirements.txt",
     "src/tsra_agent/agents.py",
+    "src/tsra_agent/attack_agent.py",
+    "src/tsra_agent/defense_agent.py",
     "src/tsra_agent/runtime.py",
     "src/tsra_agent/simulator.py",
     "src/tsra_agent/cli.py",
     "models/tsra_sklearn_policy.joblib",
     "models/tsra_sklearn_training_report.json",
     "examples/summary_multi_seed.json",
+    "examples/holdout_30_seed_summary.json",
+    "docs/agent_engineering_notes.md",
     "docs/report_writer_guide.md",
     "docs/safety_boundary.md",
     "tests/test_simulation.py",
     "scripts/build_submission_zip.py",
     "scripts/summarize_decision_traces.py",
+    "scripts/summarize_holdout.py",
     "scripts/verify_submission_state.py",
 ]
 
@@ -82,6 +93,7 @@ TRACE_REQUIRED_FIELDS = {
     "selected_action",
     "reason",
     "feedback",
+    "runtime",
     "safety_boundary",
 }
 
@@ -174,7 +186,7 @@ def check_compile_and_tests() -> list[str]:
     output = "\n".join(part for part in [result.stdout.strip(), result.stderr.strip()] if part)
     match = re.search(r"Ran\s+(\d+)\s+tests?", output)
     test_count = int(match.group(1)) if match else 0
-    require(test_count >= 7, f"expected at least 7 tests, got {test_count}")
+    require(test_count >= 10, f"expected at least 10 tests, got {test_count}")
     return [f"compile=pass", f"unit_tests={test_count} pass"]
 
 
@@ -182,7 +194,10 @@ def check_model_and_example_evidence() -> list[str]:
     import sklearn
 
     fallback_model = read_json(ROOT / "models/tsra_ml_policy.json")
+    fallback_report = read_json(ROOT / "models/tsra_ml_training_report.json")
     sklearn_report = read_json(ROOT / "models/tsra_sklearn_training_report.json")
+    policy_config = read_json(ROOT / "models/tsra_ml_policy_config.json")["config"]
+    tuning_report = read_json(ROOT / "models/tsra_ml_tuning_report.json")
     selection = read_json(ROOT / "models/tsra_final_selection_report.json")
     summary = read_json(ROOT / "examples/summary_multi_seed.json")
 
@@ -190,31 +205,97 @@ def check_model_and_example_evidence() -> list[str]:
         version_tuple(sklearn.__version__) >= (1, 9, 0),
         f"scikit-learn runtime must be >=1.9.0 for the bundled model, got {sklearn.__version__}",
     )
-    require(fallback_model["metrics"]["validation_f1"] >= 0.99, "fallback model validation_f1 below 0.99")
-    require(sklearn_report["metrics"]["validation_f1"] >= 0.99, "sklearn validation_f1 below 0.99")
-    require(sklearn_report["metrics"]["validation_roc_auc"] >= 0.99, "sklearn ROC-AUC below 0.99")
+    require(fallback_model["metrics"]["validation_f1"] >= 0.97, "fallback model validation_f1 below 0.97")
+    require(fallback_report["dataset_generator_version"] == "overlap-balanced-v2", "fallback dataset provenance mismatch")
+    require(sklearn_report["metrics"]["validation_f1"] >= 0.985, "sklearn validation_f1 below 0.985")
+    require(sklearn_report["metrics"]["validation_roc_auc"] >= 0.999, "sklearn ROC-AUC below 0.999")
+    require(sklearn_report["dataset_generator_version"] == "overlap-balanced-v2", "primary dataset provenance mismatch")
+    require(sklearn_report["feature_count"] == 12, "primary model feature count must be 12")
+    require("defense_alerted" not in sklearn_report["feature_names"], "post-decision defense_alerted leaked into model features")
+    data_quality = sklearn_report["data_quality"]
+    require(data_quality["missing_value_count"] == 0, "training data contains missing values")
+    require(data_quality["out_of_range_value_count"] == 0, "training features violate normalized range")
+    require(data_quality["class_balance_delta"] == 0, "training labels are not balanced")
+    trajectory = sklearn_report["closed_loop_oracle_validation"]["conditions"]
+    require(trajectory["attacked"]["f1"] >= 0.95, "attacked-trajectory oracle F1 below 0.95")
+    require(trajectory["baseline"]["false_positive_rate"] <= 0.01, "baseline trajectory false-positive rate too high")
+    require(trajectory["tsra_defended"]["f1"] >= 0.95, "TSRA-defended trajectory oracle F1 below 0.95")
+    model_path = ROOT / "models/tsra_sklearn_policy.joblib"
+    require(
+        hashlib.sha256(model_path.read_bytes()).hexdigest() == sklearn_report["model_sha256"],
+        "bundled sklearn model hash does not match training report",
+    )
     require(selection["final_five_seed_metrics"]["baseline_adjusted_resilience_gain_percent"] >= 85.0, "final resilience gain below 85%")
     require(selection["final_five_seed_metrics"]["false_alarm_rate"] == 0.0, "final false alarm rate must be zero")
+    require(policy_config == tuning_report["selected_config"], "runtime policy config differs from tuning selection")
+    require(policy_config == selection["selected_policy_config"], "final selection report policy config mismatch")
+    require(
+        hashlib.sha256((ROOT / "models/tsra_ml_policy_config.json").read_bytes()).hexdigest()
+        == tuning_report["selected_policy_config_sha256"],
+        "policy config hash does not match tuning report",
+    )
+    require(
+        tuning_report["model_provenance"]["sha256"] == sklearn_report["model_sha256"],
+        "tuning report was produced against a different model artifact",
+    )
+    require(selection["model_provenance"]["sha256"] == sklearn_report["model_sha256"], "final selection model hash mismatch")
+    require(selection["selected_policy_config_sha256"] == tuning_report["selected_policy_config_sha256"], "final selection config hash mismatch")
+    require(
+        tuning_report["validation_result"]["metrics"]["missing_model_influence_seed_count"] == 0,
+        "tuning validation contains a seed with no ML influence",
+    )
+    require(
+        tuning_report["validation_result"]["metrics"]["guarded_model_influenced_ticks"] == 0,
+        "tuning validation has model-influenced actions under no attack",
+    )
 
     aggregate = summary["aggregate"]
     attacked = aggregate["attacked"]["mission_impact_score"]["mean"]
     rule_defended = aggregate["rule_defended"]["mission_impact_score"]["mean"]
     defended = aggregate["defended"]["mission_impact_score"]["mean"]
     ml_defended = aggregate["ml_defended"]["mission_impact_score"]["mean"]
+    ml_ablated = aggregate["ml_ablated"]["mission_impact_score"]["mean"]
     gain = aggregate["resilience_gain_percent"]["mean"]
     ml_gain = aggregate["ml_resilience_gain_percent"]["mean"]
 
     require(attacked > rule_defended > defended, "mission impact ordering must be attacked > rule > TSRA-R")
     require(ml_defended <= rule_defended, "TSRA-ML must beat rule defense")
+    require(ml_defended < defended, "TSRA-ML must improve mission impact over TSRA-R")
+    require(ml_defended < ml_ablated, "learned TSRA-ML must beat its zero-model ablation")
+    require(ml_ablated - ml_defended >= 1.0, "ML causal contribution is below one impact point")
     require(gain >= 85.0 and ml_gain >= 85.0, "TSRA-R/ML resilience gain below 85%")
     require(aggregate["guarded_baseline"]["false_alarm_rate"]["mean"] == 0.0, "guarded baseline false alarm must be zero")
     require(aggregate["ml_guarded_baseline"]["false_alarm_rate"]["mean"] == 0.0, "ML guarded baseline false alarm must be zero")
+    require(
+        aggregate["ml_defended"]["defense_intervention_ticks"]["mean"]
+        < aggregate["defended"]["defense_intervention_ticks"]["mean"],
+        "TSRA-ML must reduce intervention ticks relative to TSRA-R",
+    )
+    require(
+        aggregate["ml_defended"]["priority_boost_ticks"]["mean"]
+        < aggregate["defended"]["priority_boost_ticks"]["mean"],
+        "TSRA-ML must reduce priority-boost ticks relative to TSRA-R",
+    )
+    require(
+        aggregate["ml_defended"]["model_influenced_ticks"]["mean"] > 0,
+        "TSRA-ML must expose model-influenced closed-loop actions",
+    )
 
     return [
         f"sklearn_runtime={sklearn.__version__} pass",
-        f"sklearn_f1={sklearn_report['metrics']['validation_f1']} pass",
+        (
+            f"sklearn_f1={sklearn_report['metrics']['validation_f1']} "
+            f"trajectory_f1={trajectory['attacked']['f1']} pass"
+        ),
         f"mission_impact={attacked}->{rule_defended}->{defended} pass",
         f"resilience_gain={gain} ml={ml_gain} pass",
+        (
+            "agent_action_economy="
+            f"{aggregate['defended']['defense_intervention_ticks']['mean']}"
+            "->"
+            f"{aggregate['ml_defended']['defense_intervention_ticks']['mean']} pass"
+        ),
+        f"ml_ablation_impact={ml_ablated}->{ml_defended} pass",
     ]
 
 
@@ -253,7 +334,12 @@ def check_cli_smoke() -> list[str]:
         require(summary["seeds"] == [7, 11], "smoke summary seed mismatch")
         require("defended" in summary["aggregate"], "summary missing defended aggregate")
         require("ml_defended" in summary["aggregate"], "summary missing ml_defended aggregate")
-        require(manifest["schema_version"] == "tsra-run-manifest/v1", "manifest schema mismatch")
+        require("ml_ablated" in summary["aggregate"], "summary missing ml_ablated aggregate")
+        require(manifest["schema_version"] == "tsra-run-manifest/v2", "manifest schema mismatch")
+        require(
+            manifest["agent_runtime_contract"]["post_action_feedback_required"] is True,
+            "manifest missing AgentRuntime feedback contract",
+        )
         require(manifest["safety_boundary"]["synthetic_mission_event_simulator_only"] is True, "manifest safety boundary missing")
         require("seed_<seed>/<experiment>_tsra_decision_traces.jsonl" in manifest["artifacts"], "manifest missing TSRA trace artifact")
 
@@ -262,6 +348,7 @@ def check_cli_smoke() -> list[str]:
             read_jsonl(seed_dir / "attacked_aura_decision_traces.jsonl"),
             read_jsonl(seed_dir / "defended_tsra_decision_traces.jsonl"),
             read_jsonl(seed_dir / "ml_defended_tsra_decision_traces.jsonl"),
+            read_jsonl(seed_dir / "ml_ablated_tsra_decision_traces.jsonl"),
         ]
         for traces in trace_sets:
             require(len(traces) == 80, f"expected 80 decision traces, got {len(traces)}")
@@ -292,7 +379,11 @@ def check_cli_smoke() -> list[str]:
             len(trace_rows) == expected_trace_rows,
             f"expected {expected_trace_rows} trace summary rows, got {len(trace_rows)}",
         )
-        require({row["agent"] for row in trace_rows} == {"AURA-lite", "TSRA-R", "TSRA-ML"}, "trace summary agent coverage mismatch")
+        require(
+            {row["agent"] for row in trace_rows}
+            == {"AURA-lite", "Rule-Defense", "TSRA-R-lite", "TSRA-ML"},
+            "trace summary agent coverage mismatch",
+        )
         require(trace_md.exists() and trace_md.stat().st_size > 0, "trace summary markdown is missing")
 
         aggregate = summary["aggregate"]
@@ -304,8 +395,59 @@ def check_cli_smoke() -> list[str]:
         )
         require(aggregate["resilience_gain_percent"]["mean"] >= 85.0, "smoke TSRA-R resilience gain below 85%")
         require(aggregate["ml_resilience_gain_percent"]["mean"] >= 85.0, "smoke TSRA-ML resilience gain below 85%")
+        require(
+            aggregate["ml_defended"]["mission_impact_score"]["mean"]
+            < aggregate["ml_ablated"]["mission_impact_score"]["mean"],
+            "smoke learned model did not beat zero-model ablation",
+        )
+        require(
+            aggregate["ml_defended"]["defense_intervention_ticks"]["mean"]
+            < aggregate["defended"]["defense_intervention_ticks"]["mean"],
+            "smoke TSRA-ML intervention count must differ from and improve on TSRA-R",
+        )
+        require(
+            aggregate["ml_defended"]["model_influenced_ticks"]["mean"] > 0,
+            "smoke run did not exercise ML-influenced defense actions",
+        )
 
     return ["cli_smoke=pass", "decision_trace_schema=pass", "decision_trace_summary=pass"]
+
+
+def check_holdout_evidence() -> list[str]:
+    holdout = read_json(ROOT / "examples/holdout_30_seed_summary.json")
+    require(holdout["schema_version"] == "tsra-post-tuning-holdout/v1", "holdout schema mismatch")
+    seeds = holdout["seeds"]
+    require(holdout["seed_count"] == 30 and len(seeds) == 30 and len(set(seeds)) == 30, "holdout must contain 30 unique seeds")
+    require(
+        not (set(seeds) & set(holdout["development_seed_exclusion"])),
+        "holdout overlaps model or policy development seeds",
+    )
+    require(
+        holdout["model_sha256"]
+        == hashlib.sha256((ROOT / "models/tsra_sklearn_policy.joblib").read_bytes()).hexdigest(),
+        "holdout model hash mismatch",
+    )
+    require(
+        holdout["policy_config_sha256"]
+        == hashlib.sha256((ROOT / "models/tsra_ml_policy_config.json").read_bytes()).hexdigest(),
+        "holdout policy hash mismatch",
+    )
+    aggregate = holdout["aggregate"]
+    tsra_impact = aggregate["defended"]["mission_impact_score"]["mean"]
+    ml_impact = aggregate["ml_defended"]["mission_impact_score"]["mean"]
+    ablated_impact = aggregate["ml_ablated"]["mission_impact_score"]["mean"]
+    require(ml_impact < tsra_impact, "30-seed holdout TSRA-ML did not beat TSRA-R")
+    require(ml_impact < ablated_impact, "30-seed holdout learned model did not beat ablation")
+    require(aggregate["ml_defended"]["model_influenced_ticks"]["mean"] > 0, "holdout lacks model influence")
+    require(aggregate["ml_ablated"]["model_influenced_ticks"]["mean"] == 0, "holdout ablation has model influence")
+    require(aggregate["ml_guarded_baseline"]["model_influenced_ticks"]["mean"] == 0, "holdout no-attack model influence is nonzero")
+    require(aggregate["ml_guarded_baseline"]["false_alarm_rate"]["mean"] == 0, "holdout ML false alarm is nonzero")
+    for comparison in holdout["paired_mission_impact"].values():
+        require(comparison["count"] == 30, "holdout paired comparison count mismatch")
+        require(comparison["bootstrap_95_percent_ci"][0] > 0, "holdout paired confidence interval crosses zero")
+        require(comparison["wins"] >= 20, "holdout paired comparison wins below 20/30")
+        require(comparison["losses"] > 0, "holdout artifact must preserve observed losing seeds")
+    return [f"holdout_30_seed_impact={tsra_impact}->{ml_impact} ablation={ablated_impact} pass"]
 
 
 def validate_trace(trace: dict[str, Any]) -> None:
@@ -314,6 +456,13 @@ def validate_trace(trace: dict[str, Any]) -> None:
     require(trace["candidate_actions"], "trace has no candidate actions")
     require(trace["tool_calls"], "trace has no tool calls")
     require(SAFETY_TEXT in trace["safety_boundary"], "trace missing safety boundary")
+    runtime = trace["runtime"]
+    require(runtime.get("implementation") == "AgentRuntime", "trace was not produced by AgentRuntime")
+    require(runtime.get("feedback_attached") is True, "trace missing environment feedback attachment")
+    require(runtime.get("phase") == "feedback_attached", "runtime did not complete the feedback phase")
+    require(runtime.get("tool_call_count") == len(trace["tool_calls"]), "runtime tool-call count mismatch")
+    require(trace["feedback"].get("feedback_status") == "observed", "trace feedback is not observed")
+    require("queue_depth_after_processing" in trace["feedback"], "trace missing closed-loop queue feedback")
     for tool_call in trace["tool_calls"]:
         missing_tool_fields = TOOL_CALL_REQUIRED_FIELDS - set(tool_call)
         require(not missing_tool_fields, f"tool call missing fields: {sorted(missing_tool_fields)}")
@@ -323,8 +472,12 @@ def validate_trace(trace: dict[str, Any]) -> None:
         require(isinstance(tool_call["output_summary"], dict), "tool output_summary must be an object")
         require(tool_call["tool_name"] and tool_call["purpose"], "tool call name and purpose must be non-empty")
     if trace["agent"] == "TSRA-ML":
-        validate_ml_trace(trace)
-    if trace["agent"] in {"TSRA-R-lite", "TSRA-ML"}:
+        backend = trace["selected_action"].get("decision_basis", {}).get("model_backend")
+        if backend == "ablation_zero_model":
+            validate_ml_ablation_trace(trace)
+        else:
+            validate_ml_trace(trace)
+    if trace["agent"] in {"Rule-Defense", "TSRA-R-lite", "TSRA-ML"}:
         validate_defense_action_alignment(trace)
     if trace["agent"] == "AURA-lite":
         validate_aura_trace(trace)
@@ -345,6 +498,9 @@ def validate_aura_trace(trace: dict[str, Any]) -> None:
     output = attack_tools[0]["output_summary"]
     require(output["candidate_count"] == len(candidates), "AURA-lite tool candidate_count mismatch")
     require(output["selected_score"] == selected["score"], "AURA-lite tool selected_score mismatch")
+    rank_tools = [tool for tool in trace["tool_calls"] if tool["tool_name"] == "rank_attack_candidates"]
+    require(len(rank_tools) == 1, "AURA-lite trace must include one real candidate-ranking tool call")
+    require(rank_tools[0]["output_summary"]["candidate_count"] == len(candidates), "AURA rank tool candidate count mismatch")
 
 
 def validate_ml_trace(trace: dict[str, Any]) -> None:
@@ -359,11 +515,14 @@ def validate_ml_trace(trace: dict[str, Any]) -> None:
         "ml_weight",
         "heuristic_weight",
         "feature_count",
+        "heuristic_only_component",
+        "model_influenced_actions",
+        "guardrail_triggered_actions",
     }
     missing_basis = required_basis - set(decision_basis)
     require(not missing_basis, f"TSRA-ML decision_basis missing fields: {sorted(missing_basis)}")
     require(decision_basis["policy_kind"] == "ml_risk_fusion", "TSRA-ML policy_kind mismatch")
-    require(decision_basis["model_backend"] == "sklearn_ensemble", "TSRA-ML must use bundled sklearn ensemble")
+    require(decision_basis["model_backend"] == "sklearn_hist_gradient_boosting", "TSRA-ML backend mismatch")
     for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
         require(isinstance(decision_basis[key], (int, float)), f"TSRA-ML {key} must be numeric")
     require(decision_basis["feature_count"] > 0, "TSRA-ML feature_count must be positive")
@@ -371,9 +530,35 @@ def validate_ml_trace(trace: dict[str, Any]) -> None:
     prediction_tools = [tool for tool in trace["tool_calls"] if tool["tool_name"] == "predict_mission_risk"]
     require(len(prediction_tools) == 1, "TSRA-ML trace must include one predict_mission_risk tool call")
     output = prediction_tools[0]["output_summary"]
-    for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
+    for key in ["ml_risk", "model_backend", "feature_count"]:
         require(key in output, f"predict_mission_risk output missing {key}")
-        require(isinstance(output[key], (int, float)), f"predict_mission_risk {key} must be numeric")
+    require(isinstance(output["ml_risk"], (int, float)), "predict_mission_risk ml_risk must be numeric")
+    require(output["model_backend"] == "sklearn_hist_gradient_boosting", "predict_mission_risk backend mismatch")
+
+    fusion_tools = [tool for tool in trace["tool_calls"] if tool["tool_name"] == "fuse_mission_risk"]
+    require(len(fusion_tools) == 1, "TSRA-ML trace must include one fuse_mission_risk tool call")
+    fusion_output = fusion_tools[0]["output_summary"]
+    for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
+        require(key in fusion_output, f"fuse_mission_risk output missing {key}")
+        require(isinstance(fusion_output[key], (int, float)), f"fuse_mission_risk {key} must be numeric")
+
+    action_tools = [tool for tool in trace["tool_calls"] if tool["tool_name"] == "select_defense_action"]
+    require(len(action_tools) == 1, "TSRA-ML trace must include one select_defense_action tool call")
+    require(
+        action_tools[0]["output_summary"]["model_influenced_actions"]
+        == decision_basis["model_influenced_actions"],
+        "TSRA-ML action attribution changed between tool output and selected action",
+    )
+
+
+def validate_ml_ablation_trace(trace: dict[str, Any]) -> None:
+    basis = trace["selected_action"].get("decision_basis", {})
+    require(basis.get("model_backend") == "ablation_zero_model", "ML ablation backend mismatch")
+    require(basis.get("ml_risk") == 0.0, "ML ablation risk must be fixed to zero")
+    require(not basis.get("model_influenced_actions"), "ML ablation emitted model-influenced actions")
+    prediction_tools = [tool for tool in trace["tool_calls"] if tool["tool_name"] == "predict_mission_risk"]
+    require(len(prediction_tools) == 1, "ML ablation must execute one prediction tool")
+    require(prediction_tools[0]["output_summary"]["ml_risk"] == 0.0, "ML ablation tool risk must be zero")
 
 
 def validate_defense_action_alignment(trace: dict[str, Any]) -> None:
@@ -387,7 +572,11 @@ def validate_defense_action_alignment(trace: dict[str, Any]) -> None:
         selected_action.get("actions") == selected_candidates,
         "TSRA selected_action actions must match selected candidate actions",
     )
-    expected_type = "defense_action" if selected_candidates else "no_op"
+    expected_type = (
+        "defense_action"
+        if selected_candidates or selected_action.get("alert")
+        else "no_op"
+    )
     require(selected_action.get("type") == expected_type, "TSRA selected_action type does not match candidate selection")
     require(trace["reason"], "TSRA trace requires a decision reason")
 
@@ -418,8 +607,12 @@ def check_documented_numbers() -> list[str]:
         "82.162",
         "61.228",
         "15.306",
+        "12.926",
+        "15.180",
         "90.374",
-        "0.9956",
+        "93.600",
+        "2.254",
+        "0.9884",
         "0.0629",
     ]
     docs = {
@@ -480,6 +673,7 @@ def main() -> None:
     checks.extend(check_compile_and_tests())
     checks.extend(check_model_and_example_evidence())
     checks.extend(check_cli_smoke())
+    checks.extend(check_holdout_evidence())
     checks.extend(check_safety_boundary())
     checks.extend(check_documented_numbers())
     checks.extend(check_no_tracked_archives())

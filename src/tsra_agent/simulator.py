@@ -7,7 +7,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .agents import AURALite, MissionState, MLTSRARLite, TSRARLite
+from .agents import MissionState
+from .attack_agent import AURAAgent
+from .defense_agent import TSRAAgent
 from .evaluator import evaluate
 from .models import (
     AttackMode,
@@ -19,7 +21,6 @@ from .models import (
     MissionMessage,
     RunMetrics,
 )
-from .runtime import AgentTool, AgentTraceRecorder
 
 
 DEFAULT_PROFILES = [
@@ -69,57 +70,25 @@ class MissionSimulator:
             LinkName.LTE: LinkState(LinkName.LTE, 420, 2, 0.05, 2),
             LinkName.MESH: LinkState(LinkName.MESH, 260, 4, 0.04, 2),
         }
-        self.red = AURALite(self.attack_mode)
-        if self.defense_mode == "ml":
-            ml_kwargs: dict[str, Any] = {}
-            if self.defense_config is not None:
-                ml_kwargs["policy_config"] = self.defense_config
-            if self.sklearn_model is not None:
-                ml_kwargs["sklearn_model"] = self.sklearn_model
-            self.blue = MLTSRARLite(**ml_kwargs)
-        else:
-            self.blue = TSRARLite()
-        self.aura_trace = AgentTraceRecorder(
-            "AURA-lite",
-            "select bounded simulated mission-effect attacks",
-        )
-        blue_name = "TSRA-ML" if self.defense_mode == "ml" else "TSRA-R-lite"
-        self.blue_trace = AgentTraceRecorder(
-            blue_name,
-            "detect and mitigate synthetic C4ISR data-trust degradation",
-        )
-        self.attack_selector_tool = AgentTool(
-            "select_attack_effect",
-            "choose one bounded synthetic mission-effect action for the red agent",
-        )
-        self.risk_fusion_tool = AgentTool(
-            "fuse_mission_risk",
-            "combine link, data freshness, critical latency, source trust, and PACE signals",
-        )
-        self.ml_prediction_tool = AgentTool(
-            "predict_mission_risk",
-            "estimate synthetic mission-risk probability with the trained TSRA-ML model",
-        )
-        self.pace_selector_tool = AgentTool(
-            "select_pace_link",
-            "select the mission transport path used by the blue defense action",
+        self.red = AURAAgent(self.attack_mode)
+        self.blue = TSRAAgent(
+            self.defense_mode if self.defense_enabled else "tsra",
+            policy_config=self.defense_config,
+            sklearn_model=self.sklearn_model,
         )
 
     def run(self, name: str) -> SimulationResult:
         for tick in range(self.ticks):
+            event_start = len(self.events)
+            queue_depth_before = len(self.queue)
             self._generate_messages(tick)
             state = self._state(tick)
-            attack, attack_candidates = self.red.choose_action_with_candidates(state)
-            self._record_attack_decision(tick, state, attack, attack_candidates)
+            attack = self.red.decide(state)
             self._apply_attack(tick, attack)
 
             defense = DefenseAction(self.active_link, False, False, None, False)
             if self.defense_enabled:
-                if self.defense_mode == "rule":
-                    defense = self._rule_defense_action(tick, self._state(tick))
-                else:
-                    defense = self.blue.choose_action(self._state(tick))
-                self._record_defense_decision(tick, self._state(tick), defense)
+                defense = self.blue.decide(self._state(tick))
                 self.active_link = defense.active_link
                 self._apply_defense(tick, defense)
                 if defense.minimum_mode:
@@ -129,16 +98,25 @@ class MissionSimulator:
 
             self._process_queue(tick, attack.mode, defense)
             self._recover_links()
+            feedback = self._tick_feedback(
+                tick=tick,
+                event_start=event_start,
+                queue_depth_before=queue_depth_before,
+            )
+            self.red.attach_feedback(feedback)
+            if self.defense_enabled:
+                self.blue.attach_feedback(feedback)
 
         self._flush_backlog(self.ticks)
         metrics = evaluate(self.events, self.blue.alert_tick, self.blue.recovery_tick)
+        self._attach_agent_action_metrics(metrics)
         return SimulationResult(
             name=name,
             events=self.events,
             metrics=metrics,
             traces={
-                "aura": self.aura_trace.traces,
-                "tsra": self.blue_trace.traces,
+                "aura": self.red.runtime.traces,
+                "tsra": self.blue.runtime.traces,
             },
         )
 
@@ -235,56 +213,6 @@ class MissionSimulator:
             }
         )
 
-    def _record_attack_decision(
-        self,
-        tick: int,
-        state: MissionState,
-        attack,
-        candidate_actions: list[dict[str, Any]],
-    ) -> None:
-        observation = self.aura_trace.observe(state)
-        selected_candidate = next(candidate for candidate in candidate_actions if candidate["selected"])
-        self.aura_trace.memory.update_belief("last_attack_mode", attack.mode.value)
-        self.aura_trace.memory.update_belief("last_target_link", attack.target_link.value)
-        self.aura_trace.memory.update_belief("last_attack_score", selected_candidate["score"])
-        self.aura_trace.record_decision(
-            tick=tick,
-            policy="aura_lite_candidate_ranker",
-            observation=observation,
-            candidate_actions=candidate_actions,
-            tool_calls=[
-                self.attack_selector_tool.run(
-                    input_summary={
-                        "scenario": self.attack_mode.value,
-                        "tick": tick,
-                        "active_link": state.active_link.value,
-                        "candidate_count": len(candidate_actions),
-                    },
-                    output_summary={
-                        "mode": attack.mode.value,
-                        "target_link": attack.target_link.value,
-                        "intensity": round(attack.intensity, 4),
-                        "selected_score": selected_candidate["score"],
-                        "candidate_count": len(candidate_actions),
-                    },
-                )
-            ],
-            selected_action={
-                "type": "attack_action" if attack.mode != AttackMode.NONE else "no_op",
-                "mode": attack.mode.value,
-                "target_link": attack.target_link.value,
-                "intensity": round(attack.intensity, 4),
-                "score": selected_candidate["score"],
-                "predicted_effect": selected_candidate["predicted_effect"],
-            },
-            reason=attack.rationale,
-            feedback={
-                "closed_simulation_only": True,
-                "attack_start": self.red.attack_start,
-                "max_pulses": self.red.max_pulses,
-            },
-        )
-
     def _apply_defense(self, tick: int, defense: DefenseAction) -> None:
         if defense.priority_boost:
             for item in self.queue:
@@ -309,153 +237,85 @@ class MissionSimulator:
                 }
             )
 
-    def _record_defense_decision(self, tick: int, state: MissionState, defense: DefenseAction) -> None:
-        observation = self.blue_trace.observe(state)
-        candidate_actions = [
-            {
-                "action": "priority_boost",
-                "selected": defense.priority_boost,
-                "reason": "critical traffic protection",
-            },
-            {
-                "action": "minimum_mode",
-                "selected": defense.minimum_mode,
-                "reason": "shed or compress noncritical load under risk",
-            },
-            {
-                "action": "stale_badge",
-                "selected": defense.stale_badge,
-                "reason": "mark stale COP data as lower trust",
-            },
-            {
-                "action": "pace_transition",
-                "selected": defense.pace_transition,
-                "target_link": defense.active_link.value,
-                "reason": "select resilient PACE path",
-            },
-            {
-                "action": "quarantine",
-                "selected": defense.quarantine,
-                "reason": "source or terminal trust pressure",
-            },
+    def _tick_feedback(
+        self,
+        *,
+        tick: int,
+        event_start: int,
+        queue_depth_before: int,
+    ) -> dict[str, Any]:
+        tick_events = self.events[event_start:]
+        delivered = [
+            event
+            for event in tick_events
+            if event.get("event") in {"delivered", "compressed"}
         ]
-        selected_flags = [item["action"] for item in candidate_actions if item["selected"]]
-        self.blue_trace.memory.update_belief("last_risk_score", defense.risk_score)
-        self.blue_trace.memory.update_belief("last_active_link", defense.active_link.value)
-        self.blue_trace.memory.update_belief("last_decision_basis", defense.decision_basis)
-        tool_calls = []
-        if self.defense_mode == "ml":
-            tool_calls.append(
-                self.ml_prediction_tool.run(
-                    input_summary={
-                        "feature_count": defense.decision_basis.get("feature_count", 0),
-                        "model_backend": defense.decision_basis.get("model_backend", "unknown"),
-                    },
-                    output_summary={
-                        "ml_risk": defense.decision_basis.get("ml_risk"),
-                        "heuristic_risk": defense.decision_basis.get("heuristic_risk"),
-                        "fused_risk": defense.decision_basis.get("fused_risk"),
-                        "ml_weight": defense.decision_basis.get("ml_weight"),
-                        "heuristic_weight": defense.decision_basis.get("heuristic_weight"),
-                    },
-                )
-            )
-        tool_calls.extend(
-            [
-                self.risk_fusion_tool.run(
-                    input_summary=observation["signals"],
-                    output_summary={
-                        "risk_score": defense.risk_score,
-                        "alert": defense.alert,
-                        "priority_boost": defense.priority_boost,
-                        "minimum_mode": defense.minimum_mode,
-                        "decision_basis": defense.decision_basis,
-                    },
-                ),
-                self.pace_selector_tool.run(
-                    input_summary={
-                        "active_link": state.active_link.value,
-                        "satcom_health": round(state.satcom_health, 4),
-                        "radio_health": round(state.radio_health, 4),
-                        "lte_health": round(state.lte_health, 4),
-                        "mesh_health": round(state.mesh_health, 4),
-                    },
-                    output_summary={
-                        "active_link": defense.active_link.value,
-                        "pace_transition": defense.pace_transition,
-                    },
-                ),
-            ]
+        critical_delivered = [event for event in delivered if event.get("critical")]
+        critical_latencies = [
+            int(event["latency"])
+            for event in critical_delivered
+            if event.get("latency") is not None
+        ]
+        stale_count = sum(1 for event in delivered if event.get("stale"))
+        return {
+            "tick": tick,
+            "queue_depth_before_generation": queue_depth_before,
+            "queue_depth_after_processing": len(self.queue),
+            "active_link_after_processing": self.active_link.value,
+            "satcom_health_after_recovery": round(
+                self.links[LinkName.SATCOM].health,
+                4,
+            ),
+            "delivered_this_tick": len(delivered),
+            "critical_delivered_this_tick": len(critical_delivered),
+            "lost_this_tick": sum(
+                1 for event in tick_events if event.get("event") == "lost"
+            ),
+            "stale_delivery_count": stale_count,
+            "mean_critical_latency_this_tick": (
+                round(sum(critical_latencies) / len(critical_latencies), 4)
+                if critical_latencies
+                else None
+            ),
+            "environment_event_count": len(tick_events),
+        }
+
+    def _attach_agent_action_metrics(self, metrics: RunMetrics) -> None:
+        if not self.defense_enabled:
+            return
+        traces = self.blue.runtime.traces
+        action_lists = [trace["selected_action"].get("actions", []) for trace in traces]
+        metrics.defense_intervention_ticks = sum(
+            bool(actions) or bool(trace["selected_action"].get("alert"))
+            for actions, trace in zip(action_lists, traces)
         )
-        self.blue_trace.record_decision(
-            tick=tick,
-            policy=f"{self.defense_mode}_risk_fusion",
-            observation=observation,
-            candidate_actions=candidate_actions,
-            tool_calls=tool_calls,
-            selected_action={
-                "type": "defense_action" if selected_flags or defense.alert else "no_op",
-                "actions": selected_flags,
-                "active_link": defense.active_link.value,
-                "risk_score": defense.risk_score,
-                "alert": defense.alert,
-                "decision_basis": defense.decision_basis,
-            },
-            reason=defense.alert or "monitoring state; no defense action required",
-            feedback={
-                "detection_tick": self.blue.alert_tick,
-                "recovery_tick": self.blue.recovery_tick,
-                "closed_simulation_only": True,
-            },
+        metrics.priority_boost_ticks = sum(
+            "priority_boost" in actions for actions in action_lists
+        )
+        metrics.minimum_mode_ticks = sum(
+            "minimum_mode" in actions for actions in action_lists
+        )
+        metrics.stale_badge_ticks = sum(
+            "stale_badge" in actions for actions in action_lists
+        )
+        metrics.pace_transition_count = sum(
+            "pace_transition" in actions for actions in action_lists
+        )
+        metrics.quarantine_ticks = sum(
+            "quarantine" in actions for actions in action_lists
         )
 
-    def _rule_defense_action(self, tick: int, state: MissionState) -> DefenseAction:
-        degraded = state.satcom_health < 0.45
-        critical_delay = state.critical_latency_window > 10.0
-        stale_pressure = state.stale_ratio_window > 0.35
-        risk_score = min(
-            1.0,
-            0.55 * max(0.0, 1.0 - state.satcom_health)
-            + 0.25 * min(1.0, state.critical_latency_window / 14.0)
-            + 0.20 * min(1.0, state.stale_ratio_window / 0.45),
-        )
-        alert = None
-        if degraded or critical_delay:
-            if self.blue.alert_tick is None:
-                self.blue.alert_tick = tick
-            alert = "rule alert: link degradation" if degraded else "rule alert: critical latency"
-
-        active_link = state.active_link
-        if degraded and state.radio_health > 0.70:
-            active_link = LinkName.RADIO
-
-        if self.blue.alert_tick is not None and self.blue.recovery_tick is None:
-            recovered = not degraded and not critical_delay and state.queue_depth < 8
-            if recovered:
-                self.blue.stable_ticks += 1
-                if self.blue.stable_ticks >= 5:
-                    self.blue.recovery_tick = tick
-            else:
-                self.blue.stable_ticks = 0
-
-        return DefenseAction(
-            active_link=active_link,
-            priority_boost=degraded or critical_delay,
-            minimum_mode=degraded and (critical_delay or stale_pressure),
-            alert=alert,
-            stale_badge=stale_pressure,
-            risk_score=round(risk_score, 4),
-            quarantine=False,
-            pace_transition=active_link != state.active_link,
-            decision_basis={
-                "policy_kind": "threshold_rule",
-                "heuristic_risk": round(risk_score, 4),
-                "fused_risk": round(risk_score, 4),
-                "degraded": degraded,
-                "critical_delay": critical_delay,
-                "stale_pressure": stale_pressure,
-            },
-        )
+        model_action_counts = []
+        guardrail_flags = []
+        for trace in traces:
+            basis = trace["selected_action"].get("decision_basis", {})
+            model_actions = basis.get("model_influenced_actions", [])
+            guardrail_actions = basis.get("guardrail_triggered_actions", [])
+            model_action_counts.append(len(model_actions))
+            guardrail_flags.append(bool(guardrail_actions))
+        metrics.model_influenced_ticks = sum(count > 0 for count in model_action_counts)
+        metrics.model_influenced_action_count = sum(model_action_counts)
+        metrics.guardrail_triggered_ticks = sum(guardrail_flags)
 
     def _process_queue(self, tick: int, attack_mode: AttackMode, defense: DefenseAction) -> None:
         link = self.links[self.active_link]

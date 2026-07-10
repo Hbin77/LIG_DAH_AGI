@@ -21,7 +21,6 @@ class MissionStateLike(Protocol):
     terminal_risk_window: float
     source_trust_drop_window: float
     pace_instability_window: float
-    defense_alerted: bool
 
 
 FEATURE_NAMES = [
@@ -37,8 +36,12 @@ FEATURE_NAMES = [
     "terminal_risk",
     "source_trust_drop",
     "pace_instability",
-    "defense_alerted",
 ]
+
+DATASET_GENERATOR_VERSION = "overlap-balanced-v2"
+INTERVENTION_RISK_THRESHOLD = 0.18
+INTERVENTION_STALE_THRESHOLD = 0.30
+INTERVENTION_LATENCY_THRESHOLD = 0.55
 
 DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "tsra_ml_policy.json"
 DEFAULT_SKLEARN_MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "tsra_sklearn_policy.joblib"
@@ -49,6 +52,13 @@ DEFAULT_POLICY_CONFIG_PATH = Path(__file__).resolve().parents[2] / "models" / "t
 class TrainingSample:
     features: list[float]
     label: int
+
+
+class AblatedRiskModel:
+    """Counterfactual model that removes learned risk while preserving policy code."""
+
+    def predict_proba(self, rows: list[list[float]]) -> list[list[float]]:
+        return [[1.0, 0.0] for _ in rows]
 
 
 @dataclass
@@ -113,7 +123,6 @@ def state_to_features(state: MissionStateLike) -> list[float]:
         clamp(state.terminal_risk_window),
         clamp(state.source_trust_drop_window),
         clamp(state.pace_instability_window),
-        1.0 if state.defense_alerted else 0.0,
     ]
 
 
@@ -151,12 +160,26 @@ def train_model(
 
 
 def generate_training_samples(count: int, seed: int) -> list[TrainingSample]:
+    if count < 2:
+        raise ValueError("training sample count must be at least 2")
     rng = random.Random(seed)
-    samples = []
-    for _ in range(count):
+    samples: list[TrainingSample] = []
+    target_counts = {0: count // 2, 1: count - count // 2}
+    observed_counts = {0: 0, 1: 0}
+    max_attempts = count * 30
+    attempts = 0
+    while len(samples) < count and attempts < max_attempts:
+        attempts += 1
         features = synthetic_features(rng)
         label = oracle_label(features)
+        if observed_counts[label] >= target_counts[label]:
+            continue
         samples.append(TrainingSample(features, label))
+        observed_counts[label] += 1
+    if len(samples) != count:
+        raise RuntimeError(
+            f"failed to generate balanced samples: requested={count} observed={observed_counts}"
+        )
     rng.shuffle(samples)
     return samples
 
@@ -182,6 +205,17 @@ def load_sklearn_model(path: Path = DEFAULT_SKLEARN_MODEL_PATH):
     return load(path)
 
 
+def sklearn_backend_name(model: object | None) -> str:
+    if model is None:
+        return "logistic_fallback"
+    class_name = type(model).__name__
+    if class_name == "HistGradientBoostingClassifier":
+        return "sklearn_hist_gradient_boosting"
+    if class_name == "AblatedRiskModel":
+        return "ablation_zero_model"
+    return f"sklearn_{class_name.lower()}"
+
+
 def save_policy_config(config: dict[str, float], path: Path = DEFAULT_POLICY_CONFIG_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -201,32 +235,32 @@ def load_policy_config(path: Path = DEFAULT_POLICY_CONFIG_PATH) -> dict[str, flo
 
 
 def synthetic_features(rng: random.Random) -> list[float]:
-    attacked = rng.random() < 0.55
-    if attacked:
-        satcom_degradation = rng.uniform(0.25, 0.85)
-        queue_pressure = rng.uniform(0.15, 1.0)
-        critical_queue = rng.uniform(0.05, 0.75)
-        stale_ratio = rng.uniform(0.02, 0.65)
-        critical_latency = rng.uniform(0.18, 1.0)
-        priority_inversion = rng.uniform(0.0, 0.55)
-        terminal_risk = rng.uniform(0.15, 0.75)
-        source_drop = rng.uniform(0.08, 0.58)
-        pace_instability = rng.uniform(0.0, 0.55)
+    regime = rng.random()
+    if regime < 0.30:
+        risk_values = [rng.betavariate(1.2, 5.0) for _ in range(9)]
+    elif regime < 0.65:
+        risk_values = [rng.random() for _ in range(9)]
+    elif regime < 0.82:
+        risk_values = [rng.uniform(0.0, 0.55) for _ in range(9)]
+        risk_values[3] = rng.uniform(0.30, 0.58)
     else:
-        satcom_degradation = rng.uniform(0.0, 0.22)
-        queue_pressure = rng.uniform(0.0, 0.30)
-        critical_queue = rng.uniform(0.0, 0.25)
-        stale_ratio = rng.uniform(0.0, 0.12)
-        critical_latency = rng.uniform(0.0, 0.35)
-        priority_inversion = rng.uniform(0.0, 0.08)
-        terminal_risk = rng.uniform(0.0, 0.22)
-        source_drop = rng.uniform(0.0, 0.16)
-        pace_instability = rng.uniform(0.0, 0.20)
+        risk_values = [rng.uniform(0.0, 0.55) for _ in range(9)]
+        risk_values[4] = rng.uniform(0.55, 0.82)
 
-    radio_health = rng.uniform(0.55, 1.0)
-    lte_health = rng.uniform(0.55, 1.0)
-    mesh_health = rng.uniform(0.50, 1.0)
-    defense_alerted = 1.0 if rng.random() < (0.75 if attacked else 0.10) else 0.0
+    (
+        satcom_degradation,
+        queue_pressure,
+        critical_queue,
+        stale_ratio,
+        critical_latency,
+        priority_inversion,
+        terminal_risk,
+        source_drop,
+        pace_instability,
+    ) = risk_values
+    radio_health = rng.uniform(0.45, 1.0)
+    lte_health = rng.uniform(0.45, 1.0)
+    mesh_health = rng.uniform(0.45, 1.0)
     return [
         satcom_degradation,
         radio_health,
@@ -240,11 +274,18 @@ def synthetic_features(rng: random.Random) -> list[float]:
         terminal_risk,
         source_drop,
         pace_instability,
-        defense_alerted,
     ]
 
 
 def oracle_label(features: list[float]) -> int:
+    return int(
+        oracle_risk_score(features) >= INTERVENTION_RISK_THRESHOLD
+        or features[7] >= INTERVENTION_LATENCY_THRESHOLD
+        or features[6] >= INTERVENTION_STALE_THRESHOLD
+    )
+
+
+def oracle_risk_score(features: list[float]) -> float:
     (
         satcom_degradation,
         _radio_health,
@@ -258,9 +299,8 @@ def oracle_label(features: list[float]) -> int:
         terminal_risk,
         source_drop,
         pace_instability,
-        _defense_alerted,
     ) = features
-    risk = (
+    return (
         0.22 * satcom_degradation
         + 0.10 * queue_pressure
         + 0.10 * critical_queue
@@ -271,7 +311,6 @@ def oracle_label(features: list[float]) -> int:
         + 0.04 * source_drop
         + 0.02 * pace_instability
     )
-    return int(risk >= 0.30 or critical_latency >= 0.72 or stale_ratio >= 0.45)
 
 
 def evaluate_classifier(model: LogisticRiskModel, samples: list[TrainingSample]) -> dict[str, float]:

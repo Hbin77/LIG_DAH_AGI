@@ -1,18 +1,227 @@
 {
+  "schema_version": "tsra-sklearn-training/v2",
   "model_path": "models/tsra_sklearn_policy.joblib",
+  "model_sha256": "f554ccd0bb96738310bd93319eaa87d0d3f9b1d5b5472095ca6a25a60d9ff28a",
   "report_path": "models/tsra_sklearn_training_report.json",
   "seed": 20260709,
   "samples": 100000,
-  "metrics": {
-    "validation_accuracy": 0.9952,
-    "validation_precision": 0.9914,
-    "validation_recall": 0.9999,
-    "validation_f1": 0.9956,
-    "validation_roc_auc": 1.0,
-    "validation_log_loss": 0.0119,
-    "samples": 100000.0,
-    "model_family": "StandardScaler + soft-voting GradientBoosting/RandomForest"
+  "feature_names": [
+    "satcom_degradation",
+    "radio_health",
+    "lte_health",
+    "mesh_health",
+    "queue_pressure",
+    "critical_queue_pressure",
+    "stale_ratio",
+    "critical_latency_pressure",
+    "priority_inversion_pressure",
+    "terminal_risk",
+    "source_trust_drop",
+    "pace_instability"
+  ],
+  "feature_count": 12,
+  "dataset_generator_version": "overlap-balanced-v2",
+  "label_definition": "Synthetic proactive-intervention oracle: weighted mission risk >= 0.18, critical-latency pressure >= 0.55, or stale ratio >= 0.3.",
+  "label_thresholds": {
+    "weighted_mission_risk": 0.18,
+    "critical_latency_pressure": 0.55,
+    "stale_ratio": 0.3
   },
+  "metrics": {
+    "validation_accuracy": 0.9885,
+    "validation_precision": 0.9996,
+    "validation_recall": 0.9774,
+    "validation_f1": 0.9884,
+    "validation_roc_auc": 0.9995,
+    "validation_log_loss": 0.0297,
+    "validation_brier_score": 0.0088,
+    "samples": 100000,
+    "model_family": "HistGradientBoostingClassifier"
+  },
+  "validation_diagnostics": {
+    "rows": 25000,
+    "positive_rows": 12500,
+    "positive_rate": 0.5,
+    "predicted_positive_rows": 12223,
+    "accuracy": 0.9885,
+    "precision": 0.9996,
+    "recall": 0.9774,
+    "f1": 0.9884,
+    "roc_auc": 0.9995,
+    "log_loss": 0.0297,
+    "brier_score": 0.0088,
+    "false_positive_rate": 0.0004,
+    "false_negative_rate": 0.0226,
+    "confusion": {
+      "true_positive": 12218,
+      "false_positive": 5,
+      "true_negative": 12495,
+      "false_negative": 282
+    }
+  },
+  "data_quality": {
+    "grain": "one synthetic mission-state feature vector",
+    "rows": 100000,
+    "columns": 12,
+    "missing_value_count": 0,
+    "exact_duplicate_rows": 0,
+    "out_of_range_value_count": 0,
+    "class_counts": {
+      "0": 50000,
+      "1": 50000
+    },
+    "class_balance_delta": 0,
+    "feature_summary": {
+      "satcom_degradation": {
+        "min": 2e-06,
+        "max": 0.999987,
+        "mean": 0.242093
+      },
+      "radio_health": {
+        "min": 0.450006,
+        "max": 0.999987,
+        "mean": 0.725031
+      },
+      "lte_health": {
+        "min": 0.450003,
+        "max": 0.999998,
+        "mean": 0.724997
+      },
+      "mesh_health": {
+        "min": 0.450003,
+        "max": 0.999987,
+        "mean": 0.725031
+      },
+      "queue_pressure": {
+        "min": 1.3e-05,
+        "max": 0.999966,
+        "mean": 0.257861
+      },
+      "critical_queue_pressure": {
+        "min": 0.0,
+        "max": 0.999856,
+        "mean": 0.258136
+      },
+      "stale_ratio": {
+        "min": 4e-06,
+        "max": 0.999958,
+        "mean": 0.252433
+      },
+      "critical_latency_pressure": {
+        "min": 3.1e-05,
+        "max": 0.999997,
+        "mean": 0.285517
+      },
+      "priority_inversion_pressure": {
+        "min": 2e-06,
+        "max": 0.999985,
+        "mean": 0.259539
+      },
+      "terminal_risk": {
+        "min": 1.1e-05,
+        "max": 0.999998,
+        "mean": 0.263461
+      },
+      "source_trust_drop": {
+        "min": 9e-06,
+        "max": 0.999764,
+        "mean": 0.265259
+      },
+      "pace_instability": {
+        "min": 3e-06,
+        "max": 0.999977,
+        "mean": 0.268797
+      }
+    }
+  },
+  "closed_loop_oracle_validation": {
+    "seeds": [
+      41,
+      43,
+      47,
+      53,
+      59
+    ],
+    "ticks": 180,
+    "conditions": {
+      "baseline": {
+        "rows": 900,
+        "positive_rows": 0,
+        "positive_rate": 0.0,
+        "predicted_positive_rows": 0,
+        "accuracy": 1.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": null,
+        "log_loss": 0.0,
+        "brier_score": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "confusion": {
+          "true_positive": 0,
+          "false_positive": 0,
+          "true_negative": 900,
+          "false_negative": 0
+        }
+      },
+      "attacked": {
+        "rows": 900,
+        "positive_rows": 706,
+        "positive_rate": 0.7844,
+        "predicted_positive_rows": 708,
+        "accuracy": 0.9956,
+        "precision": 0.9958,
+        "recall": 0.9986,
+        "f1": 0.9972,
+        "roc_auc": 0.9999,
+        "log_loss": 0.0144,
+        "brier_score": 0.0035,
+        "false_positive_rate": 0.0155,
+        "false_negative_rate": 0.0014,
+        "confusion": {
+          "true_positive": 705,
+          "false_positive": 3,
+          "true_negative": 191,
+          "false_negative": 1
+        }
+      },
+      "tsra_defended": {
+        "rows": 900,
+        "positive_rows": 375,
+        "positive_rate": 0.4167,
+        "predicted_positive_rows": 366,
+        "accuracy": 0.9811,
+        "precision": 0.9891,
+        "recall": 0.9653,
+        "f1": 0.9771,
+        "roc_auc": 0.9992,
+        "log_loss": 0.0559,
+        "brier_score": 0.014,
+        "false_positive_rate": 0.0076,
+        "false_negative_rate": 0.0347,
+        "confusion": {
+          "true_positive": 362,
+          "false_positive": 4,
+          "true_negative": 521,
+          "false_negative": 13
+        }
+      }
+    },
+    "interpretation": "Compares model output with the same synthetic risk oracle on independent simulator trajectories; it is not real-world attack ground truth."
+  },
+  "runtime": {
+    "python": "3.14.4",
+    "scikit_learn": "1.9.0",
+    "numpy": "2.5.1",
+    "joblib": "1.5.3"
+  },
+  "limitations": [
+    "All labels are synthetic oracle labels, not operational SATCOM incident labels.",
+    "Random holdout measures interpolation on the generated distribution.",
+    "Closed-loop validation uses independent seeds but the same mission simulator.",
+    "No real-world generalization or calibrated operational probability is claimed."
+  ],
   "safety_boundary": {
     "synthetic_training_data_only": true,
     "exploit_code": false,

@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Callable
 
 
 TOOL_CALL_REQUIRED_FIELDS = {
@@ -29,43 +29,91 @@ class ToolCallResult:
         return {
             "tool_name": self.tool_name,
             "purpose": self.purpose,
-            "input_summary": to_plain(self.input_summary),
-            "output_summary": to_plain(self.output_summary),
+            "input_summary": to_summary(self.input_summary),
+            "output_summary": to_summary(self.output_summary),
             "status": self.status,
             "safety_checked": self.safety_checked,
         }
 
 
-class AgentTool:
-    """Structured synthetic tool wrapper for auditable agent action loops."""
+class AgentToolExecutionError(RuntimeError):
+    """Carries the failed tool-call record so the runtime remains auditable."""
 
-    def __init__(self, name: str, purpose: str) -> None:
+    def __init__(self, message: str, tool_call: dict[str, Any]) -> None:
+        super().__init__(message)
+        self.tool_call = tool_call
+
+
+class AgentTool:
+    """Callable tool registered with an AgentRuntime.
+
+    The handler is executed by the runtime. Input and output summaries are derived
+    from that real invocation, rather than supplied after a policy already ran.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        purpose: str,
+        handler: Callable[..., Any],
+        *,
+        input_summarizer: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
+        output_summarizer: Callable[[Any], dict[str, Any]] | None = None,
+    ) -> None:
+        if not name or not purpose:
+            raise ValueError("agent tools require a non-empty name and purpose")
+        if not callable(handler):
+            raise TypeError("agent tool handler must be callable")
         self.name = name
         self.purpose = purpose
+        self.handler = handler
+        self.input_summarizer = input_summarizer
+        self.output_summarizer = output_summarizer
 
-    def run(
-        self,
-        *,
-        input_summary: dict[str, Any],
-        output_summary: dict[str, Any],
-        status: str = "ok",
-        safety_checked: bool = True,
-    ) -> dict[str, Any]:
-        result = ToolCallResult(
-            tool_name=self.name,
-            purpose=self.purpose,
-            input_summary=input_summary,
-            output_summary=output_summary,
-            status=status,
-            safety_checked=safety_checked,
+    def execute(self, **kwargs: Any) -> tuple[Any, dict[str, Any]]:
+        input_summary = (
+            self.input_summarizer(kwargs)
+            if self.input_summarizer is not None
+            else to_summary(kwargs)
         )
-        trace = result.as_trace()
-        validate_tool_call(trace)
-        return trace
+        try:
+            output = self.handler(**kwargs)
+            output_summary = (
+                self.output_summarizer(output)
+                if self.output_summarizer is not None
+                else to_summary(output)
+            )
+            result = ToolCallResult(
+                tool_name=self.name,
+                purpose=self.purpose,
+                input_summary=input_summary,
+                output_summary=output_summary,
+            )
+            trace = result.as_trace()
+            validate_tool_call(trace)
+            return output, trace
+        except AgentToolExecutionError:
+            raise
+        except Exception as exc:
+            failed = ToolCallResult(
+                tool_name=self.name,
+                purpose=self.purpose,
+                input_summary=input_summary,
+                output_summary={
+                    "error_type": type(exc).__name__,
+                    "message": str(exc),
+                },
+                status="error",
+            ).as_trace()
+            validate_tool_call(failed)
+            raise AgentToolExecutionError(
+                f"agent tool {self.name!r} failed: {exc}",
+                failed,
+            ) from exc
 
 
 class AgentMemory:
-    """Small runtime memory used to make agent decisions auditable."""
+    """Bounded working memory shared by one agent runtime."""
 
     def __init__(self, max_observations: int = 24, max_decisions: int = 24) -> None:
         self.observations: deque[dict[str, Any]] = deque(maxlen=max_observations)
@@ -82,15 +130,28 @@ class AgentMemory:
         self.belief_state[key] = to_plain(value)
 
     def summary(self) -> dict[str, Any]:
+        last_observation = self.observations[-1] if self.observations else None
+        last_decision = self.decisions[-1] if self.decisions else None
         return {
             "recent_observation_count": len(self.observations),
             "recent_decision_count": len(self.decisions),
             "belief_state": to_plain(self.belief_state),
+            "last_observed_tick": last_observation.get("tick") if last_observation else None,
+            "last_selected_action": (
+                to_plain(last_decision.get("selected_action"))
+                if last_decision
+                else None
+            ),
+            "last_feedback": (
+                to_plain(last_decision.get("feedback"))
+                if last_decision
+                else None
+            ),
         }
 
 
 class AgentTraceRecorder:
-    """Records observe-memory-candidate-decision-feedback loops as JSON-ready dicts."""
+    """Persists observe-memory-tool-candidate-decision-feedback loops."""
 
     def __init__(self, agent_name: str, goal: str) -> None:
         self.agent_name = agent_name
@@ -132,15 +193,15 @@ class AgentTraceRecorder:
         candidate_actions: list[dict[str, Any]],
         selected_action: dict[str, Any],
         reason: str,
-        tool_calls: list[dict[str, Any]] | None = None,
+        tool_calls: list[dict[str, Any]],
         feedback: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        plain_tool_calls = to_plain(tool_calls or [])
+        plain_tool_calls = to_plain(tool_calls)
         for tool_call in plain_tool_calls:
             validate_tool_call(tool_call)
 
         trace = {
-            "trace_id": f"{self.agent_name.lower().replace(' ', '-')}-{len(self.traces) + 1:05d}",
+            "trace_id": f"{slug(self.agent_name)}-{len(self.traces) + 1:05d}",
             "agent": self.agent_name,
             "tick": tick,
             "goal": self.goal,
@@ -159,6 +220,123 @@ class AgentTraceRecorder:
         return trace
 
 
+class AgentRuntime:
+    """Owns one agent's observe-tool-decide-feedback execution lifecycle."""
+
+    def __init__(self, agent_name: str, goal: str) -> None:
+        self.agent_name = agent_name
+        self.goal = goal
+        self.recorder = AgentTraceRecorder(agent_name, goal)
+        self.memory = self.recorder.memory
+        self._tools: dict[str, AgentTool] = {}
+        self._phase = "idle"
+        self._observation: dict[str, Any] | None = None
+        self._tool_calls: list[dict[str, Any]] = []
+        self._last_trace: dict[str, Any] | None = None
+
+    @property
+    def traces(self) -> list[dict[str, Any]]:
+        return self.recorder.traces
+
+    @property
+    def registered_tools(self) -> list[str]:
+        return sorted(self._tools)
+
+    def register_tool(
+        self,
+        name: str,
+        purpose: str,
+        handler: Callable[..., Any],
+        *,
+        input_summarizer: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
+        output_summarizer: Callable[[Any], dict[str, Any]] | None = None,
+    ) -> None:
+        if name in self._tools:
+            raise ValueError(f"duplicate agent tool: {name}")
+        self._tools[name] = AgentTool(
+            name,
+            purpose,
+            handler,
+            input_summarizer=input_summarizer,
+            output_summarizer=output_summarizer,
+        )
+
+    def begin_cycle(self, state: Any) -> dict[str, Any]:
+        if self._phase != "idle":
+            raise RuntimeError(f"cannot observe while runtime phase is {self._phase}")
+        self._observation = self.recorder.observe(state)
+        self._tool_calls = []
+        self._phase = "observed"
+        return self._observation
+
+    def call_tool(self, tool_name: str, **kwargs: Any) -> Any:
+        if self._phase != "observed":
+            raise RuntimeError("agent tools may only run after begin_cycle")
+        if tool_name not in self._tools:
+            raise KeyError(f"unknown agent tool: {tool_name}")
+        try:
+            output, trace = self._tools[tool_name].execute(**kwargs)
+            self._tool_calls.append(trace)
+            return output
+        except AgentToolExecutionError as exc:
+            self._tool_calls.append(exc.tool_call)
+            raise
+
+    def commit_decision(
+        self,
+        *,
+        tick: int,
+        policy: str,
+        candidate_actions: list[dict[str, Any]],
+        selected_action: dict[str, Any],
+        reason: str,
+        feedback: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if self._phase != "observed" or self._observation is None:
+            raise RuntimeError("commit_decision requires an active observed cycle")
+        if not self._tool_calls:
+            raise RuntimeError("an agent decision must be produced through at least one registered tool")
+        if not candidate_actions:
+            raise ValueError("an agent decision requires at least one candidate action")
+
+        trace = self.recorder.record_decision(
+            tick=tick,
+            policy=policy,
+            observation=self._observation,
+            candidate_actions=candidate_actions,
+            selected_action=selected_action,
+            reason=reason,
+            tool_calls=self._tool_calls,
+            feedback={
+                "feedback_status": "pending_environment",
+                **(feedback or {}),
+            },
+        )
+        trace["runtime"] = {
+            "implementation": "AgentRuntime",
+            "phase": "decision_committed",
+            "registered_tools": self.registered_tools,
+            "tool_call_count": len(self._tool_calls),
+            "feedback_attached": False,
+        }
+        self._last_trace = trace
+        self._observation = None
+        self._tool_calls = []
+        self._phase = "idle"
+        return trace
+
+    def attach_feedback(self, feedback: dict[str, Any]) -> None:
+        if self._phase != "idle":
+            raise RuntimeError("feedback may only be attached after a decision is committed")
+        if self._last_trace is None:
+            raise RuntimeError("cannot attach feedback before the first decision")
+        self._last_trace["feedback"].update(to_plain(feedback))
+        self._last_trace["feedback"]["feedback_status"] = "observed"
+        self._last_trace["runtime"]["phase"] = "feedback_attached"
+        self._last_trace["runtime"]["feedback_attached"] = True
+        self.memory.update_belief("last_environment_feedback", feedback)
+
+
 def validate_tool_call(tool_call: dict[str, Any]) -> None:
     missing = TOOL_CALL_REQUIRED_FIELDS - set(tool_call)
     if missing:
@@ -171,6 +349,40 @@ def validate_tool_call(tool_call: dict[str, Any]) -> None:
         raise ValueError("tool call summaries must be dictionaries")
     if tool_call["safety_checked"] is not True:
         raise ValueError("synthetic agent tools must pass safety_checked=True")
+
+
+def to_summary(value: Any, *, max_items: int = 20) -> dict[str, Any]:
+    plain = compact(value, max_items=max_items)
+    if isinstance(plain, dict):
+        return plain
+    return {"result": plain}
+
+
+def compact(value: Any, *, max_items: int = 20) -> Any:
+    if isinstance(value, Enum):
+        return value.value
+    if is_dataclass(value):
+        return compact(asdict(value), max_items=max_items)
+    if isinstance(value, dict):
+        items = list(value.items())
+        result = {
+            str(key): compact(item, max_items=max_items)
+            for key, item in items[:max_items]
+        }
+        if len(items) > max_items:
+            result["truncated_count"] = len(items) - max_items
+        return result
+    if isinstance(value, (list, tuple, set, deque)):
+        items = list(value)
+        result = [compact(item, max_items=max_items) for item in items[:max_items]]
+        if len(items) > max_items:
+            result.append({"truncated_count": len(items) - max_items})
+        return result
+    if isinstance(value, float):
+        return round(value, 6)
+    if isinstance(value, (str, int, bool)) or value is None:
+        return value
+    return str(value)
 
 
 def to_plain(value: Any) -> Any:
@@ -187,3 +399,7 @@ def to_plain(value: Any) -> Any:
 
 def enum_value(value: Any) -> Any:
     return value.value if isinstance(value, Enum) else value
+
+
+def slug(value: str) -> str:
+    return "-".join(part for part in value.lower().replace("_", "-").split() if part)

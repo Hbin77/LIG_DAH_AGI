@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .evaluator import resilience_gain
+from .ml_policy import AblatedRiskModel
 from .models import AttackMode
 from .simulator import MissionSimulator, write_result
 
@@ -17,7 +18,8 @@ EXPERIMENTS = {
     "attacked": "E2 hybrid AURA-lite mission-effect attack without defense",
     "rule_defended": "E3 threshold rule defense against the same attack",
     "defended": "E4/E5 TSRA-R risk-fusion defense against the same attack",
-    "ml_defended": "E6 TSRA-ML trained ensemble and tuned action-gate defense against the same attack",
+    "ml_defended": "E6 TSRA-ML trained gradient-boosting policy and tuned action-gate defense against the same attack",
+    "ml_ablated": "E6-A TSRA-ML tuned action gate with learned risk output fixed to zero",
     "guarded_baseline": "False-alarm check: TSRA-R monitoring under no attack",
     "ml_guarded_baseline": "False-alarm check: TSRA-ML monitoring under no attack",
 }
@@ -88,6 +90,14 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             defense_enabled=True,
             defense_mode="ml",
         ).run("ml_defended")
+        ml_ablated = MissionSimulator(
+            ticks,
+            seed,
+            scenario,
+            defense_enabled=True,
+            defense_mode="ml",
+            sklearn_model=AblatedRiskModel(),
+        ).run("ml_ablated")
         guarded_baseline = MissionSimulator(
             ticks,
             seed,
@@ -108,6 +118,7 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             rule_defended,
             defended,
             ml_defended,
+            ml_ablated,
             guarded_baseline,
             ml_guarded_baseline,
         ):
@@ -120,11 +131,13 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
             "rule_defended": rule_defended.metrics.as_dict(),
             "defended": defended.metrics.as_dict(),
             "ml_defended": ml_defended.metrics.as_dict(),
+            "ml_ablated": ml_ablated.metrics.as_dict(),
             "guarded_baseline": guarded_baseline.metrics.as_dict(),
             "ml_guarded_baseline": ml_guarded_baseline.metrics.as_dict(),
             "rule_resilience_gain_percent": resilience_gain(attacked.metrics, rule_defended.metrics, baseline.metrics),
             "resilience_gain_percent": resilience_gain(attacked.metrics, defended.metrics, baseline.metrics),
             "ml_resilience_gain_percent": resilience_gain(attacked.metrics, ml_defended.metrics, baseline.metrics),
+            "ml_ablated_resilience_gain_percent": resilience_gain(attacked.metrics, ml_ablated.metrics, baseline.metrics),
         }
         runs.append(run_summary)
         (seed_dir / "summary.json").write_text(json.dumps(run_summary, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -146,11 +159,13 @@ def run_suite(scenario: AttackMode, ticks: int, seeds: list[int], output_dir: Pa
                 "rule_defended": runs[0]["rule_defended"],
                 "defended": runs[0]["defended"],
                 "ml_defended": runs[0]["ml_defended"],
+                "ml_ablated": runs[0]["ml_ablated"],
                 "guarded_baseline": runs[0]["guarded_baseline"],
                 "ml_guarded_baseline": runs[0]["ml_guarded_baseline"],
                 "rule_resilience_gain_percent": runs[0]["rule_resilience_gain_percent"],
                 "resilience_gain_percent": runs[0]["resilience_gain_percent"],
                 "ml_resilience_gain_percent": runs[0]["ml_resilience_gain_percent"],
+                "ml_ablated_resilience_gain_percent": runs[0]["ml_ablated_resilience_gain_percent"],
             }
         )
     return summary
@@ -163,11 +178,15 @@ def aggregate_runs(runs: list[dict[str, Any]]) -> dict[str, Any]:
         "rule_defended": aggregate_metric_dicts([run["rule_defended"] for run in runs]),
         "defended": aggregate_metric_dicts([run["defended"] for run in runs]),
         "ml_defended": aggregate_metric_dicts([run["ml_defended"] for run in runs]),
+        "ml_ablated": aggregate_metric_dicts([run["ml_ablated"] for run in runs]),
         "guarded_baseline": aggregate_metric_dicts([run["guarded_baseline"] for run in runs]),
         "ml_guarded_baseline": aggregate_metric_dicts([run["ml_guarded_baseline"] for run in runs]),
         "rule_resilience_gain_percent": aggregate_values([run["rule_resilience_gain_percent"] for run in runs]),
         "resilience_gain_percent": aggregate_values([run["resilience_gain_percent"] for run in runs]),
         "ml_resilience_gain_percent": aggregate_values([run["ml_resilience_gain_percent"] for run in runs]),
+        "ml_ablated_resilience_gain_percent": aggregate_values(
+            [run["ml_ablated_resilience_gain_percent"] for run in runs]
+        ),
     }
     return aggregate
 
@@ -190,7 +209,7 @@ def aggregate_values(values: list[Any]) -> dict[str, Any]:
 
 def build_manifest(summary: dict[str, Any]) -> dict[str, Any]:
     return {
-        "schema_version": "tsra-run-manifest/v1",
+        "schema_version": "tsra-run-manifest/v2",
         "scenario": summary["scenario"],
         "ticks": summary["ticks"],
         "seeds": summary["seeds"],
@@ -217,6 +236,14 @@ def build_manifest(summary: dict[str, Any]) -> dict[str, Any]:
             "equipment_specific_intrusion_steps": False,
             "synthetic_mission_event_simulator_only": True,
         },
+        "agent_runtime_contract": {
+            "implementation": "AgentRuntime",
+            "separate_attack_defense_ownership": True,
+            "registered_callable_tools": True,
+            "bounded_memory": True,
+            "post_action_feedback_required": True,
+            "model_guardrail_attribution": True,
+        },
     }
 
 
@@ -225,10 +252,12 @@ def build_report(summary: dict) -> str:
     rule_defended = summary["aggregate"]["rule_defended"]
     defended = summary["aggregate"]["defended"]
     ml_defended = summary["aggregate"]["ml_defended"]
+    ml_ablated = summary["aggregate"]["ml_ablated"]
     guarded = summary["aggregate"]["guarded_baseline"]
     ml_guarded = summary["aggregate"]["ml_guarded_baseline"]
     gain = summary["aggregate"]["resilience_gain_percent"]
     ml_gain = summary["aggregate"]["ml_resilience_gain_percent"]
+    ml_ablated_gain = summary["aggregate"]["ml_ablated_resilience_gain_percent"]
     rule_gain = summary["aggregate"]["rule_resilience_gain_percent"]
     return f"""# TSRA-R / AURA-lite Incident Summary
 
@@ -246,6 +275,8 @@ def build_report(summary: dict) -> str:
 - Mean baseline-adjusted resilience gain was `{gain["mean"]}%`.
 - TSRA-ML reduced mean mission impact score to `{ml_defended["mission_impact_score"]["mean"]}`.
 - TSRA-ML mean baseline-adjusted resilience gain was `{ml_gain["mean"]}%`.
+- With the same tuned action gate but learned risk fixed to zero, mean mission impact was `{ml_ablated["mission_impact_score"]["mean"]}` and resilience gain was `{ml_ablated_gain["mean"]}%`.
+- Learned-model mission-impact contribution versus the zero-model ablation was `{round(ml_ablated["mission_impact_score"]["mean"] - ml_defended["mission_impact_score"]["mean"], 4)}` points.
 - Defended mean P95 critical latency: `{defended["p95_critical_latency"]["mean"]}` ticks.
 - Defended mean stale data ratio: `{defended["stale_data_ratio"]["mean"]}`.
 - Defended mean priority inversion rate: `{defended["priority_inversion_rate"]["mean"]}`.
@@ -256,6 +287,11 @@ def build_report(summary: dict) -> str:
 - TSRA-ML mean deferred messages: `{ml_defended["deferred_messages"]["mean"]}`.
 - TSRA-ML mean backlog messages: `{ml_defended["backlog_messages"]["mean"]}`.
 - TSRA-ML mean expired messages: `{ml_defended["expired_messages"]["mean"]}`.
+- TSRA-R mean defense intervention ticks: `{defended["defense_intervention_ticks"]["mean"]}`.
+- TSRA-ML mean defense intervention ticks: `{ml_defended["defense_intervention_ticks"]["mean"]}`.
+- TSRA-R mean priority-boost ticks: `{defended["priority_boost_ticks"]["mean"]}`.
+- TSRA-ML mean priority-boost ticks: `{ml_defended["priority_boost_ticks"]["mean"]}`.
+- TSRA-ML mean model-influenced ticks: `{ml_defended["model_influenced_ticks"]["mean"]}`.
 - TSRA-R mean detection time: `{defended["detection_time"]["mean"]}` ticks after first attack.
 - TSRA-R mean recovery time: `{defended["recovery_time"]["mean"]}` ticks after first TSRA-R alert stabilization.
 - Guarded no-attack false alarm rate: `{guarded["false_alarm_rate"]["mean"]}`.
@@ -265,7 +301,7 @@ def build_report(summary: dict) -> str:
 
 - AURA-lite selected bounded, abstract COAs across link degradation, mission-aware delay, and failover chasing inside a synthetic mission-event simulator.
 - TSRA-R-lite applied risk fusion, critical traffic priority boosting, PACE routing, COP stale badge, terminal/source quarantine flags, and minimum mode.
-- TSRA-ML used a trained scikit-learn ensemble plus tuned guardrail policy for earlier priority boosting, adaptive UAV snapshot compression, EDF scheduling, SATCOM return hysteresis, and stale noncritical backlog control.
+- TSRA-ML used a trained scikit-learn histogram gradient-boosting policy plus tuned guardrails for proactive priority boosting, adaptive UAV snapshot compression, EDF scheduling, SATCOM return hysteresis, and stale noncritical backlog control.
 
 ## Safety Boundary
 

@@ -8,7 +8,7 @@
 
 보고서의 핵심 주장은 다음처럼 잡으면 됩니다.
 
-> 본 구현은 Hybrid SATCOM Disruption 상황에서 C4ISR 데이터 신뢰성 붕괴를 모사하고, AURA-lite 공격 에이전트와 TSRA-R/TSRA-ML 방어 에이전트의 판단 및 대응 효과를 폐쇄형 mission-event simulator로 검증한다. 5개 seed 기준 공격 단독 mission impact는 평균 82.162였고, TSRA-R/TSRA-ML 적용 후 15.306으로 감소하여 baseline-adjusted resilience gain 90.374%를 기록했다. 각 에이전트의 판단 과정은 DecisionTrace로 남겨 observation, memory, tool call, candidate action, selected action, feedback을 감사 가능하게 했다.
+> 본 구현은 Hybrid SATCOM Disruption 상황에서 C4ISR 데이터 신뢰성 붕괴를 모사하고, AURA-lite 공격 에이전트와 TSRA-R/TSRA-ML 방어 에이전트의 판단 및 대응 효과를 폐쇄형 mission-event simulator로 검증한다. 5개 seed 기준 공격 단독 mission impact는 평균 82.162였고, TSRA-R은 15.306, TSRA-ML은 12.926으로 감소했다. TSRA-ML baseline-adjusted resilience gain은 93.600%였다. 각 에이전트의 판단 과정은 DecisionTrace로 남겨 observation, memory, 실제 tool call, candidate action, selected action, environment feedback을 감사 가능하게 했다.
 
 ## 어디에 무엇을 쓰면 되는가
 
@@ -62,12 +62,12 @@ TSRA-ML은 scikit-learn 기반 trained policy를 사용하는 방어 에이전�
 주의할 점:
 
 - TSRA-ML은 TSRA-R보다 수치가 더 좋아졌다고 과장하면 안 됩니다.
-- 현재 5-seed 기준 TSRA-R과 TSRA-ML의 mission impact는 동일하게 `15.306`입니다.
+- 현재 5-seed 기준 mission impact는 TSRA-R `15.306`, TSRA-ML `12.926`입니다.
 - 따라서 “ML이 더 강하다”가 아니라 “ML 기반 risk estimate와 deterministic guardrail을 결합해 TSRA-R 수준의 안정적 방어 성능을 재현했다”라고 쓰는 편이 안전합니다.
 
 보고서 표현:
 
-> TSRA-ML은 synthetic mission-state feature를 입력으로 위험 확률을 추정하고, 튜닝된 action gate와 deterministic guardrail을 함께 사용한다. 실험상 TSRA-ML은 TSRA-R과 동일한 평균 mission impact 15.306 및 resilience gain 90.374%를 기록했으며, 폐쇄형 synthetic simulator 안에서 TSRA-R 수준의 방어 성능을 재현했다.
+> TSRA-ML은 12개 synthetic mission-state feature를 입력으로 선제 개입 확률을 추정하고, 튜닝된 action gate와 deterministic guardrail을 함께 사용한다. 5개 seed에서 평균 mission impact 12.926과 resilience gain 93.600%를 기록했다. 같은 tuned config에서 모델 출력을 0으로 고정한 ablation은 impact 15.180이므로, 본 simulator에서 학습 모델 기여는 2.254 point로 관측됐다.
 
 ## DecisionTrace 설명
 
@@ -81,7 +81,7 @@ DecisionTrace는 `src/tsra_agent/runtime.py`가 만들고, CLI 실행 시 seed�
 JSONL을 직접 열지 않고 표로 확인하려면 CLI 실행 뒤 아래 명령을 사용합니다.
 
 ```bash
-conda run -n base python scripts/summarize_decision_traces.py \
+.venv/bin/python scripts/summarize_decision_traces.py \
   --input-dir outputs/final_run \
   --output-csv outputs/final_run/report_tables/decision_trace_summary.csv \
   --output-md outputs/final_run/report_tables/decision_trace_summary.md
@@ -129,7 +129,8 @@ conda run -n base python scripts/summarize_decision_traces.py \
 | attacked mission impact | `82.162` | 공격 단독 시 임무 영향이 크게 상승 |
 | rule defense mission impact | `61.228` | 단순 rule 방어는 일부 완화하나 충분하지 않음 |
 | TSRA-R mission impact | `15.306` | TSRA-R 적용 후 영향 크게 감소 |
-| TSRA-ML mission impact | `15.306` | ML 방어도 동일 수준의 안정적 완화 |
+| TSRA-ML mission impact | `12.926` | trained model + tuned guardrail 결과 |
+| zero-model ablation impact | `15.180` | 같은 config에서 learned risk만 제거 |
 | attacked priority inversion rate | `0.0629` | 공격 시 critical traffic 우선순위 역전 발생 |
 | TSRA-R priority inversion rate | `0.0` | 5개 seed synthetic 실험에서 priority inversion이 관측되지 않음 |
 | TSRA-ML priority inversion rate | `0.0` | 5개 seed synthetic 실험에서 priority inversion이 관측되지 않음 |
@@ -138,12 +139,12 @@ conda run -n base python scripts/summarize_decision_traces.py \
 | TSRA-ML recovery time | `2 ticks` | ML 방어의 빠른 회복 |
 | false alarm rate | `0.0` | 5개 seed synthetic guarded-baseline에서 false alarm이 관측되지 않음 |
 | resilience gain | `90.374%` | 공격으로 인한 mission impact 대부분 회복 |
-| TSRA-ML validation F1 | `0.9956` | synthetic validation 기준 높은 분류 성능 |
-| TSRA-ML ROC-AUC | `1.0` | synthetic validation 기준 분리 성능 우수 |
+| TSRA-ML synthetic holdout F1 | `0.9884` | overlap-balanced synthetic oracle 기준 |
+| TSRA-ML attacked-trajectory oracle F1 | `0.9972` | 독립 seed simulator trajectory 기준이며 실데이터 정확도가 아님 |
 
 보고서 표현:
 
-> 5개 seed 반복 synthetic 실험에서 AURA-lite 공격 단독 조건의 평균 mission impact는 82.162였다. 단순 rule defense는 이를 61.228로 낮췄지만, TSRA-R 적용 시 15.306까지 감소했다. 이는 baseline-adjusted resilience gain 90.374%에 해당한다. 또한 priority inversion rate는 공격 조건에서 0.0629였으나 TSRA-R/TSRA-ML 적용 조건에서는 0.0으로 관측됐고, no-attack guarded baseline의 false alarm rate도 0.0으로 관측됐다.
+> 5개 seed 반복 synthetic 실험에서 AURA-lite 공격 단독 조건의 평균 mission impact는 82.162였다. 단순 rule defense는 61.228, TSRA-R은 15.306, TSRA-ML은 12.926으로 낮췄다. TSRA-ML baseline-adjusted resilience gain은 93.600%다. priority inversion rate는 공격 조건에서 0.0629였으나 TSRA-R/TSRA-ML 조건에서는 0.0이었고, no-attack guarded baseline의 false alarm rate와 model-influenced tick도 0.0이었다.
 
 ## 보고서에 넣을 표 예시
 
@@ -155,7 +156,7 @@ conda run -n base python scripts/summarize_decision_traces.py \
 | AURA attacked | `82.162` | `0.0629` | N/A | N/A | 공격 효과 확인 |
 | Rule defense | `61.228` | `0.0` | `1` | N/A | 단순 방어는 제한적 |
 | TSRA-R | `15.306` | `0.0` | `1` | `3` | 주 방어 성능 |
-| TSRA-ML | `15.306` | `0.0` | `1` | `2` | ML+guardrail 안정성 |
+| TSRA-ML | `12.926` | `0.0` | `1` | `1` | ML+guardrail 선제 대응 |
 
 ### 에이전트 기능표
 
@@ -199,13 +200,13 @@ Python은 Conda base 환경 기준으로 실행합니다.
 주의: 포함된 `models/tsra_sklearn_policy.joblib`는 `scikit-learn 1.9.x` 계열 로드를 기준으로 합니다. 실행 환경은 `requirements.txt`를 설치한 상태로 맞추는 것이 안전합니다.
 
 ```bash
-conda run -n base python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
 다중 seed 실험:
 
 ```bash
-conda run -n base python -m src.tsra_agent.cli \
+.venv/bin/python -m src.tsra_agent.cli \
   --scenario hybrid \
   --ticks 180 \
   --seeds 7,11,19,23,31 \
@@ -215,7 +216,7 @@ conda run -n base python -m src.tsra_agent.cli \
 제출 ZIP 생성:
 
 ```bash
-conda run -n base python scripts/build_submission_zip.py
+.venv/bin/python scripts/build_submission_zip.py
 ```
 
 주의: `dist/*.zip`는 생성 산출물입니다. GitHub에 남아 있는 오래된 ZIP을 제출 대상으로 삼지 말고, 최종 검증 직전에 새로 생성된 ZIP을 사용해야 합니다.
@@ -223,7 +224,7 @@ conda run -n base python scripts/build_submission_zip.py
 최종 제출 전 전체 검증:
 
 ```bash
-conda run -n base python scripts/verify_submission_state.py --require-dev --require-clean
+.venv/bin/python scripts/verify_submission_state.py --require-dev --require-clean
 ```
 
 이 검증은 unit test, CLI smoke run, DecisionTrace schema, canonical example metrics, model report metrics, 안전 경계 문구, 제출 ZIP 구성, DEV 브랜치 상태를 함께 확인합니다.
@@ -255,4 +256,4 @@ CLI 실행 후 `outputs/report_check` 안에 아래 파일이 생깁니다.
 
 아래 문단은 보고서 결론 또는 부가자료 설명에 그대로 사용할 수 있습니다.
 
-> 본 부가자료는 DAH 2026 예선 주제인 Hybrid SATCOM Disruption 기반 C4ISR 데이터 신뢰성 붕괴 시나리오를 폐쇄형 mission-event simulator로 구현한 AI 공방 에이전트 프로토타입이다. AURA-lite는 실제 공격 코드 없이 link degradation, mission-aware delay, failover chasing과 같은 추상 공격 효과를 선택하고, TSRA-R/TSRA-ML은 risk fusion, priority boost, PACE routing, stale badge, minimum mode를 통해 mission impact를 완화한다. 5개 seed 반복 실험에서 공격 단독 mission impact는 평균 82.162였고, TSRA-R/TSRA-ML 적용 후 15.306으로 감소했으며, baseline-adjusted resilience gain은 90.374%였다. 또한 각 에이전트의 판단 과정은 DecisionTrace로 기록되어 관측, 기억, 도구 호출, 후보 행동, 선택 행동, 피드백을 감사할 수 있다. 모든 실험은 synthetic simulator 내부에서만 수행되며 실제 RF parameter, exploit code, 장비별 침투 절차는 포함하지 않는다.
+> 본 부가자료는 DAH 2026 예선 주제인 Hybrid SATCOM Disruption 기반 C4ISR 데이터 신뢰성 붕괴 시나리오를 폐쇄형 mission-event simulator로 구현한 AI 공방 에이전트 프로토타입이다. AURA-lite는 실제 공격 코드 없이 link degradation, mission-aware delay, failover chasing과 같은 추상 공격 효과를 선택하고, TSRA-R/TSRA-ML은 risk fusion, priority boost, PACE routing, stale badge, minimum mode를 통해 mission impact를 완화한다. 5개 seed에서 공격 단독 mission impact는 82.162, TSRA-R은 15.306, TSRA-ML은 12.926이었고 TSRA-ML resilience gain은 93.600%였다. zero-model ablation impact 15.180과 비교한 learned-model 기여는 2.254 point다. 각 판단은 DecisionTrace로 기록되어 관측, 기억, 실제 도구 호출, 후보 행동, 선택 행동, 환경 피드백을 감사할 수 있다. 모든 실험은 synthetic simulator 내부에서만 수행되며 실제 RF parameter, exploit code, 장비별 침투 절차는 포함하지 않는다.

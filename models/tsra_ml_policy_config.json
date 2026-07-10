@@ -3,21 +3,21 @@
   "description": "Threshold and fusion parameters selected by mission-simulator policy search.",
   "config": {
     "ml_alert_threshold": 0.5,
-    "ml_priority_threshold": 0.24,
-    "ml_minimum_mode_threshold": 0.46,
-    "ml_pace_threshold": 0.36,
+    "ml_priority_threshold": 0.28,
+    "ml_minimum_mode_threshold": 0.5,
+    "ml_pace_threshold": 0.39,
     "ml_stale_badge_threshold": 0.62,
     "ml_quarantine_threshold": 0.78,
     "ml_recovery_threshold": 0.32,
-    "ml_weight": 0.58,
-    "heuristic_weight": 0.42,
-    "recovery_stable_ticks_required": 3,
-    "recovery_queue_threshold": 12,
+    "ml_weight": 0.74,
+    "heuristic_weight": 0.26,
+    "recovery_stable_ticks_required": 2,
+    "recovery_queue_threshold": 16,
     "recovery_latency_threshold": 6.0,
     "critical_queue_guard_threshold": 0,
-    "queue_guard_threshold": 2,
+    "queue_guard_threshold": 4,
     "satcom_guard_threshold": 0.92,
-    "satcom_return_health_threshold": 0.86,
-    "satcom_return_risk_threshold": 0.5
+    "satcom_return_health_threshold": 0.82,
+    "satcom_return_risk_threshold": 0.46
   }
 }

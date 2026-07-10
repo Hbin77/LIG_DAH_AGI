@@ -13,7 +13,8 @@
     "attacked": "E2 hybrid AURA-lite mission-effect attack without defense",
     "rule_defended": "E3 threshold rule defense against the same attack",
     "defended": "E4/E5 TSRA-R risk-fusion defense against the same attack",
-    "ml_defended": "E6 TSRA-ML trained ensemble and tuned action-gate defense against the same attack",
+    "ml_defended": "E6 TSRA-ML trained gradient-boosting policy and tuned action-gate defense against the same attack",
+    "ml_ablated": "E6-A TSRA-ML tuned action gate with learned risk output fixed to zero",
     "guarded_baseline": "False-alarm check: TSRA-R monitoring under no attack",
     "ml_guarded_baseline": "False-alarm check: TSRA-ML monitoring under no attack"
   },
@@ -40,7 +41,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.25
+        "mission_impact_score": 8.25,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "attacked": {
         "generated_messages": 208,
@@ -62,7 +72,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 84.44
+        "mission_impact_score": 84.44,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "rule_defended": {
         "generated_messages": 208,
@@ -84,7 +103,16 @@
         "recovery_tick": null,
         "detection_time": 1,
         "recovery_time": null,
-        "mission_impact_score": 60.33
+        "mission_impact_score": 60.33,
+        "defense_intervention_ticks": 87,
+        "priority_boost_ticks": 68,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 19,
+        "pace_transition_count": 1,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 87
       },
       "defended": {
         "generated_messages": 208,
@@ -106,29 +134,78 @@
         "recovery_tick": 39,
         "detection_time": 1,
         "recovery_time": 3,
-        "mission_impact_score": 13.5
+        "mission_impact_score": 13.5,
+        "defense_intervention_ticks": 135,
+        "priority_boost_ticks": 118,
+        "minimum_mode_ticks": 57,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 11,
+        "quarantine_ticks": 46,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 135
       },
       "ml_defended": {
         "generated_messages": 208,
-        "delivered_messages": 143,
+        "delivered_messages": 146,
         "lost_messages": 10,
-        "deferred_messages": 14,
+        "deferred_messages": 8,
         "shed_messages": 0,
-        "compressed_messages": 41,
+        "compressed_messages": 44,
         "backlog_messages": 0,
         "expired_messages": 0,
         "p95_critical_latency": 4.0,
-        "stale_data_ratio": 0.0054,
+        "stale_data_ratio": 0.0105,
         "priority_inversion_rate": 0.0,
         "false_alarm_count": 0,
         "false_alarm_rate": 0.0,
         "attack_start_tick": 35,
         "attack_end_tick": 148,
         "detection_tick": 36,
-        "recovery_tick": 38,
+        "recovery_tick": 37,
         "detection_time": 1,
-        "recovery_time": 2,
-        "mission_impact_score": 13.5
+        "recovery_time": 1,
+        "mission_impact_score": 13.35,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 96,
+        "minimum_mode_ticks": 94,
+        "stale_badge_ticks": 78,
+        "pace_transition_count": 17,
+        "quarantine_ticks": 71,
+        "model_influenced_ticks": 83,
+        "model_influenced_action_count": 375,
+        "guardrail_triggered_ticks": 115
+      },
+      "ml_ablated": {
+        "generated_messages": 208,
+        "delivered_messages": 145,
+        "lost_messages": 10,
+        "deferred_messages": 12,
+        "shed_messages": 0,
+        "compressed_messages": 41,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.85,
+        "stale_data_ratio": 0.0161,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 37,
+        "detection_time": 1,
+        "recovery_time": 1,
+        "mission_impact_score": 15.35,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 95,
+        "minimum_mode_ticks": 55,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 14,
+        "quarantine_ticks": 50,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 115
       },
       "guarded_baseline": {
         "generated_messages": 208,
@@ -150,7 +227,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.25
+        "mission_impact_score": 8.25,
+        "defense_intervention_ticks": 64,
+        "priority_boost_ticks": 64,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 64
       },
       "ml_guarded_baseline": {
         "generated_messages": 208,
@@ -172,11 +258,21 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.25
+        "mission_impact_score": 8.25,
+        "defense_intervention_ticks": 1,
+        "priority_boost_ticks": 1,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 1
       },
       "rule_resilience_gain_percent": 31.64,
       "resilience_gain_percent": 93.11,
-      "ml_resilience_gain_percent": 93.11
+      "ml_resilience_gain_percent": 93.31,
+      "ml_ablated_resilience_gain_percent": 90.68
     },
     {
       "seed": 11,
@@ -200,7 +296,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.95
+        "mission_impact_score": 8.95,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "attacked": {
         "generated_messages": 208,
@@ -222,7 +327,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 84.35
+        "mission_impact_score": 84.35,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "rule_defended": {
         "generated_messages": 208,
@@ -244,7 +358,16 @@
         "recovery_tick": null,
         "detection_time": 1,
         "recovery_time": null,
-        "mission_impact_score": 62.05
+        "mission_impact_score": 62.05,
+        "defense_intervention_ticks": 88,
+        "priority_boost_ticks": 68,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 20,
+        "pace_transition_count": 1,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 88
       },
       "defended": {
         "generated_messages": 208,
@@ -266,29 +389,78 @@
         "recovery_tick": 39,
         "detection_time": 1,
         "recovery_time": 3,
-        "mission_impact_score": 18.96
+        "mission_impact_score": 18.96,
+        "defense_intervention_ticks": 134,
+        "priority_boost_ticks": 118,
+        "minimum_mode_ticks": 56,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 11,
+        "quarantine_ticks": 46,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 134
       },
       "ml_defended": {
         "generated_messages": 208,
-        "delivered_messages": 144,
-        "lost_messages": 10,
-        "deferred_messages": 12,
+        "delivered_messages": 148,
+        "lost_messages": 8,
+        "deferred_messages": 10,
         "shed_messages": 0,
         "compressed_messages": 42,
         "backlog_messages": 0,
         "expired_messages": 0,
-        "p95_critical_latency": 6.7,
-        "stale_data_ratio": 0.0215,
+        "p95_critical_latency": 5.3,
+        "stale_data_ratio": 0.0105,
         "priority_inversion_rate": 0.0,
         "false_alarm_count": 0,
         "false_alarm_rate": 0.0,
         "attack_start_tick": 35,
         "attack_end_tick": 148,
         "detection_tick": 36,
-        "recovery_tick": 38,
+        "recovery_tick": 37,
         "detection_time": 1,
-        "recovery_time": 2,
-        "mission_impact_score": 18.96
+        "recovery_time": 1,
+        "mission_impact_score": 15.08,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 97,
+        "minimum_mode_ticks": 94,
+        "stale_badge_ticks": 78,
+        "pace_transition_count": 17,
+        "quarantine_ticks": 68,
+        "model_influenced_ticks": 83,
+        "model_influenced_action_count": 372,
+        "guardrail_triggered_ticks": 115
+      },
+      "ml_ablated": {
+        "generated_messages": 208,
+        "delivered_messages": 147,
+        "lost_messages": 9,
+        "deferred_messages": 9,
+        "shed_messages": 0,
+        "compressed_messages": 43,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 6.0,
+        "stale_data_ratio": 0.0263,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 37,
+        "detection_time": 1,
+        "recovery_time": 1,
+        "mission_impact_score": 17.36,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 95,
+        "minimum_mode_ticks": 56,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 14,
+        "quarantine_ticks": 50,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 115
       },
       "guarded_baseline": {
         "generated_messages": 208,
@@ -310,7 +482,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.95
+        "mission_impact_score": 8.95,
+        "defense_intervention_ticks": 64,
+        "priority_boost_ticks": 64,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 64
       },
       "ml_guarded_baseline": {
         "generated_messages": 208,
@@ -332,11 +513,21 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.95
+        "mission_impact_score": 8.95,
+        "defense_intervention_ticks": 1,
+        "priority_boost_ticks": 1,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 1
       },
       "rule_resilience_gain_percent": 29.58,
       "resilience_gain_percent": 86.72,
-      "ml_resilience_gain_percent": 86.72
+      "ml_resilience_gain_percent": 91.87,
+      "ml_ablated_resilience_gain_percent": 88.85
     },
     {
       "seed": 19,
@@ -360,7 +551,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 7.9
+        "mission_impact_score": 7.9,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "attacked": {
         "generated_messages": 208,
@@ -382,7 +582,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 81.93
+        "mission_impact_score": 81.93,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "rule_defended": {
         "generated_messages": 208,
@@ -404,7 +613,16 @@
         "recovery_tick": null,
         "detection_time": 1,
         "recovery_time": null,
-        "mission_impact_score": 64.38
+        "mission_impact_score": 64.38,
+        "defense_intervention_ticks": 82,
+        "priority_boost_ticks": 68,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 14,
+        "pace_transition_count": 1,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 82
       },
       "defended": {
         "generated_messages": 208,
@@ -426,29 +644,78 @@
         "recovery_tick": 39,
         "detection_time": 1,
         "recovery_time": 3,
-        "mission_impact_score": 15.88
+        "mission_impact_score": 15.88,
+        "defense_intervention_ticks": 134,
+        "priority_boost_ticks": 118,
+        "minimum_mode_ticks": 55,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 11,
+        "quarantine_ticks": 46,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 134
       },
       "ml_defended": {
         "generated_messages": 208,
-        "delivered_messages": 145,
-        "lost_messages": 9,
-        "deferred_messages": 14,
+        "delivered_messages": 148,
+        "lost_messages": 6,
+        "deferred_messages": 11,
         "shed_messages": 0,
-        "compressed_messages": 40,
+        "compressed_messages": 43,
         "backlog_messages": 0,
         "expired_messages": 0,
-        "p95_critical_latency": 5.4,
-        "stale_data_ratio": 0.0108,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0105,
         "priority_inversion_rate": 0.0,
         "false_alarm_count": 0,
         "false_alarm_rate": 0.0,
         "attack_start_tick": 35,
         "attack_end_tick": 148,
         "detection_tick": 36,
-        "recovery_tick": 38,
+        "recovery_tick": 37,
         "detection_time": 1,
-        "recovery_time": 2,
-        "mission_impact_score": 15.88
+        "recovery_time": 1,
+        "mission_impact_score": 12.16,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 98,
+        "minimum_mode_ticks": 95,
+        "stale_badge_ticks": 78,
+        "pace_transition_count": 18,
+        "quarantine_ticks": 67,
+        "model_influenced_ticks": 84,
+        "model_influenced_action_count": 375,
+        "guardrail_triggered_ticks": 115
+      },
+      "ml_ablated": {
+        "generated_messages": 208,
+        "delivered_messages": 143,
+        "lost_messages": 11,
+        "deferred_messages": 14,
+        "shed_messages": 0,
+        "compressed_messages": 40,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0109,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 37,
+        "detection_time": 1,
+        "recovery_time": 1,
+        "mission_impact_score": 14.06,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 95,
+        "minimum_mode_ticks": 54,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 14,
+        "quarantine_ticks": 50,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 115
       },
       "guarded_baseline": {
         "generated_messages": 208,
@@ -470,7 +737,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 7.9
+        "mission_impact_score": 7.9,
+        "defense_intervention_ticks": 64,
+        "priority_boost_ticks": 64,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 64
       },
       "ml_guarded_baseline": {
         "generated_messages": 208,
@@ -492,11 +768,21 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 7.9
+        "mission_impact_score": 7.9,
+        "defense_intervention_ticks": 1,
+        "priority_boost_ticks": 1,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 1
       },
       "rule_resilience_gain_percent": 23.71,
       "resilience_gain_percent": 89.22,
-      "ml_resilience_gain_percent": 89.22
+      "ml_resilience_gain_percent": 94.25,
+      "ml_ablated_resilience_gain_percent": 91.68
     },
     {
       "seed": 23,
@@ -520,7 +806,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.25
+        "mission_impact_score": 8.25,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "attacked": {
         "generated_messages": 208,
@@ -542,7 +837,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 80.73
+        "mission_impact_score": 80.73,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "rule_defended": {
         "generated_messages": 208,
@@ -564,7 +868,16 @@
         "recovery_tick": null,
         "detection_time": 1,
         "recovery_time": null,
-        "mission_impact_score": 58.21
+        "mission_impact_score": 58.21,
+        "defense_intervention_ticks": 82,
+        "priority_boost_ticks": 68,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 14,
+        "pace_transition_count": 1,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 82
       },
       "defended": {
         "generated_messages": 208,
@@ -586,29 +899,78 @@
         "recovery_tick": 39,
         "detection_time": 1,
         "recovery_time": 3,
-        "mission_impact_score": 14.04
+        "mission_impact_score": 14.04,
+        "defense_intervention_ticks": 134,
+        "priority_boost_ticks": 118,
+        "minimum_mode_ticks": 56,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 11,
+        "quarantine_ticks": 46,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 134
       },
       "ml_defended": {
         "generated_messages": 208,
-        "delivered_messages": 146,
-        "lost_messages": 8,
-        "deferred_messages": 13,
+        "delivered_messages": 148,
+        "lost_messages": 6,
+        "deferred_messages": 9,
         "shed_messages": 0,
-        "compressed_messages": 41,
+        "compressed_messages": 45,
         "backlog_messages": 0,
         "expired_messages": 0,
-        "p95_critical_latency": 4.6,
-        "stale_data_ratio": 0.0107,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0104,
         "priority_inversion_rate": 0.0,
         "false_alarm_count": 0,
         "false_alarm_rate": 0.0,
         "attack_start_tick": 35,
         "attack_end_tick": 148,
         "detection_tick": 36,
-        "recovery_tick": 38,
+        "recovery_tick": 37,
         "detection_time": 1,
-        "recovery_time": 2,
-        "mission_impact_score": 14.04
+        "recovery_time": 1,
+        "mission_impact_score": 12.06,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 98,
+        "minimum_mode_ticks": 96,
+        "stale_badge_ticks": 78,
+        "pace_transition_count": 18,
+        "quarantine_ticks": 76,
+        "model_influenced_ticks": 85,
+        "model_influenced_action_count": 383,
+        "guardrail_triggered_ticks": 115
+      },
+      "ml_ablated": {
+        "generated_messages": 208,
+        "delivered_messages": 148,
+        "lost_messages": 6,
+        "deferred_messages": 12,
+        "shed_messages": 0,
+        "compressed_messages": 42,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 5.6,
+        "stale_data_ratio": 0.0158,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 37,
+        "detection_time": 1,
+        "recovery_time": 1,
+        "mission_impact_score": 15.32,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 95,
+        "minimum_mode_ticks": 55,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 14,
+        "quarantine_ticks": 50,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 115
       },
       "guarded_baseline": {
         "generated_messages": 208,
@@ -630,7 +992,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.25
+        "mission_impact_score": 8.25,
+        "defense_intervention_ticks": 64,
+        "priority_boost_ticks": 64,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 64
       },
       "ml_guarded_baseline": {
         "generated_messages": 208,
@@ -652,11 +1023,21 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 8.25
+        "mission_impact_score": 8.25,
+        "defense_intervention_ticks": 1,
+        "priority_boost_ticks": 1,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 1
       },
       "rule_resilience_gain_percent": 31.07,
       "resilience_gain_percent": 92.01,
-      "ml_resilience_gain_percent": 92.01
+      "ml_resilience_gain_percent": 94.74,
+      "ml_ablated_resilience_gain_percent": 90.25
     },
     {
       "seed": 31,
@@ -680,7 +1061,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 7.55
+        "mission_impact_score": 7.55,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "attacked": {
         "generated_messages": 208,
@@ -702,7 +1092,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 79.36
+        "mission_impact_score": 79.36,
+        "defense_intervention_ticks": 0,
+        "priority_boost_ticks": 0,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 0
       },
       "rule_defended": {
         "generated_messages": 208,
@@ -724,7 +1123,16 @@
         "recovery_tick": null,
         "detection_time": 1,
         "recovery_time": null,
-        "mission_impact_score": 61.17
+        "mission_impact_score": 61.17,
+        "defense_intervention_ticks": 90,
+        "priority_boost_ticks": 68,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 22,
+        "pace_transition_count": 1,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 90
       },
       "defended": {
         "generated_messages": 208,
@@ -746,29 +1154,78 @@
         "recovery_tick": 39,
         "detection_time": 1,
         "recovery_time": 3,
-        "mission_impact_score": 14.15
+        "mission_impact_score": 14.15,
+        "defense_intervention_ticks": 135,
+        "priority_boost_ticks": 118,
+        "minimum_mode_ticks": 57,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 11,
+        "quarantine_ticks": 46,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 135
       },
       "ml_defended": {
         "generated_messages": 208,
-        "delivered_messages": 146,
-        "lost_messages": 7,
-        "deferred_messages": 12,
+        "delivered_messages": 149,
+        "lost_messages": 6,
+        "deferred_messages": 8,
         "shed_messages": 0,
-        "compressed_messages": 43,
+        "compressed_messages": 45,
         "backlog_messages": 0,
         "expired_messages": 0,
-        "p95_critical_latency": 5.0,
-        "stale_data_ratio": 0.0053,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.0103,
         "priority_inversion_rate": 0.0,
         "false_alarm_count": 0,
         "false_alarm_rate": 0.0,
         "attack_start_tick": 35,
         "attack_end_tick": 148,
         "detection_tick": 36,
-        "recovery_tick": 38,
+        "recovery_tick": 37,
         "detection_time": 1,
-        "recovery_time": 2,
-        "mission_impact_score": 14.15
+        "recovery_time": 1,
+        "mission_impact_score": 11.98,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 97,
+        "minimum_mode_ticks": 96,
+        "stale_badge_ticks": 79,
+        "pace_transition_count": 19,
+        "quarantine_ticks": 67,
+        "model_influenced_ticks": 84,
+        "model_influenced_action_count": 380,
+        "guardrail_triggered_ticks": 115
+      },
+      "ml_ablated": {
+        "generated_messages": 208,
+        "delivered_messages": 144,
+        "lost_messages": 10,
+        "deferred_messages": 11,
+        "shed_messages": 0,
+        "compressed_messages": 43,
+        "backlog_messages": 0,
+        "expired_messages": 0,
+        "p95_critical_latency": 4.0,
+        "stale_data_ratio": 0.016,
+        "priority_inversion_rate": 0.0,
+        "false_alarm_count": 0,
+        "false_alarm_rate": 0.0,
+        "attack_start_tick": 35,
+        "attack_end_tick": 148,
+        "detection_tick": 36,
+        "recovery_tick": 37,
+        "detection_time": 1,
+        "recovery_time": 1,
+        "mission_impact_score": 13.81,
+        "defense_intervention_ticks": 116,
+        "priority_boost_ticks": 95,
+        "minimum_mode_ticks": 54,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 14,
+        "quarantine_ticks": 50,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 115
       },
       "guarded_baseline": {
         "generated_messages": 208,
@@ -790,7 +1247,16 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 7.55
+        "mission_impact_score": 7.55,
+        "defense_intervention_ticks": 64,
+        "priority_boost_ticks": 64,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 64
       },
       "ml_guarded_baseline": {
         "generated_messages": 208,
@@ -812,11 +1278,21 @@
         "recovery_tick": null,
         "detection_time": null,
         "recovery_time": null,
-        "mission_impact_score": 7.55
+        "mission_impact_score": 7.55,
+        "defense_intervention_ticks": 1,
+        "priority_boost_ticks": 1,
+        "minimum_mode_ticks": 0,
+        "stale_badge_ticks": 0,
+        "pace_transition_count": 0,
+        "quarantine_ticks": 0,
+        "model_influenced_ticks": 0,
+        "model_influenced_action_count": 0,
+        "guardrail_triggered_ticks": 1
       },
       "rule_resilience_gain_percent": 25.33,
       "resilience_gain_percent": 90.81,
-      "ml_resilience_gain_percent": 90.81
+      "ml_resilience_gain_percent": 93.83,
+      "ml_ablated_resilience_gain_percent": 91.28
     }
   ],
   "aggregate": {
@@ -920,6 +1396,51 @@
         "mean": 8.18,
         "stdev": 0.4643,
         "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
       }
     },
     "attacked": {
@@ -1021,6 +1542,51 @@
       "mission_impact_score": {
         "mean": 82.162,
         "stdev": 1.9966,
+        "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
         "count": 5
       }
     },
@@ -1124,6 +1690,51 @@
         "mean": 61.228,
         "stdev": 2.0263,
         "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 85.8,
+        "stdev": 3.2496,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 68,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 17.8,
+        "stdev": 3.2496,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 85.8,
+        "stdev": 3.2496,
+        "count": 5
       }
     },
     "defended": {
@@ -1226,6 +1837,51 @@
         "mean": 15.306,
         "stdev": 1.9941,
         "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 134.4,
+        "stdev": 0.4899,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 118,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 56.2,
+        "stdev": 0.7483,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 11,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 46,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 134.4,
+        "stdev": 0.4899,
+        "count": 5
       }
     },
     "ml_defended": {
@@ -1235,18 +1891,18 @@
         "count": 5
       },
       "delivered_messages": {
-        "mean": 144.8,
-        "stdev": 1.1662,
+        "mean": 147.8,
+        "stdev": 0.9798,
         "count": 5
       },
       "lost_messages": {
-        "mean": 8.8,
-        "stdev": 1.1662,
+        "mean": 7.2,
+        "stdev": 1.6,
         "count": 5
       },
       "deferred_messages": {
-        "mean": 13,
-        "stdev": 0.8944,
+        "mean": 9.2,
+        "stdev": 1.1662,
         "count": 5
       },
       "shed_messages": {
@@ -1255,8 +1911,8 @@
         "count": 5
       },
       "compressed_messages": {
-        "mean": 41.4,
-        "stdev": 1.0198,
+        "mean": 43.8,
+        "stdev": 1.1662,
         "count": 5
       },
       "backlog_messages": {
@@ -1270,13 +1926,13 @@
         "count": 5
       },
       "p95_critical_latency": {
-        "mean": 5.14,
-        "stdev": 0.9069,
+        "mean": 4.26,
+        "stdev": 0.52,
         "count": 5
       },
       "stale_data_ratio": {
-        "mean": 0.0107,
-        "stdev": 0.0059,
+        "mean": 0.0104,
+        "stdev": 0.0001,
         "count": 5
       },
       "priority_inversion_rate": {
@@ -1310,7 +1966,7 @@
         "count": 5
       },
       "recovery_tick": {
-        "mean": 38,
+        "mean": 37,
         "stdev": 0.0,
         "count": 5
       },
@@ -1320,13 +1976,205 @@
         "count": 5
       },
       "recovery_time": {
-        "mean": 2,
+        "mean": 1,
         "stdev": 0.0,
         "count": 5
       },
       "mission_impact_score": {
-        "mean": 15.306,
-        "stdev": 1.9941,
+        "mean": 12.926,
+        "stdev": 1.1875,
+        "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 116,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 97.2,
+        "stdev": 0.7483,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 95,
+        "stdev": 0.8944,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 78.2,
+        "stdev": 0.4,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 17.8,
+        "stdev": 0.7483,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 69.8,
+        "stdev": 3.4293,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 83.8,
+        "stdev": 0.7483,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 377,
+        "stdev": 3.9497,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 115,
+        "stdev": 0.0,
+        "count": 5
+      }
+    },
+    "ml_ablated": {
+      "generated_messages": {
+        "mean": 208,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "delivered_messages": {
+        "mean": 145.4,
+        "stdev": 1.8547,
+        "count": 5
+      },
+      "lost_messages": {
+        "mean": 9.2,
+        "stdev": 1.7205,
+        "count": 5
+      },
+      "deferred_messages": {
+        "mean": 11.6,
+        "stdev": 1.6248,
+        "count": 5
+      },
+      "shed_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "compressed_messages": {
+        "mean": 41.8,
+        "stdev": 1.1662,
+        "count": 5
+      },
+      "backlog_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "expired_messages": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "p95_critical_latency": {
+        "mean": 4.89,
+        "stdev": 0.8151,
+        "count": 5
+      },
+      "stale_data_ratio": {
+        "mean": 0.017,
+        "stdev": 0.005,
+        "count": 5
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_start_tick": {
+        "mean": 35,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "attack_end_tick": {
+        "mean": 148,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_tick": {
+        "mean": 36,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_tick": {
+        "mean": 37,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "detection_time": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "recovery_time": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "mission_impact_score": {
+        "mean": 15.18,
+        "stdev": 1.2595,
+        "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 116,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 95,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 54.8,
+        "stdev": 0.7483,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 14,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 50,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 115,
+        "stdev": 0.0,
         "count": 5
       }
     },
@@ -1430,6 +2278,51 @@
         "mean": 8.18,
         "stdev": 0.4643,
         "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 64,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 64,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 64,
+        "stdev": 0.0,
+        "count": 5
       }
     },
     "ml_guarded_baseline": {
@@ -1532,6 +2425,51 @@
         "mean": 8.18,
         "stdev": 0.4643,
         "count": 5
+      },
+      "defense_intervention_ticks": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "priority_boost_ticks": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "minimum_mode_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "stale_badge_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "pace_transition_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "quarantine_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "model_influenced_action_count": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 5
+      },
+      "guardrail_triggered_ticks": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 5
       }
     },
     "rule_resilience_gain_percent": {
@@ -1545,8 +2483,13 @@
       "count": 5
     },
     "ml_resilience_gain_percent": {
-      "mean": 90.374,
-      "stdev": 2.2377,
+      "mean": 93.6,
+      "stdev": 0.9851,
+      "count": 5
+    },
+    "ml_ablated_resilience_gain_percent": {
+      "mean": 90.548,
+      "stdev": 0.9805,
       "count": 5
     }
   }

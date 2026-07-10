@@ -1,0 +1,460 @@
+{
+  "schema_version": "tsra-post-tuning-holdout/v1",
+  "evaluation_kind": "post_tuning_holdout",
+  "scenario": "hybrid",
+  "ticks": 180,
+  "seeds": [
+    101,
+    103,
+    107,
+    109,
+    113,
+    127,
+    131,
+    137,
+    139,
+    149,
+    151,
+    157,
+    163,
+    167,
+    173,
+    179,
+    181,
+    191,
+    193,
+    197,
+    199,
+    211,
+    223,
+    227,
+    229,
+    233,
+    239,
+    241,
+    251,
+    257
+  ],
+  "seed_count": 30,
+  "development_seed_exclusion": [
+    7,
+    11,
+    19,
+    23,
+    31,
+    41,
+    43,
+    47,
+    53,
+    59
+  ],
+  "source_summary_sha256": "1e2a3a50276ac36a2f765372175f733a2d51c1fe9676fea1ab8d2f2395d2452b",
+  "model_sha256": "f554ccd0bb96738310bd93319eaa87d0d3f9b1d5b5472095ca6a25a60d9ff28a",
+  "policy_config_sha256": "f345863bc43f58ae2e61883a27920b0a904abc985c0204f937c283fbdc3ea3f6",
+  "aggregate": {
+    "baseline": {
+      "mission_impact_score": {
+        "mean": 8.705,
+        "stdev": 0.6072,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 4.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      }
+    },
+    "attacked": {
+      "mission_impact_score": {
+        "mean": 82.3653,
+        "stdev": 1.9836,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 9.8567,
+        "stdev": 0.684,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.2421,
+        "stdev": 0.023,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0577,
+        "stdev": 0.0209,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      }
+    },
+    "rule_defended": {
+      "mission_impact_score": {
+        "mean": 60.0803,
+        "stdev": 2.4942,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 8.1,
+        "stdev": 1.2038,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.1035,
+        "stdev": 0.0142,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 83.8,
+        "stdev": 4.6861,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 68,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      }
+    },
+    "defended": {
+      "mission_impact_score": {
+        "mean": 16.218,
+        "stdev": 2.1104,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 5.7817,
+        "stdev": 0.9594,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.0151,
+        "stdev": 0.0055,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 134.4333,
+        "stdev": 0.4955,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 118,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      }
+    },
+    "ml_defended": {
+      "mission_impact_score": {
+        "mean": 15.3187,
+        "stdev": 1.625,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 5.11,
+        "stdev": 0.6567,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.0133,
+        "stdev": 0.0065,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 116.5,
+        "stdev": 0.6191,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 98.6333,
+        "stdev": 1.5162,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 86.2333,
+        "stdev": 2.3336,
+        "count": 30
+      }
+    },
+    "ml_ablated": {
+      "mission_impact_score": {
+        "mean": 16.981,
+        "stdev": 2.8517,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 6.0433,
+        "stdev": 1.3914,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.0193,
+        "stdev": 0.0079,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 116.5333,
+        "stdev": 0.5617,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 95,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      }
+    },
+    "guarded_baseline": {
+      "mission_impact_score": {
+        "mean": 8.705,
+        "stdev": 0.6072,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 4.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 64,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 64,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      }
+    },
+    "ml_guarded_baseline": {
+      "mission_impact_score": {
+        "mean": 8.705,
+        "stdev": 0.6072,
+        "count": 30
+      },
+      "p95_critical_latency": {
+        "mean": 4.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "stale_data_ratio": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "priority_inversion_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "false_alarm_rate": {
+        "mean": 0.0,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "defense_intervention_ticks": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "priority_boost_ticks": {
+        "mean": 1,
+        "stdev": 0.0,
+        "count": 30
+      },
+      "model_influenced_ticks": {
+        "mean": 0,
+        "stdev": 0.0,
+        "count": 30
+      }
+    }
+  },
+  "resilience_gain_percent": {
+    "rule_resilience_gain_percent": {
+      "mean": 30.2197,
+      "stdev": 3.4582,
+      "count": 30
+    },
+    "resilience_gain_percent": {
+      "mean": 89.8057,
+      "stdev": 2.6785,
+      "count": 30
+    },
+    "ml_resilience_gain_percent": {
+      "mean": 91.033,
+      "stdev": 1.9391,
+      "count": 30
+    },
+    "ml_ablated_resilience_gain_percent": {
+      "mean": 88.773,
+      "stdev": 3.8901,
+      "count": 30
+    }
+  },
+  "paired_mission_impact": {
+    "tsra_r_minus_tsra_ml": {
+      "meaning": "positive values favor ml_defended",
+      "count": 30,
+      "mean": 0.8993,
+      "stdev": 2.1005,
+      "bootstrap_95_percent_ci": [
+        0.15,
+        1.6387
+      ],
+      "wins": 22,
+      "ties": 0,
+      "losses": 8,
+      "min": -4.65,
+      "max": 5.49,
+      "bootstrap_samples": 20000,
+      "bootstrap_seed": 20260710
+    },
+    "zero_model_ablation_minus_tsra_ml": {
+      "meaning": "positive values favor ml_defended",
+      "count": 30,
+      "mean": 1.6623,
+      "stdev": 2.8255,
+      "bootstrap_95_percent_ci": [
+        0.7063,
+        2.705
+      ],
+      "wins": 22,
+      "ties": 0,
+      "losses": 8,
+      "min": -2.43,
+      "max": 10.82,
+      "bootstrap_samples": 20000,
+      "bootstrap_seed": 20260711
+    }
+  },
+  "limitations": [
+    "Holdout seeds vary simulator stochastic loss and delivery outcomes, not real operational environments.",
+    "The model wins on average but not on every seed; win/loss counts are reported explicitly.",
+    "Bootstrap intervals quantify simulator-seed uncertainty only."
+  ],
+  "safety_boundary": {
+    "synthetic_mission_event_simulator_only": true,
+    "exploit_code": false,
+    "operational_rf_parameters": false
+  }
+}

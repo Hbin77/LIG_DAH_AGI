@@ -111,6 +111,15 @@ class RunMetrics:
     detection_time: int | None
     recovery_time: int | None
     mission_impact_score: float
+    defense_intervention_ticks: int = 0
+    priority_boost_ticks: int = 0
+    minimum_mode_ticks: int = 0
+    stale_badge_ticks: int = 0
+    pace_transition_count: int = 0
+    quarantine_ticks: int = 0
+    model_influenced_ticks: int = 0
+    model_influenced_action_count: int = 0
+    guardrail_triggered_ticks: int = 0
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -134,4 +143,13 @@ class RunMetrics:
             "detection_time": self.detection_time,
             "recovery_time": self.recovery_time,
             "mission_impact_score": self.mission_impact_score,
+            "defense_intervention_ticks": self.defense_intervention_ticks,
+            "priority_boost_ticks": self.priority_boost_ticks,
+            "minimum_mode_ticks": self.minimum_mode_ticks,
+            "stale_badge_ticks": self.stale_badge_ticks,
+            "pace_transition_count": self.pace_transition_count,
+            "quarantine_ticks": self.quarantine_ticks,
+            "model_influenced_ticks": self.model_influenced_ticks,
+            "model_influenced_action_count": self.model_influenced_action_count,
+            "guardrail_triggered_ticks": self.guardrail_triggered_ticks,
         }

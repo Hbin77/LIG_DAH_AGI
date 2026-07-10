@@ -1,5 +1,5 @@
 {
-  "schema_version": "tsra-run-manifest/v1",
+  "schema_version": "tsra-run-manifest/v2",
   "scenario": "hybrid",
   "ticks": 180,
   "seeds": [
@@ -14,7 +14,8 @@
     "attacked": "E2 hybrid AURA-lite mission-effect attack without defense",
     "rule_defended": "E3 threshold rule defense against the same attack",
     "defended": "E4/E5 TSRA-R risk-fusion defense against the same attack",
-    "ml_defended": "E6 TSRA-ML trained ensemble and tuned action-gate defense against the same attack",
+    "ml_defended": "E6 TSRA-ML trained gradient-boosting policy and tuned action-gate defense against the same attack",
+    "ml_ablated": "E6-A TSRA-ML tuned action gate with learned risk output fixed to zero",
     "guarded_baseline": "False-alarm check: TSRA-R monitoring under no attack",
     "ml_guarded_baseline": "False-alarm check: TSRA-ML monitoring under no attack"
   },
@@ -30,6 +31,8 @@
     "models/tsra_ml_tuning_report.json",
     "models/tsra_final_selection_report.json",
     "seed_<seed>/<experiment>_events.jsonl",
+    "seed_<seed>/<experiment>_aura_decision_traces.jsonl",
+    "seed_<seed>/<experiment>_tsra_decision_traces.jsonl",
     "seed_<seed>/summary.json"
   ],
   "safety_boundary": {
@@ -37,5 +40,13 @@
     "operational_rf_parameters": false,
     "equipment_specific_intrusion_steps": false,
     "synthetic_mission_event_simulator_only": true
+  },
+  "agent_runtime_contract": {
+    "implementation": "AgentRuntime",
+    "separate_attack_defense_ownership": true,
+    "registered_callable_tools": true,
+    "bounded_memory": true,
+    "post_action_feedback_required": true,
+    "model_guardrail_attribution": true
   }
 }

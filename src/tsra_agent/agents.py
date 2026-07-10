@@ -12,6 +12,7 @@ from .ml_policy import (
     load_model,
     load_policy_config,
     load_sklearn_model,
+    sklearn_backend_name,
     state_to_features,
 )
 
@@ -203,14 +204,35 @@ class TSRARLite:
     satcom_return_health_threshold: float = 0.86
     satcom_return_risk_threshold: float = 0.50
 
-    def choose_action(self, state: MissionState) -> DefenseAction:
-        self.health_history.append(state.satcom_health)
+    def assess_state(self, state: MissionState) -> dict[str, Any]:
         risk_score = self._risk_score(state)
-        degraded = state.satcom_health < self.detection_threshold
-        stale_pressure = state.stale_ratio_window > self.stale_threshold
-        critical_delay = state.critical_latency_window > self.critical_latency_threshold
-        traffic_manipulation = state.priority_inversion_window > 0.05
-        access_pressure = state.terminal_risk_window > 0.35 or state.source_trust_drop_window > 0.25
+        return {
+            "policy_kind": "heuristic_risk_fusion",
+            "heuristic_risk": round(risk_score, 4),
+            "fused_risk": round(risk_score, 4),
+            "degraded": state.satcom_health < self.detection_threshold,
+            "stale_pressure": state.stale_ratio_window > self.stale_threshold,
+            "critical_delay": state.critical_latency_window > self.critical_latency_threshold,
+            "traffic_manipulation": state.priority_inversion_window > 0.05,
+            "access_pressure": (
+                state.terminal_risk_window > 0.35
+                or state.source_trust_drop_window > 0.25
+            ),
+        }
+
+    def choose_action(
+        self,
+        state: MissionState,
+        assessment: dict[str, Any] | None = None,
+    ) -> DefenseAction:
+        self.health_history.append(state.satcom_health)
+        assessment = assessment or self.assess_state(state)
+        risk_score = float(assessment["fused_risk"])
+        degraded = bool(assessment["degraded"])
+        stale_pressure = bool(assessment["stale_pressure"])
+        critical_delay = bool(assessment["critical_delay"])
+        traffic_manipulation = bool(assessment["traffic_manipulation"])
+        access_pressure = bool(assessment["access_pressure"])
 
         alert = None
         if risk_score >= 0.42 or degraded or stale_pressure or critical_delay:
@@ -245,15 +267,42 @@ class TSRARLite:
             or deadline_pressure
             or (degraded and (stale_pressure or critical_delay))
         )
-        priority_boost = (
-            risk_score >= 0.45
-            or degraded
-            or critical_delay
-            or state.critical_queue_depth > 0
-            or (state.queue_depth > 4 and state.satcom_health < 0.92)
-        )
+        priority_triggers = []
+        if risk_score >= 0.45:
+            priority_triggers.append("heuristic_risk")
+        if degraded:
+            priority_triggers.append("link_degradation_guard")
+        if critical_delay:
+            priority_triggers.append("critical_latency_guard")
+        if state.critical_queue_depth > 0:
+            priority_triggers.append("critical_queue_guard")
+        if state.queue_depth > 4 and state.satcom_health < 0.92:
+            priority_triggers.append("queue_health_guard")
+        priority_boost = bool(priority_triggers)
         quarantine = risk_score >= 0.72 or access_pressure
         pace_transition = active_link != state.active_link
+
+        minimum_mode_triggers = []
+        if risk_score >= 0.68:
+            minimum_mode_triggers.append("heuristic_risk")
+        if backup_link_pressure:
+            minimum_mode_triggers.append("backup_link_pressure")
+        if deadline_pressure:
+            minimum_mode_triggers.append("deadline_pressure")
+        if degraded and (stale_pressure or critical_delay):
+            minimum_mode_triggers.append("compound_degradation_guard")
+
+        selected_actions = []
+        if priority_boost:
+            selected_actions.append("priority_boost")
+        if minimum_mode:
+            selected_actions.append("minimum_mode")
+        if stale_pressure:
+            selected_actions.append("stale_badge")
+        if pace_transition:
+            selected_actions.append("pace_transition")
+        if quarantine:
+            selected_actions.append("quarantine")
 
         if self.alert_tick is not None and self.recovery_tick is None:
             recovered_path = (
@@ -283,14 +332,19 @@ class TSRARLite:
             quarantine=quarantine,
             pace_transition=pace_transition,
             decision_basis={
-                "policy_kind": "heuristic_risk_fusion",
-                "heuristic_risk": round(risk_score, 4),
-                "fused_risk": round(risk_score, 4),
-                "degraded": degraded,
-                "stale_pressure": stale_pressure,
-                "critical_delay": critical_delay,
-                "traffic_manipulation": traffic_manipulation,
-                "access_pressure": access_pressure,
+                **assessment,
+                "selected_actions": selected_actions,
+                "action_triggers": {
+                    "priority_boost": priority_triggers,
+                    "minimum_mode": minimum_mode_triggers,
+                    "stale_badge": ["stale_pressure"] if stale_pressure else [],
+                    "pace_transition": ["pace_route_change"] if pace_transition else [],
+                    "quarantine": (
+                        ["heuristic_risk"] if risk_score >= 0.72 else []
+                    ) + (["access_pressure"] if access_pressure else []),
+                },
+                "model_influenced_actions": [],
+                "guardrail_triggered_actions": selected_actions,
             },
         )
 
@@ -376,18 +430,69 @@ class MLTSRARLite(TSRARLite):
             if hasattr(self, key):
                 setattr(self, key, value)
 
-    def choose_action(self, state: MissionState) -> DefenseAction:
-        features = state_to_features(state)
-        ml_risk = self._predict_ml_risk(features)
-        heuristic_risk = self._risk_score(state)
-        fused_risk = min(1.0, self.ml_weight * ml_risk + self.heuristic_weight * heuristic_risk)
-        model_backend = "sklearn_ensemble" if self.sklearn_model is not None else "logistic_fallback"
+    def extract_features(self, state: MissionState) -> list[float]:
+        return state_to_features(state)
 
-        degraded = state.satcom_health < self.detection_threshold
-        stale_pressure = state.stale_ratio_window > self.stale_threshold
-        critical_delay = state.critical_latency_window > self.critical_latency_threshold
-        traffic_manipulation = state.priority_inversion_window > 0.03
-        access_pressure = state.terminal_risk_window > 0.30 or state.source_trust_drop_window > 0.22
+    def predict_ml_risk(self, features: list[float]) -> float:
+        return self._predict_ml_risk(features)
+
+    def assess_state(
+        self,
+        state: MissionState,
+        *,
+        ml_risk: float | None = None,
+        feature_count: int | None = None,
+    ) -> dict[str, Any]:
+        features = self.extract_features(state) if ml_risk is None else None
+        if ml_risk is None:
+            assert features is not None
+            ml_risk = self.predict_ml_risk(features)
+        heuristic_risk = self._risk_score(state)
+        fused_risk = min(
+            1.0,
+            self.ml_weight * ml_risk + self.heuristic_weight * heuristic_risk,
+        )
+        return {
+            "policy_kind": "ml_risk_fusion",
+            "model_backend": sklearn_backend_name(self.sklearn_model),
+            "ml_risk": round(ml_risk, 4),
+            "heuristic_risk": round(heuristic_risk, 4),
+            "fused_risk": round(fused_risk, 4),
+            "heuristic_only_component": round(self.heuristic_weight * heuristic_risk, 4),
+            "ml_weight": round(self.ml_weight, 4),
+            "heuristic_weight": round(self.heuristic_weight, 4),
+            "feature_count": feature_count or len(features or state_to_features(state)),
+            "ml_alert_threshold": self.ml_alert_threshold,
+            "ml_priority_threshold": self.ml_priority_threshold,
+            "ml_minimum_mode_threshold": self.ml_minimum_mode_threshold,
+            "ml_pace_threshold": self.ml_pace_threshold,
+            "ml_stale_badge_threshold": self.ml_stale_badge_threshold,
+            "ml_quarantine_threshold": self.ml_quarantine_threshold,
+            "degraded": state.satcom_health < self.detection_threshold,
+            "stale_pressure": state.stale_ratio_window > self.stale_threshold,
+            "critical_delay": state.critical_latency_window > self.critical_latency_threshold,
+            "traffic_manipulation": state.priority_inversion_window > 0.03,
+            "access_pressure": (
+                state.terminal_risk_window > 0.30
+                or state.source_trust_drop_window > 0.22
+            ),
+        }
+
+    def choose_action(
+        self,
+        state: MissionState,
+        assessment: dict[str, Any] | None = None,
+    ) -> DefenseAction:
+        self.health_history.append(state.satcom_health)
+        assessment = assessment or self.assess_state(state)
+        ml_risk = float(assessment["ml_risk"])
+        fused_risk = float(assessment["fused_risk"])
+        heuristic_only = float(assessment["heuristic_only_component"])
+        degraded = bool(assessment["degraded"])
+        stale_pressure = bool(assessment["stale_pressure"])
+        critical_delay = bool(assessment["critical_delay"])
+        traffic_manipulation = bool(assessment["traffic_manipulation"])
+        access_pressure = bool(assessment["access_pressure"])
 
         alert = None
         if fused_risk >= self.ml_alert_threshold or degraded or stale_pressure or critical_delay:
@@ -423,9 +528,8 @@ class MLTSRARLite(TSRARLite):
             state.critical_latency_window >= self.recovery_latency_threshold
             or state.priority_inversion_window > 0.0
         )
-        priority_boost = (
-            fused_risk >= self.ml_priority_threshold
-            or degraded
+        priority_guard = (
+            degraded
             or critical_delay
             or traffic_manipulation
             or (
@@ -436,6 +540,7 @@ class MLTSRARLite(TSRARLite):
                 )
             )
         )
+        priority_boost = fused_risk >= self.ml_priority_threshold or priority_guard
         minimum_mode = (
             fused_risk >= self.ml_minimum_mode_threshold
             or backup_link_pressure
@@ -444,6 +549,45 @@ class MLTSRARLite(TSRARLite):
         )
         quarantine = fused_risk >= self.ml_quarantine_threshold or access_pressure
         pace_transition = active_link != state.active_link
+
+        stale_badge = stale_pressure or ml_risk >= self.ml_stale_badge_threshold
+        model_influenced_actions = []
+        if alert is not None and fused_risk >= self.ml_alert_threshold and heuristic_only < self.ml_alert_threshold:
+            model_influenced_actions.append("alert")
+        if fused_risk >= self.ml_priority_threshold and heuristic_only < self.ml_priority_threshold:
+            model_influenced_actions.append("priority_boost")
+        if fused_risk >= self.ml_minimum_mode_threshold and heuristic_only < self.ml_minimum_mode_threshold:
+            model_influenced_actions.append("minimum_mode")
+        if pace_transition and fused_risk >= self.ml_pace_threshold and heuristic_only < self.ml_pace_threshold:
+            model_influenced_actions.append("pace_transition")
+        if ml_risk >= self.ml_stale_badge_threshold:
+            model_influenced_actions.append("stale_badge")
+        if fused_risk >= self.ml_quarantine_threshold and heuristic_only < self.ml_quarantine_threshold:
+            model_influenced_actions.append("quarantine")
+
+        guardrail_triggered_actions = []
+        if priority_guard:
+            guardrail_triggered_actions.append("priority_boost")
+        if backup_link_pressure or deadline_pressure or (degraded and (stale_pressure or critical_delay)):
+            guardrail_triggered_actions.append("minimum_mode")
+        if stale_pressure:
+            guardrail_triggered_actions.append("stale_badge")
+        if degraded and active_link != state.active_link:
+            guardrail_triggered_actions.append("pace_transition")
+        if access_pressure:
+            guardrail_triggered_actions.append("quarantine")
+
+        selected_actions = []
+        if priority_boost:
+            selected_actions.append("priority_boost")
+        if minimum_mode:
+            selected_actions.append("minimum_mode")
+        if stale_badge:
+            selected_actions.append("stale_badge")
+        if pace_transition:
+            selected_actions.append("pace_transition")
+        if quarantine:
+            selected_actions.append("quarantine")
 
         if self.alert_tick is not None and self.recovery_tick is None:
             recovered_path = (
@@ -471,28 +615,39 @@ class MLTSRARLite(TSRARLite):
             priority_boost=priority_boost,
             minimum_mode=minimum_mode,
             alert=alert,
-            stale_badge=stale_pressure or ml_risk >= self.ml_stale_badge_threshold,
+            stale_badge=stale_badge,
             risk_score=round(fused_risk, 4),
             quarantine=quarantine,
             pace_transition=pace_transition,
             decision_basis={
-                "policy_kind": "ml_risk_fusion",
-                "model_backend": model_backend,
-                "ml_risk": round(ml_risk, 4),
-                "heuristic_risk": round(heuristic_risk, 4),
-                "fused_risk": round(fused_risk, 4),
-                "ml_weight": round(self.ml_weight, 4),
-                "heuristic_weight": round(self.heuristic_weight, 4),
-                "feature_count": len(features),
-                "ml_alert_threshold": self.ml_alert_threshold,
-                "ml_priority_threshold": self.ml_priority_threshold,
-                "ml_minimum_mode_threshold": self.ml_minimum_mode_threshold,
-                "ml_pace_threshold": self.ml_pace_threshold,
-                "degraded": degraded,
-                "stale_pressure": stale_pressure,
-                "critical_delay": critical_delay,
-                "traffic_manipulation": traffic_manipulation,
-                "access_pressure": access_pressure,
+                **assessment,
+                "selected_actions": selected_actions,
+                "action_triggers": {
+                    "priority_boost": (
+                        (["fused_risk"] if fused_risk >= self.ml_priority_threshold else [])
+                        + (["mission_guardrail"] if priority_guard else [])
+                    ),
+                    "minimum_mode": (
+                        (["fused_risk"] if fused_risk >= self.ml_minimum_mode_threshold else [])
+                        + (["backup_link_pressure"] if backup_link_pressure else [])
+                        + (["deadline_pressure"] if deadline_pressure else [])
+                        + (["compound_degradation_guard"] if degraded and (stale_pressure or critical_delay) else [])
+                    ),
+                    "stale_badge": (
+                        (["ml_risk"] if ml_risk >= self.ml_stale_badge_threshold else [])
+                        + (["stale_pressure"] if stale_pressure else [])
+                    ),
+                    "pace_transition": (
+                        (["fused_risk"] if fused_risk >= self.ml_pace_threshold else [])
+                        + (["link_degradation_guard"] if degraded else [])
+                    ) if pace_transition else [],
+                    "quarantine": (
+                        (["fused_risk"] if fused_risk >= self.ml_quarantine_threshold else [])
+                        + (["access_pressure"] if access_pressure else [])
+                    ),
+                },
+                "model_influenced_actions": sorted(set(model_influenced_actions)),
+                "guardrail_triggered_actions": sorted(set(guardrail_triggered_actions)),
             },
         )
 

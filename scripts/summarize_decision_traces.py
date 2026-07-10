@@ -54,13 +54,17 @@ def selected_action_summary(selected_action: Any) -> str:
     if not isinstance(selected_action, dict):
         return str(selected_action or "")
     action_type = str(selected_action.get("type", ""))
-    action_name = str(
-        selected_action.get("action")
-        or selected_action.get("attack")
-        or selected_action.get("mode")
-        or selected_action.get("defense_mode")
-        or ""
-    )
+    actions = selected_action.get("actions")
+    if isinstance(actions, list):
+        action_name = ", ".join(str(action) for action in actions)
+    else:
+        action_name = str(
+            selected_action.get("action")
+            or selected_action.get("attack")
+            or selected_action.get("mode")
+            or selected_action.get("defense_mode")
+            or ""
+        )
     return ": ".join(value for value in [action_type, action_name] if value)
 
 

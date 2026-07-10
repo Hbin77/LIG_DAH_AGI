@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -9,7 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.tsra_agent.ml_policy import (
+    DATASET_GENERATOR_VERSION,
     DEFAULT_MODEL_PATH,
+    FEATURE_NAMES,
+    INTERVENTION_LATENCY_THRESHOLD,
+    INTERVENTION_RISK_THRESHOLD,
+    INTERVENTION_STALE_THRESHOLD,
     evaluate_classifier,
     generate_training_samples,
     save_model,
@@ -52,16 +58,40 @@ def main() -> None:
     output_path = Path(args.output)
     report_path = Path(args.report)
     save_model(model, output_path)
+    model_sha256 = hashlib.sha256(output_path.read_bytes()).hexdigest()
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(
         json.dumps(
             {
-                "model_path": str(output_path),
+                "schema_version": "tsra-logistic-fallback-training/v2",
+                "model_path": display_path(output_path),
+                "model_sha256": model_sha256,
                 "report_path": str(report_path),
                 "seed": args.seed,
                 "samples": args.samples,
                 "epochs": args.epochs,
                 "metrics": model.metrics,
+                "feature_names": FEATURE_NAMES,
+                "feature_count": len(FEATURE_NAMES),
+                "dataset_generator_version": DATASET_GENERATOR_VERSION,
+                "class_counts": {
+                    "0": sum(sample.label == 0 for sample in samples),
+                    "1": sum(sample.label == 1 for sample in samples),
+                },
+                "label_thresholds": {
+                    "weighted_mission_risk": INTERVENTION_RISK_THRESHOLD,
+                    "critical_latency_pressure": INTERVENTION_LATENCY_THRESHOLD,
+                    "stale_ratio": INTERVENTION_STALE_THRESHOLD,
+                },
+                "limitations": [
+                    "Dependency-free fallback only; the primary runtime model is scikit-learn.",
+                    "All labels are synthetic proactive-intervention oracle labels.",
+                ],
+                "safety_boundary": {
+                    "synthetic_training_data_only": True,
+                    "exploit_code": False,
+                    "operational_rf_parameters": False,
+                },
             },
             indent=2,
             ensure_ascii=False,
@@ -71,6 +101,13 @@ def main() -> None:
     print(json.dumps(model.metrics, indent=2, ensure_ascii=False))
     print(f"model: {output_path}")
     print(f"report: {report_path}")
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,8 @@
 | E2 | `attacked` | AURA-lite hybrid mission-effect attack without defense |
 | E3 | `rule_defended` | Threshold-only defense comparison |
 | E4/E5 | `defended` | TSRA-R risk-fusion defense against hybrid attack |
-| E6 | `ml_defended` | TSRA-ML trained ensemble and tuned action-gate defense against hybrid attack |
+| E6 | `ml_defended` | TSRA-ML trained gradient-boosting policy and tuned action-gate defense against hybrid attack |
+| E6-A | `ml_ablated` | Same tuned action gate with learned risk fixed to zero |
 | FA | `guarded_baseline` | TSRA-R false alarm check under no attack |
 | ML-FA | `ml_guarded_baseline` | TSRA-ML false alarm check under no attack |
 
@@ -26,6 +27,9 @@
 | `false_alarm_rate` | Defense alert count per observed tick under no attack |
 | `mission_impact_score` | Weighted mission impact score |
 | `resilience_gain_percent` | Baseline-adjusted reduction from attacked to defended |
+| `defense_intervention_ticks` | Ticks where the defense emitted at least one control or alert |
+| `priority_boost_ticks` | Ticks where critical-traffic priority control was active |
+| `model_influenced_ticks` | Ticks where model contribution was required for at least one ML action |
 
 ## Current multi-seed result
 
@@ -43,7 +47,8 @@ Summary:
 | attacked | 82.162 | 0.0629 | 0.236 | 9.8 | 53.0 | 49.0 |
 | rule_defended | 61.228 | 0.0 | 0.1127 | 8.56 | 72.0 | 68.0 |
 | defended | 15.306 | 0.0 | 0.0107 | 5.14 | 0.0 | 0.0 |
-| ml_defended | 15.306 | 0.0 | 0.0107 | 5.14 | 0.0 | 0.0 |
+| ml_defended | 12.926 | 0.0 | 0.0104 | 4.26 | 0.0 | 0.0 |
+| ml_ablated | 15.180 | 0.0 | 0.0170 | 4.89 | 0.0 | 0.0 |
 
 TSRA-R result:
 
@@ -54,23 +59,49 @@ TSRA-R result:
 
 TSRA-ML result:
 
-- Primary model: StandardScaler + soft-voting GradientBoosting/RandomForest
+- Primary model: HistGradientBoostingClassifier
 - Training samples: 100,000 synthetic mission states
-- Validation accuracy: 0.9952
-- Validation F1: 0.9956
-- Validation ROC-AUC: 1.0
-- Validation log loss: 0.0119
+- Synthetic holdout validation accuracy: 0.9885
+- Synthetic holdout validation F1: 0.9884
+- Synthetic holdout validation ROC-AUC: 0.9995
+- Synthetic holdout validation log loss: 0.0297
+- Independent attacked-trajectory oracle F1: 0.9972
+- Independent TSRA-defended-trajectory oracle F1: 0.9771
 - Tuned action gate: `models/tsra_ml_policy_config.json`
 - Final selection report: `models/tsra_final_selection_report.json`
 - Detection time: 1 tick
-- Recovery time: 2 ticks
-- Adaptive compressed UAV snapshots: 41.4 mean
-- Deferred UAV frames: 13.0 mean
+- Recovery time: 1 tick
+- Adaptive compressed UAV snapshots: 43.8 mean
+- Deferred UAV frames: 9.2 mean
 - Backlog messages: 0.0 mean
 - Expired messages: 0.0 mean
 - ML guarded baseline false alarm rate: 0.0
-- Baseline-adjusted resilience gain: 90.374%
+- Baseline-adjusted resilience gain: 93.600%
+- Defense intervention ticks: 116.0 mean, versus TSRA-R 134.4
+- Priority-boost ticks: 97.2 mean, versus TSRA-R 118.0
+- Model-influenced ticks: 83.8 mean
+- Zero-model ablation mission impact: 15.180
+- Learned-model impact contribution: 2.254 points
 
 ## Selection note
 
-The 100k-sample model improved validation F1 to 0.9956 and log loss to 0.0119, but mission-level gains still came mainly from the action layer: adaptive UAV snapshot compression, EDF scheduling, minimum-mode guardrails, and SATCOM return hysteresis.
+The 100k-sample model reaches synthetic holdout F1 0.9884 and attacked-trajectory oracle F1 0.9972. Both values compare against a synthetic proactive-intervention oracle; neither is real-world incident accuracy. `model_influenced_actions` and `guardrail_triggered_actions` expose which source caused each closed-loop decision.
+
+## Independent 30-seed holdout
+
+The five-seed result above combines policy-tuning and policy-validation seeds. A
+separate post-tuning holdout therefore uses 30 seeds excluded from model trajectory
+validation and policy tuning.
+
+| Condition | Mission impact mean | Stdev | Resilience gain |
+|---|---:|---:|---:|
+| TSRA-R | 16.2180 | 2.1104 | 89.8057% |
+| TSRA-ML | 15.3187 | 1.6250 | 91.0330% |
+| zero-model ablation | 16.9810 | 2.8517 | 88.7730% |
+
+Paired TSRA-R minus TSRA-ML impact is 0.8993 with bootstrap 95% interval
+`[0.1500, 1.6387]`. Paired zero-model ablation minus TSRA-ML impact is 1.6623
+with interval `[0.7063, 2.7050]`. TSRA-ML wins 22 of 30 seeds in both comparisons
+and loses 8, so the supported conclusion is positive mean effect, not universal
+per-seed dominance. The compact evidence is
+`examples/holdout_30_seed_summary.json`.
