@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
+from scripts.build_submission_zip import should_include
 from src.tsra_agent.attack_agent import AURAAgent
 from src.tsra_agent.defense_agent import TSRAAgent
 from src.tsra_agent.evaluator import resilience_gain
@@ -355,6 +356,11 @@ class AgentRuntimeContractTests(unittest.TestCase):
         self.assertEqual(defense.runtime.agent_name, "TSRA-ML")
         self.assertIn("rank_attack_candidates", attack.runtime.registered_tools)
         self.assertIn("predict_mission_risk", defense.runtime.registered_tools)
+
+    def test_submission_package_excludes_local_macos_metadata(self) -> None:
+        self.assertFalse(should_include(Path("docs/.DS_Store")))
+        self.assertFalse(should_include(Path("src/__pycache__/module.pyc")))
+        self.assertTrue(should_include(Path("src/tsra_agent/runtime.py")))
 
     def test_tsra_selected_actions_match_selected_candidates(self) -> None:
         for defense_mode, expected_agent in [("tsra", "TSRA-R-lite"), ("ml", "TSRA-ML")]:

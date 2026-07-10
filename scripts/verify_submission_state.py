@@ -652,6 +652,8 @@ def check_package_zip() -> list[str]:
         require(not forbidden, f"package zip contains forbidden entries: {forbidden[:8]}")
         nested_zips = [name for name in names if name.endswith(".zip")]
         require(not nested_zips, f"package zip contains nested zip files: {nested_zips[:8]}")
+        macos_metadata = [name for name in names if name.endswith(".DS_Store") or name.startswith("__MACOSX/")]
+        require(not macos_metadata, f"package zip contains macOS metadata: {macos_metadata[:8]}")
 
     return [f"package_zip={zip_path.relative_to(ROOT)} entries={len(names)} bytes={zip_path.stat().st_size} pass"]
 

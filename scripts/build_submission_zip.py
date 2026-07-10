@@ -34,6 +34,8 @@ def add_file(archive: ZipFile, path: Path) -> None:
 
 def should_include(path: Path) -> bool:
     parts = set(path.parts)
+    if ".DS_Store" in parts:
+        return False
     if "__pycache__" in parts:
         return False
     if path.suffix in {".pyc", ".pyo"}:

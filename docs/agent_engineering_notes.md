@@ -221,3 +221,9 @@ instead of directly orchestrating their policy internals.
 Added model-versus-guardrail attribution and action-economy metrics. This resolves
 the ambiguity created when TSRA-R and TSRA-ML had identical mission-impact columns
 despite taking different control paths.
+
+### 2026-07-10: Reproducible package contents
+
+Excluded local `.DS_Store` and `__MACOSX` metadata from generated ZIP files and the
+package verifier. Local workspaces and fresh GitHub clones now produce the same
+source-file entry set.
