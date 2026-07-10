@@ -58,7 +58,7 @@ The implemented agents use an executable runtime contract rather than only retur
 
 The simulator exchanges only `MissionState`, `AttackAction`, and `DefenseAction` contracts with the separately owned attack and defense agents. It no longer constructs tool records after executing policy code.
 
-`scripts/verify_submission_state.py` validates this contract across the CLI smoke run. A trace fails when its runtime did not execute tools, its environment feedback was not attached, its AURA ranking is inconsistent, or its TSRA-ML risk/action attribution is incomplete.
+`scripts/verify_submission_state.py` validates this contract through the local CLI smoke run. A trace fails when its runtime did not execute tools, its environment feedback was not attached, its AURA ranking is inconsistent, or its TSRA-ML risk/action attribution is incomplete.
 
 ## Implemented scope
 

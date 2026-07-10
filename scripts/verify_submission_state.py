@@ -19,7 +19,6 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_FILES = [
     "README.md",
     "requirements.txt",
-    ".github/workflows/dev-quality.yml",
     "scripts/build_submission_zip.py",
     "scripts/train_ml_policy.py",
     "scripts/train_sklearn_policy.py",

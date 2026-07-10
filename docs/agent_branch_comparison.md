@@ -6,7 +6,7 @@
 |---|---|---|
 | `origin/GubikoDev` | Current executable submission base | Stable `src.tsra_agent` API, trained TSRA-ML model artifacts, CLI, and `unittest` regression coverage. |
 | `origin/hbin` | Other contributor branch | Stronger agent framing through separated AURA/TSRA-R packages, AgentRuntime, DecisionTrace logs, and report-generation assets. |
-| `origin/DEV` | Final integrated submission branch | Keeps the stable GubikoDev execution path and adds hbin-style decision traces plus a DEV submission verifier and CI quality gate. |
+| `origin/DEV` | Final integrated submission branch | Keeps the stable GubikoDev execution path and adds hbin-style decision traces plus a local DEV submission verifier. |
 
 ## Decision
 
@@ -27,7 +27,6 @@ Implemented in this branch:
 - `src/tsra_agent/cli.py`: run manifest now lists decision-trace artifacts.
 - `tests/test_simulation.py`: runtime invocation, attack/defense separation, feedback, ML attribution, and CLI regression.
 - `scripts/verify_submission_state.py`: DEV-specific final gate for tests, CLI smoke output, DecisionTrace schema, model metrics, safety boundary, package contents, and branch/worktree hygiene.
-- `.github/workflows/dev-quality.yml`: CI gate for pushes and pull requests targeting `DEV`.
 
 Kept from `GubikoDev`:
 
@@ -46,7 +45,7 @@ Why not copy `hbin` wholesale:
 
 - `hbin` is stronger for broad evidence generation, but its large report-table tree and split packages would make the DEV branch heavier and harder for a report writer to run quickly.
 - `DEV` already has trained TSRA-ML artifacts, a compact CLI, and a reproducible multi-seed scenario.
-- The final compromise is to keep DEV compact and executable while adding the hbin-style proof points that matter for judging an AI agent: observation, memory, tool calls, candidate actions, selected action, feedback, safety boundary, and an automated quality gate.
+- The final compromise is to keep DEV compact and executable while adding the hbin-style proof points that matter for judging an AI agent: observation, memory, tool calls, candidate actions, selected action, feedback, safety boundary, and a local submission verifier.
 
 ## Latest Recomparison (2026-07-10)
 
