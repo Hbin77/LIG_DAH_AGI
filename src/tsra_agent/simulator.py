@@ -19,7 +19,7 @@ from .models import (
     MissionMessage,
     RunMetrics,
 )
-from .runtime import AgentTraceRecorder
+from .runtime import AgentTool, AgentTraceRecorder
 
 
 DEFAULT_PROFILES = [
@@ -87,6 +87,18 @@ class MissionSimulator:
         self.blue_trace = AgentTraceRecorder(
             blue_name,
             "detect and mitigate synthetic C4ISR data-trust degradation",
+        )
+        self.attack_selector_tool = AgentTool(
+            "select_attack_effect",
+            "choose one bounded synthetic mission-effect action for the red agent",
+        )
+        self.risk_fusion_tool = AgentTool(
+            "fuse_mission_risk",
+            "combine link, data freshness, critical latency, source trust, and PACE signals",
+        )
+        self.pace_selector_tool = AgentTool(
+            "select_pace_link",
+            "select the mission transport path used by the blue defense action",
         )
 
     def run(self, name: str) -> SimulationResult:
@@ -239,19 +251,18 @@ class MissionSimulator:
             observation=observation,
             candidate_actions=candidate_actions,
             tool_calls=[
-                {
-                    "tool_name": "select_attack_effect",
-                    "input_summary": {
+                self.attack_selector_tool.run(
+                    input_summary={
                         "scenario": self.attack_mode.value,
                         "tick": tick,
                         "active_link": state.active_link.value,
                     },
-                    "output_summary": {
+                    output_summary={
                         "mode": attack.mode.value,
                         "target_link": attack.target_link.value,
+                        "intensity": round(attack.intensity, 4),
                     },
-                    "status": "ok",
-                }
+                )
             ],
             selected_action={
                 "type": "attack_action" if attack.mode != AttackMode.NONE else "no_op",
@@ -330,18 +341,28 @@ class MissionSimulator:
             observation=observation,
             candidate_actions=candidate_actions,
             tool_calls=[
-                {
-                    "tool_name": "fuse_mission_risk",
-                    "input_summary": observation["signals"],
-                    "output_summary": {"risk_score": defense.risk_score},
-                    "status": "ok",
-                },
-                {
-                    "tool_name": "select_pace_link",
-                    "input_summary": {"active_link": state.active_link.value},
-                    "output_summary": {"active_link": defense.active_link.value},
-                    "status": "ok",
-                },
+                self.risk_fusion_tool.run(
+                    input_summary=observation["signals"],
+                    output_summary={
+                        "risk_score": defense.risk_score,
+                        "alert": defense.alert,
+                        "priority_boost": defense.priority_boost,
+                        "minimum_mode": defense.minimum_mode,
+                    },
+                ),
+                self.pace_selector_tool.run(
+                    input_summary={
+                        "active_link": state.active_link.value,
+                        "satcom_health": round(state.satcom_health, 4),
+                        "radio_health": round(state.radio_health, 4),
+                        "lte_health": round(state.lte_health, 4),
+                        "mesh_health": round(state.mesh_health, 4),
+                    },
+                    output_summary={
+                        "active_link": defense.active_link.value,
+                        "pace_transition": defense.pace_transition,
+                    },
+                ),
             ],
             selected_action={
                 "type": "defense_action" if selected_flags or defense.alert else "no_op",

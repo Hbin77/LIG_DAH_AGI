@@ -42,9 +42,19 @@ flowchart LR
 6. Guard: mission safety guardrails keep critical traffic priority even when the model is uncertain.
 7. Evaluate: compare no-defense, threshold-rule defense, TSRA-R defense, and TSRA-ML defense across multiple seeds.
 
+## Agent runtime contract
+
+The implemented agents use a lightweight runtime contract rather than only returning simulator actions:
+
+- `AgentMemory`: keeps recent observations, recent decisions, and compact belief state.
+- `AgentTool`: records a structured synthetic tool result with `tool_name`, `purpose`, `input_summary`, `output_summary`, `status`, and `safety_checked`.
+- `DecisionTrace`: persists observation, memory, candidate actions, tool results, selected action, reason, feedback, and safety boundary for each tick.
+
+`scripts/verify_submission_state.py` validates this contract across the CLI smoke run, so missing tool fields or unsafe tool results fail the DEV quality gate.
+
 ## Implemented scope
 
-- Implemented: mission-event simulator, AURA-lite attack pulses, TSRA-R risk fusion, TSRA-ML scikit-learn ensemble classifier, tuned action-gate policy, PACE path choice and SATCOM return hysteresis, EDF scheduling, adaptive UAV snapshot compression, priority inversion detection, stale noncritical backlog control, multi-seed evaluation, event logs, incident report, tests.
+- Implemented: mission-event simulator, AURA-lite attack pulses, TSRA-R risk fusion, TSRA-ML scikit-learn ensemble classifier, tuned action-gate policy, structured AgentTool/DecisionTrace runtime, PACE path choice and SATCOM return hysteresis, EDF scheduling, adaptive UAV snapshot compression, priority inversion detection, stale noncritical backlog control, multi-seed evaluation, event logs, incident report, tests.
 - Not implemented: real RF control, real exploit execution, device-specific intrusion, live UAV/UGV integration, RAG/RL/XGBoost training.
 
 Unimplemented advanced models such as RAG/RL/XGBoost are future work, not claimed as current prototype behavior.

@@ -82,6 +82,15 @@ TRACE_REQUIRED_FIELDS = {
     "safety_boundary",
 }
 
+TOOL_CALL_REQUIRED_FIELDS = {
+    "tool_name",
+    "purpose",
+    "input_summary",
+    "output_summary",
+    "status",
+    "safety_checked",
+}
+
 SAFETY_TEXT = "closed synthetic mission simulation"
 
 
@@ -105,12 +114,11 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def read_first_jsonl(path: Path) -> dict[str, Any]:
-    require(path.exists(), f"missing trace file: {display_path(path)}")
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            return json.loads(line)
-    raise AssertionError(f"empty trace file: {display_path(path)}")
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    require(path.exists(), f"missing jsonl file: {display_path(path)}")
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    require(rows, f"empty jsonl file: {display_path(path)}")
+    return rows
 
 
 def display_path(path: Path) -> str:
@@ -247,15 +255,15 @@ def check_cli_smoke() -> list[str]:
         require("seed_<seed>/<experiment>_tsra_decision_traces.jsonl" in manifest["artifacts"], "manifest missing TSRA trace artifact")
 
         seed_dir = output_dir / "seed_7"
-        aura_trace = read_first_jsonl(seed_dir / "attacked_aura_decision_traces.jsonl")
-        tsra_trace = read_first_jsonl(seed_dir / "defended_tsra_decision_traces.jsonl")
-        ml_trace = read_first_jsonl(seed_dir / "ml_defended_tsra_decision_traces.jsonl")
-        for trace in [aura_trace, tsra_trace, ml_trace]:
-            missing = TRACE_REQUIRED_FIELDS - set(trace)
-            require(not missing, f"trace missing fields: {sorted(missing)}")
-            require(trace["candidate_actions"], "trace has no candidate actions")
-            require(trace["tool_calls"], "trace has no tool calls")
-            require(SAFETY_TEXT in trace["safety_boundary"], "trace missing safety boundary")
+        trace_sets = [
+            read_jsonl(seed_dir / "attacked_aura_decision_traces.jsonl"),
+            read_jsonl(seed_dir / "defended_tsra_decision_traces.jsonl"),
+            read_jsonl(seed_dir / "ml_defended_tsra_decision_traces.jsonl"),
+        ]
+        for traces in trace_sets:
+            require(len(traces) == 80, f"expected 80 decision traces, got {len(traces)}")
+            for trace in traces:
+                validate_trace(trace)
 
         aggregate = summary["aggregate"]
         require(
@@ -268,6 +276,22 @@ def check_cli_smoke() -> list[str]:
         require(aggregate["ml_resilience_gain_percent"]["mean"] >= 85.0, "smoke TSRA-ML resilience gain below 85%")
 
     return ["cli_smoke=pass", "decision_trace_schema=pass"]
+
+
+def validate_trace(trace: dict[str, Any]) -> None:
+    missing = TRACE_REQUIRED_FIELDS - set(trace)
+    require(not missing, f"trace missing fields: {sorted(missing)}")
+    require(trace["candidate_actions"], "trace has no candidate actions")
+    require(trace["tool_calls"], "trace has no tool calls")
+    require(SAFETY_TEXT in trace["safety_boundary"], "trace missing safety boundary")
+    for tool_call in trace["tool_calls"]:
+        missing_tool_fields = TOOL_CALL_REQUIRED_FIELDS - set(tool_call)
+        require(not missing_tool_fields, f"tool call missing fields: {sorted(missing_tool_fields)}")
+        require(tool_call["status"] == "ok", f"tool call status is not ok: {tool_call['status']}")
+        require(tool_call["safety_checked"] is True, "tool call safety_checked must be true")
+        require(isinstance(tool_call["input_summary"], dict), "tool input_summary must be an object")
+        require(isinstance(tool_call["output_summary"], dict), "tool output_summary must be an object")
+        require(tool_call["tool_name"] and tool_call["purpose"], "tool call name and purpose must be non-empty")
 
 
 def check_safety_boundary() -> list[str]:

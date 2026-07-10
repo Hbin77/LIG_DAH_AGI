@@ -1,9 +1,67 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import asdict, is_dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum
 from typing import Any
+
+
+TOOL_CALL_REQUIRED_FIELDS = {
+    "tool_name",
+    "purpose",
+    "input_summary",
+    "output_summary",
+    "status",
+    "safety_checked",
+}
+
+
+@dataclass(frozen=True)
+class ToolCallResult:
+    tool_name: str
+    purpose: str
+    input_summary: dict[str, Any]
+    output_summary: dict[str, Any]
+    status: str = "ok"
+    safety_checked: bool = True
+
+    def as_trace(self) -> dict[str, Any]:
+        return {
+            "tool_name": self.tool_name,
+            "purpose": self.purpose,
+            "input_summary": to_plain(self.input_summary),
+            "output_summary": to_plain(self.output_summary),
+            "status": self.status,
+            "safety_checked": self.safety_checked,
+        }
+
+
+class AgentTool:
+    """Structured synthetic tool wrapper for auditable agent action loops."""
+
+    def __init__(self, name: str, purpose: str) -> None:
+        self.name = name
+        self.purpose = purpose
+
+    def run(
+        self,
+        *,
+        input_summary: dict[str, Any],
+        output_summary: dict[str, Any],
+        status: str = "ok",
+        safety_checked: bool = True,
+    ) -> dict[str, Any]:
+        result = ToolCallResult(
+            tool_name=self.name,
+            purpose=self.purpose,
+            input_summary=input_summary,
+            output_summary=output_summary,
+            status=status,
+            safety_checked=safety_checked,
+        )
+        trace = result.as_trace()
+        validate_tool_call(trace)
+        return trace
 
 
 class AgentMemory:
@@ -77,6 +135,10 @@ class AgentTraceRecorder:
         tool_calls: list[dict[str, Any]] | None = None,
         feedback: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        plain_tool_calls = to_plain(tool_calls or [])
+        for tool_call in plain_tool_calls:
+            validate_tool_call(tool_call)
+
         trace = {
             "trace_id": f"{self.agent_name.lower().replace(' ', '-')}-{len(self.traces) + 1:05d}",
             "agent": self.agent_name,
@@ -86,7 +148,7 @@ class AgentTraceRecorder:
             "observation": observation,
             "memory": self.memory.summary(),
             "candidate_actions": to_plain(candidate_actions),
-            "tool_calls": to_plain(tool_calls or []),
+            "tool_calls": plain_tool_calls,
             "selected_action": to_plain(selected_action),
             "reason": reason,
             "feedback": to_plain(feedback or {}),
@@ -95,6 +157,20 @@ class AgentTraceRecorder:
         self.traces.append(trace)
         self.memory.remember_decision(trace)
         return trace
+
+
+def validate_tool_call(tool_call: dict[str, Any]) -> None:
+    missing = TOOL_CALL_REQUIRED_FIELDS - set(tool_call)
+    if missing:
+        raise ValueError(f"tool call missing fields: {sorted(missing)}")
+    if tool_call["status"] not in {"ok", "skipped", "error"}:
+        raise ValueError(f"invalid tool call status: {tool_call['status']}")
+    if not tool_call["tool_name"] or not tool_call["purpose"]:
+        raise ValueError("tool call requires non-empty tool_name and purpose")
+    if not isinstance(tool_call["input_summary"], dict) or not isinstance(tool_call["output_summary"], dict):
+        raise ValueError("tool call summaries must be dictionaries")
+    if tool_call["safety_checked"] is not True:
+        raise ValueError("synthetic agent tools must pass safety_checked=True")
 
 
 def to_plain(value: Any) -> Any:

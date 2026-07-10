@@ -18,6 +18,7 @@ from src.tsra_agent.ml_policy import (
     load_sklearn_model,
 )
 from src.tsra_agent.models import AttackMode
+from src.tsra_agent.runtime import TOOL_CALL_REQUIRED_FIELDS
 from src.tsra_agent.simulator import MissionSimulator
 
 
@@ -166,6 +167,29 @@ class CliArtifactTests(unittest.TestCase):
             self.assertTrue(first_trace["tool_calls"])
             self.assertIn("selected_action", first_trace)
             self.assertIn("closed synthetic mission simulation", first_trace["safety_boundary"])
+
+    def test_decision_traces_include_structured_tool_results(self) -> None:
+        result = MissionSimulator(
+            48,
+            7,
+            AttackMode.HYBRID,
+            defense_enabled=True,
+            defense_mode="ml",
+        ).run("ml_defended")
+
+        for agent_name, traces in result.traces.items():
+            self.assertEqual(len(traces), 48, agent_name)
+            for trace in traces:
+                self.assertTrue(trace["candidate_actions"])
+                self.assertTrue(trace["tool_calls"])
+                for tool_call in trace["tool_calls"]:
+                    self.assertTrue(TOOL_CALL_REQUIRED_FIELDS.issubset(tool_call), tool_call)
+                    self.assertEqual(tool_call["status"], "ok")
+                    self.assertIs(tool_call["safety_checked"], True)
+                    self.assertIsInstance(tool_call["input_summary"], dict)
+                    self.assertIsInstance(tool_call["output_summary"], dict)
+                    self.assertTrue(tool_call["tool_name"])
+                    self.assertTrue(tool_call["purpose"])
 
 
 if __name__ == "__main__":
