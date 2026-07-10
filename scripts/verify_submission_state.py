@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import re
@@ -22,6 +23,7 @@ REQUIRED_FILES = [
     "scripts/train_ml_policy.py",
     "scripts/train_sklearn_policy.py",
     "scripts/tune_ml_policy.py",
+    "scripts/summarize_decision_traces.py",
     "scripts/verify_submission_state.py",
     "src/tsra_agent/__init__.py",
     "src/tsra_agent/agents.py",
@@ -63,6 +65,7 @@ ZIP_REQUIRED_FILES = [
     "docs/safety_boundary.md",
     "tests/test_simulation.py",
     "scripts/build_submission_zip.py",
+    "scripts/summarize_decision_traces.py",
     "scripts/verify_submission_state.py",
 ]
 
@@ -265,6 +268,33 @@ def check_cli_smoke() -> list[str]:
             for trace in traces:
                 validate_trace(trace)
 
+        trace_csv = output_dir / "report_tables" / "decision_trace_summary.csv"
+        trace_md = output_dir / "report_tables" / "decision_trace_summary.md"
+        run(
+            [
+                sys.executable,
+                "scripts/summarize_decision_traces.py",
+                "--input-dir",
+                str(output_dir),
+                "--output-csv",
+                str(trace_csv),
+                "--output-md",
+                str(trace_md),
+            ]
+        )
+        with trace_csv.open(encoding="utf-8", newline="") as handle:
+            trace_rows = list(csv.DictReader(handle))
+        expected_trace_rows = sum(
+            sum(1 for line in trace_path.read_text(encoding="utf-8").splitlines() if line.strip())
+            for trace_path in output_dir.rglob("*_decision_traces.jsonl")
+        )
+        require(
+            len(trace_rows) == expected_trace_rows,
+            f"expected {expected_trace_rows} trace summary rows, got {len(trace_rows)}",
+        )
+        require({row["agent"] for row in trace_rows} == {"AURA-lite", "TSRA-R", "TSRA-ML"}, "trace summary agent coverage mismatch")
+        require(trace_md.exists() and trace_md.stat().st_size > 0, "trace summary markdown is missing")
+
         aggregate = summary["aggregate"]
         require(
             aggregate["attacked"]["mission_impact_score"]["mean"]
@@ -275,7 +305,7 @@ def check_cli_smoke() -> list[str]:
         require(aggregate["resilience_gain_percent"]["mean"] >= 85.0, "smoke TSRA-R resilience gain below 85%")
         require(aggregate["ml_resilience_gain_percent"]["mean"] >= 85.0, "smoke TSRA-ML resilience gain below 85%")
 
-    return ["cli_smoke=pass", "decision_trace_schema=pass"]
+    return ["cli_smoke=pass", "decision_trace_schema=pass", "decision_trace_summary=pass"]
 
 
 def validate_trace(trace: dict[str, Any]) -> None:
@@ -294,6 +324,8 @@ def validate_trace(trace: dict[str, Any]) -> None:
         require(tool_call["tool_name"] and tool_call["purpose"], "tool call name and purpose must be non-empty")
     if trace["agent"] == "TSRA-ML":
         validate_ml_trace(trace)
+    if trace["agent"] in {"TSRA-R-lite", "TSRA-ML"}:
+        validate_defense_action_alignment(trace)
     if trace["agent"] == "AURA-lite":
         validate_aura_trace(trace)
 
@@ -342,6 +374,22 @@ def validate_ml_trace(trace: dict[str, Any]) -> None:
     for key in ["ml_risk", "heuristic_risk", "fused_risk", "ml_weight", "heuristic_weight"]:
         require(key in output, f"predict_mission_risk output missing {key}")
         require(isinstance(output[key], (int, float)), f"predict_mission_risk {key} must be numeric")
+
+
+def validate_defense_action_alignment(trace: dict[str, Any]) -> None:
+    selected_action = trace["selected_action"]
+    selected_candidates = [
+        candidate["action"]
+        for candidate in trace["candidate_actions"]
+        if candidate.get("selected") is True and candidate.get("action")
+    ]
+    require(
+        selected_action.get("actions") == selected_candidates,
+        "TSRA selected_action actions must match selected candidate actions",
+    )
+    expected_type = "defense_action" if selected_candidates else "no_op"
+    require(selected_action.get("type") == expected_type, "TSRA selected_action type does not match candidate selection")
+    require(trace["reason"], "TSRA trace requires a decision reason")
 
 
 def check_safety_boundary() -> list[str]:

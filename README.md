@@ -59,6 +59,17 @@ conda run -n base python -m src.tsra_agent.cli \
 - `seed_<seed>/*_events.jsonl`: 실험별 이벤트 로그
 - `seed_<seed>/*_decision_traces.jsonl`: AURA/TSRA-R 판단 trace 로그
 
+보고서용으로 trace를 평탄화한 표가 필요하면 다음 명령을 사용합니다.
+
+```bash
+conda run -n base python scripts/summarize_decision_traces.py \
+  --input-dir outputs/final_run \
+  --output-csv outputs/final_run/report_tables/decision_trace_summary.csv \
+  --output-md outputs/final_run/report_tables/decision_trace_summary.md
+```
+
+생성된 CSV/Markdown은 seed, 실험군, tick, 에이전트, 선택 행동, 후보 수, 도구 호출, 판단 이유를 한 표로 정리합니다. 이 요약기는 DEV 품질 게이트의 CLI smoke 검증에도 포함됩니다.
+
 ## 검증
 
 ```bash
@@ -71,7 +82,7 @@ conda run -n base python -m unittest discover -s tests -v
 conda run -n base python scripts/verify_submission_state.py --require-dev --require-clean
 ```
 
-이 검증은 unit test뿐 아니라 CLI smoke run, 모든 DecisionTrace의 structured tool-call schema, AURA 후보 점수화/선택 근거, TSRA-ML의 model/heuristic/fused risk basis, 모델/예시 수치, 안전 경계, 제출 ZIP 포함 파일까지 함께 확인합니다. GitHub Actions의 `DEV Submission Quality Gate`도 같은 검증기를 실행합니다.
+이 검증은 unit test뿐 아니라 CLI smoke run, 보고서용 DecisionTrace 요약표, 모든 DecisionTrace의 structured tool-call schema, AURA 후보 점수화/선택 근거, TSRA-ML의 model/heuristic/fused risk basis, 모델/예시 수치, 안전 경계, 제출 ZIP 포함 파일까지 함께 확인합니다. GitHub Actions의 `DEV Submission Quality Gate`도 같은 검증기를 실행합니다.
 
 현재 검증 기준 결과는 `examples/summary_multi_seed.json`에 고정했습니다.
 

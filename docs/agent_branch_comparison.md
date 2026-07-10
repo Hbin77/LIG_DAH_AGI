@@ -46,6 +46,18 @@ Why not copy `hbin` wholesale:
 - `DEV` already has trained TSRA-ML artifacts, a compact CLI, and a reproducible multi-seed scenario.
 - The final compromise is to keep DEV compact and executable while adding the hbin-style proof points that matter for judging an AI agent: observation, memory, tool calls, candidate actions, selected action, feedback, safety boundary, and an automated quality gate.
 
+## Latest Recomparison (2026-07-10)
+
+The latest comparison used `origin/DEV@5d2609c` and `origin/hbin@e8cbbad`. These branches have no common Git ancestor, so direct merge, cherry-pick, and raw metric comparison are not valid integration methods.
+
+The latest `hbin` commits improve evidence handling rather than attack, defense, simulator, or ML-policy performance. They add rule-delegate trace exposure, fixed-output audit tables, and regression tests for the relationship between candidate actions and final actions. The equivalent high-value ideas adopted for DEV are:
+
+- `scripts/summarize_decision_traces.py`: converts freshly generated CLI JSONL traces into a report-ready CSV and Markdown table with trace source, ID, candidate count, tool calls, selected action, and reason.
+- `tests/test_simulation.py`: checks that TSRA-R-lite and TSRA-ML selected candidate actions exactly match the emitted action list, including an explicit no-op case.
+- `scripts/verify_submission_state.py`: regenerates the trace summary during its CLI smoke run and checks row coverage plus the TSRA candidate-to-action contract.
+
+The following `hbin` material remains intentionally excluded: its separate `src/aura`/`src/tsra_r` implementation, generated `outputs/` snapshot tree, branch-specific workflow, and fixed trace-count assertions. Those artifacts would replace the executable DEV path or bind verification to historical outputs rather than freshly generated simulation evidence.
+
 ## Repro Commands
 
 ```bash

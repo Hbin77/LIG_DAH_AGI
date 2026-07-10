@@ -78,6 +78,17 @@ DecisionTrace는 `src/tsra_agent/runtime.py`가 만들고, CLI 실행 시 seed�
 - `<experiment>_aura_decision_traces.jsonl`
 - `<experiment>_tsra_decision_traces.jsonl`
 
+JSONL을 직접 열지 않고 표로 확인하려면 CLI 실행 뒤 아래 명령을 사용합니다.
+
+```bash
+conda run -n base python scripts/summarize_decision_traces.py \
+  --input-dir outputs/final_run \
+  --output-csv outputs/final_run/report_tables/decision_trace_summary.csv \
+  --output-md outputs/final_run/report_tables/decision_trace_summary.md
+```
+
+`decision_trace_summary.md`는 seed, 실험군, tick, agent, 선택 행동, 후보 수, tool call, 판단 이유를 한 표로 제공하므로 보고서의 AI agent 설명 또는 부록 표를 빠르게 작성할 때 사용합니다. 이 파일도 폐쇄형 synthetic simulation 결과를 요약한 것이므로 실제 운용 로그로 표현하면 안 됩니다.
+
 각 trace의 주요 필드:
 
 | 필드 | 의미 | 보고서 활용 |

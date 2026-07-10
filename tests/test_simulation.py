@@ -158,6 +158,32 @@ class CliArtifactTests(unittest.TestCase):
             self.assertIn("ml_defended", summary["aggregate"])
             self.assertEqual(manifest["schema_version"], "tsra-run-manifest/v1")
             self.assertTrue((output_dir / "incident_report.md").exists())
+            trace_csv = output_dir / "report_tables" / "decision_trace_summary.csv"
+            trace_md = output_dir / "report_tables" / "decision_trace_summary.md"
+            subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/summarize_decision_traces.py",
+                    "--input-dir",
+                    str(output_dir),
+                    "--output-csv",
+                    str(trace_csv),
+                    "--output-md",
+                    str(trace_md),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            trace_rows = trace_csv.read_text(encoding="utf-8").splitlines()
+            expected_trace_rows = sum(
+                len(path.read_text(encoding="utf-8").splitlines())
+                for path in output_dir.rglob("*_decision_traces.jsonl")
+            )
+            self.assertEqual(len(trace_rows), expected_trace_rows + 1)
+            self.assertIn("AURA-lite", trace_csv.read_text(encoding="utf-8"))
+            self.assertIn("TSRA-ML", trace_csv.read_text(encoding="utf-8"))
+            self.assertTrue(trace_md.exists())
             trace_path = output_dir / "seed_7" / "defended_tsra_decision_traces.jsonl"
             self.assertTrue(trace_path.exists())
             first_trace = json.loads(trace_path.read_text(encoding="utf-8").splitlines()[0])
@@ -221,6 +247,29 @@ class CliArtifactTests(unittest.TestCase):
         first_ml_action = ml_traces[0]["selected_action"]
         self.assertEqual(first_ml_action["decision_basis"]["policy_kind"], "ml_risk_fusion")
         self.assertEqual(first_ml_action["decision_basis"]["model_backend"], "sklearn_ensemble")
+
+    def test_tsra_selected_actions_match_selected_candidates(self) -> None:
+        for defense_mode, expected_agent in [("tsra", "TSRA-R-lite"), ("ml", "TSRA-ML")]:
+            result = MissionSimulator(
+                48,
+                7,
+                AttackMode.HYBRID,
+                defense_enabled=True,
+                defense_mode=defense_mode,
+            ).run(f"{defense_mode}_defended")
+            traces = result.traces["tsra"]
+            self.assertTrue(traces)
+            for trace in traces:
+                self.assertEqual(trace["agent"], expected_agent)
+                selected_candidates = [
+                    candidate["action"]
+                    for candidate in trace["candidate_actions"]
+                    if candidate.get("selected") is True
+                ]
+                expected_type = "defense_action" if selected_candidates else "no_op"
+                self.assertEqual(trace["selected_action"]["type"], expected_type)
+                self.assertEqual(trace["selected_action"]["actions"], selected_candidates)
+                self.assertTrue(trace["reason"])
 
 
 if __name__ == "__main__":
